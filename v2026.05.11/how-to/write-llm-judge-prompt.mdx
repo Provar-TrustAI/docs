@@ -1,0 +1,239 @@
+---
+title: "Write an effective LLM-judge prompt"
+icon: "wand-sparkles"
+description: "How to author rubrics that calibrate well, the anti-patterns that don't, and when to break each rule."
+---
+
+<Info>
+  You are viewing the **v2026.05.11** archive. The latest documentation is at [`/`](/) — go there unless you specifically need the v2026.05.11 snapshot.
+</Info>
+
+This is the **deep how-to** on authoring LLM Judge rubrics. If you just want to author your first Evaluator end-to-end, start with [Build your first Evaluator](/tutorials/build-first-evaluator). Come here when you need to write a rubric that:
+
+- Calibrates to ~90%+ agreement with a careful human reviewer
+- Stays stable when you re-run it next month
+- Doesn't drift across Dataset rows that should score the same
+
+Authoring LLM Judges is a craft. The patterns below come from teams that have iterated on dozens of rubrics; they save real time when you internalize them.
+
+## The shape of an LLM Judge
+
+Every LLM Judge prompt has the same four-part anatomy:
+
+1. **System prompt** — the role the judge model is taking ("you are reviewing a customer-support agent's response"). Frames the rest of the prompt.
+2. **Criteria** — the testable rubric. What specifically constitutes a pass vs. a fail.
+3. **Scoring scale** — binary (`pass`/`fail`), Likert (1-5), or freeform with extraction. Determines how the result is captured.
+4. **Output format** — JSON schema the judge must adhere to. Trust AI's builder fills this in for you; you don't author it from scratch.
+
+The skill is in writing **criteria** that are testable, **scoring scales** that are calibrate-able, and **system prompts** that frame the judgment without contaminating it. Each of the next sections is one of those.
+
+## Criteria — be specific about pass/fail
+
+The biggest single mistake new rubric authors make is writing criteria as **a vague yes/no question**:
+
+```
+❌ Is the agent's response good?
+❌ Did the agent help the user?
+❌ Was the answer correct and helpful?
+```
+
+These look like rubrics; they aren't. They're **vibes**. Different reviewers will score the same response differently because "good," "help," and "helpful" are under-specified. An LLM Judge given the same vibe-rubric will score inconsistently across re-runs — which means it can't be calibrated and can't be trusted as a regression signal.
+
+Good criteria are **decomposable**. The agent's response can be checked against each clause independently:
+
+```
+✅ A passing response must:
+   (a) Correctly identify the order ID from the user's message
+   (b) Provide the current status of that order (not "let me check")
+   (c) If the status is anything other than "delivered," explain the
+       next expected step
+
+   Mark "fail" if any of (a), (b), or (c) is missing or wrong.
+   Mark "pass" only if all three are present.
+```
+
+This works because:
+
+- Each clause is **independently checkable** — "is (a) satisfied? yes / no"
+- The **aggregation rule is explicit** — pass = all three, fail = any missing
+- A different reviewer applying this rubric would reach the same verdict on most rows
+
+A useful test: **could you write a regex that catches the failure case?** If yes, you may not need an LLM Judge at all — [Structured Match](/concepts/evaluators#anatomy-of-a-structured-match) is the right family. If no — if the judgment really does need natural-language reasoning — make sure the criteria are still as decomposable as the problem allows.
+
+## Scoring scale — pick the right granularity
+
+**Binary (pass/fail)** is the easiest to calibrate. Reviewers tend to agree on binary judgments; LLMs tend to be consistent at them. Start here.
+
+**Likert (1-5 or similar)** is more nuanced — useful when "pass" and "fail" hide important detail (e.g., 1 = "actively harmful," 5 = "delightful," 3 = "technically correct but blunt"). Cost: reviewer agreement on Likert scales is markedly lower than binary; calibration takes longer; you'll typically need ~3x as many annotated examples to achieve the same agreement rate.
+
+**Freeform with extraction** is for cases where the rubric output is itself unstructured ("describe the agent's tone in one sentence"). The Evaluator extracts a categorical tag from the freeform text via a post-process. Rare in practice; almost always reducible to binary or Likert.
+
+**Rule of thumb:** start binary. Move to Likert only when you can name the specific failure modes you're collapsing in the binary view. Don't move to freeform unless you've tried both and neither captures the judgment you need.
+
+## System prompt — frame the role, don't contaminate the judgment
+
+The system prompt sets context for the judge. Two anti-patterns to avoid:
+
+**❌ Leading the judge toward "pass":**
+
+```
+You are evaluating a high-quality customer-support agent.
+The agent is generally accurate. Score the response below.
+```
+
+The phrase "high-quality" and "generally accurate" prime the judge to score generously. Calibration agreement drops because the judge ignores legitimate failures.
+
+**❌ Leading the judge toward "fail":**
+
+```
+You are a strict quality reviewer looking for issues.
+Find what's wrong with the response.
+```
+
+Mirror image of the above — the judge over-rejects, even pass-worthy responses get nitpicked.
+
+**✅ Neutral framing:**
+
+```
+You are reviewing a customer-support agent's response to a user's order
+status question. You are judging whether the response satisfies the
+criteria below. The agent may be correct or incorrect; your job is to
+apply the criteria, not to look for issues.
+```
+
+The role is specific (customer-support, order-status), the task is bounded (apply the criteria), and the neutrality is explicit. Judges calibrated against this kind of framing show the most stability across re-runs.
+
+## Calibration — the part that makes the rubric trustworthy
+
+Authoring is half the work. The other half is calibrating against [Annotations](/concepts/annotations):
+
+1. **Write the draft rubric.**
+2. **Pick 10-20 annotated rows** from a [Dataset](/concepts/datasets), spanning both passes and fails (don't only pick the easy cases).
+3. **Run the Evaluator against them** in the calibration panel.
+4. **Inspect every disagreement.** The disagreements are the data — they tell you exactly where the rubric is wrong.
+5. **Refine the rubric.** Tighten an over-lenient clause, loosen an over-strict one, fix a leading phrase in the system prompt.
+6. **Re-calibrate.** Repeat until agreement is ~90%+ on a binary rubric or ~75%+ on a Likert.
+
+Don't chase 100%. On a small annotated set, 100% agreement usually means the rubric has over-fit to the specific rows. A well-calibrated rubric tolerates a small disagreement rate — and looking at *which* rows disagree on a healthy rubric is itself useful (those rows are typically the genuinely ambiguous cases that the human reviewer would also have flagged for discussion).
+
+## Common pitfalls
+
+<AccordionGroup>
+  <Accordion title="The 'agree with everything' judge">
+    **Symptom:** the judge passes nearly every row, including rows a human would clearly fail.
+
+    **Common causes:**
+    - System prompt has leading language ("evaluate a high-quality agent")
+    - Criteria are too vague ("the response should be reasonable")
+    - The judge model is generally agreement-prone (Claude Sonnet at temperature 0 is more conservative than at higher temperatures; GPT-4 has its own tendencies)
+
+    **Fix:** neutralize the system prompt, decompose criteria into testable clauses, set temperature to 0 if your provider exposes it.
+  </Accordion>
+
+  <Accordion title="The 'over-reject' judge">
+    **Symptom:** the judge fails rows that a human would pass.
+
+    **Common causes:**
+    - System prompt has critical language ("strict reviewer," "find what's wrong")
+    - Criteria include implicit but un-stated requirements (the agent had to say "you're welcome" — but the rubric never mentioned that)
+    - Reviewer baseline was relaxed and the rubric is more strict than the Annotations encode
+
+    **Fix:** re-read the criteria as if you'd never seen the responses, identify the implicit requirements, either state them explicitly or drop them.
+  </Accordion>
+
+  <Accordion title="The 'flaps' judge">
+    **Symptom:** the same row, run twice in a row, scores differently.
+
+    **Common causes:**
+    - Temperature is non-zero on the judge model
+    - Criteria are ambiguous enough that the judge picks an interpretation per-call
+    - The output format gives the judge room to disagree with itself ("score from 1-5, with reasoning" — the score and reasoning don't always line up across re-runs)
+
+    **Fix:** set temperature to 0, tighten ambiguous criteria, simplify the output format to score-only.
+  </Accordion>
+
+  <Accordion title="The 'category-blind' judge">
+    **Symptom:** a specific category of responses (e.g., "agent returned an error") all score the same way, ignoring real differences within the category.
+
+    **Common causes:** the rubric never accounts for that category; the judge applies the same default verdict to every row in it.
+
+    **Fix:** add an explicit clause for the category. "If the agent returned an error, mark fail unless the error message correctly identifies the user's input was missing required information."
+  </Accordion>
+</AccordionGroup>
+
+## Two worked examples
+
+### Example 1 — Order-status accuracy (binary)
+
+**Use case:** evaluating a customer-support agent's order-status responses.
+
+```
+System: You are reviewing a customer-support agent's response to a user
+asking about an order's status. You are judging whether the response
+satisfies the criteria below; apply them strictly.
+
+Criteria:
+A passing response must:
+(a) Correctly identify the order ID from the user's message
+    (or correctly ask for it if the user didn't provide one)
+(b) Provide the current status of the identified order, not a
+    generic acknowledgement
+(c) If the status is anything other than "delivered," explain the
+    next expected step (estimated delivery date, shipping carrier,
+    or action the user needs to take)
+
+Mark "fail" if any of (a), (b), or (c) is missing, incorrect, or
+contradicts the agent's tool-call evidence.
+Mark "pass" only if all three are satisfied.
+
+Scale: binary (pass / fail)
+Output: { "score": "pass" | "fail", "reasoning": "..." }
+```
+
+This calibrates well because each clause is testable independently, the aggregation rule is explicit, and the system prompt is role-bounded without being leading.
+
+### Example 2 — Tone-and-completeness (Likert 1-5)
+
+**Use case:** evaluating whether an agent's *style* matches a customer's brand voice. Note this is intentionally a *style* rubric, not a *correctness* rubric — combining the two in one Evaluator is an anti-pattern.
+
+```
+System: You are reviewing a customer-support agent's response style.
+You are not judging the factual accuracy of the response — assume
+the facts are correct. You are judging tone, clarity, and completeness
+against the brand voice criteria below.
+
+Criteria:
+Score the response on a 1-5 scale where:
+  5 — Friendly, complete, no jargon, ends with a clear next step or
+      offer to help further.
+  4 — Friendly and complete, but missing the explicit next-step
+      sentence at the end.
+  3 — Acceptable: factually adequate but flat in tone (no friendly
+      framing) or incomplete (skips a sub-question the user asked).
+  2 — Either curt to the point of feeling cold, or so verbose that
+      the answer is buried.
+  1 — Off-tone (sarcasm, condescension, jargon-heavy) or so
+      incomplete it fails to answer.
+
+Scale: Likert 1-5
+Output: { "score": 1 | 2 | 3 | 4 | 5, "reasoning": "..." }
+```
+
+Two separate Evaluators (this style one + an accuracy one from Example 1) are better than one combined rubric, because regressions in tone don't visually drown regressions in accuracy.
+
+## What's next
+
+<CardGroup cols={2}>
+  <Card title="Build your first Evaluator" icon="wand-sparkles" href="/tutorials/build-first-evaluator">
+    The hands-on tutorial that walks through authoring + calibrating an LLM Judge end-to-end.
+  </Card>
+  <Card title="Read about Evaluators" icon="book-open" href="/concepts/evaluators">
+    Full conceptual reference — the two families, calibration loop, reuse semantics, what we explicitly reject.
+  </Card>
+  <Card title="Read about Annotations" icon="tag" href="/concepts/annotations">
+    The human signal LLM Judges calibrate against. Knowing how Annotations are structured helps you write rubrics that calibrate well.
+  </Card>
+  <Card title="Compare two Agent Versions" icon="git-branch" href="/how-to/compare-agent-versions">
+    Where the calibrated Evaluators ultimately serve — the regression-tracking diff.
+  </Card>
+</CardGroup>
