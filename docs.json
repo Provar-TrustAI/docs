@@ -1,6 +1,6 @@
 {
   "$schema": "https://mintlify.com/docs.json",
-  "theme": "mint",
+  "theme": "maple",
   "name": "Provar Trust AI",
   "colors": {
     "primary": "#5E6AD2",
@@ -9,13 +9,24 @@
   },
   "background": {
     "colors": {
-      "light": "#FCFCFC",
+      "light": "#FCFCFB",
       "dark": "#08090A"
     }
   },
   "appearance": {
     "default": "system",
     "strict": false
+  },
+  "icons": {
+    "library": "lucide"
+  },
+  "styling": {
+    "codeblocks": {
+      "theme": {
+        "light": "github-light",
+        "dark": "github-dark"
+      }
+    }
   },
   "fonts": {
     "heading": {
@@ -37,12 +48,12 @@
       {
         "tab": "Documentation",
         "groups": [
-          { "group": "Welcome",   "icon": "house",                "pages": ["index"] },
-          { "group": "Concepts",  "icon": "lightbulb",            "pages": ["concepts/overview", "concepts/evaluation-loop"] },
-          { "group": "Tutorials", "icon": "graduation-cap",       "pages": ["tutorials/quickstart"] },
-          { "group": "How-to",    "icon": "screwdriver-wrench",   "pages": ["how-to/connect-agentcore"] },
-          { "group": "Reference", "icon": "book",                 "pages": ["reference/api", "reference/schemas"] },
-          { "group": "Resources", "icon": "folder-open",          "pages": ["glossary", "changelog"] }
+          { "group": "Welcome",   "icon": "sparkles",       "pages": ["index"] },
+          { "group": "Concepts",  "icon": "book-open",      "pages": ["concepts/overview", "concepts/evaluation-loop"] },
+          { "group": "Tutorials", "icon": "graduation-cap", "pages": ["tutorials/quickstart"] },
+          { "group": "How-to",    "icon": "wrench",         "pages": ["how-to/connect-agentcore"] },
+          { "group": "Reference", "icon": "code",           "pages": ["reference/api", "reference/schemas"] },
+          { "group": "Resources", "icon": "bookmark",       "pages": ["glossary", "changelog"] }
         ]
       }
     ]
