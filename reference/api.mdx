@@ -1,0 +1,42 @@
+---
+title: "HTTP API reference"
+description: "The /v1 API surface."
+---
+
+<Info>
+  Documentation site under construction. The structure and branded elements are in place; content lands milestone-by-milestone.
+</Info>
+
+The Trust AI HTTP API is organized around the seven core nouns. Every endpoint lives under `/v1` and accepts and returns JSON. Authentication is bearer-token.
+
+## Endpoints
+
+| Method | Path                          | Description                                              |
+| ------ | ----------------------------- | -------------------------------------------------------- |
+| GET    | `/v1/projects`                | List Projects the caller has access to.                  |
+| POST   | `/v1/projects`                | Create a new Project.                                    |
+| POST   | `/v1/sessions/import`         | Ingest a batch of Sessions into a Project.               |
+| GET    | `/v1/sessions/{id}`           | Fetch a single Session with its Turns and Tool Calls.    |
+| POST   | `/v1/datasets`                | Curate a Dataset from annotated Sessions.                |
+| POST   | `/v1/evaluations`             | Run an Evaluation against a Dataset and Agent Version.   |
+
+## Example: create a Project
+
+<CodeGroup>
+  ```sh curl
+  curl -X POST https://api.provar.dev/v1/projects \
+    -H "Authorization: Bearer $TRUST_AI_TOKEN" \
+    -H "Content-Type: application/json" \
+    -d '{"name": "Acme Support Agent"}'
+  ```
+
+  ```ts TypeScript
+  import { TrustAI } from "@provar/trust-ai";
+
+  const client = new TrustAI({ token: process.env.TRUST_AI_TOKEN });
+
+  const project = await client.projects.create({
+    name: "Acme Support Agent",
+  });
+  ```
+</CodeGroup>

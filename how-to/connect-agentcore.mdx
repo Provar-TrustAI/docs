@@ -1,0 +1,55 @@
+---
+title: "Connect an AWS Bedrock AgentCore agent"
+description: "Wire a discovered AgentCore runtime into a Trust AI project."
+---
+
+<Info>
+  Documentation site under construction. The structure and branded elements are in place; content lands milestone-by-milestone.
+</Info>
+
+<Warning>
+  This integration requires a cross-account IAM trust relationship between the Provar Trust AI control plane and the AWS account hosting your AgentCore runtime. Coordinate with your cloud security owner before granting the role — the policy below is the minimum surface area Trust AI needs and should not be widened.
+</Warning>
+
+<Steps>
+  <Step title="Discover the AgentCore runtime">
+    From the Project settings, open Integrations and select AWS Bedrock AgentCore. Trust AI will prompt for the AWS region and runtime ARN to connect.
+  </Step>
+  <Step title="Create the cross-account IAM role">
+    In the AWS account hosting your agent, create a role that trusts the Trust AI principal and attaches the policy below. The role ARN gets pasted back into Trust AI.
+
+    <CodeGroup>
+      ```json IAM policy
+      {
+        "Version": "2012-10-17",
+        "Statement": [
+          {
+            "Effect": "Allow",
+            "Action": [
+              "bedrock-agent-runtime:InvokeAgent",
+              "bedrock-agent-runtime:GetAgentSession",
+              "bedrock-agent-runtime:ListAgentSessions"
+            ],
+            "Resource": "arn:aws:bedrock:*:*:agent-runtime/*"
+          }
+        ]
+      }
+      ```
+    </CodeGroup>
+  </Step>
+  <Step title="Verify the connection">
+    Trust AI runs a no-op probe against the runtime and surfaces any IAM, region, or network errors in the integration panel. A green check means Sessions will start flowing.
+  </Step>
+  <Step title="Map runtimes to Agent Versions">
+    Each AgentCore runtime alias maps to a Trust AI Agent Version. Confirm the mapping so that ingested Sessions land against the right version for comparison.
+  </Step>
+</Steps>
+
+<AccordionGroup>
+  <Accordion title="The integration probe fails with AccessDenied">
+    The IAM role is reachable but the policy is too narrow. Confirm all three `bedrock-agent-runtime:*` actions above are attached, and that the resource ARN covers the runtime you discovered. Region mismatches between the role's trust policy and the runtime are the second most common cause.
+  </Accordion>
+  <Accordion title="Sessions ingest but are missing Tool Calls">
+    Tool Call telemetry requires AgentCore tracing to be enabled on the runtime. In the AWS console, open the runtime, enable detailed tracing, and re-ingest. Historical Sessions captured before tracing was enabled will remain Tool-Call-less.
+  </Accordion>
+</AccordionGroup>

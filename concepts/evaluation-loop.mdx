@@ -1,0 +1,31 @@
+---
+title: "The evaluation loop"
+description: "How Sessions become Datasets become Evaluations — the workflow Trust AI is built around."
+---
+
+<Info>
+  Documentation site under construction. The structure and branded elements are in place; content lands milestone-by-milestone.
+</Info>
+
+The Trust AI workflow is a loop, not a line. Every step feeds the next, and every Agent Version closes back to the start.
+
+<Steps>
+  <Step title="Ingest sessions">
+    Pull real agent interactions into the Project from production, staging, or a discovered AgentCore runtime. Each Session arrives as a structured sequence of Turns and Tool Calls.
+  </Step>
+  <Step title="Review and annotate">
+    QA Practitioners walk Sessions Turn-by-Turn, attaching Annotations that capture pass/fail judgments, rubric scores, and reviewer notes.
+  </Step>
+  <Step title="Curate datasets">
+    Promote the most informative annotated Sessions into a Dataset — a versioned, representative slice that Evaluations will run against.
+  </Step>
+  <Step title="Define evaluators">
+    Author the Evaluators (LLM Judge, Structured Match) that encode the team's quality bar. Calibrate them against existing Annotations until their scores agree with reviewer judgment.
+  </Step>
+  <Step title="Run evaluations">
+    Execute the Evaluators across the Dataset for a given Agent Version. The Evaluation captures scores, deltas, and the full per-Turn detail behind them.
+  </Step>
+  <Step title="Compare versions">
+    Diff Evaluations across Agent Versions to see regressions, wins, and unchanged surface area before a change ships. Then ingest the next batch of Sessions and start the loop again.
+  </Step>
+</Steps>

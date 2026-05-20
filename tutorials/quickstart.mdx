@@ -1,0 +1,44 @@
+---
+title: "Your first 10 minutes in Trust AI"
+description: "Project creation through your first dataset, end to end."
+---
+
+<Info>
+  Documentation site under construction. The structure and branded elements are in place; content lands milestone-by-milestone.
+</Info>
+
+This tutorial walks an SI Consultant from a brand-new Trust AI account to a curated Dataset in roughly ten minutes. Every code sample is illustrative — endpoints and payloads will be finalized when the API stabilizes.
+
+<Steps>
+  <Step title="Create a Project">
+    A Project is the top-level container for everything that follows. Give it a name that matches the agent under evaluation.
+
+    <CodeGroup>
+      ```sh curl
+      curl -X POST https://api.provar.dev/v1/projects \
+        -H "Authorization: Bearer $TRUST_AI_TOKEN" \
+        -H "Content-Type: application/json" \
+        -d '{"name": "Acme Support Agent"}'
+      ```
+
+      ```ts TypeScript
+      import { TrustAI } from "@provar/trust-ai";
+
+      const client = new TrustAI({ token: process.env.TRUST_AI_TOKEN });
+
+      const project = await client.projects.create({
+        name: "Acme Support Agent",
+      });
+      ```
+    </CodeGroup>
+  </Step>
+  <Step title="Ingest a batch of Sessions">
+    Push captured agent Sessions into the Project. Each Session is a sequence of Turns and Tool Calls — Trust AI does not re-run the agent, it evaluates what already happened.
+  </Step>
+  <Step title="Review and annotate">
+    Open the Session reviewer, walk each Turn, and attach Annotations. A handful of well-annotated Sessions is enough to calibrate your first Evaluator.
+  </Step>
+  <Step title="Curate your first Dataset">
+    Promote the annotated Sessions into a named Dataset. From here you can define an Evaluator, run an Evaluation, and start comparing Agent Versions.
+  </Step>
+</Steps>
