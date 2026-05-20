@@ -1,0 +1,156 @@
+---
+title: "Run your first Evaluation"
+icon: "chart-line"
+description: "Apply the Evaluator you authored across the Dataset you curated — the first scored run against a live agent."
+---
+
+This is the final tutorial in the onboarding trilogy. With the [Dataset](/concepts/datasets) you curated in [the quickstart](/tutorials/quickstart) and the [Evaluator](/concepts/evaluators) you authored in [Build your first Evaluator](/tutorials/build-first-evaluator), you'll now **run an [Evaluation](/concepts/evaluations)** — the moment Trust AI produces its first piece of evidence about your agent's behavior.
+
+By the end you'll have:
+
+- A finished Evaluation run with scored rows
+- A clear pass/fail breakdown and aggregate stats
+- A side-by-side comparison against a prior [Agent Version](/concepts/agent-versions) (where available)
+- A concrete idea of what to do next based on what you saw
+
+Allow about 10 minutes. Most of that time is the run itself processing — the configuration and reading-results steps are quick.
+
+## Before you start
+
+You should have, from the prior two tutorials:
+
+- A [Project](/concepts/projects) with a connected runtime (or demo data)
+- At least one [Dataset](/concepts/datasets) with at least 3-5 rows (more is better)
+- At least one saved [Evaluator](/concepts/evaluators) calibrated against Annotations in that Dataset
+- At least one **deployed Agent Version** that the Project's runtime can reach. If you're using demo data, two pre-seeded versions are already available.
+
+## The five steps
+
+<Steps>
+  <Step title="Pick your Dataset and Evaluator(s)">
+    From the Project home, navigate to **Evaluations → + New Evaluation**.
+
+    The configurator asks for three things:
+
+    - **Dataset** — pick the one you curated in the quickstart
+    - **Evaluators** — pick the one you authored in the prior tutorial. You can pick more than one (each Dataset row will be scored by every selected Evaluator) but for your first run, one is enough.
+    - **Agent Version** — covered in the next step
+
+    **You should see:** the dropdowns populated with your prior artifacts. The Dataset shows its row count; the Evaluator shows its calibration agreement rate from when you saved it.
+  </Step>
+
+  <Step title="Pick the Agent Version">
+    For the **Agent Version**, pick the version your Project has currently active. If you connected an AgentCore runtime in the quickstart, Trust AI has already auto-discovered the deployed alias and surfaced it in this dropdown.
+
+    If multiple versions are available, **pick the production one** for your first run. You'll compare against another version in step 5.
+
+    **What's happening underneath:** Trust AI will send each Dataset row's input to this specific Agent Version, via the Project's runtime connection, collect the agent's structured response, and feed both to the selected Evaluator(s) for scoring. The agent is **invoked live** — Trust AI doesn't reuse the Session's original response, it gets a fresh one from the version under test.
+
+    **You should see:** the configurator now has all three blanks filled in. The summary line reads something like: *"Evaluating `Order-status happy path` (5 rows) with `Order status — three-part rubric` against Agent Version `v2026-05-11-prod`."*
+  </Step>
+
+  <Step title="Kick off the run">
+    Click **Run Evaluation**.
+
+    What happens in the background, in roughly this order:
+
+    1. Trust AI calls your Project's connected runtime once per Dataset row, sending the row's input
+    2. The agent responds; Trust AI captures the full response (including tool calls, latency, all the Session-shaped detail)
+    3. Each response is wrapped as a new Session — these will appear in your Sessions list tagged `from-eval`. (This is the "Evaluation results are Sessions too" pattern from ADR 0006, expanded in [the Evaluations concept page](/concepts/evaluations#evaluation-results-are-sessions-too).)
+    4. For each new Session, every selected Evaluator runs against the appropriate Turns and produces a score + reasoning
+    5. Aggregate stats roll up: pass rate, score distribution, failure patterns
+
+    For a small Dataset (5-10 rows) this completes in 30-60 seconds. For larger Datasets it can run for several minutes; the page stays live and shows rows filling in as they complete.
+
+    Or via the API:
+
+    <CodeGroup>
+      ```bash curl
+      curl -X POST https://api.provar.dev/v1/evaluations \
+        -H "Authorization: Bearer $TRUST_AI_TOKEN" \
+        -H "Content-Type: application/json" \
+        -d '{
+          "project_id": "'$PROJECT_ID'",
+          "dataset_id": "'$DATASET_ID'",
+          "evaluator_ids": ["'$EVALUATOR_ID'"],
+          "agent_version_id": "'$AGENT_VERSION_ID'"
+        }'
+      ```
+
+      ```typescript TypeScript
+      const evaluation = await client.evaluations.create({
+        project_id: project.id,
+        dataset_id: dataset.id,
+        evaluator_ids: [evaluator.id],
+        agent_version_id: agentVersion.id,
+      });
+
+      // Poll until complete; or use the streaming endpoint
+      let result = await client.evaluations.get(evaluation.id);
+      while (result.status !== "complete") {
+        await new Promise(r => setTimeout(r, 5000));
+        result = await client.evaluations.get(evaluation.id);
+      }
+      ```
+    </CodeGroup>
+
+    **You should see:** the Evaluation detail page transitions from `In progress` to `Complete`. Aggregate stats appear at the top.
+  </Step>
+
+  <Step title="Read the results">
+    The Evaluation detail page has three panes:
+
+    - **Top:** aggregate stats — pass rate, score distribution, latency stats, common failure patterns
+    - **Middle:** per-row results — Dataset input, agent response, Evaluator score, Evaluator reasoning. Sortable, filterable by score.
+    - **Bottom:** comparison panel — empty until you run against another Agent Version (step 5)
+
+    **What to look at first:**
+
+    1. **The aggregate pass rate.** Sanity check: is it roughly where you expected? If your calibration agreement in the prior tutorial was 90%, you'd expect roughly that — on this run, with this specific Agent Version, on these rows.
+    2. **Failed rows, top-down.** Open the first failed row. Read the Evaluator's reasoning. Read the agent's response. Decide: did the agent regress, or did the Evaluator over-reject? Both are valid findings; they point you in different directions.
+    3. **Latency outliers.** If one row took 20x as long as the others, that's almost always an infrastructure issue worth knowing about.
+
+    **You should see:** an Evaluation that tells a story. Pass rate, the distribution of failures, the reasoning behind each one. This is the evidence Trust AI exists to produce.
+  </Step>
+
+  <Step title="Compare to a previous Agent Version">
+    If your Project has more than one Agent Version (the demo data ships with two; a real Project gets a second one when you deploy a new version of your agent), do one more thing:
+
+    Click **Run again against a different version** from the Evaluation detail page. Pick the second Agent Version (e.g., the previous week's deployment, or the demo's `v2026-05-04-prod`). Trust AI re-runs the same Dataset + same Evaluator(s) against the alternate version.
+
+    When the second run completes, open either Evaluation and click **Compare**. Pick the other run.
+
+    **You should see:** a side-by-side view of the same Dataset rows, scored against both Agent Versions. Per row, the diff: pass → fail (regression), fail → pass (improvement), same → same. Aggregate: the headline pass-rate delta.
+
+    This is the **regression-tracking primitive** that Trust AI is built around. Everything in the first three tutorials served this view.
+
+    For the full how-to on comparison reading, see [Compare two Agent Versions](/how-to/compare-agent-versions).
+  </Step>
+</Steps>
+
+## What to do with what you saw
+
+The Evaluation results point in three possible directions, often more than one at once:
+
+- **Refine the Evaluator.** If the Evaluator and the agent both produced reasonable outputs but the rubric scored them differently than you would, the rubric needs tightening. Go back to [Build your first Evaluator](/tutorials/build-first-evaluator) → calibration step, and iterate.
+- **Expand the Dataset.** If one category of behavior is missing from your Dataset (the rows all passed because they all skipped the failure mode), add more rows from your Sessions list — annotate them first, then bulk-curate.
+- **Fix the agent.** If the Evaluator is fair and the rubric is good, but the agent failed a row a human would expect it to pass, that's a real bug. Hand it to the team owning the agent with the Evaluation row as the artifact.
+
+Most teams iterate on all three over time. The Evaluation isn't a verdict — it's a piece of evidence that closes one round of the [evaluation loop](/concepts/evaluation-loop).
+
+## You've completed the onboarding trilogy
+
+<CardGroup cols={2}>
+  <Card title="The evaluation loop" icon="refresh-cw" href="/concepts/evaluation-loop">
+    The full conceptual narrative the three tutorials walk one round of. Worth re-reading now that you've done it once.
+  </Card>
+  <Card title="Compare two Agent Versions" icon="git-branch" href="/how-to/compare-agent-versions">
+    The deep how-to on reading regression diffs — what to look for, common patterns, when to ship vs. block.
+  </Card>
+  <Card title="Connect another runtime" icon="plug" href="/how-to/connect-agentcore">
+    Bring a second agent (or a second environment of the same agent) into Trust AI. Same shape, narrower scope.
+  </Card>
+  <Card title="API Reference" icon="code" href="/api-reference">
+    Every endpoint, request shape, and response shape — the source of truth for programmatic Trust AI usage.
+  </Card>
+</CardGroup>
