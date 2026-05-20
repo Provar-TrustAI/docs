@@ -164,3 +164,15 @@ The point of M3 being a rehearsal is to find these things before V0 → V1 (wher
 - **Automation** (`repository_dispatch` from trust-ai-app on tag → docs-side regen workflow). That's M4's scope. This runbook is the manual procedure that M4 automates.
 - **Major-version transitions** (V0 → V1). Different beast — treat as its own milestone with its own runbook.
 - **Per-version Mintlify version dropdown.** Not enabled yet (DEV-1764 says: only when ≥2 simultaneously-supported majors exist).
+
+---
+
+## Cutover friction notes — DEV-1909 / DEV-1910 / DEV-1912 (v2026.05.11 → v2026.05.19)
+
+First end-to-end exercise of this runbook. Notes captured as the cutover happened:
+
+- **Step 3 (archive banners): manual was unnecessary.** A short python regex script (`re.match(r'^(---\n.*?\n---\n)', content, re.DOTALL)`) inserted banners into all 15 files safely and identically. For minor-version cuts where the frontmatter shape is consistent, the script is fine; reserve manual sweeps for major-version cuts where frontmatter shape may have drifted.
+- **Step 4b decision (archive API exposure): pick a tab.** We chose: single `tab` per archive in `docs.json` containing both archived MDX `groups` and the archived `openapi`. Documented the rationale in `docs-plan/versioning/README.md` under "How the archived API Reference is exposed."
+- **Splitting steps across PRs introduces broken intermediate states.** Step 4 (OpenAPI pin) and step 6 (mintignore unignore) can land in the same PR or separate PRs, but they must NOT land BEFORE step 1-3 (archive copy) and step 4b (docs.json tab addition). The dependency: docs.json references archive paths that mintignore was hiding; the unignore + docs.json + files must all be present together for the build to succeed. Recommend splitting as: PR A = files (1-3), PR B = OpenAPI pin (4a/4b, no docs.json yet), PR C = docs.json archive tab + mintignore unignore (6) + verify (7-9). That's what M3-X1 / X2 / X4 was.
+- **Internal links in archived files still point to root paths.** A reader on `/v2026.05.11/concepts/sessions` clicking `[Datasets](/concepts/datasets)` will land on root /concepts/datasets, not /v2026.05.11/concepts/datasets. For a minor-version cut this is harmless (concept names didn't change). For a major-version cut the archive's internal links would need rewriting — flag for the V0→V1 runbook variant.
+- **OpenAPI file sizes are large** (~600KB each). Two snapshots committed = ~1.2MB of git history per cutover. Acceptable for now (the repo is small) but worth tracking as a long-term cost — automation in M4 could keep these in git LFS if it becomes meaningful.
