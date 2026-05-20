@@ -16,50 +16,23 @@ You **ingest Sessions** from your agent runtime. You **review** them, attaching 
 
 ## The diagram
 
-```
-                       ┌─────────────────────┐
-                       │  1. Ingest          │
-                       │     Sessions        │  ← from AgentCore / Agentforce / Copilot Studio
-                       └──────────┬──────────┘
-                                  │
-                                  ▼
-                       ┌─────────────────────┐
-                       │  2. Review +        │
-                       │     Annotate        │  ← QA Practitioner reviewer judgment
-                       └──────────┬──────────┘
-                                  │
-                                  ▼
-                       ┌─────────────────────┐
-                       │  3. Curate          │
-                       │     Dataset         │  ← versioned, snapshot-bound test bed
-                       └──────────┬──────────┘
-                                  │
-                                  ▼
-                       ┌─────────────────────┐
-                       │  4. Define          │
-                       │     Evaluators      │  ← LLM Judge or Structured Match
-                       └──────────┬──────────┘
-                                  │
-                                  ▼
-                       ┌─────────────────────┐
-                       │  5. Run             │
-                       │     Evaluation      │  ← scored, per-row results
-                       └──────────┬──────────┘
-                                  │
-                                  ▼
-                       ┌─────────────────────┐
-                       │  6. Compare         │
-                       │     Agent Versions  │  ← the regression signal
-                       └──────────┬──────────┘
-                                  │
-                                  ▼
-                       ┌─────────────────────┐
-                       │  Ship the winner.   │
-                       │  Ingest next batch  │ ──┐
-                       │  of Sessions.       │   │
-                       └─────────────────────┘   │
-                                                 │
-                                                 └─→ back to step 1
+```mermaid
+flowchart TD
+    S1["<b>1. Ingest Sessions</b><br/><i>from AgentCore / Agentforce / Copilot Studio</i>"]
+    S2["<b>2. Review + Annotate</b><br/><i>QA Practitioner reviewer judgment</i>"]
+    S3["<b>3. Curate Dataset</b><br/><i>versioned, snapshot-bound test bed</i>"]
+    S4["<b>4. Define Evaluators</b><br/><i>LLM Judge or Structured Match</i>"]
+    S5["<b>5. Run Evaluation</b><br/><i>scored, per-row results</i>"]
+    S6["<b>6. Compare Agent Versions</b><br/><i>the regression signal</i>"]
+    SHIP(["Ship the winner.<br/>Ingest the next batch."])
+
+    S1 --> S2
+    S2 --> S3
+    S3 --> S4
+    S4 --> S5
+    S5 --> S6
+    S6 --> SHIP
+    SHIP -.->|loop| S1
 ```
 
 The loop is not strictly linear — you'll often define an Evaluator before fully curating a Dataset, or curate a Dataset before having any Annotations. The arrows show the **dependency direction**, not a forced sequence.

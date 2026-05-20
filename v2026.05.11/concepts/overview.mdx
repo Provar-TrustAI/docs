@@ -38,21 +38,20 @@ Trust AI is built around seven core nouns. Every workflow, every API call, every
 
 ## How they connect
 
-```text
-   ingest        review        curate         define          run            compare
-   ──────►       ──────►       ──────►        ──────►        ──────►        ──────►
+```mermaid
+flowchart LR
+    S["<b>Session</b><br/>Turns + Tool Calls<br/><i>raw material</i>"]
+    A["<b>Annotation</b><br/>human signal<br/><i>reviewer judgment</i>"]
+    D["<b>Dataset</b><br/>curated rows<br/><i>test bed</i>"]
+    E["<b>Evaluator</b><br/>LLM Judge or<br/>Structured Match<br/><i>judgment rule</i>"]
+    R["<b>Evaluation</b><br/>scored results<br/><i>per-row record</i>"]
+    V["<b>Comparison</b><br/>two Agent Versions<br/><i>regression delta</i>"]
 
-  ┌──────────┐  ┌──────────┐  ┌──────────┐   ┌──────────┐   ┌──────────┐   ┌────────────────┐
-  │ Session  │  │  Annot-  │  │ Dataset  │   │ Evaluator│   │Evaluation│   │  Agent Version │
-  │ (Turns + │  │  ation   │  │  (rows)  │   │(LLM Judge│   │  (scored │   │   comparison   │
-  │  Tool    │  │ (signal) │  │          │   │   or     │   │  results)│   │ (regression    │
-  │  Calls)  │  │          │  │          │   │Structured│   │          │   │  detection)    │
-  │          │  │          │  │          │   │  Match)  │   │          │   │                │
-  └──────────┘  └──────────┘  └──────────┘   └──────────┘   └──────────┘   └────────────────┘
-
-  raw material  reviewer       curated test    judgment       scored         per-version
-  from agent    judgment       bed             rule           record         delta
-  runtime
+    S -->|ingest| A
+    A -->|annotate| D
+    D -->|curate| E
+    E -->|define| R
+    R -->|run + compare| V
 ```
 
 All of this happens **inside a Project**. The Project is the boundary around the loop — members, runtime credentials, and every artifact above belong to one specific Project. A Trust AI organization may have many Projects (one per agent or agent fleet under evaluation), but a single workflow always stays inside one.
