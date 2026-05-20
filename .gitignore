@@ -1,5 +1,12 @@
-# Planning material (memos, audits, drafts) — local to the docs repo, not part of the published site
-docs-plan/
+# Planning material under docs-plan/ — local to the docs repo, not part of the published site.
+# Be specific so docs-plan/versioning/ and docs-plan/runbooks/ stay tracked as team contracts.
+docs-plan/audit/
+docs-plan/branding/
+docs-plan/icons-and-style/
+docs-plan/*.md
 
 # gstack skill state directory
 .gstack/
+
+# Claude Code session state directory
+.claude/
