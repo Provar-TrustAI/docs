@@ -20,13 +20,11 @@
   "fonts": {
     "heading": {
       "family": "Inter",
-      "weight": 600,
-      "source": "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      "weight": 600
     },
     "body": {
       "family": "Inter",
-      "weight": 400,
-      "source": "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      "weight": 400
     }
   },
   "favicon": "/favicon.svg",
