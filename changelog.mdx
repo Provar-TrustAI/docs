@@ -4,9 +4,21 @@ icon: "history"
 description: "Trust AI release notes."
 ---
 
-<Info>
-  Documentation site under construction. The structure and branded elements are in place; content lands milestone-by-milestone.
-</Info>
+<Update label="v2026.05.19 — May 2026">
+  **API surface additions.** Eleven new endpoints land across Projects, Agent Versions, Datasets, Evaluators, and Evaluations:
+
+  - **Projects** — `GET /v1/projects/{id}/requirements` lists configured requirements for the Project.
+  - **Agent Versions** — `GET /v1/agent-versions/run-options` surfaces the runtime invocation options each connected platform supports.
+  - **Datasets** — five additions: `POST /duplicate` clones a Dataset for variant experiments; `GET /export.csv` downloads the Dataset; `GET` and `PUT /tag-vocabulary` define and inspect the controlled tag set; `GET /columns/{key}/option-usage` reports per-option frequency for enumerated columns.
+  - **Evaluators** — `GET /v1/evaluators/{id}/ref-check` lists the Datasets and Evaluations currently referencing an Evaluator (recommended before archiving or rubric-breaking edits). Request-body type for `PATCH /v1/evaluators/{id}` renamed from `UpdateEvaluatorInput` to `EvaluatorPatchRequest` — route is unchanged, only the schema name moved.
+  - **Evaluations** — `POST /v1/evaluations/{id}/cancel` halts an in-progress run; `GET /v1/evaluations/stats` aggregates pass-rate and latency trends across the Project; `POST /v1/evaluations/cohort-breakdown` slices a run's per-row results by intent, tag, or custom dimension.
+
+  **Saved Views.** A new `/v1/saved-views` endpoint family lands with `POST /v1/saved-views/{id}/default` to mark a view as the user's default for a list surface. Saved Views are not yet covered in the Concepts section; expect a dedicated page in a future docs release.
+
+  **Archive.** The prior version's snapshot is now browseable at the [v2026.05.11 archive tab](/v2026.05.11/concepts/overview) — same conceptual model, frozen at the 116-endpoint API surface.
+
+  Twenty-two new schemas land alongside the new endpoints. Full request/response shapes auto-render in the [API Reference](/api-reference).
+</Update>
 
 <Update label="v0 — April 2026">
   Initial Provar Trust AI platform launch. Projects, Sessions, Annotations, Datasets, Evaluators, Evaluations, and Agent Versions are live. AWS Bedrock AgentCore is the first supported runtime integration. Full release notes for subsequent versions will land here as they ship.
