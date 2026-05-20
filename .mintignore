@@ -9,6 +9,8 @@ drafts/
 # Planning material — kept in repo for contributors but not published
 docs-plan/
 
-# Version archive folders — empty until M3 cuts v2026.05.11/ as the archive.
-# Once cut over, REMOVE this ignore so the archive renders at /v2026.05.11/*.
-v2026.*/
+# Version archive folders — empty until M3 cuts. v2026.05.11/ is the first
+# archive (cut in DEV-1909/1910/1912). Future EMPTY future archive folders
+# (e.g., v2026.05.20/) still need ignoring until they're populated, but the
+# specific pattern would go here per-cutover rather than blanket-ignoring all
+# of them. For now nothing future is staged, so no pattern needed.
