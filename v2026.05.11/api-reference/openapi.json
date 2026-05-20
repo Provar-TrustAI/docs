@@ -324,90 +324,6 @@
         }
       }
     },
-    "/v1/agent-versions/run-options": {
-      "get": {
-        "tags": [
-          "agent-versions"
-        ],
-        "summary": "List Agent Version Run Options",
-        "description": "List a project's agent builds, picker-shaped, for the New Run form.\n\nBacks the Evaluation New Run Agent-version picker. Returns\npicker-shaped options (``id`` / ``label`` / ``tag`` / ``meta``) over\nthe project's active agent versions, newest-first \u2014 the first row is\nthe project's current build, tagged ``current``.\n\nDeclared ahead of ``GET /{agent_version_id}`` so the literal path\nisn't shadowed by the id path-param route.",
-        "operationId": "list_agent_version_run_options_v1_agent_versions_run_options_get",
-        "parameters": [
-          {
-            "name": "project_id",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 255,
-              "title": "Project Id"
-            }
-          },
-          {
-            "name": "limit",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "maximum": 100,
-              "minimum": 1,
-              "default": 50,
-              "title": "Limit"
-            }
-          },
-          {
-            "name": "offset",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "default": 0,
-              "title": "Offset"
-            }
-          },
-          {
-            "name": "wos_session",
-            "in": "cookie",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Wos Session"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AgentVersionRunOptionListResponse"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/v1/agent-versions/{agent_version_id}": {
       "get": {
         "tags": [
@@ -2538,25 +2454,6 @@
             "description": "Filter sessions tagged with any of these tag values. Same encoding rules as ``routed_to`` (DEV-752)."
           },
           {
-            "name": "q",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string",
-                  "maxLength": 255
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "description": "Free-text search term. When supplied, the list is restricted to sessions whose summary, transcript turn content, or tags match the term case-insensitively (ILIKE substring). Empty / whitespace-only ``q`` is normalised away and yields the unfiltered list \u2014 same search semantics as the Datasets list endpoint.",
-              "title": "Q"
-            },
-            "description": "Free-text search term. When supplied, the list is restricted to sessions whose summary, transcript turn content, or tags match the term case-insensitively (ILIKE substring). Empty / whitespace-only ``q`` is normalised away and yields the unfiltered list \u2014 same search semantics as the Datasets list endpoint."
-          },
-          {
             "name": "include_eval",
             "in": "query",
             "required": false,
@@ -4401,191 +4298,6 @@
         }
       }
     },
-    "/v1/datasets/{dataset_id}/duplicate": {
-      "post": {
-        "tags": [
-          "datasets"
-        ],
-        "summary": "Duplicate Dataset",
-        "description": "Clone a dataset into the same project.\n\nCopies the dataset's annotation schema, every row (with turns and\nagent steps), and every row annotation into a new dataset named\n``\"<name> (copy)\"`` \u2014 with a numeric suffix on collision. Returns\nthe new :class:`DatasetResponse`.",
-        "operationId": "duplicate_dataset_v1_datasets__dataset_id__duplicate_post",
-        "parameters": [
-          {
-            "name": "dataset_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Dataset Id"
-            }
-          },
-          {
-            "name": "wos_session",
-            "in": "cookie",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Wos Session"
-            }
-          }
-        ],
-        "responses": {
-          "201": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DatasetResponse"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/v1/datasets/{dataset_id}/tag-vocabulary": {
-      "get": {
-        "tags": [
-          "datasets"
-        ],
-        "summary": "Get Dataset Tag Vocabulary",
-        "description": "Return the dataset-wide row-tag vocabulary + per-tag usage counts.\n\nThe vocabulary is the union of the dataset's stored vocabulary and\nevery tag currently in use on its rows \u2014 so the system ``tags``\ncolumn's \"Edit tags\u2026\" modal can offer a real add / rename / remove\neditor that never loses a tag a row still carries.",
-        "operationId": "get_dataset_tag_vocabulary_v1_datasets__dataset_id__tag_vocabulary_get",
-        "parameters": [
-          {
-            "name": "dataset_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Dataset Id"
-            }
-          },
-          {
-            "name": "wos_session",
-            "in": "cookie",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Wos Session"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DatasetTagVocabularyResponse"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      },
-      "put": {
-        "tags": [
-          "datasets"
-        ],
-        "summary": "Update Dataset Tag Vocabulary",
-        "description": "Replace the dataset's stored row-tag vocabulary.\n\nThe vocabulary is annotator chrome \u2014 it does not bump the dataset\nversion. Removing a tag does not strip it from rows that already\ncarry it; the read endpoint folds those still-in-use tags back in.",
-        "operationId": "update_dataset_tag_vocabulary_v1_datasets__dataset_id__tag_vocabulary_put",
-        "parameters": [
-          {
-            "name": "dataset_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Dataset Id"
-            }
-          },
-          {
-            "name": "wos_session",
-            "in": "cookie",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Wos Session"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateDatasetTagVocabularyInput"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DatasetTagVocabularyResponse"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/v1/datasets/{dataset_id}/rows": {
       "post": {
         "tags": [
@@ -4757,27 +4469,6 @@
             }
           },
           {
-            "name": "include",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "description": "Optional response shape extensions. ``turns`` adds a structured ``turns`` array to every row \u2014 each entry carries idx / role / content plus an ordered ``agent_steps`` array. Off by default so the row-table list payload stays small; mirrors the Sessions list endpoint's ``?include=turns``.",
-              "title": "Include"
-            },
-            "description": "Optional response shape extensions. ``turns`` adds a structured ``turns`` array to every row \u2014 each entry carries idx / role / content plus an ordered ``agent_steps`` array. Off by default so the row-table list payload stays small; mirrors the Sessions list endpoint's ``?include=turns``."
-          },
-          {
             "name": "wos_session",
             "in": "cookie",
             "required": false,
@@ -4886,87 +4577,12 @@
         }
       }
     },
-    "/v1/datasets/{dataset_id}/export.csv": {
-      "get": {
-        "tags": [
-          "datasets"
-        ],
-        "summary": "Export Dataset Rows Csv",
-        "description": "Stream a dataset's rows as a downloadable CSV file.\n\nServer-streamed via ``StreamingResponse`` + a chunked async\ngenerator so a large dataset never materialises in BE memory. The\ncolumns are the fixed system columns followed by every annotation\ncolumn in the dataset schema; the ``attachment`` disposition pins\nthe download filename to the dataset's name.\n\nMirrors the Sessions surface's streamed CSV export\n(``POST /v1/projects/{id}/sessions/export``).",
-        "operationId": "export_dataset_rows_csv_v1_datasets__dataset_id__export_csv_get",
-        "parameters": [
-          {
-            "name": "dataset_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Dataset Id"
-            }
-          },
-          {
-            "name": "q",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string",
-                  "maxLength": 255
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Q"
-            }
-          },
-          {
-            "name": "wos_session",
-            "in": "cookie",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Wos Session"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/v1/datasets/{dataset_id}/rows/{row_id}": {
       "get": {
         "tags": [
           "datasets"
         ],
         "summary": "Get Dataset Row",
-        "description": "Return one row's wire shape (metadata + derived legacy IO + annotations map).\n\nBy default the response's ``turns`` field is ``null``: the row table\nrenders the legacy-derived ``input_data`` / ``expected_output``\npreview cells and does not need the full conversation, so the\ndefault payload stays small. Pass ``?include=turns`` to receive the\nstructured ``turns`` projection \u2014 the Dataset Detail fly-in\nTranscript tab opts in to get per-turn agent steps and the editable\nIO-split. This mirrors the Sessions detail endpoint's\n``?include=turns`` contract. The sibling sub-endpoint\n``GET /{dataset_id}/rows/{row_id}/turns`` remains available for\ncallers that want only the turn list.",
         "operationId": "get_dataset_row_v1_datasets__dataset_id__rows__row_id__get",
         "parameters": [
           {
@@ -4988,27 +4604,6 @@
             }
           },
           {
-            "name": "include",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "description": "Optional response shape extensions. ``turns`` adds a structured ``turns`` array \u2014 each entry carries idx / role / content plus an ordered ``agent_steps`` array. Mirrors the Sessions detail endpoint's ``?include=turns``.",
-              "title": "Include"
-            },
-            "description": "Optional response shape extensions. ``turns`` adds a structured ``turns`` array \u2014 each entry carries idx / role / content plus an ordered ``agent_steps`` array. Mirrors the Sessions detail endpoint's ``?include=turns``."
-          },
-          {
             "name": "wos_session",
             "in": "cookie",
             "required": false,
@@ -5025,82 +4620,6 @@
             }
           }
         ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DatasetRowResponse"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      },
-      "patch": {
-        "tags": [
-          "datasets"
-        ],
-        "summary": "Update Dataset Row",
-        "description": "Patch a dataset row's metadata (currently: ``tags`` + ``source_session_id``).\n\nThe row body is metadata only \u2014 turn content is edited through the\n``ExampleTurn`` endpoints below and annotation values through the\nper-cell ``PUT .../annotations/{key}`` endpoint. This route covers\nthe FE row-level inline edits (chip-editor commits for tags, etc.)\nthat the row table fires when a user edits a system column directly\nin the grid. The sessions-side precedent is\n``PATCH /sessions/{id}/tags`` \u2014 same shape, different replacement\nsemantics (this route accepts a full ``tags`` array; sessions\naccept ``{add, remove}``).",
-        "operationId": "update_dataset_row_v1_datasets__dataset_id__rows__row_id__patch",
-        "parameters": [
-          {
-            "name": "dataset_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Dataset Id"
-            }
-          },
-          {
-            "name": "row_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Row Id"
-            }
-          },
-          {
-            "name": "wos_session",
-            "in": "cookie",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Wos Session"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateDatasetRowInput"
-              }
-            }
-          }
-        },
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -5894,74 +5413,6 @@
         }
       }
     },
-    "/v1/datasets/{dataset_id}/columns/{column_key}/option-usage": {
-      "get": {
-        "tags": [
-          "datasets"
-        ],
-        "summary": "Get Column Option Usage",
-        "description": "Return dataset-wide per-option usage counts for one column.\n\nPowers the truthful count chips in the dataset detail\n``<ConfigureOptionsModal>`` \u2014 the modal otherwise tallies counts\nclient-side from the loaded page only, so the numbers grow as the\nuser scrolls.\n\n``column_key`` is either an ``axial`` / ``multi_tag`` annotation\ncolumn key, or the sentinel ``__tags__`` to count the system\nrow-level ``tags`` field. ``pass_fail`` / ``score`` / ``comment``\ncolumns have no option list and return a structured 400.",
-        "operationId": "get_column_option_usage_v1_datasets__dataset_id__columns__column_key__option_usage_get",
-        "parameters": [
-          {
-            "name": "dataset_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Dataset Id"
-            }
-          },
-          {
-            "name": "column_key",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Column Key"
-            }
-          },
-          {
-            "name": "wos_session",
-            "in": "cookie",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Wos Session"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ColumnOptionUsageResponse"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/v1/datasets/{dataset_id}/rows/{row_id}/annotations": {
       "get": {
         "tags": [
@@ -6485,26 +5936,6 @@
             "description": "Filter runs to those pinned to this agent version. When omitted, returns all runs in the project (DEV-668)."
           },
           {
-            "name": "evaluator_id",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string",
-                  "minLength": 1,
-                  "maxLength": 255
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "description": "Filter runs to those whose pinned evaluators include this evaluator. When omitted, returns all runs in the project.",
-              "title": "Evaluator Id"
-            },
-            "description": "Filter runs to those whose pinned evaluators include this evaluator. When omitted, returns all runs in the project."
-          },
-          {
             "name": "wos_session",
             "in": "cookie",
             "required": false,
@@ -6606,127 +6037,6 @@
         }
       }
     },
-    "/v1/evaluations/stats": {
-      "get": {
-        "tags": [
-          "evaluations"
-        ],
-        "summary": "Evaluation Project Stats",
-        "description": "Project-wide aggregate stats for the Evaluations list subtitle.\n\nBacks the list page header line\n\"<N> total runs \u00b7 <N> in last 7 days \u00b7 <X> avg pass rate\".\n\n* ``total_runs`` counts every run in the project, any status.\n* ``runs_last_7d`` counts runs *completed* in the last 7 days.\n* ``avg_pass_rate`` is the row-weighted mean of\n  ``evaluation_results.passed_all`` over all result rows of\n  completed runs (\"% of examples that passed\") \u2014 ``null`` when no\n  completed run has been scored.\n\nKept separate from the paginated list endpoint so the stats stay\nproject-wide and page-independent: re-paginating the list never\nre-runs this aggregate, and a page-scoped denominator (which would\nunderstate the numbers on page 2+) is structurally impossible.\n\nAn empty project returns ``total_runs=0``, ``runs_last_7d=0``,\n``avg_pass_rate=null`` \u2014 a clean success response, not an error.",
-        "operationId": "evaluation_project_stats_v1_evaluations_stats_get",
-        "parameters": [
-          {
-            "name": "project_id",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 255,
-              "title": "Project Id"
-            }
-          },
-          {
-            "name": "wos_session",
-            "in": "cookie",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Wos Session"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/EvaluationProjectStatsResponse"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/v1/evaluations/cohort-breakdown": {
-      "post": {
-        "tags": [
-          "evaluations"
-        ],
-        "summary": "Cohort Breakdown",
-        "description": "Preview how a dataset's rows split into evaluation cohorts.\n\nConsumed by the Evaluation New Run form's \"What this run will\nevaluate\" cards: as the user picks a dataset / agent version /\nevaluators, the form posts the three values here and renders the\nreturned counts live.\n\nThe split is decided by each row's value in the dataset's pass/fail\nannotation column \u2014 the column whose ``type == 'pass_fail'``. A\n*pass* verdict makes the row ``agent_testable``; a *fail* verdict\nmakes it ``currently_failing``; either way it is ``evaluator_testable``.\nA row with no verdict is ``unusable``.\n\n**No pass/fail column contract:** when the chosen dataset has no\npass/fail column at all, no row can carry a verdict, so the\nresponse reports every row as ``unusable`` and both testable\ncohorts as ``0``. This is a documented success response, not an\nerror \u2014 the form simply shows a zero gradable cohort.\n\n``agent_version_id`` is validated for existence (a stale picker\nvalue yields a 404) but does not currently gate row inclusion;\n``evaluator_ids`` is accepted for a stable request contract and is\nnot consulted. A missing ``dataset_id`` or ``agent_version_id``\nreturns 404.",
-        "operationId": "cohort_breakdown_v1_evaluations_cohort_breakdown_post",
-        "parameters": [
-          {
-            "name": "wos_session",
-            "in": "cookie",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Wos Session"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CohortBreakdownRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CohortBreakdownResponse"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/v1/evaluations/{run_id}": {
       "get": {
         "tags": [
@@ -6761,73 +6071,6 @@
             }
           }
         ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/EvaluationRunResponse"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      },
-      "patch": {
-        "tags": [
-          "evaluations"
-        ],
-        "summary": "Rename Evaluation",
-        "description": "Rename an evaluation run.\n\nBacks the Run Detail header's inline-editable title \u2014 committing\nthe edited title sends ``{\"name\": \"<new label>\"}`` here so a user\ncan label a finished run (\"baseline\", \"post-prompt-tweak\"). Only\nthe run's ``name`` is touched; status, counters, and timestamps are\nleft untouched.\n\nReturns the updated run. An unknown ``run_id`` yields a 404; an\nempty / whitespace-only / oversized ``name`` is rejected as a 422\nby :class:`RenameEvaluationRunInput` before the service runs.",
-        "operationId": "rename_evaluation_v1_evaluations__run_id__patch",
-        "parameters": [
-          {
-            "name": "run_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Run Id"
-            }
-          },
-          {
-            "name": "wos_session",
-            "in": "cookie",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Wos Session"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/RenameEvaluationRunInput"
-              }
-            }
-          }
-        },
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -6893,65 +6136,6 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/EvaluationRunDetailResponse"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/v1/evaluations/{run_id}/cancel": {
-      "post": {
-        "tags": [
-          "evaluations"
-        ],
-        "summary": "Cancel Evaluation",
-        "description": "Cancel an in-flight evaluation run.\n\nOperator-initiated: while a run is ``pending`` or ``running`` the\nRun Detail header shows a \"Cancel run\" button that calls this\nendpoint. The run transitions to the terminal ``canceled`` state \u2014\neither immediately (when the run was still ``pending`` and no\nworker had picked it up) or once the evaluation worker drains its\nin-flight dataset rows and observes the cancel flag.\n\nReturns the updated run. A run that has already reached a terminal\nstate (``completed`` / ``failed`` / ``canceled``) yields a 409 \u2014\nthe run exists but there is nothing left to cancel. An unknown\n``run_id`` yields a 404.",
-        "operationId": "cancel_evaluation_v1_evaluations__run_id__cancel_post",
-        "parameters": [
-          {
-            "name": "run_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Run Id"
-            }
-          },
-          {
-            "name": "wos_session",
-            "in": "cookie",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Wos Session"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/EvaluationRunResponse"
                 }
               }
             }
@@ -7043,7 +6227,7 @@
           "evaluators"
         ],
         "summary": "Create Evaluator",
-        "description": "Create a new evaluator.\n\nThe authenticated request user is recorded as the evaluator's\n``created_by`` so the Evaluator detail Overview tab can surface a\nreal \"Created by\" row \u2014 mirrors the datasets create path\n(``dataset_service.create(db, user[\"user_id\"], ...)``).",
+        "description": "Create a new evaluator.",
         "operationId": "create_evaluator_v1_evaluators_post",
         "parameters": [
           {
@@ -7056,22 +6240,6 @@
               "title": "Project Id"
             },
             "description": "Project ID"
-          },
-          {
-            "name": "wos_session",
-            "in": "cookie",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Wos Session"
-            }
           }
         ],
         "requestBody": {
@@ -7112,7 +6280,7 @@
           "evaluators"
         ],
         "summary": "List Evaluators",
-        "description": "List evaluators for a project.\n\nEach list item carries ``runs_count`` / ``last_pass_rate``\nprojected from the evaluations domain. The projection (a single\nbatched query over ``evaluation_runs``) lives in\n``evaluations.repository`` \u2014 cross-domain reads from the route are\nthe documented pattern, mirroring ``GET /evaluators/{id}``\npre-fetching the per-run pass-rate trend. The route binds the\nrepository call as the service's ``run_projection_fetcher`` so the\nevaluators service stays free of cross-domain imports.",
+        "description": "List evaluators for a project.",
         "operationId": "list_evaluators_v1_evaluators_get",
         "parameters": [
           {
@@ -7227,7 +6395,7 @@
           "evaluators"
         ],
         "summary": "Get Evaluator",
-        "description": "Get an evaluator by ID, hydrated with run projections.\n\nThe detail surface is the canonical place to read\n``runs_count`` / ``last_pass_rate`` / ``trend`` \u2014 the route\npre-fetches the per-run pass-rate trend from the evaluations\ndomain (cross-domain reads from the route are the documented\npattern, mirroring ``GET /evaluators/{id}/usage``) and hands the\nraw tuples to the service so the service layer stays free of\ncross-domain ORM coupling.",
+        "description": "Get an evaluator by ID.",
         "operationId": "get_evaluator_v1_evaluators__evaluator_id__get",
         "parameters": [
           {
@@ -7268,9 +6436,9 @@
         "tags": [
           "evaluators"
         ],
-        "summary": "Patch Evaluator",
-        "description": "Inline-patch an evaluator's user-authored copy + config fields.\n\nAccepts a partial ``{name?, description?, criteria?, subkind?,\nscoring_type?, pass_threshold?}`` payload \u2014 the narrow surface the\nEvaluators table's inline editor, the Evaluator side-panel Overview\ntab's Score type radio, and the Evaluator New/Edit form commit.\n``criteria`` is gated to ``llm_judge`` evaluators and ``subkind``\nto ``structured_match`` evaluators (a mismatched ``kind`` yields a\n422); ``scoring_type`` accepts ``pass_fail`` on every kind but\nrejects ``scale_1_5`` on a structured_match evaluator with a 422;\n``pass_threshold`` is coerced to ``None`` for any evaluator whose\neffective scoring is not ``scale_1_5``. ``scoring_type`` is a\nversion-bump field \u2014 patching it cuts a new ``EvaluatorVersion``\nrow via the same bump path the full-form editor uses. The remaining\nversioned content (``prompt``) and toggles (``enable_reasoning``)\nround-trip through the full-form editor at a different surface.",
-        "operationId": "patch_evaluator_v1_evaluators__evaluator_id__patch",
+        "summary": "Update Evaluator",
+        "description": "Update an existing evaluator. Partial updates supported.",
+        "operationId": "update_evaluator_v1_evaluators__evaluator_id__patch",
         "parameters": [
           {
             "name": "evaluator_id",
@@ -7288,7 +6456,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/EvaluatorPatchRequest"
+                "$ref": "#/components/schemas/UpdateEvaluatorInput"
               }
             }
           }
@@ -7321,7 +6489,7 @@
           "evaluators"
         ],
         "summary": "Delete Evaluator",
-        "description": "Delete an evaluator. Versions and calibration runs are removed too.\n\nReturns ``409 Conflict`` when an evaluation run that pins this\nevaluator is still in flight (``pending`` / ``running``) \u2014 deleting\nit would orphan the live job. The active-run count is read from the\nevaluations domain here (cross-domain imports from ``evaluators/``\nare banned, so the route does the read) and handed to the service,\nwhich raises ``EvaluatorInUseError`` inside the same request\ntransaction the delete would commit in \u2014 so the guard is\ntransaction-isolated, not a best-effort pre-check.",
+        "description": "Delete an evaluator. Versions and calibration runs are removed too.",
         "operationId": "delete_evaluator_v1_evaluators__evaluator_id__delete",
         "parameters": [
           {
@@ -7379,50 +6547,6 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/EvaluatorUsageResponse"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/v1/evaluators/{evaluator_id}/ref-check": {
-      "get": {
-        "tags": [
-          "evaluators"
-        ],
-        "summary": "Get Evaluator Ref Check",
-        "description": "Return the active / completed run breakdown for the Delete confirm flow.\n\nDrives the Evaluator side-panel's three-state Delete confirm:\n``active_run_count > 0`` blocks the delete, a non-zero\n``completed_run_count`` warns (past results are preserved), and a\nzero ``total_run_count`` is a simple confirm.\n\nUnlike ``GET /{id}/usage`` (a flat ``usage_count``), this surface\nsplits the runs by status. The breakdown is sourced from the\nevaluations domain via the route \u2014 cross-domain imports from\n``evaluators/`` are banned \u2014 and computed in a single aggregate\nquery, so the FE no longer over-fetches a page of runs to tally the\ncounts client-side.",
-        "operationId": "get_evaluator_ref_check_v1_evaluators__evaluator_id__ref_check_get",
-        "parameters": [
-          {
-            "name": "evaluator_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Evaluator Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/EvaluatorRefCheckResponse"
                 }
               }
             }
@@ -10828,7 +9952,6 @@
               "enum": [
                 "sessions",
                 "datasets",
-                "dataset_rows",
                 "evaluations"
               ],
               "type": "string",
@@ -10979,65 +10102,6 @@
         "responses": {
           "204": {
             "description": "Successful Response"
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/v1/saved-views/{view_id}/default": {
-      "post": {
-        "tags": [
-          "saved-views"
-        ],
-        "summary": "Toggle Saved View Default",
-        "description": "Toggle the calling user's default SavedView for this view's kind.",
-        "operationId": "toggle_saved_view_default_v1_saved_views__view_id__default_post",
-        "parameters": [
-          {
-            "name": "view_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "View Id"
-            }
-          },
-          {
-            "name": "wos_session",
-            "in": "cookie",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Wos Session"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SavedViewDefaultResponse"
-                }
-              }
-            }
           },
           "422": {
             "description": "Validation Error",
@@ -11372,89 +10436,6 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/WorkspaceCaptureImpactResponse"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/v1/projects/{project_id}/requirements": {
-      "get": {
-        "tags": [
-          "requirements",
-          "requirements"
-        ],
-        "summary": "List Requirements",
-        "description": "List requirements for a project.\n\nReturns an empty ``{items: [], total: 0}`` projection \u2014 the\nRequirements surface is not built yet. The FE sidebar calls this\nwith ``{limit: 1}`` and reads ``total`` for its count badge.",
-        "operationId": "list_requirements_v1_projects__project_id__requirements_get",
-        "parameters": [
-          {
-            "name": "project_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Project Id"
-            }
-          },
-          {
-            "name": "limit",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "maximum": 200,
-              "minimum": 1,
-              "default": 50,
-              "title": "Limit"
-            }
-          },
-          {
-            "name": "offset",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "default": 0,
-              "title": "Offset"
-            }
-          },
-          {
-            "name": "wos_session",
-            "in": "cookie",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Wos Session"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/RequirementListResponse"
                 }
               }
             }
@@ -13229,66 +12210,6 @@
         "title": "AgentVersionResponse",
         "description": "Wire shape for an agent version row.\n\nDEV-1026 V1 widens the response with rollup fields the new top-level\nAgent versions page renders inline:\n\n- ``session_count`` \u2014 total sessions pinned to this version (any\n  origin: synced / uploaded / simulator).\n- ``eval_run_count`` \u2014 total evaluation runs pinned to this version.\n- ``last_activity_at`` \u2014 most recent ``created_at`` across the union\n  of pinned sessions + eval runs, or ``None`` when this version has\n  neither yet.\n\nDefaults keep the schema backward-compatible: callers that don't need\nthe rollup (e.g. the simulator picker) just ignore the extra fields,\nand DB paths that don't compute them (legacy fixtures, fast-path\ncreates) get sensible zero values."
       },
-      "AgentVersionRunOption": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "title": "Id"
-          },
-          "label": {
-            "type": "string",
-            "title": "Label"
-          },
-          "tag": {
-            "anyOf": [
-              {
-                "type": "string",
-                "enum": [
-                  "current",
-                  "staging"
-                ]
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Tag"
-          },
-          "meta": {
-            "type": "string",
-            "title": "Meta"
-          }
-        },
-        "type": "object",
-        "required": [
-          "id",
-          "label",
-          "meta"
-        ],
-        "title": "AgentVersionRunOption",
-        "description": "One agent-version option for the Evaluation New Run picker.\n\nPicker-shaped projection of an :class:`AgentVersion` row \u2014 distinct\nfrom :class:`AgentVersionResponse`, which carries the agent-versions\n*domain* list shape (rollups, audit fields) used by the detail\nsurface. The frontend's ``AgentVersionOption`` interface consumes\nthis 1:1.\n\nFields:\n    id: The agent-version row id \u2014 persisted to the run-create\n        request's ``agent_version_id``. A real UUID (so a started\n        run resolves against the backend, unlike the R2 const's\n        non-resolvable fixture ids).\n    label: The human-facing version string (``AgentVersion.label``).\n    tag: Optional status badge \u2014 see :data:`AgentVersionRunTag`.\n    meta: Secondary line. ``\"current (prod)\"`` for the current\n        build; otherwise a relative-time string derived from\n        ``created_at`` (e.g. ``\"2 weeks ago\"``), or the staging\n        build's branch label when one is recorded."
-      },
-      "AgentVersionRunOptionListResponse": {
-        "properties": {
-          "items": {
-            "items": {
-              "$ref": "#/components/schemas/AgentVersionRunOption"
-            },
-            "type": "array",
-            "title": "Items"
-          },
-          "total": {
-            "type": "integer",
-            "title": "Total"
-          }
-        },
-        "type": "object",
-        "required": [
-          "total"
-        ],
-        "title": "AgentVersionRunOptionListResponse",
-        "description": "Response for ``GET /agent-versions/run-options``.\n\n``items`` is newest-first so the picker's first option is the\nproject's current build."
-      },
       "ApprovalDecisionInput": {
         "properties": {
           "decision": {
@@ -13409,28 +12330,6 @@
               }
             ],
             "title": "Organization Id"
-          },
-          "workspace_name": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Workspace Name"
-          },
-          "role": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Role"
           }
         },
         "type": "object",
@@ -14042,101 +12941,6 @@
         "title": "CalibrationSessionResultResponse",
         "description": "Per-(session, rule) annotation comparison in a calibration run."
       },
-      "CohortBreakdownRequest": {
-        "properties": {
-          "dataset_id": {
-            "type": "string",
-            "maxLength": 255,
-            "minLength": 1,
-            "title": "Dataset Id"
-          },
-          "agent_version_id": {
-            "type": "string",
-            "maxLength": 255,
-            "minLength": 1,
-            "title": "Agent Version Id"
-          },
-          "evaluator_ids": {
-            "items": {
-              "type": "string"
-            },
-            "type": "array",
-            "title": "Evaluator Ids"
-          }
-        },
-        "type": "object",
-        "required": [
-          "dataset_id",
-          "agent_version_id"
-        ],
-        "title": "CohortBreakdownRequest",
-        "description": "Inputs for the Evaluation New Run cohort preview.\n\nThe new-run form sends the three picked field values as the user\nfills them in; the response splits the chosen dataset's rows into\nthe cohorts the form's \"What this run will evaluate\" cards render.\n\n``agent_version_id`` is accepted for forward-compatibility \u2014 agent\nversions do not gate row inclusion today, but the form already\nbinds the picker value and a stable request contract means the FE\nneedn't change when agent-version-aware cohort logic lands.\n``evaluator_ids`` is likewise carried for contract stability; the\ncohort split is derived entirely from the dataset's pass/fail\nannotation column."
-      },
-      "CohortBreakdownResponse": {
-        "properties": {
-          "agent_testable": {
-            "type": "integer",
-            "title": "Agent Testable",
-            "description": "Rows whose pass/fail verdict is a pass \u2014 the run's gradable agent-output cohort."
-          },
-          "evaluator_testable": {
-            "type": "integer",
-            "title": "Evaluator Testable",
-            "description": "Rows with any pass/fail verdict (pass or fail) \u2014 the evaluator-accuracy cohort."
-          },
-          "currently_failing": {
-            "type": "integer",
-            "title": "Currently Failing",
-            "description": "Rows whose pass/fail verdict is a fail (a subset of evaluator_testable)."
-          },
-          "unusable": {
-            "type": "integer",
-            "title": "Unusable",
-            "description": "Rows with no pass/fail verdict entered \u2014 excluded from every testable cohort."
-          },
-          "total_rows": {
-            "type": "integer",
-            "title": "Total Rows",
-            "description": "The dataset's total row count, for '<N> / <total>' display."
-          }
-        },
-        "type": "object",
-        "required": [
-          "agent_testable",
-          "evaluator_testable",
-          "currently_failing",
-          "unusable",
-          "total_rows"
-        ],
-        "title": "CohortBreakdownResponse",
-        "description": "Row-cohort counts for one ``(dataset, agent version)`` pairing.\n\nThe new-run form renders these as two cards \u2014 \"Agent pass rate\"\n(``agent_testable`` / ``total_rows``, with ``currently_failing`` and\n``unusable`` as inline notes) and \"Evaluator accuracy\"\n(``evaluator_testable`` / ``total_rows``).\n\nA row's cohort is decided by its value in the dataset's pass/fail\nannotation column (the column whose ``type == 'pass_fail'``). When a\ndataset has no pass/fail column every row counts as ``unusable``."
-      },
-      "ColumnOptionUsageResponse": {
-        "properties": {
-          "column_key": {
-            "type": "string",
-            "title": "Column Key"
-          },
-          "counts": {
-            "additionalProperties": {
-              "type": "integer"
-            },
-            "type": "object",
-            "title": "Counts"
-          },
-          "total_rows": {
-            "type": "integer",
-            "title": "Total Rows",
-            "default": 0
-          }
-        },
-        "type": "object",
-        "required": [
-          "column_key"
-        ],
-        "title": "ColumnOptionUsageResponse",
-        "description": "Wire shape for ``GET /datasets/{dataset_id}/columns/{column_key}/option-usage``.\n\n``counts`` maps each option value to the number of dataset rows that\nuse it \u2014 computed dataset-wide via an aggregate query so the count\nis truthful regardless of how many rows the client has loaded.\n\nFor an ``axial`` annotation column the value is the chosen pole\n*key*; for a ``multi_tag`` annotation column each row contributes\none increment per tag in its value list. The sentinel ``column_key``\n:data:`SYSTEM_TAGS_USAGE_KEY` aggregates the system row-level\n``DatasetRow.tags`` field instead of an annotation column.\n\nOption values with zero usage are intentionally absent from the map\n\u2014 callers default a missing key to ``0``. ``total_rows`` is the\ndataset's row count, surfaced so the modal can phrase the\n\"N of M rows\" copy without a second request."
-      },
       "CreateAgentPromptVersionInput": {
         "properties": {
           "content": {
@@ -14574,20 +13378,6 @@
             "$ref": "#/components/schemas/ScoringType",
             "description": "How the evaluator reports scores",
             "default": "pass_fail"
-          },
-          "pass_threshold": {
-            "anyOf": [
-              {
-                "type": "integer",
-                "maximum": 5.0,
-                "minimum": 2.0
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Pass Threshold",
-            "description": "1-5-scale pass cutoff (2-5): a score at or above this value counts as a pass. Meaningful only for llm_judge evaluators scored ``scale_1_5``; coerced to NULL by the service for pass/fail judges and structured_match evaluators."
           },
           "prompt": {
             "anyOf": [
@@ -15183,16 +13973,6 @@
             "type": "string",
             "title": "Created By"
           },
-          "created_by_user": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/UserDisplay"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
           "row_count": {
             "type": "integer",
             "title": "Row Count"
@@ -15204,11 +13984,6 @@
           "annotated_count": {
             "type": "integer",
             "title": "Annotated Count",
-            "default": 0
-          },
-          "schema_column_count": {
-            "type": "integer",
-            "title": "Schema Column Count",
             "default": 0
           },
           "created_at": {
@@ -15321,32 +14096,6 @@
             "type": "object",
             "title": "Annotations"
           },
-          "turns": {
-            "anyOf": [
-              {
-                "items": {
-                  "$ref": "#/components/schemas/ExampleTurnResponse"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Turns",
-            "description": "Structured per-turn rows for the example. Populated only when ?include=turns is set on the row read endpoints; ``null`` otherwise. Mirrors the Sessions detail endpoint's ``?include=turns`` projection \u2014 each entry carries idx / role / content plus an ordered ``agent_steps`` array."
-          },
-          "source_session": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/SourceSessionProjection"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Per-row projection of the live source Session for a row materialised from a session \u2014 transcript preview, routed-to topics, tools called, turn count, session date, originating user, and duration. ``null`` for uploaded rows and for rows whose source session has since been deleted."
-          },
           "created_at": {
             "type": "string",
             "format": "date-time",
@@ -15407,27 +14156,6 @@
           "rows_created"
         ],
         "title": "DatasetRowUploadResponse"
-      },
-      "DatasetTagVocabularyResponse": {
-        "properties": {
-          "tags": {
-            "items": {
-              "type": "string"
-            },
-            "type": "array",
-            "title": "Tags"
-          },
-          "usage_counts": {
-            "additionalProperties": {
-              "type": "integer"
-            },
-            "type": "object",
-            "title": "Usage Counts"
-          }
-        },
-        "type": "object",
-        "title": "DatasetTagVocabularyResponse",
-        "description": "Wire shape for ``GET /datasets/{dataset_id}/tag-vocabulary``.\n\n``tags`` is the dataset-wide row-tag vocabulary, sorted\ncase-insensitively. It is the union of the dataset's *stored*\nvocabulary (``Dataset.tag_vocabulary``) and every tag currently in\nuse on the dataset's rows \u2014 so the vocabulary is never narrower than\nthe data, and a tag stays selectable even after a row that used it\nis filtered out of the loaded set.\n\n``usage_counts`` maps each vocabulary tag to the number of rows that\ncurrently carry it (zero for a stored-but-unused tag)."
       },
       "DatasetVersionEventListResponse": {
         "properties": {
@@ -15605,92 +14333,6 @@
         "title": "EndSimulationResponse",
         "description": "Returned from ``POST /v1/simulations/{id}/end``.\n\n``session_id`` is the ID the FE redirects to so the operator can\nreview the just-emitted session."
       },
-      "EvaluationProjectStatsResponse": {
-        "properties": {
-          "total_runs": {
-            "type": "integer",
-            "title": "Total Runs",
-            "description": "Count of all evaluation runs in the project, any status."
-          },
-          "runs_last_7d": {
-            "type": "integer",
-            "title": "Runs Last 7D",
-            "description": "Count of runs completed within the last 7 days (completed status only)."
-          },
-          "avg_pass_rate": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Avg Pass Rate",
-            "description": "Row-weighted average pass rate (0.0-1.0) across all result rows of completed runs in the project. Null when no completed run has any scored results."
-          }
-        },
-        "type": "object",
-        "required": [
-          "total_runs",
-          "runs_last_7d"
-        ],
-        "title": "EvaluationProjectStatsResponse",
-        "description": "Project-wide aggregate stats for the Evaluations list page header.\n\nThe Evaluations list renders a dot-separated subtitle \u2014\n\"<N> total runs \u00b7 <N> in last 7 days \u00b7 <X> avg pass rate \u00b7 last 7 days\"\n(see docs/design/evaluations-list/notes.md \u00a7\"Page header\"). These\nthree fields back that line. They are computed server-side over the\n*whole* project \u2014 never page-scoped \u2014 because the list endpoint is\npaginated and a page-scoped denominator would understate the stats\non every page but the first.\n\nA separate endpoint (rather than folding these onto the list\nresponse) keeps the stats page-independent: the list can re-paginate\nwithout forcing a re-aggregation, and the FE fetches the two\nconcerns on independent cadences.\n\n* ``total_runs`` \u2014 count of ALL runs in the project regardless of\n  status (matches the design's plain \"N runs\" subtitle).\n* ``runs_last_7d`` \u2014 count of runs *completed* within the last 7\n  days (status ``completed`` only; the 7d window anchors on\n  ``completed_at``).\n* ``avg_pass_rate`` \u2014 row-weighted average pass rate across every\n  result row of every completed run in the project (\"% of examples\n  that passed\"). ``None`` for a project with no scored completed\n  runs. See ``aggregate_project_stats`` for the denominator\n  rationale."
-      },
-      "EvaluationResultAgentStepProjection": {
-        "properties": {
-          "ord": {
-            "type": "integer",
-            "title": "Ord",
-            "description": "Zero-based step ordinal within the turn (sorted ASC)."
-          },
-          "kind": {
-            "type": "string",
-            "title": "Kind",
-            "description": "Step kind discriminator: 'route', 'tool', or 'llm'."
-          },
-          "name": {
-            "type": "string",
-            "title": "Name",
-            "description": "Human-readable label \u2014 route name, tool name, or model name."
-          },
-          "input": {
-            "anyOf": [
-              {
-                "additionalProperties": true,
-                "type": "object"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Input",
-            "description": "Kind-specific input payload. Nullable."
-          },
-          "output": {
-            "anyOf": [
-              {
-                "additionalProperties": true,
-                "type": "object"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Output",
-            "description": "Kind-specific output payload. Nullable."
-          }
-        },
-        "type": "object",
-        "required": [
-          "ord",
-          "kind",
-          "name"
-        ],
-        "title": "EvaluationResultAgentStepProjection",
-        "description": "One agent execution step within a projected transcript turn.\n\nMirrors :class:`src.domain.sessions.schemas.SessionAgentStepResponse`\nso the FE's shared ``<Transcript>`` primitive renders the evaluation\nResult fly-in's Transcript tab with the exact same component tree it\nuses for live sessions. Sourced from ``example_snapshot[\"agent_steps\"]``\n(RFC 0003 \u00a74.2) \u2014 never from the live ``example_agent_steps`` table."
-      },
       "EvaluationResultDetailResponse": {
         "properties": {
           "id": {
@@ -15742,13 +14384,6 @@
             ],
             "title": "Example Snapshot"
           },
-          "turns": {
-            "items": {
-              "$ref": "#/components/schemas/EvaluationResultTurnProjection"
-            },
-            "type": "array",
-            "title": "Turns"
-          },
           "error_message": {
             "anyOf": [
               {
@@ -15787,7 +14422,7 @@
           "created_at"
         ],
         "title": "EvaluationResultDetailResponse",
-        "description": "Per-result detail rendered from the frozen ``example_snapshot``.\n\nPer RFC 0003 \u00a77.1 (\"Detail endpoint\"), this response **must not**\njoin to live ``dataset_rows`` / ``example_turns`` /\n``example_agent_steps`` / ``dataset_row_annotations``. Everything\nthe detail page renders comes from the snapshot blob captured at\nrun dequeue time, which means a result row stays renderable even\nafter its source dataset row is edited or deleted.\n\n``example_snapshot`` is typed as a free-form dict because its\ninner shape lives in RFC 0003 \u2014 the FE consumes it through a\ntyped wrapper generated from the OpenAPI schema, but the FastAPI\nsurface keeps it opaque so future RFC-compatible field additions\ndon't trigger an OpenAPI / type regeneration churn.\n\n``turns`` is the structured transcript projection: the snapshot's\n``turns[]`` array with each turn's ``agent_steps`` joined back under\nit by ``turn_id``. It exists so the evaluation Result fly-in's\nTranscript tab can render the real ``<Transcript>`` primitive\ninstead of degrading to raw Input/Expected/Actual payload blocks.\nIt is a read-side reshape of ``example_snapshot`` \u2014 no live join,\nso the RFC 0003 \u00a77.1 contract holds. Empty list (never null) for\nlegacy results whose snapshot pre-dates the turn capture, or that\nhave no snapshot at all."
+        "description": "Per-result detail rendered from the frozen ``example_snapshot``.\n\nPer RFC 0003 \u00a77.1 (\"Detail endpoint\"), this response **must not**\njoin to live ``dataset_rows`` / ``example_turns`` /\n``example_agent_steps`` / ``dataset_row_annotations``. Everything\nthe detail page renders comes from the snapshot blob captured at\nrun dequeue time, which means a result row stays renderable even\nafter its source dataset row is edited or deleted.\n\n``example_snapshot`` is typed as a free-form dict because its\ninner shape lives in RFC 0003 \u2014 the FE consumes it through a\ntyped wrapper generated from the OpenAPI schema, but the FastAPI\nsurface keeps it opaque so future RFC-compatible field additions\ndon't trigger an OpenAPI / type regeneration churn."
       },
       "EvaluationResultResponse": {
         "properties": {
@@ -15857,69 +14492,6 @@
           "created_at"
         ],
         "title": "EvaluationResultResponse"
-      },
-      "EvaluationResultTurnProjection": {
-        "properties": {
-          "idx": {
-            "type": "integer",
-            "title": "Idx",
-            "description": "Zero-based turn index within the example."
-          },
-          "role": {
-            "type": "string",
-            "title": "Role",
-            "description": "Turn role, e.g. 'user' or 'assistant'."
-          },
-          "content": {
-            "type": "string",
-            "title": "Content",
-            "description": "Rendered turn content."
-          },
-          "timestamp": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "date-time"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Timestamp",
-            "description": "Conversational per-turn timestamp, frozen from the source ``ExampleTurn.recorded_at`` at run-dequeue snapshot time. ``null`` for turns with no conversational source (CSV-uploaded / turn-spec / manually-inserted examples) and for legacy snapshots frozen before the field existed \u2014 the FE renders the role word alone in that case. Mirrors ``SessionTurnResponse.timestamp``."
-          },
-          "intents": {
-            "anyOf": [
-              {
-                "items": {
-                  "type": "string"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Intents",
-            "description": "Router intents/skills recorded for this turn, when the frozen snapshot carried them (``intents`` or ``routedTo`` key). ``null`` when the snapshot has no routing signal for the turn."
-          },
-          "agent_steps": {
-            "items": {
-              "$ref": "#/components/schemas/EvaluationResultAgentStepProjection"
-            },
-            "type": "array",
-            "title": "Agent Steps",
-            "description": "Ordered agent execution steps that produced this turn, sorted by ``ord`` ASC. Empty list (never null) when the snapshot recorded no steps for the turn."
-          }
-        },
-        "type": "object",
-        "required": [
-          "idx",
-          "role",
-          "content"
-        ],
-        "title": "EvaluationResultTurnProjection",
-        "description": "One conversation turn projected from a result's frozen snapshot.\n\nThe evaluation Result fly-in's Transcript tab needs a real turn\nlist, not just Input/Expected/Actual payload blocks. RFC 0003\n\u00a74.1/\u00a74.2 already require ``example_snapshot`` to carry a full deep\ncopy of the source example's ``turns[]`` and ``agent_steps[]``, so\nthis projection is a pure **read-side reshape** of the frozen blob\n\u2014 it never joins live ``example_turns`` / ``example_agent_steps``\nand so stays fully within the RFC 0003 \u00a77.1 \"detail endpoint never\njoins live\" contract.\n\nShape mirrors :class:`src.domain.sessions.schemas.SessionTurnResponse`\nso the FE can feed it straight into the shared ``<Transcript>``\nprimitive without a shape adapter."
       },
       "EvaluationRunAgentVersionAggregate": {
         "properties": {
@@ -16111,30 +14683,6 @@
             ],
             "title": "Completed At"
           },
-          "cancel_requested_at": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "date-time"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Cancel Requested At"
-          },
-          "canceled_at": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "date-time"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Canceled At"
-          },
           "created_at": {
             "type": "string",
             "format": "date-time",
@@ -16155,16 +14703,6 @@
               }
             ],
             "title": "Overall Pass Rate"
-          },
-          "summary": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/EvaluationRunSummary"
-              },
-              {
-                "type": "null"
-              }
-            ]
           },
           "results": {
             "items": {
@@ -16193,31 +14731,6 @@
           "updated_at"
         ],
         "title": "EvaluationRunDetailResponse"
-      },
-      "EvaluationRunEvaluatorPassRate": {
-        "properties": {
-          "evaluator_id": {
-            "type": "string",
-            "title": "Evaluator Id"
-          },
-          "pass_rate": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Pass Rate"
-          }
-        },
-        "type": "object",
-        "required": [
-          "evaluator_id"
-        ],
-        "title": "EvaluationRunEvaluatorPassRate",
-        "description": "One evaluator's pass rate on a single run.\n\n``pass_rate`` is the mean of ``EvaluationScore.verdict == 'pass'``\nacross every result row in the run that this evaluator scored,\nexpressed as a fraction in ``[0.0, 1.0]`` \u2014 the same 0..1 scale as\nthe run-level :attr:`EvaluationRunResponse.overall_pass_rate`. It is\n``None`` when the run has no ``EvaluationScore`` rows for this\nevaluator yet (in-flight runs, or runs that errored before scoring).\n\nSurfaced inside :class:`EvaluationRunSummary` so the Evaluator\nside-panel Runs tab can look up *this* evaluator's score per run \u2014\na different question than the run's aggregate ``overall_pass_rate``,\nwhich spans every pinned evaluator."
       },
       "EvaluationRunListResponse": {
         "properties": {
@@ -16355,30 +14868,6 @@
             ],
             "title": "Completed At"
           },
-          "cancel_requested_at": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "date-time"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Cancel Requested At"
-          },
-          "canceled_at": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "date-time"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Canceled At"
-          },
           "created_at": {
             "type": "string",
             "format": "date-time",
@@ -16399,16 +14888,6 @@
               }
             ],
             "title": "Overall Pass Rate"
-          },
-          "summary": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/EvaluationRunSummary"
-              },
-              {
-                "type": "null"
-              }
-            ]
           }
         },
         "type": "object",
@@ -16430,20 +14909,6 @@
           "updated_at"
         ],
         "title": "EvaluationRunResponse"
-      },
-      "EvaluationRunSummary": {
-        "properties": {
-          "evaluators": {
-            "items": {
-              "$ref": "#/components/schemas/EvaluationRunEvaluatorPassRate"
-            },
-            "type": "array",
-            "title": "Evaluators"
-          }
-        },
-        "type": "object",
-        "title": "EvaluationRunSummary",
-        "description": "Per-run aggregate breakdowns that are not flat scalar fields.\n\nLets the run-list response carry a per-evaluator pass-rate split\nalongside the existing flat ``overall_pass_rate``. ``evaluators``\nhas one entry per evaluator that produced at least one score on the\nrun; the Evaluator panel keys into it by ``evaluator_id`` to render\nthe active evaluator's score in the Runs tab \"Pass rate\" column.\n\nEmpty ``evaluators`` list (never ``None``) when the run has no\nscored results yet \u2014 the FE renders that as a degraded cell."
       },
       "EvaluationScoreResponse": {
         "properties": {
@@ -16509,11 +14974,10 @@
           "pending",
           "running",
           "completed",
-          "failed",
-          "canceled"
+          "failed"
         ],
         "title": "EvaluationStatus",
-        "description": "Lifecycle state of an evaluation run.\n\n``CANCELED`` is a terminal state set when an operator cancels an\nin-flight run via ``POST /evaluations/{run_id}/cancel`` (Wave 5).\nIt is reachable only from ``PENDING`` or ``RUNNING`` \u2014 a run that\nhas already reached ``COMPLETED`` / ``FAILED`` / ``CANCELED`` is\nnot cancelable."
+        "description": "Lifecycle state of an evaluation run."
       },
       "EvaluatorKind": {
         "type": "string",
@@ -16561,88 +15025,6 @@
         "title": "EvaluatorListResponse",
         "description": "Paginated list of evaluators (DEV-750).\n\nM8-37 added pagination to ``GET /v1/evaluators`` so the FE\nEvaluators table consumes the same generic primitives as Sessions /\nDatasets / Evaluations. Wraps the ``items`` array in the shared\n``{items, page, page_size, total, total_pages}`` envelope."
       },
-      "EvaluatorPatchRequest": {
-        "properties": {
-          "name": {
-            "anyOf": [
-              {
-                "type": "string",
-                "maxLength": 200,
-                "minLength": 1
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Name",
-            "description": "Evaluator name"
-          },
-          "description": {
-            "anyOf": [
-              {
-                "type": "string",
-                "maxLength": 4000
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Description",
-            "description": "Evaluator description"
-          },
-          "criteria": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Criteria",
-            "description": "Human-authored evaluator spec (LLM Judge only)"
-          },
-          "subkind": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/EvaluatorSubkind"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Which structured field a structured_match evaluator compares (``routedTo`` | ``toolsUsed``). Gated at the service layer to ``structured_match`` evaluators."
-          },
-          "scoring_type": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/ScoringType"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "How the evaluator reports scores (``pass_fail`` | ``scale_1_5``). A ``_VERSION_BUMP_FIELDS`` member \u2014 changing it cuts a new ``EvaluatorVersion`` row via the same bump path the full-form editor uses. ``scale_1_5`` is gated at the service layer to ``llm_judge`` evaluators; a ``scale_1_5`` patch on a structured_match evaluator yields a 422."
-          },
-          "pass_threshold": {
-            "anyOf": [
-              {
-                "type": "integer",
-                "maximum": 5.0,
-                "minimum": 2.0
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Pass Threshold",
-            "description": "1-5-scale pass cutoff (2-5). The service coerces it to NULL when the evaluator's effective ``scoring_type`` is not ``scale_1_5`` (pass/fail judges and every structured_match evaluator). When a ``scoring_type`` patch lands in the same request, the coercion runs against that post-patch value."
-          }
-        },
-        "type": "object",
-        "title": "EvaluatorPatchRequest",
-        "description": "Narrow inline-edit payload for ``PATCH /v1/evaluators/{id}``.\n\nThe Evaluators table's inline editor commits the user-authored copy\nfields (``name``, ``description``, ``criteria``); the Evaluator\npanel's Structured Match config additionally commits ``subkind``\n(Routing match / Tool match) here. The ``pass_threshold`` cutoff\n(the 1-5-scale LLM-judge pass bar) is also patchable so the\nEvaluator New/Edit form's threshold control can persist. The\nEvaluator side-panel Overview tab's Score type radio additionally\ncommits ``scoring_type`` (pass/fail \u2194 scale_1_5) here \u2014 see the\nversion-bump note below. The remaining versioned content\n(``prompt``) and immutable taxonomy (``kind``) round-trip through\nthe dedicated full-form editor instead.\n\nLength caps mirror :data:`EVALUATOR_NAME_MAX_LENGTH` /\n:data:`EVALUATOR_DESCRIPTION_MAX_LENGTH`. ``criteria`` is gated at\nthe service layer to ``llm_judge`` evaluators \u2014 structured_match\nrows have nothing for criteria to describe \u2014 and, symmetrically,\n``subkind`` is gated to ``structured_match`` evaluators (an\n``llm_judge`` row must keep a NULL subkind, per the\n``ck_evaluators_subkind_requires_structured_match`` CHECK).\n\n``scoring_type`` is a ``_VERSION_BUMP_FIELDS`` member \u2014 unlike the\npure copy fields, mutating it cuts a new ``EvaluatorVersion`` row.\n``patch_evaluator`` routes it through the *same* version-bump path\n``update_evaluator`` uses, so an inline Score-type edit shows up in\nversion history exactly as a full-form edit would. The ``scale_1_5``\nvalue is gated at the service layer to ``llm_judge`` evaluators\n(structured_match rows are always pass/fail); a ``scale_1_5`` patch\non a structured_match evaluator is rejected with a 422."
-      },
       "EvaluatorPin": {
         "properties": {
           "id": {
@@ -16661,42 +15043,6 @@
         ],
         "title": "EvaluatorPin",
         "description": "One ``{id, version}`` entry from ``evaluation_runs.evaluators_pinned``.\n\nSurfaced on ``EvaluationRunResponse`` (DEV-693 / M6-09) so the run\ndetail page can render a per-evaluator version chip without\nmaking a second round trip to the evaluator-versions endpoint.\nThe shape mirrors the JSONB row written by the service at run start\n(DEV-661 / M4-04)."
-      },
-      "EvaluatorRefCheckResponse": {
-        "properties": {
-          "evaluator_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Evaluator Id"
-          },
-          "active_run_count": {
-            "type": "integer",
-            "minimum": 0.0,
-            "title": "Active Run Count",
-            "description": "Runs in a ``pending`` / ``running`` state that pin this evaluator. A non-zero count blocks the delete."
-          },
-          "completed_run_count": {
-            "type": "integer",
-            "minimum": 0.0,
-            "title": "Completed Run Count",
-            "description": "Runs in a ``completed`` state that pin this evaluator."
-          },
-          "total_run_count": {
-            "type": "integer",
-            "minimum": 0.0,
-            "title": "Total Run Count",
-            "description": "Every run that pins this evaluator \u2014 active + completed + failed. A ``failed`` run is neither active nor completed but still counts toward the total."
-          }
-        },
-        "type": "object",
-        "required": [
-          "evaluator_id",
-          "active_run_count",
-          "completed_run_count",
-          "total_run_count"
-        ],
-        "title": "EvaluatorRefCheckResponse",
-        "description": "Referential-check breakdown for the Evaluator Delete confirm flow.\n\n``GET /v1/evaluators/{id}/ref-check`` splits the runs that pin an\nevaluator into active vs completed so the side-panel Delete confirm\ncan pick one of its three states:\n\n* ``active_run_count > 0`` \u2014 a run is still in flight; the delete is\n  BLOCKED until the user cancels or waits for it.\n* ``completed_run_count > 0`` (with no active runs) \u2014 the delete is\n  ALLOWED but warned: past results stay intact.\n* ``total_run_count == 0`` \u2014 nothing references the evaluator; a\n  simple confirm.\n\nUnlike ``EvaluatorUsageResponse`` (a single flat ``usage_count``),\nthis surface carries the status breakdown the three-state dialog\nneeds. The counts are computed server-side with one aggregate query\nso the FE no longer has to over-fetch a page of runs and tally the\n``evaluators_pinned`` manifests client-side."
       },
       "EvaluatorResponse": {
         "properties": {
@@ -16751,30 +15097,6 @@
             ],
             "title": "Prompt"
           },
-          "criteria": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Criteria",
-            "description": "Human-authored evaluator spec for LLM Judge evaluators, kept separate from the model-facing ``prompt`` text. ``None`` for structured_match evaluators (which carry no criteria)."
-          },
-          "pass_threshold": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Pass Threshold",
-            "description": "1-5-scale pass cutoff (2-5): a score at or above this value counts as a pass. Non-NULL only for llm_judge evaluators scored ``scale_1_5``; ``None`` for pass/fail judges and structured_match evaluators."
-          },
           "enable_reasoning": {
             "type": "boolean",
             "title": "Enable Reasoning"
@@ -16788,43 +15110,6 @@
             "type": "string",
             "format": "date-time",
             "title": "Updated At"
-          },
-          "created_by_user": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/UserDisplay"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Display projection of the WorkOS user who created the evaluator \u2014 powers the Evaluator detail Overview tab's \"Created by\" row. Resolved from the raw ``created_by`` user id via ``_shared/users.resolve`` on the GET detail path only; ``None`` on the create / patch / list responses, for evaluators that predate the ``created_by`` column (re-added in migration 0095), and whenever the author can't be resolved (user removed from WorkOS, or a transient WorkOS failure) \u2014 the FE renders a muted dash, never the banned \"Workspace member\" placeholder. The raw ``created_by`` user id is intentionally NOT surfaced on this response \u2014 evaluators have no raw-id consumer, and AGENTS.md \"Built for Humans and Agents\" bans raw ids in user-facing payloads."
-          },
-          "runs_count": {
-            "type": "integer",
-            "title": "Runs Count",
-            "description": "Number of EvaluationRun rows that pin this evaluator. On the LIST surface this counts only ``completed`` runs; on the GET detail surface it counts every run in the trend window.",
-            "default": 0
-          },
-          "last_pass_rate": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Last Pass Rate",
-            "description": "Pass-rate of this evaluator on its most recent run; ``None`` when no run has produced a score yet (the design renders this as \"Never run\"). On the LIST surface this is the row-weighted mean of ``passed_all`` over the most recently completed run; on the GET detail surface it is the newest non-empty point of the per-run pass-rate trend."
-          },
-          "trend": {
-            "items": {
-              "$ref": "#/components/schemas/TrendPoint"
-            },
-            "type": "array",
-            "title": "Trend",
-            "description": "Per-run pass-rate history, newest first. Capped at the service-level window so the response stays bounded."
           }
         },
         "type": "object",
@@ -16841,7 +15126,7 @@
           "updated_at"
         ],
         "title": "EvaluatorResponse",
-        "description": "Response schema for an evaluator.\n\nDEV-681 / M7-03: ``evaluator_type`` was removed from this surface\nafter the underlying column was dropped \u2014 clients should read\n``kind`` (and, for structured matches, ``subkind``).\n\nProjections (``runs_count`` / ``last_pass_rate`` / ``trend``) are\ncomputed by the service against the evaluations domain. They are\n``0`` / ``None`` / ``[]`` on the create + patch responses where no\nruns have referenced the evaluator yet.\n\n``runs_count`` and ``last_pass_rate`` are populated on both the GET\ndetail surface and the LIST surface \u2014 the Evaluators list page\nrenders a \"Last pass rate\" column, so ``GET /v1/evaluators`` runs\na batched projection over the evaluations domain. ``trend`` stays a\ndetail-only field (the side-panel sparkline) and is always ``[]``\non the list response."
+        "description": "Response schema for an evaluator.\n\nDEV-681 / M7-03: ``evaluator_type`` was removed from this surface\nafter the underlying column was dropped \u2014 clients should read\n``kind`` (and, for structured matches, ``subkind``)."
       },
       "EvaluatorSubkind": {
         "type": "string",
@@ -17031,18 +15316,6 @@
             "format": "date-time",
             "title": "Created At"
           },
-          "timestamp": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Timestamp",
-            "description": "Conversational per-turn timestamp \u2014 when the turn happened in its source conversation. Sourced from ``ExampleTurn.recorded_at``, distinct from ``created_at`` (the dataset-ingestion time). Populated only for examples bulk-added from a Session; ``null`` for CSV-uploaded, turn-spec, and manually-inserted turns, where the FE renders the role word alone. Mirrors ``SessionTurnResponse.timestamp``."
-          },
           "agent_steps": {
             "items": {
               "$ref": "#/components/schemas/ExampleAgentStepResponse"
@@ -17061,19 +15334,13 @@
           "content",
           "created_at"
         ],
-        "title": "ExampleTurnResponse",
-        "description": "Wire shape for one ``ExampleTurn`` in a dataset row.\n\nReturned standalone by the per-row turn endpoints (``GET\n.../rows/{id}/turns`` etc.) and embedded as the element type of\n``DatasetRowResponse.turns`` \u2014 the structured per-turn projection\nthat mirrors the Sessions detail endpoint's ``SessionTurnResponse``.\nField-for-field the dataset-domain analogue of the session shape:\n``idx`` / ``role`` / ``content`` / ``timestamp`` plus an ordered\n``agent_steps`` array."
+        "title": "ExampleTurnResponse"
       },
       "FeatureFlags": {
         "properties": {
           "project_snapshots": {
             "type": "boolean",
             "title": "Project Snapshots",
-            "default": false
-          },
-          "requirements": {
-            "type": "boolean",
-            "title": "Requirements",
             "default": false
           }
         },
@@ -18630,22 +16897,6 @@
         "title": "RecordInvokeTurnResponse",
         "description": "Response from the internal capture endpoint (DEV-755).\n\nTells the gateway whether a Session row was created vs an existing\none was appended to. Used for log breadcrumbs only \u2014 capture is\nfire-and-forget from the gateway's perspective."
       },
-      "RenameEvaluationRunInput": {
-        "properties": {
-          "name": {
-            "type": "string",
-            "maxLength": 255,
-            "minLength": 1,
-            "title": "Name"
-          }
-        },
-        "type": "object",
-        "required": [
-          "name"
-        ],
-        "title": "RenameEvaluationRunInput",
-        "description": "Body for ``PATCH /evaluations/{run_id}`` \u2014 persists a run rename.\n\nThe Run Detail header ships an inline-editable run title so a user\ncan label a finished run (\"baseline\", \"post-prompt-tweak\"). This is\nthe wire shape that title's commit handler sends.\n\n``name`` carries the same ``1..255`` bound as the underlying\n``evaluation_runs.name`` column. The ``<InlineEditableTitle>``\nprimitive trims client-side, but the server re-validates: the\n``before``-mode field validator strips surrounding whitespace, so a\nwhitespace-only payload (``\"   \"``) collapses to ``\"\"`` and is\nrejected by ``min_length`` as a 422 rather than silently persisted\nas a blank run title. An oversized name is likewise rejected before\nit reaches the DB."
-      },
       "ReorderDatasetColumnsInput": {
         "properties": {
           "keys": {
@@ -18663,74 +16914,6 @@
         ],
         "title": "ReorderDatasetColumnsInput",
         "description": "Body for ``POST /datasets/{dataset_id}/columns/reorder``.\n\n``keys`` is the desired display order for the dataset's columns.\nThe service rejects requests whose ``keys`` aren't a strict\npermutation of the dataset's current column keys \u2014 adds and removes\nmust go through the create/delete endpoints so version-bump events\nstay clean."
-      },
-      "RequirementListResponse": {
-        "properties": {
-          "items": {
-            "items": {
-              "$ref": "#/components/schemas/RequirementResponse"
-            },
-            "type": "array",
-            "title": "Items"
-          },
-          "page": {
-            "type": "integer",
-            "title": "Page",
-            "description": "1-indexed page number returned.",
-            "default": 1
-          },
-          "page_size": {
-            "type": "integer",
-            "title": "Page Size",
-            "description": "Items per page returned.",
-            "default": 50
-          },
-          "total": {
-            "type": "integer",
-            "title": "Total",
-            "description": "Total number of items matching the filter set.",
-            "default": 0
-          },
-          "total_pages": {
-            "type": "integer",
-            "title": "Total Pages",
-            "description": "Total number of pages at the requested page_size. Always at least 1 \u2014 when total is 0 we still return 1 so the FE never renders 'Page 1 of 0'.",
-            "default": 1
-          }
-        },
-        "type": "object",
-        "title": "RequirementListResponse",
-        "description": "Paginated list of requirements.\n\nExtends the shared :class:`PageEnvelope` so the response carries\n``items`` / ``page`` / ``page_size`` / ``total`` / ``total_pages``\nby name \u2014 the same wire shape as ``SessionListResponse``. The\nsidebar count badge reads ``total`` (with ``limit: 1``); until the\nRequirements surface ships, ``total`` is always ``0``."
-      },
-      "RequirementResponse": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "title": "Id"
-          },
-          "project_id": {
-            "type": "string",
-            "title": "Project Id"
-          },
-          "title": {
-            "type": "string",
-            "title": "Title"
-          },
-          "created_at": {
-            "type": "string",
-            "format": "date-time",
-            "title": "Created At"
-          }
-        },
-        "type": "object",
-        "required": [
-          "id",
-          "project_id",
-          "title",
-          "created_at"
-        ],
-        "title": "RequirementResponse",
-        "description": "A single requirement.\n\nPlaceholder shape \u2014 the Requirements workflow surface is not built\nyet, so the list endpoint never emits one of these. The fields\nmirror the common metadata every project-scoped row carries so the\nreal domain can adopt this schema unchanged when it lands."
       },
       "RestoreResultResponse": {
         "properties": {
@@ -18849,7 +17032,6 @@
             "enum": [
               "sessions",
               "datasets",
-              "dataset_rows",
               "evaluations"
             ],
             "title": "Kind"
@@ -18874,25 +17056,6 @@
         ],
         "title": "SavedViewCreate",
         "description": "Body for ``POST /saved-views``.\n\nServer stamps ``created_by`` from the authenticated user and ignores\nany client-supplied ``builtin`` flag (always created as ``False``)."
-      },
-      "SavedViewDefaultResponse": {
-        "properties": {
-          "saved_view_id": {
-            "type": "string",
-            "title": "Saved View Id"
-          },
-          "is_user_default": {
-            "type": "boolean",
-            "title": "Is User Default"
-          }
-        },
-        "type": "object",
-        "required": [
-          "saved_view_id",
-          "is_user_default"
-        ],
-        "title": "SavedViewDefaultResponse",
-        "description": "Response for ``POST /saved-views/{view_id}/default``.\n\nReports the post-toggle state: ``is_user_default`` is ``True`` when\nthe view is now the calling user's default, ``False`` when the call\ncleared it."
       },
       "SavedViewList": {
         "properties": {
@@ -18931,7 +17094,6 @@
             "enum": [
               "sessions",
               "datasets",
-              "dataset_rows",
               "evaluations"
             ],
             "title": "Kind"
@@ -18960,11 +17122,6 @@
             ],
             "title": "Created By"
           },
-          "is_user_default": {
-            "type": "boolean",
-            "title": "Is User Default",
-            "default": false
-          },
           "created_at": {
             "type": "string",
             "format": "date-time",
@@ -18989,7 +17146,7 @@
           "updated_at"
         ],
         "title": "SavedViewResponse",
-        "description": "Single SavedView serialized for HTTP responses.\n\n``is_user_default`` is a per-request, per-user flag \u2014 it is not a\ncolumn on the SavedView. The service derives it from a LEFT JOIN\nagainst ``saved_view_user_defaults`` for the authenticated user, so\nthe same SavedView serializes ``True`` for one user and ``False``\nfor another."
+        "description": "Single SavedView serialized for HTTP responses."
       },
       "SavedViewUpdate": {
         "properties": {
@@ -19435,22 +17592,6 @@
             "title": "Tags",
             "description": "User-editable tag list (M2-06)."
           },
-          "routed_to": {
-            "items": {
-              "type": "string"
-            },
-            "type": "array",
-            "title": "Routed To",
-            "description": "Distinct ``route``-kind agent-step names for this session. Sourced from ``session_agent_steps`` rows where ``kind = 'route'`` and sorted alphabetically. Powers the default-visible \"Routed To\" column on the Sessions list. Empty list (never null) when the session recorded no routing steps \u2014 the same per-row projection of the data ``GET .../filter-vocabulary`` aggregates project-wide."
-          },
-          "tools_called": {
-            "items": {
-              "type": "string"
-            },
-            "type": "array",
-            "title": "Tools Called",
-            "description": "Distinct ``tool``-kind agent-step names for this session. Sourced from ``session_agent_steps`` rows where ``kind = 'tool'`` and sorted alphabetically. Powers the default-visible \"Tools Called\" column on the Sessions list. Empty list (never null) when the session called no tools \u2014 the same per-row projection of the data ``GET .../filter-vocabulary`` aggregates project-wide."
-          },
           "origin_kind": {
             "type": "string",
             "enum": [
@@ -19477,18 +17618,6 @@
             "type": "string",
             "format": "date-time",
             "title": "Created At"
-          },
-          "duration_ms": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Duration Ms",
-            "description": "Elapsed conversation time in milliseconds, computed as ``MAX(session_turns.created_at) - MIN(session_turns.created_at)`` for the session. This is a pure computed projection \u2014 not a stored column, so no migration backs it. ``null`` for sessions with fewer than 2 turns, where no meaningful elapsed time exists. Powers the Sessions table ``Duration`` column."
           },
           "turns": {
             "anyOf": [
@@ -19986,7 +18115,7 @@
           "value"
         ],
         "title": "SetRowAnnotationInput",
-        "description": "Body for ``PUT /datasets/{dataset_id}/rows/{row_id}/annotations/{column_key}``.\n\n``value`` is intentionally typed as ``Any`` because the legal shape\ndepends on the column's ``type``:\n\n* ``pass_fail`` -> ``bool``\n* ``score``     -> ``int`` / ``float`` (inside the column's range + step)\n* ``axial``     -> ``str`` (one of the column's ``config.options``)\n* ``multi_tag`` -> ``list[str]`` (subset of options, unless ``allow_freeform``)\n* ``comment``   -> ``str``\n\nThe service rejects mismatched shapes with a structured 400."
+        "description": "Body for ``PUT /datasets/{dataset_id}/rows/{row_id}/annotations/{column_key}``.\n\n``value`` is intentionally typed as ``Any`` because the legal shape\ndepends on the column's ``type``:\n\n* ``pass_fail`` -> ``bool``\n* ``score``     -> ``int`` / ``float`` (inside the column's range + step)\n* ``axial``     -> ``str`` (one of the column's pole keys)\n* ``multi_tag`` -> ``list[str]`` (subset of options, unless ``allow_freeform``)\n* ``comment``   -> ``str``\n\nThe service rejects mismatched shapes with a structured 400."
       },
       "SetupStatus": {
         "properties": {
@@ -20258,97 +18387,6 @@
           "desc"
         ],
         "title": "SortDirection"
-      },
-      "SourceSessionProjection": {
-        "properties": {
-          "session_id": {
-            "type": "string",
-            "title": "Session Id",
-            "description": "ID of the live source Session this row was materialised from."
-          },
-          "display_label": {
-            "type": "string",
-            "title": "Display Label",
-            "description": "Human-readable source-session label \u2014 ``SES-000123`` \u2014 never the raw UUID. Mirrors ``SessionResponse.display_label``."
-          },
-          "preview": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Preview",
-            "description": "First user-role turn's text content from the source session \u2014 the Dataset Detail 'Transcript' column preview. ``null`` when the session has no user turn."
-          },
-          "turn_count": {
-            "type": "integer",
-            "title": "Turn Count",
-            "description": "Total turn count of the source session ('Turns' column)."
-          },
-          "routed_to": {
-            "items": {
-              "type": "string"
-            },
-            "type": "array",
-            "title": "Routed To",
-            "description": "Distinct ``route``-kind agent-step names for the source session, sorted alphabetically ('Routed To' column). Empty list (never null) when the session recorded no routing steps. Mirrors ``SessionResponse.routed_to``."
-          },
-          "tools_called": {
-            "items": {
-              "type": "string"
-            },
-            "type": "array",
-            "title": "Tools Called",
-            "description": "Distinct ``tool``-kind agent-step names for the source session, sorted alphabetically ('Tools Called' column). Empty list (never null) when the session called no tools. Mirrors ``SessionResponse.tools_called``."
-          },
-          "date": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Date",
-            "description": "Source session timestamp ('Date' column). ``null`` only when the session row carries no timestamp."
-          },
-          "user": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "User",
-            "description": "External end-user id of the source session ('User' column) \u2014 ``Session.end_user_id``. ``null`` for sessions whose source system carries no end-user identifier."
-          },
-          "duration_ms": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Duration Ms",
-            "description": "Source session duration in milliseconds ('Duration' column), derived as the span between the first and last session turn's ``created_at``. ``null`` for a session with fewer than two turns (no measurable span)."
-          }
-        },
-        "type": "object",
-        "required": [
-          "session_id",
-          "display_label",
-          "turn_count"
-        ],
-        "title": "SourceSessionProjection",
-        "description": "Per-row projection of the live source Session for a materialised row.\n\nA DatasetRow materialised from a session (``origin_kind ==\n'session'``) carries an ``origin_session_id`` FK to the live\n``Session`` it was copied from. The Dataset Detail rows table's\nprototype column model is *session-shaped* \u2014 its ``SESSION_COLUMNS``\n(``docs/design/_source/columns.jsx:5-16``) surface a transcript\npreview, routed-to topics, tools called, turn count, the session\ndate, the originating user, and a duration. None of that lives on\nthe DatasetRow itself (an Example is an immutable *copy* of\nconversation turns, not a live reference), so this block is a\nread-time projection of the source Session.\n\nIt is attached to :class:`DatasetRowResponse.source_session` only\nfor rows whose source session still exists. Rows materialised from\nan upload \u2014 or rows whose source session has since been deleted\n(``origin_session_id`` is ``ON DELETE SET NULL``) \u2014 carry\n``source_session = null``, so the FE only paints the session-shaped\ncolumns for rows that genuinely back them (AGENTS.md \"Built for\nHumans and Agents\": absent fields must not surface zero-value\nplaceholders)."
       },
       "TaskApprovalListResponse": {
         "properties": {
@@ -21046,39 +19084,6 @@
         "title": "ToolPermissionResponse",
         "description": "One workspace-authored restriction on a tool.\n\nDefault behaviour is allow-all \u2014 the absence of a row here means\nthe tool is enabled for every user in the workspace. The admin UI\n(follow-up ticket) renders rows in this list as \"restricted\" and\nthe ``available_tools`` list returned by the list endpoint as\n\"enabled for everyone\"."
       },
-      "TrendPoint": {
-        "properties": {
-          "run_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Run Id"
-          },
-          "run_created_at": {
-            "type": "string",
-            "format": "date-time",
-            "title": "Run Created At"
-          },
-          "pass_rate": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Pass Rate"
-          }
-        },
-        "type": "object",
-        "required": [
-          "run_id",
-          "run_created_at",
-          "pass_rate"
-        ],
-        "title": "TrendPoint",
-        "description": "One historical pass-rate datapoint for the evaluator trend sparkline.\n\nA point is anchored to a specific ``EvaluationRun`` so the FE can\nalign the sparkline against the runs list (deep-link a tooltip to\nthe matching run detail). ``pass_rate`` is the mean of\n``EvaluationScore.verdict == \"pass\"`` across every result row in\nthat run that scored the evaluator \u2014 ``None`` when the run produced\nno scores for this evaluator (in-flight, errored before scoring,\netc.) so the sparkline can render a gap instead of a misleading\nzero."
-      },
       "TrustScoreSummary": {
         "properties": {
           "score": {
@@ -21295,79 +19300,107 @@
         "type": "object",
         "title": "UpdateDatasetInput"
       },
-      "UpdateDatasetRowInput": {
+      "UpdateEvaluatorInput": {
         "properties": {
-          "input_data": {
-            "anyOf": [
-              {
-                "additionalProperties": true,
-                "type": "object"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Input Data"
-          },
-          "expected_output": {
-            "anyOf": [
-              {
-                "additionalProperties": true,
-                "type": "object"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Expected Output"
-          },
-          "source_session_id": {
+          "name": {
             "anyOf": [
               {
                 "type": "string",
-                "maxLength": 255
+                "minLength": 1
               },
               {
                 "type": "null"
               }
             ],
-            "title": "Source Session Id"
+            "title": "Name",
+            "description": "Evaluator name"
           },
-          "tags": {
+          "description": {
             "anyOf": [
               {
-                "items": {
-                  "type": "string"
-                },
-                "type": "array"
+                "type": "string"
               },
               {
                 "type": "null"
               }
             ],
-            "title": "Tags"
+            "title": "Description",
+            "description": "Evaluator description"
+          },
+          "scoring_type": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ScoringType"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "How the evaluator reports scores"
+          },
+          "prompt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Prompt",
+            "description": "Evaluation prompt text (LLM Judge only)"
+          },
+          "criteria": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Criteria",
+            "description": "Human-authored evaluator spec (LLM Judge)"
+          },
+          "subkind": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EvaluatorSubkind"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Which structured field a structured_match evaluator compares."
+          },
+          "pass_threshold": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pass Threshold",
+            "description": "Optional 1-5 cutoff for scale-scored evaluators."
+          },
+          "enable_reasoning": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Enable Reasoning",
+            "description": "Enable chain-of-thought reasoning for LLM Judge calls (LLM Judge only)."
           }
         },
         "type": "object",
-        "title": "UpdateDatasetRowInput",
-        "description": "Body for ``PATCH /datasets/{dataset_id}/rows/{row_id}``.\n\nPost-M3-11 the row body is metadata only \u2014 turn content is edited\nthrough the ``ExampleTurn`` endpoints. This shape covers\n``source_session_id`` and ``tags``; everything else lives on\nchildren.\n\n``input_data`` / ``expected_output`` are still accepted on the wire\nso the polymorphic Paddington update path doesn't break for clients\nthat learned the old shape, but they are silently ignored \u2014\ncallers MUST go through the turn endpoints to mutate conversation\nbody."
-      },
-      "UpdateDatasetTagVocabularyInput": {
-        "properties": {
-          "tags": {
-            "items": {
-              "type": "string"
-            },
-            "type": "array",
-            "title": "Tags"
-          }
-        },
-        "type": "object",
-        "required": [
-          "tags"
-        ],
-        "title": "UpdateDatasetTagVocabularyInput",
-        "description": "Body for ``PUT /datasets/{dataset_id}/tag-vocabulary``.\n\n``tags`` replaces the dataset's stored tag vocabulary wholesale.\nEach tag must be a non-empty string; duplicates (case-insensitive)\nare rejected so the vocabulary stays a set. Whitespace is trimmed at\nthe service layer before persisting.\n\nRemoving a tag from the vocabulary does NOT strip it off rows that\nalready carry it \u2014 row tags are edited through the row endpoints.\nThe read endpoint folds those still-in-use tags back in, so a\nremoved-but-used tag reappears until every row drops it."
+        "title": "UpdateEvaluatorInput",
+        "description": "Input for editing an existing evaluator.\n\nOnly editable fields are exposed: ``kind`` is fixed after\ncreation (changing it would invalidate version history and calibration\nresults). All fields are optional so callers can send a partial update.\n\nMutating any of ``prompt``, ``criteria``, ``scoring_type``,\n``pass_threshold``, or ``subkind`` cuts a new ``EvaluatorVersion`` row\nvia ``EvaluatorService._bump_evaluator_version()``. Renaming or\nrewording (``name`` / ``description``) does not."
       },
       "UpdateExampleTurnInput": {
         "properties": {
@@ -21744,53 +19777,6 @@
         ],
         "title": "UsageWindow",
         "description": "Aggregate totals over a single time window for one provider."
-      },
-      "UserDisplay": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "title": "Id"
-          },
-          "email": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Email"
-          },
-          "first_name": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "First Name"
-          },
-          "last_name": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Last Name"
-          }
-        },
-        "type": "object",
-        "required": [
-          "id"
-        ],
-        "title": "UserDisplay",
-        "description": "A WorkOS user projected down to display-relevant fields.\n\nMirrors the subset of the WorkOS ``User`` record (see\n``services/api/src/core/workos.py`` ``serialize_user``) that the\nfrontend needs to render an author label. WorkOS is the source of\ntruth \u2014 there is no local ``users`` table."
       },
       "ValidationError": {
         "properties": {

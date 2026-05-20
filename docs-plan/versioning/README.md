@@ -70,6 +70,31 @@ See `../runbooks/version-transition.md` for the step-by-step. High level:
 6. Remove `v2026.*/` from `.mintignore` so the archive renders.
 7. Verify both versions via local `mintlify dev` before merging.
 
+## How the archived API Reference is exposed
+
+**Decision (DEV-1910, the first transition exercise):** the archive gets its own `tab` in `docs.json`, named after the version (e.g., "v2026.05.11"), containing both the archived MDX pages (grouped under Concepts / Tutorials / How-to) AND the archived `openapi.json`. The root API Reference stays pointing at the latest snapshot.
+
+Rationale:
+- A single archive tab is one cohesive surface. Users entering the archive get the same shape as the live docs (Documentation tab + API Reference tab) without having to chase down the archived API from a banner.
+- It keeps `docs.json` simple to reason about — each version is a tab; each tab has its own openapi pin.
+- It matches the way Mintlify v2 tabs are designed to be used (per-tab `openapi` and `groups` are first-class).
+
+What an archive tab looks like in `docs.json` after M3:
+
+```json
+{
+  "tab": "v2026.05.11",
+  "groups": [
+    { "group": "Concepts",  "pages": ["v2026.05.11/concepts/overview", ...] },
+    { "group": "Tutorials", "pages": ["v2026.05.11/tutorials/quickstart", ...] },
+    { "group": "How-to",    "pages": ["v2026.05.11/how-to/connect-agentcore", ...] }
+  ],
+  "openapi": "v2026.05.11/api-reference/openapi.json"
+}
+```
+
+Tab ordering: the latest (root) Documentation tab first, the latest API Reference second, then archive tabs newest-to-oldest. When the dropdown lifestyle eventually wins (multiple supported majors), this folder + tab pattern is a strict prefix — no rework.
+
 ## When to revisit this convention
 
 Trigger conditions for re-evaluation:
