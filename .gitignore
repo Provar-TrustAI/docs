@@ -1,0 +1,5 @@
+# Planning material (memos, audits, drafts) — local to the docs repo, not part of the published site
+docs-plan/
+
+# gstack skill state directory
+.gstack/
