@@ -1,0 +1,21 @@
+---
+title: "Datasets"
+icon: "database"
+description: "Curated, versioned collections of Sessions — the test bed for every Evaluation."
+---
+
+<Info>
+  Documentation site under construction. The structure and branded elements are in place; content lands milestone-by-milestone.
+</Info>
+
+## What is a Dataset?
+
+A Dataset is a curated, versioned collection of Sessions or Turns chosen as a representative test bed. Rows in a Dataset can come from ingested Sessions, manual entries authored in the app, or CSV uploads. Datasets are what every Evaluation actually runs against — they're the stable substrate that lets you compare two Agent Versions or two Evaluators apples-to-apples.
+
+## How Datasets fit into the evaluation loop
+
+Datasets are the curation step. After you ingest and annotate Sessions, you pull the ones worth testing against into a Dataset, then point Evaluators at the Dataset to score every row in a single Evaluation run.
+
+<Tip>
+  Read [The evaluation loop](/concepts/evaluation-loop) for the full workflow.
+</Tip>

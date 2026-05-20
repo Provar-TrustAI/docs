@@ -1,0 +1,21 @@
+---
+title: "Evaluators"
+icon: "wand-sparkles"
+description: "Reusable judgment functions — LLM Judge or Structured Match — that score Sessions and Turns."
+---
+
+<Info>
+  Documentation site under construction. The structure and branded elements are in place; content lands milestone-by-milestone.
+</Info>
+
+## What is an Evaluator?
+
+An Evaluator is a reusable judgment function — typically an LLM Judge (plain-English criteria sent to Claude or GPT) or a Structured Match (deterministic checks on agent output metadata) — that scores a Turn or Session against criteria. Evaluators are defined once in your Project and reused across many Evaluations, so you can compare apples-to-apples across Dataset rows, Agent Versions, and time.
+
+## How Evaluators fit into the evaluation loop
+
+Evaluators are the judgment step. After you've curated a Dataset, you define one or more Evaluators that encode what passing looks like, then point them at the Dataset to produce a scored Evaluation run.
+
+<Tip>
+  Read [The evaluation loop](/concepts/evaluation-loop) for the full workflow.
+</Tip>
