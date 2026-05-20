@@ -51,7 +51,7 @@
           { "group": "Welcome",   "icon": "sparkles",       "pages": ["index"] },
           { "group": "Concepts",  "icon": "book-open",      "pages": ["concepts/overview", "concepts/projects", "concepts/sessions", "concepts/annotations", "concepts/datasets", "concepts/evaluators", "concepts/evaluations", "concepts/agent-versions", "concepts/evaluation-loop"] },
           { "group": "Tutorials", "icon": "graduation-cap", "pages": ["tutorials/quickstart", "tutorials/build-first-evaluator", "tutorials/run-first-evaluation"] },
-          { "group": "How-to",    "icon": "wrench",         "pages": ["how-to/connect-agentcore", "how-to/write-llm-judge-prompt"] },
+          { "group": "How-to",    "icon": "wrench",         "pages": ["how-to/connect-agentcore", "how-to/write-llm-judge-prompt", "how-to/compare-agent-versions"] },
           { "group": "Resources", "icon": "bookmark",       "pages": ["glossary", "changelog"] }
         ]
       },
