@@ -40,8 +40,8 @@
   },
   "favicon": "/favicon.svg",
   "logo": {
-    "light": "/logo/provar-logo-light.png",
-    "dark": "/logo/provar-logo-dark.png"
+    "light": "/logo/provar-logo.svg",
+    "dark": "/logo/provar-logo.svg"
   },
   "navigation": {
     "tabs": [
