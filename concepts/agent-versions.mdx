@@ -1,0 +1,101 @@
+---
+title: "Agent Versions"
+icon: "git-branch"
+description: "A pinned snapshot of the agent under test — the thing every Evaluation is scoped to and every regression is measured against."
+---
+
+An Agent Version is a **pinned snapshot of the agent under test** — its prompt, model, tool set, retrieval config, and deployment target captured as a single, named, immutable reference. Every [Evaluation](/concepts/evaluations) runs against exactly one Agent Version, and every regression-tracking workflow is a diff between two.
+
+If [Sessions](/concepts/sessions) are the raw material, [Datasets](/concepts/datasets) the test bed, and [Evaluators](/concepts/evaluators) the rubric, then Agent Versions are **what's being judged**. The product exists to make this judgment routine.
+
+## The regression-tracking pattern
+
+The headline pattern Trust AI is built around:
+
+1. Pick a stable **Dataset**.
+2. Pick the same set of **Evaluators**.
+3. Pick **two Agent Versions** — the production one and a candidate replacement.
+4. Run an Evaluation against each.
+5. Compare per-row deltas.
+
+When the same Dataset and the same Evaluators are held constant, **the only variable left is the agent itself**. Whatever changes in the Evaluation results between the two runs is attributable to the version change. That's the loop the Agent Version concept exists to make legible.
+
+Hold any of those three constants and you get a different signal:
+
+- **Hold Agent Version, vary Dataset** → "does this version regress on a different slice?"
+- **Hold Agent Version, vary Evaluator** → "does the new rubric judge this version differently?"
+- **Hold both, vary Agent Version** → **the regression diff**, the daily workflow
+
+## What's in an Agent Version
+
+An Agent Version captures everything that influences agent behavior at runtime:
+
+- **Prompt** — system prompt, persona, instructions
+- **Model** — Claude Opus 4.7, GPT-4o, etc., with model-side config (temperature, max tokens)
+- **Tool set** — which functions the agent can call, with their schemas
+- **Retrieval config** — knowledge base, RAG sources, search parameters (if applicable)
+- **Deployment target** — the runtime the version is deployed to (AgentCore alias, Agentforce environment, etc.)
+- **Metadata** — version name, description, owner, creation time, tags
+
+Two Agent Versions that differ only in metadata are functionally identical; two that differ in any runtime input are not. The schema makes this distinction explicit.
+
+## Version discovery
+
+For platforms Trust AI has a connector for, **versions are discovered automatically**:
+
+- **AWS Bedrock AgentCore** — Trust AI reads the AgentCore alias and runtime version. Each new deployment becomes a new Agent Version row in the Project, with the AgentCore version ID pinned to the metadata.
+- **Salesforce Agentforce** *(roadmap)* — analogous: discovery via the Agentforce metadata API.
+- **Manual entry** — for agents on platforms without a connector, you create the Agent Version row manually and attach the relevant config. The Project then knows how to invoke it for evaluation-time runs.
+
+Discovery is read-only — Trust AI never modifies the source platform. Discovered Agent Versions stay in sync with what's deployed; archiving an Agent Version in Trust AI does not affect the source runtime.
+
+## The VersionPill — what users see in the app
+
+In the Trust AI app, an Agent Version surfaces as a compact pill on every Session, Evaluation, and comparison view: a colored badge showing the version name (and sometimes its short SHA-equivalent). Two Agent Versions next to each other in a comparison view show as two pills side by side, color-keyed so the eye can track them.
+
+The pill is the **anchor** users orient around. Reviewing a regression report, you'll see something like:
+
+```
+[v2026.05.11]  →  [v2026.05.19]    pass rate: 87.2% → 84.8%  (−2.4)
+```
+
+Two pills, one delta, immediately legible. The pill UI is intentionally minimal: it's the most-clicked element in a comparison view, and every detail of the Agent Version is one hop away.
+
+## Lifecycle
+
+An Agent Version is **created** on discovery (or manual entry), **active** while it's the target of new Evaluations, and **archived** when superseded. Archiving doesn't delete:
+
+- Historical Evaluations against the archived version remain readable and re-runnable
+- The version stays comparable from any new Evaluation
+- Snapshot exports include archived versions
+
+Versions don't expire on their own; archive is a manual or policy-driven action. A team that ships weekly might keep the last six versions hot and archive everything older; a team that ships quarterly might keep every version forever.
+
+## Comparison semantics across more than two versions
+
+The common pattern is a two-version comparison, but the underlying primitive supports more:
+
+- **A vs B vs C** — same Dataset, three versions. Useful for evaluating prompt-A vs prompt-B vs prompt-C in parallel. The comparison view surfaces each version's row-level score; rows where one stands out localize where each version excels or fails.
+- **A baseline + N candidates** — useful when iterating on a candidate replacement; the baseline stays pinned, candidates rotate.
+- **A vs A across time** — re-running the same Evaluation on the same Agent Version weeks apart. Surfaces non-determinism in the Evaluator (a calibration smell) and any drift in the agent's runtime behavior between the two runs.
+
+All three patterns reduce to the same Evaluation diff primitive; the UI just shows more pills.
+
+## API surface
+
+Agent Versions appear in the `/v1/agent-versions` endpoint family of the [API Reference](/api-reference). Common operations:
+
+- `GET /v1/agent-versions` — list / filter Agent Versions in a Project
+- `GET /v1/agent-versions/{version_id}` — fetch the full config snapshot
+- `POST /v1/agent-versions` — manually create an Agent Version (platforms without a connector)
+- `POST /v1/agent-versions/{version_id}/archive` — archive a version
+- `POST /v1/agent-versions/discover` — trigger a discovery refresh against connected runtimes
+
+Full request/response shapes live in the auto-generated [API Reference](/api-reference).
+
+## Related concepts
+
+- **[Projects](/concepts/projects)** — the workspace that owns the runtime connection Agent Versions are discovered through
+- **[Evaluations](/concepts/evaluations)** — every Evaluation is scoped to one Agent Version
+- **[The evaluation loop](/concepts/evaluation-loop)** — Agent Versions are step 6 (compare)
+- **[Compare two Agent Versions](/how-to/compare-agent-versions)** — the practical how-to *(coming soon)*
