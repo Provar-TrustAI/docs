@@ -1,45 +1,221 @@
 ---
 title: "Your first 10 minutes in Trust AI"
 icon: "rocket"
-description: "Project creation through your first dataset, end to end."
+description: "Project creation through your first curated Dataset, end to end."
 ---
 
-<Info>
-  Documentation site under construction. The structure and branded elements are in place; content lands milestone-by-milestone.
-</Info>
+This tutorial walks you from a brand-new Trust AI account to a curated [Dataset](/concepts/datasets) ready for evaluation, in roughly ten minutes. It assumes the **SI Consultant** persona: setting up Trust AI for a customer agent for the first time. The shape is the same for an Agent Owner adding a new agent to an existing workspace.
 
-This tutorial walks an SI Consultant from a brand-new Trust AI account to a curated Dataset in roughly ten minutes. Every code sample is illustrative — endpoints and payloads will be finalized when the API stabilizes.
+By the end you'll have:
+
+- A [Project](/concepts/projects) wired to a deployed agent
+- One ingested [Session](/concepts/sessions) you can read end-to-end
+- An [Annotation](/concepts/annotations) on a single Turn
+- A starter Dataset with one curated row
+
+That's the smallest complete pass through the first three steps of [the evaluation loop](/concepts/evaluation-loop). Once it works once, the rest of Trust AI is "do this same thing at scale."
+
+<Tip>
+  Every code sample below is illustrative of the V0 API surface. Exact endpoint names and payload shapes are auto-rendered in the [API Reference](/api-reference) and will be the authoritative source.
+</Tip>
+
+## Before you start
+
+You'll need:
+
+- A Trust AI account with **Admin** or **SI Consultant** role on at least one org
+- An agent **deployed and reachable** — for V0 that means a Bedrock AgentCore runtime alias in an AWS account you can create an IAM role in
+- About 10 minutes
+
+If your agent isn't on AgentCore yet, you can still walk this tutorial using a **demo Project** seeded with example Sessions (we'll flag that variant inline).
+
+## The five steps
 
 <Steps>
-  <Step title="Create a Project">
-    A Project is the top-level container for everything that follows. Give it a name that matches the agent under evaluation.
+  <Step title="Create your first Project">
+    A [Project](/concepts/projects) is the workspace boundary around one agent (or fleet) under evaluation. Members, runtime credentials, and every artifact downstream belong to it.
+
+    In the app: click **+ New Project** in the top bar, name it after the agent under evaluation (e.g., "Acme Support Agent"), pick the org it belongs to, and click **Create**.
+
+    Or via the API:
 
     <CodeGroup>
-      ```sh curl
+      ```bash curl
       curl -X POST https://api.provar.dev/v1/projects \
         -H "Authorization: Bearer $TRUST_AI_TOKEN" \
         -H "Content-Type: application/json" \
-        -d '{"name": "Acme Support Agent"}'
+        -d '{
+          "name": "Acme Support Agent",
+          "description": "Production AgentCore agent for Acme's customer support flow"
+        }'
       ```
 
-      ```ts TypeScript
+      ```typescript TypeScript
       import { TrustAI } from "@provar/trust-ai";
 
       const client = new TrustAI({ token: process.env.TRUST_AI_TOKEN });
 
       const project = await client.projects.create({
         name: "Acme Support Agent",
+        description: "Production AgentCore agent for Acme's customer support flow",
       });
       ```
     </CodeGroup>
+
+    **You should see:** the Project's empty home view, with five empty surfaces (Sessions, Annotations, Datasets, Evaluators, Evaluations) and a banner prompting you to connect a runtime.
   </Step>
-  <Step title="Ingest a batch of Sessions">
-    Push captured agent Sessions into the Project. Each Session is a sequence of Turns and Tool Calls — Trust AI does not re-run the agent, it evaluates what already happened.
+
+  <Step title="Connect an agent runtime">
+    For V0 the supported connector is **AWS Bedrock AgentCore**. The setup is a one-time IAM role grant; once it's in place, Sessions flow automatically.
+
+    From the Project home, click **Connect runtime → AWS Bedrock AgentCore**. Trust AI walks you through:
+
+    1. Generating a CloudFormation snippet that creates a cross-account IAM role
+    2. Deploying it in your AWS account
+    3. Pasting the role ARN back into Trust AI
+
+    Full step-by-step (with the CloudFormation snippet inline): [Connect an AWS Bedrock AgentCore agent](/how-to/connect-agentcore).
+
+    **You should see:** Project home now shows the runtime as **Connected**, with the AgentCore agent name + alias pinned to the Project's metadata.
+
+    <Tip>
+      **Don't have AgentCore handy?** Skip to a demo Project: from your org's home, click **+ New Project → Use demo data**. You'll get a Project pre-seeded with ~50 example Sessions across two Agent Versions. The rest of the tutorial works the same way against the demo data.
+    </Tip>
   </Step>
-  <Step title="Review and annotate">
-    Open the Session reviewer, walk each Turn, and attach Annotations. A handful of well-annotated Sessions is enough to calibrate your first Evaluator.
+
+  <Step title="Ingest your first Sessions">
+    Once the runtime is connected, ingestion is automatic. Trust AI pulls AgentCore invocation logs every few minutes and each invocation becomes a Session row.
+
+    To pull immediately rather than wait: click **Sessions → Ingest now**. You'll see Sessions begin to appear within ~30 seconds for an active agent.
+
+    Or via the API:
+
+    <CodeGroup>
+      ```bash curl
+      # Trigger an on-demand ingestion pull
+      curl -X POST https://api.provar.dev/v1/projects/$PROJECT_ID/ingest \
+        -H "Authorization: Bearer $TRUST_AI_TOKEN"
+
+      # Then list the Sessions that came back
+      curl https://api.provar.dev/v1/sessions?project_id=$PROJECT_ID&limit=10 \
+        -H "Authorization: Bearer $TRUST_AI_TOKEN"
+      ```
+
+      ```typescript TypeScript
+      await client.projects.ingest(project.id);
+
+      const sessions = await client.sessions.list({
+        project_id: project.id,
+        limit: 10,
+      });
+
+      console.log(`Ingested ${sessions.total} Sessions`);
+      ```
+    </CodeGroup>
+
+    **You should see:** the Sessions list populated with rows. Each row shows: timestamp, Agent Version, turn count, latency, and any intent classification your agent emits.
   </Step>
+
+  <Step title="Review and annotate a Session">
+    Open the first Session in your list. Read through the Turns. The viewer shows:
+
+    - The full conversation, top to bottom
+    - Tool Calls inline (request + response, latency)
+    - Skill activations as colored badges
+    - A side panel where Annotations live
+
+    Pick a single Turn — say, the one where the agent responded to the user's primary question — and apply a pass/fail [Annotation](/concepts/annotations) with a short freeform note explaining why. Click **Save**.
+
+    Or via the API:
+
+    <CodeGroup>
+      ```bash curl
+      curl -X POST https://api.provar.dev/v1/sessions/$SESSION_ID/turns/$TURN_ID/annotations \
+        -H "Authorization: Bearer $TRUST_AI_TOKEN" \
+        -H "Content-Type: application/json" \
+        -d '{
+          "label": "pass",
+          "note": "Correctly resolved order status and explained next steps clearly"
+        }'
+      ```
+
+      ```typescript TypeScript
+      await client.annotations.create({
+        session_id: sessionId,
+        turn_id: turnId,
+        label: "pass",
+        note: "Correctly resolved order status and explained next steps clearly",
+      });
+      ```
+    </CodeGroup>
+
+    **You should see:** the Annotation appear in the Session's side panel, time-stamped, attributed to you. The Sessions list now shows this row as **Annotated**.
+  </Step>
+
   <Step title="Curate your first Dataset">
-    Promote the annotated Sessions into a named Dataset. From here you can define an Evaluator, run an Evaluation, and start comparing Agent Versions.
+    Now turn that one annotated Session into the first row of a curated [Dataset](/concepts/datasets).
+
+    In the app: from the Sessions list, click the **+ Add to Dataset** action on your annotated Session, choose **+ New Dataset**, name it (e.g., "Order-status happy path"), and confirm.
+
+    Or via the API:
+
+    <CodeGroup>
+      ```bash curl
+      # Create the Dataset
+      curl -X POST https://api.provar.dev/v1/datasets \
+        -H "Authorization: Bearer $TRUST_AI_TOKEN" \
+        -H "Content-Type: application/json" \
+        -d '{
+          "project_id": "'$PROJECT_ID'",
+          "name": "Order-status happy path"
+        }'
+
+      # Add the annotated Session as a row
+      curl -X POST https://api.provar.dev/v1/datasets/$DATASET_ID/rows \
+        -H "Authorization: Bearer $TRUST_AI_TOKEN" \
+        -H "Content-Type: application/json" \
+        -d '{
+          "source_session_id": "'$SESSION_ID'"
+        }'
+      ```
+
+      ```typescript TypeScript
+      const dataset = await client.datasets.create({
+        project_id: project.id,
+        name: "Order-status happy path",
+      });
+
+      await client.datasets.rows.add(dataset.id, {
+        source_session_id: sessionId,
+      });
+      ```
+    </CodeGroup>
+
+    **You should see:** the Datasets list now has one entry with one row. Open it — the row carries the Session's input, the agent's full response, and the Annotation you applied.
   </Step>
 </Steps>
+
+## You're done with the first half of the loop
+
+You've done the first three steps of [the evaluation loop](/concepts/evaluation-loop) — ingest, annotate, curate. The next three are **define an Evaluator**, **run an Evaluation**, and **compare Agent Versions**. The Dataset you just curated is the test bed they all run against.
+
+## What's next
+
+<CardGroup cols={2}>
+  <Card title="Build your first Evaluator" icon="wand-sparkles" href="/tutorials/build-first-evaluator">
+    Author an LLM Judge or Structured Match Evaluator and calibrate it against the Annotation you just applied.
+  </Card>
+  <Card title="Run your first Evaluation" icon="chart-line" href="/tutorials/run-first-evaluation">
+    Apply your Evaluator across the Dataset, against the current Agent Version. The first scored result.
+  </Card>
+  <Card title="Read the conceptual model" icon="book-open" href="/concepts/overview">
+    The nouns and verbs Trust AI is built around, in one place. Worth ten minutes if anything in this tutorial felt under-explained.
+  </Card>
+  <Card title="API Reference" icon="code" href="/api-reference">
+    Every endpoint, request shape, and response shape — auto-generated from the live OpenAPI spec.
+  </Card>
+</CardGroup>
+
+<Tip>
+  **Stuck?** The most common first-time blocker is the AgentCore IAM role: make sure the trust policy lists Trust AI's account and the role's permissions cover `bedrock:GetAgentRuntime` and `logs:FilterLogEvents`. The [Connect AgentCore how-to](/how-to/connect-agentcore) has the full troubleshooting matrix.
+</Tip>
