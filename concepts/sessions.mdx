@@ -4,18 +4,92 @@ icon: "message-square"
 description: "Real interactions between users and agents — the raw material every evaluation builds on."
 ---
 
-<Info>
-  Documentation site under construction. The structure and branded elements are in place; content lands milestone-by-milestone.
-</Info>
+A Session is one real conversation between a user and an agent — every message, tool call, and intermediate step captured as-it-happened. Sessions flow into Trust AI from your connected agent runtime and become the raw material everything downstream depends on: Annotations, Datasets, Evaluations, regression comparisons.
 
-## What is a Session?
+## What's in a Session
 
-A Session is one real interaction between a user and an agent — a sequence of Turns and Tool Calls captured from production or staging. Sessions are ingested from your connected agent runtime (AgentCore, Salesforce, and similar platforms) and become the raw material QA Practitioners review, annotate, and curate into Datasets.
+A Session is a tree of nested structures:
 
-## How Sessions fit into the evaluation loop
+- **The Session itself** — top-level metadata (timestamps, user ID, Agent Version, runtime source, intent classification if available)
+- **Turns** — each message exchange. A Turn is the smallest unit an Annotation or Evaluator can attach to.
+- **Tool Calls inside a Turn** — function name, arguments, return value, latency. Often the most diagnostic data in a Session.
+- **Skill activations** — when the agent invoked a known capability (`refund_check`, `lookup_order_status`, etc.). Useful for evaluating coverage and routing.
 
-Sessions sit at the start of the loop. You ingest them from the runtime, review and annotate to encode reviewer judgment, then curate the best examples into a Dataset that an Evaluation can run against.
+Think of a Session as a fully-resolved trace: not just what the user said and what the agent said back, but every decision the agent made on the way to its response.
 
-<Tip>
-  Read [The evaluation loop](/concepts/evaluation-loop) for the full workflow.
-</Tip>
+## Where Sessions come from
+
+Trust AI ingests Sessions from the agent runtime configured at the **[Project](/concepts/projects)** level. V0 supports AWS Bedrock AgentCore; Salesforce Agentforce and Microsoft Copilot Studio connectors are on the roadmap.
+
+The ingestion path for AgentCore:
+
+1. Your AgentCore Runtime emits invocation logs to CloudWatch (built-in).
+2. Trust AI's ingestion pipeline pulls those logs via a cross-account IAM role you grant during [Connect an AWS Bedrock AgentCore agent](/how-to/connect-agentcore).
+3. Each invocation becomes a Session row in your Project.
+
+Ingestion is read-only — Trust AI never modifies the source runtime or its logs.
+
+## Sessions vs Traces — same data, different name?
+
+If you've used observability tools (Langfuse, Phoenix, LangSmith) you may have heard the data called a "trace." Trust AI deliberately uses **Session**:
+
+| Term | Implies |
+|---|---|
+| Trace | Engineering observability — debugging a single execution |
+| Session | A complete user interaction — a unit of agent behavior worth judging |
+
+The distinction matters because the workflows differ. Traces are for engineers reading logs. Sessions are for **QA Practitioners** building Datasets and **Agent Owners** judging behavior. Both are valid lenses; Trust AI's vocabulary picks the one that maps to its core users.
+
+(For the full rationale, see the architecture decision record `docs/decisions/sessions-vs-traces.md` in the trust-ai-app repo.)
+
+## What you do with a Session
+
+The four primary workflows:
+
+<CardGroup cols={2}>
+  <Card title="Review and annotate" icon="tag">
+    Open a Session, read the conversation, attach an [Annotation](/concepts/overview#annotation-in-one-paragraph) to one or more Turns (pass / fail / rubric score / freeform comment). Reviewer judgment becomes data.
+  </Card>
+  <Card title="Curate into a Dataset" icon="database">
+    Filter or bulk-select annotated Sessions, then add them to a [Dataset](/concepts/datasets) as test-bed rows. The same Session can live in multiple Datasets.
+  </Card>
+  <Card title="Re-run against a new Agent Version" icon="git-branch">
+    A Session is the prompt + context; replaying it against a different [Agent Version](/concepts/overview#agent-version-in-one-paragraph) is the basis of regression-testing.
+  </Card>
+  <Card title="Search + filter" icon="search">
+    By intent, skill activation, tool-call success, latency, length, user, time window. The Sessions list is the workspace's working-memory; filters are how you find the few hundred that matter today.
+  </Card>
+</CardGroup>
+
+## Session metadata you can filter on
+
+Out of the box, every ingested Session carries:
+
+- Source: runtime (AgentCore, Salesforce, etc.), Agent Version, runtime-specific IDs
+- Time: ingestion timestamp, original invocation time
+- Outcome: response status (success, error, partial), latency, total tokens
+- Routing: intent classification (if your agent emits one), skill activations
+- Annotations: any human signal already attached
+- Dataset memberships: which Datasets this Session has been curated into
+
+Custom metadata your agent emits also surfaces — anything in the AgentCore invocation's `attributes` block flows through to the Session.
+
+## API surface
+
+Sessions appear in the `/v1/sessions` endpoint family of the [API Reference](/api-reference). Common operations:
+
+- `GET /v1/sessions` — list / filter Sessions in a Project
+- `GET /v1/sessions/{session_id}` — fetch full Session detail with Turns + Tool Calls
+- `POST /v1/sessions/{session_id}/annotations` — attach an Annotation
+- `POST /v1/sessions/{session_id}/add-to-dataset` — curate into a Dataset
+- `GET /v1/sessions/{session_id}/replay/{agent_version_id}` — replay against a new Agent Version
+
+Full request/response shapes live in the auto-generated [API Reference](/api-reference).
+
+## Related concepts
+
+- **[Projects](/concepts/projects)** — the workspace boundary; Sessions belong to one
+- **[Annotations](/concepts/overview#annotation-in-one-paragraph)** — the human signal you attach to Sessions and Turns
+- **[Datasets](/concepts/datasets)** — curated collections of Sessions for evaluation
+- **[Agent Versions](/concepts/overview#agent-version-in-one-paragraph)** — what the Session was generated by; what regressions are compared across
+- **[The evaluation loop](/concepts/evaluation-loop)** — the workflow Sessions are the starting point for
