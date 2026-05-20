@@ -5,3 +5,10 @@
 # Draft content
 drafts/
 *.draft.mdx
+
+# Planning material — kept in repo for contributors but not published
+docs-plan/
+
+# Version archive folders — empty until M3 cuts v2026.05.11/ as the archive.
+# Once cut over, REMOVE this ignore so the archive renders at /v2026.05.11/*.
+v2026.*/
