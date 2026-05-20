@@ -49,7 +49,7 @@
         "tab": "Documentation",
         "groups": [
           { "group": "Welcome",   "icon": "sparkles",       "pages": ["index"] },
-          { "group": "Concepts",  "icon": "book-open",      "pages": ["concepts/overview", "concepts/evaluation-loop"] },
+          { "group": "Concepts",  "icon": "book-open",      "pages": ["concepts/overview", "concepts/projects", "concepts/sessions", "concepts/datasets", "concepts/evaluators", "concepts/evaluations", "concepts/evaluation-loop"] },
           { "group": "Tutorials", "icon": "graduation-cap", "pages": ["tutorials/quickstart"] },
           { "group": "How-to",    "icon": "wrench",         "pages": ["how-to/connect-agentcore"] },
           { "group": "Reference", "icon": "code",           "pages": ["reference/api", "reference/schemas"] },

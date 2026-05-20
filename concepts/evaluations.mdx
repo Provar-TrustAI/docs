@@ -1,0 +1,21 @@
+---
+title: "Evaluations"
+icon: "chart-line"
+description: "Single runs of Evaluators across a Dataset, scoped to a specific Agent Version."
+---
+
+<Info>
+  Documentation site under construction. The structure and branded elements are in place; content lands milestone-by-milestone.
+</Info>
+
+## What is an Evaluation?
+
+An Evaluation is a single run of one or more Evaluators across a Dataset, typically scoped to a specific Agent Version. The output is a scored, comparable, reviewable record — every Dataset row gets a pass/fail (or rubric score) per Evaluator, alongside reasoning the Evaluator captured. Evaluations are how regressions get caught before they ship.
+
+## How Evaluations fit into the evaluation loop
+
+Evaluations are the final step. With a Dataset curated and Evaluators defined, you run an Evaluation against a specific Agent Version. The results feed back into your review of Sessions and refinement of Evaluators, and let you compare Agent Versions side-by-side as the product evolves.
+
+<Tip>
+  Read [The evaluation loop](/concepts/evaluation-loop) for the full workflow.
+</Tip>

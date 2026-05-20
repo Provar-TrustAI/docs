@@ -1,0 +1,21 @@
+---
+title: "Projects"
+icon: "sliders-horizontal"
+description: "The top-level workspace container for an agent or agent fleet under evaluation."
+---
+
+<Info>
+  Documentation site under construction. The structure and branded elements are in place; content lands milestone-by-milestone.
+</Info>
+
+## What is a Project?
+
+A Project is the top-level container for a single agent or agent fleet under evaluation. SI Consultants and Agent Owners create one Project per logical product. The Project owns its members, the connection config to the underlying agent runtime (AWS Bedrock AgentCore, Salesforce Agentforce, and similar platforms), and every Session, Dataset, Evaluator, Evaluation, and Agent Version associated with that agent.
+
+## How Projects fit into the evaluation loop
+
+Projects are the boundary around the loop. Everything you do in Trust AI happens inside one — when you ingest Sessions, curate Datasets, define Evaluators, run Evaluations, or compare Agent Versions, you are always operating within a single Project's scope.
+
+<Tip>
+  Read [The evaluation loop](/concepts/evaluation-loop) for the full workflow.
+</Tip>
