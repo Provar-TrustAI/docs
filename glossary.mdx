@@ -1,0 +1,43 @@
+---
+title: "Glossary"
+description: "Trust AI domain language at a glance."
+---
+
+<Info>
+  Documentation site under construction. The structure and branded elements are in place; content lands milestone-by-milestone.
+</Info>
+
+A single source of truth for the words Trust AI uses. When a term in the docs or product feels ambiguous, this page is the tiebreaker.
+
+**Agent Version**
+: A snapshot of the agent under test — its prompt, model, tool set, and deployment. Evaluations are scoped to a specific Agent Version so that regressions can be attributed precisely.
+
+**Annotation**
+: A human-authored signal attached to a Turn or Session — a pass/fail label, rubric score, or comment. Annotations calibrate Evaluators against reviewer judgment.
+
+**Dataset**
+: A curated, versioned collection of Sessions (or Turns) chosen as a representative test bed. Datasets are what an Evaluation runs against.
+
+**Evaluation**
+: A single run of one or more Evaluators across a Dataset, typically scoped to one Agent Version. Outputs are scored, comparable, and reviewable.
+
+**Evaluator**
+: A reusable judgment function — most commonly an LLM Judge or a Structured Match — that scores a Turn or Session against criteria.
+
+**Project**
+: The top-level container for a single agent or agent fleet under evaluation. Sessions, Datasets, Evaluators, and Agent Versions all belong to a Project.
+
+**Session**
+: One real interaction between a user and an agent — a sequence of Turns and Tool Calls captured from production or staging.
+
+**Skill**
+: A named capability an agent exposes, often backed by one or more Tool Calls. Skills are the unit at which Agent Owners reason about coverage.
+
+**Task**
+: The user-facing job a Session is meant to accomplish. Datasets are often organized by Task so that Evaluations measure per-task quality.
+
+**Tool Call**
+: A single invocation an agent makes against an external tool or API during a Turn, with its input, output, and latency captured for review.
+
+**Turn**
+: One step in a Session — a user message, an agent response, or a tool result. Annotations and Evaluator scores can be attached at the Turn level.

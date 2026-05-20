@@ -1,0 +1,42 @@
+---
+title: "Concepts"
+description: "The seven nouns that describe how Trust AI works."
+---
+
+<Info>
+  Documentation site under construction. The structure and branded elements are in place; content lands milestone-by-milestone.
+</Info>
+
+Trust AI is built around seven core nouns. Every workflow, every API call, and every screen in the product traces back to one of them.
+
+## Project
+
+A Project is the top-level container for a single agent or agent fleet under evaluation. SI Consultants and Agent Owners create one Project per logical product — Sessions, Datasets, Evaluators, and Agent Versions all belong to it.
+
+## Session
+
+A Session is one real interaction between a user and an agent — a sequence of Turns and Tool Calls captured from production or staging. Sessions are the raw material QA Practitioners review and curate into Datasets.
+
+## Annotation
+
+An Annotation is a human-authored signal attached to a Turn or Session — a pass/fail label, a rubric score, or a freeform comment. Annotations are how reviewer judgment gets encoded into data that Evaluators can be calibrated against.
+
+## Dataset
+
+A Dataset is a curated, versioned collection of Sessions (or Turns) chosen as a representative test bed. Datasets are what an Evaluation actually runs against.
+
+## Evaluator
+
+An Evaluator is a reusable judgment function — typically an LLM Judge or a Structured Match — that scores a Turn or Session against criteria. Evaluators are defined once and reused across many Evaluations.
+
+## Evaluation
+
+An Evaluation is a single run of one or more Evaluators across a Dataset, typically scoped to a specific Agent Version. The output is scored, comparable, and reviewable.
+
+## Agent Version
+
+An Agent Version is a snapshot of the agent under test — a prompt, a model, a tool set, a deployment. Comparing two Agent Versions on the same Dataset under the same Evaluators is the core regression-testing loop.
+
+<Tip>
+  Next: read [The evaluation loop](/concepts/evaluation-loop) to see how these seven nouns connect into a single workflow.
+</Tip>
