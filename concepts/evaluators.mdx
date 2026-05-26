@@ -4,7 +4,7 @@ icon: "wand-sparkles"
 description: "Reusable judgment functions — LLM Judge or Structured Match — that score Sessions and Turns against criteria."
 ---
 
-An Evaluator is a reusable judgment function. You define it once in a [Project](/concepts/projects), and it gets reused across many [Evaluations](/concepts/evaluations) — applied to whatever [Dataset](/concepts/datasets) you point it at, against whatever [Agent Version](/concepts/overview#agent-version-in-one-paragraph) you're testing. The same Evaluator scoring the same Dataset across two Agent Versions is **the apples-to-apples comparison** Trust AI is built around.
+An Evaluator is a reusable judgment function. You define it once in a [Project](/concepts/projects), and it gets reused across many [Evaluations](/concepts/evaluations) — applied to whatever [Dataset](/concepts/datasets) you point it at, against whatever [Agent Version](/concepts/agent-versions) you're testing. The same Evaluator scoring the same Dataset across two Agent Versions is **the apples-to-apples comparison** Trust AI is built around.
 
 ## The two families
 
@@ -100,7 +100,7 @@ Full request/response shapes live in the auto-generated [API Reference](/api-ref
 
 ## Related concepts
 
-- **[Annotations](/concepts/overview#annotation-in-one-paragraph)** — the human signal that calibrates LLM Judges
+- **[Annotations](/concepts/annotations)** — the human signal that calibrates LLM Judges
 - **[Datasets](/concepts/datasets)** — the test beds Evaluators score
 - **[Evaluations](/concepts/evaluations)** — the runs that apply Evaluators to Datasets
 - **[The evaluation loop](/concepts/evaluation-loop)** — Evaluators are the "define" step
