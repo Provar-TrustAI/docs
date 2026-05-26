@@ -1,0 +1,161 @@
+---
+title: "Connect an MCP client to Trust AI"
+icon: "plug"
+description: "Configure Claude Desktop, Cursor, or VS Code to query and act on Trust AI data via the MCP server."
+---
+
+This how-to covers connecting an **MCP-compatible client** to Trust AI's [MCP server](/concepts/mcp-integration). After it's done:
+
+- Your AI client can query Trust AI data — Sessions, Evaluations, Datasets, Projects — without leaving the tool
+- Write operations (create Annotations, curate Datasets, trigger Evaluations) are available with an approval gate
+- Every MCP interaction is traced and auditable via OpenInference spans
+
+The setup takes under five minutes. You'll generate credentials in Trust AI, paste a config snippet into your client, and verify the connection with a test query.
+
+## Prerequisites
+
+- A **Trust AI account** with WorkOS credentials and access to at least one Project
+- An **MCP-compatible client** installed — Claude Desktop, Cursor, VS Code with an MCP extension, or any client that speaks the Model Context Protocol
+
+## Setup
+
+<Steps>
+  <Step title="Generate your MCP connection config">
+    In Trust AI, navigate to **Settings > Integrations > MCP**.
+
+    Click **Generate MCP config**. Trust AI creates a WorkOS-scoped token and shows you:
+
+    - The **MCP server URL** (`https://mcp.provar.dev/v1`)
+    - A **Bearer token** for authentication (copy it now — it won't be shown again)
+
+    **You should see:** a config panel with the server URL and a one-time-visible token. Copy both values before leaving the page.
+  </Step>
+
+  <Step title="Configure your MCP client">
+    Add the Trust AI MCP server to your client's configuration. Find your client below and paste the corresponding JSON snippet into its config file.
+
+    <CodeGroup>
+      ```json Claude Desktop
+      // ~/.claude/claude_desktop_config.json (macOS)
+      // %APPDATA%\Claude\claude_desktop_config.json (Windows)
+      {
+        "mcpServers": {
+          "trust-ai": {
+            "url": "https://mcp.provar.dev/v1",
+            "headers": {
+              "Authorization": "Bearer <YOUR_WORKOS_TOKEN>"
+            }
+          }
+        }
+      }
+      ```
+
+      ```json Cursor
+      // ~/.cursor/mcp.json
+      {
+        "mcpServers": {
+          "trust-ai": {
+            "url": "https://mcp.provar.dev/v1",
+            "headers": {
+              "Authorization": "Bearer <YOUR_WORKOS_TOKEN>"
+            }
+          }
+        }
+      }
+      ```
+
+      ```json VS Code
+      // .vscode/settings.json (workspace) or User Settings
+      {
+        "mcp": {
+          "servers": {
+            "trust-ai": {
+              "url": "https://mcp.provar.dev/v1",
+              "headers": {
+                "Authorization": "Bearer <YOUR_WORKOS_TOKEN>"
+              }
+            }
+          }
+        }
+      }
+      ```
+    </CodeGroup>
+
+    Replace `<YOUR_WORKOS_TOKEN>` with the token you copied in step 1.
+
+    After saving the config, restart your client (or reload the MCP server list if your client supports hot-reloading).
+
+    **You should see:** "trust-ai" appear in your client's list of connected MCP servers. In Claude Desktop, this is under the MCP server indicator. In Cursor, check the MCP panel in settings. In VS Code, check the MCP servers section in the command palette.
+  </Step>
+
+  <Step title="Verify the connection">
+    Run a test query to confirm the connection is working. Ask your AI client something like:
+
+    > "Use the trust-ai MCP server to list my recent sessions."
+
+    The client should invoke the `query_data` tool on the Trust AI MCP server and return a list of Sessions from your Project.
+
+    **You should see:** a response containing Session data from your Trust AI account — session IDs, timestamps, agent versions. If you see an authentication error, jump to [Troubleshooting](#troubleshooting) below.
+  </Step>
+
+  <Step title="Understand write tool approval">
+    Read operations work immediately. When your MCP client attempts a **write operation** — creating an Annotation, adding a Session to a Dataset, triggering an Evaluation — the approval gate activates:
+
+    1. The MCP client sends the write request to Trust AI
+    2. Trust AI surfaces a **confirmation prompt** describing what will be changed
+    3. You approve or reject the operation
+    4. Only after approval does the write execute
+
+    Try it: ask your client to create a test Annotation on a Session. You should see the approval prompt before anything is modified.
+
+    **You should see:** a confirmation dialog describing the write operation. After you approve, the Annotation appears on the Session in Trust AI.
+  </Step>
+</Steps>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Authentication fails with 401 Unauthorized">
+    The token is missing, expired, or malformed.
+
+    Check, in order:
+    1. **Token is present** — confirm the `Authorization` header is set in your client config and includes the `Bearer ` prefix (with a trailing space before the token).
+    2. **Token hasn't expired** — WorkOS tokens have an expiration window. Generate a new token from **Settings > Integrations > MCP** if needed.
+    3. **No extra whitespace or line breaks** — some editors wrap long tokens across lines when pasting. The token should be a single unbroken string.
+    4. **Correct config file location** — each client reads its MCP config from a specific path. Double-check you're editing the right file for your client (see the snippets in step 2).
+  </Accordion>
+
+  <Accordion title="Connection times out">
+    The client cannot reach the MCP server endpoint.
+
+    Check, in order:
+    1. **Network access** — confirm you can reach `https://mcp.provar.dev` from your machine (try `curl -I https://mcp.provar.dev/v1`).
+    2. **Firewall or proxy** — corporate networks may block outbound connections to unfamiliar domains. Check with your network administrator if needed.
+    3. **Client version** — older versions of Claude Desktop, Cursor, or VS Code extensions may not support streamable HTTP MCP transport. Update to the latest version.
+  </Accordion>
+
+  <Accordion title="Tools are missing or the tool list is empty">
+    The connection succeeds but the client reports no available tools, or is missing tools you expect.
+
+    This usually means the MCP server's tool registry is ahead of or behind your client's cached tool list:
+    1. **Reload the MCP server** in your client — most clients have a "refresh" or "reconnect" action for MCP servers.
+    2. **Check your token scope** — the token is scoped to your WorkOS organization. If you recently switched orgs or your org permissions changed, generate a fresh token.
+    3. **Server version** — the MCP tool surface updates when Trust AI ships new Paddington capabilities. If you expect a tool that isn't appearing, confirm the Trust AI release includes it (check the [changelog](/changelog)).
+  </Accordion>
+
+  <Accordion title="Write operations fail after approval">
+    You approve a write but it doesn't execute, or returns an error.
+
+    Check, in order:
+    1. **Permissions** — your WorkOS user role must have write access to the target entity. Read-only users can query data via MCP but cannot perform writes even with approval.
+    2. **Entity exists** — the target Session, Dataset, or Evaluation must exist. If the MCP client is referencing an ID from a previous query, confirm it's still valid.
+    3. **Rate limits** — rapid successive write operations may trigger rate limiting. Wait a moment and retry.
+  </Accordion>
+</AccordionGroup>
+
+## Related reading
+
+- **[MCP Integration](/concepts/mcp-integration)** — the concept page covering architecture, tools, auth, and the approval gate
+- **[Sessions](/concepts/sessions)** — the primary data you'll query through MCP
+- **[Evaluations](/concepts/evaluations)** — triggerable through MCP write tools
+- **[Connect an AWS Bedrock AgentCore agent](/how-to/connect-agentcore)** — the other integration how-to, for ingesting Sessions from AgentCore
