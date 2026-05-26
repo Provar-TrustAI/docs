@@ -27,10 +27,10 @@ An LLM Judge has four parts:
 
 1. **System prompt** — describes the role ("you are a customer-support quality reviewer"). Sets the tone of judgment.
 2. **Criteria** — what specifically you're judging. Phrased as a rubric, not as "is this good?". Example: *"Did the agent (a) acknowledge the user's specific order ID, (b) provide the correct order status, (c) explain what the status means, in that order?"*
-3. **Scoring scale** — binary (pass/fail), Likert (1-5), or freeform with extraction. Binary is the easiest to calibrate; Likert is more nuanced but harder to get reviewer agreement on.
+3. **Scoring scale** — pass/fail or 1–5 scale (the two score types available in the app). Pass/fail is the easiest to calibrate; 1–5 is more nuanced but harder to get reviewer agreement on. Freeform with extraction is also possible via the API, though less common.
 4. **Output format** — JSON with a structured score field, so the result is machine-readable.
 
-The Evaluator builder in the app walks you through these four parts; the rubric gets stored as a template that re-runs against every Dataset row at Evaluation time.
+The create/edit flow in the app walks you through these four parts — you pick the evaluator kind (LLM Judge or Structured Match), choose a score type (pass/fail or 1–5 scale), and author the criteria in a dedicated editor. The rubric gets stored as a template that re-runs against every Dataset row at Evaluation time.
 
 For how to author rubrics that actually work, see [Write an effective LLM-judge prompt](/how-to/write-llm-judge-prompt).
 
@@ -43,6 +43,13 @@ A Structured Match assertion has three parts:
 3. **Expected** — the value or pattern the path should resolve to.
 
 Structured Match is exact-match by default — useful when the agent emits structured metadata you can pin to (intent classification, skill activation, tool call shape). It's the right choice when "good" is defined precisely and exhaustively. It's the wrong choice when "good" is judgment-laden.
+
+## In the app
+
+- **Evaluator list view** — The Evaluators surface shows every evaluator in the project. Create a new evaluator or click an existing one to edit.
+- **Create/edit flow** — Select the evaluator kind (LLM Judge or Structured Match), choose a score type (pass/fail or 1–5 scale), and author the criteria in a dedicated editor.
+- **Side panel** — Click any evaluator to open a side panel showing the recent trend sparkline and run history.
+- **Inline delete** — Delete an evaluator from the side panel. Use the ref-check endpoint first to see what Datasets and Evaluations reference it before removing.
 
 ## Calibration — the loop that makes LLM Judges trustworthy
 
