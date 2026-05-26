@@ -10,3 +10,7 @@ docs-plan/*.md
 
 # Claude Code session state directory
 .claude/
+.env
+
+# Playwright capture scripts
+captures/node_modules/
