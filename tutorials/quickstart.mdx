@@ -16,7 +16,7 @@ By the end you'll have:
 That's the smallest complete pass through the first three steps of [the evaluation loop](/concepts/evaluation-loop). Once it works once, the rest of Trust AI is "do this same thing at scale."
 
 <Tip>
-  Every code sample below is illustrative of the V0 API surface. Exact endpoint names and payload shapes are auto-rendered in the [API Reference](/api-reference) and will be the authoritative source.
+  Every code sample below is illustrative. Exact endpoint names and payload shapes are auto-rendered in the [API Reference](/api-reference) and will be the authoritative source.
 </Tip>
 
 ## Before you start
@@ -24,7 +24,7 @@ That's the smallest complete pass through the first three steps of [the evaluati
 You'll need:
 
 - A Trust AI account with **Admin** or **SI Consultant** role on at least one org
-- An agent **deployed and reachable** — for V0 that means a Bedrock AgentCore runtime alias in an AWS account you can create an IAM role in
+- An agent **deployed and reachable** — today that means a Bedrock AgentCore runtime alias in an AWS account you can create an IAM role in
 - About 10 minutes
 
 If your agent isn't on AgentCore yet, you can still walk this tutorial using a **demo Project** seeded with example Sessions (we'll flag that variant inline).
@@ -66,7 +66,7 @@ If your agent isn't on AgentCore yet, you can still walk this tutorial using a *
   </Step>
 
   <Step title="Connect an agent runtime">
-    For V0 the supported connector is **AWS Bedrock AgentCore**. The setup is a one-time IAM role grant; once it's in place, Sessions flow automatically.
+    The supported connector today is **AWS Bedrock AgentCore**. The setup is a one-time IAM role grant; once it's in place, Sessions flow automatically.
 
     From the Project home, click **Connect runtime → AWS Bedrock AgentCore**. Trust AI walks you through:
 
@@ -86,7 +86,7 @@ If your agent isn't on AgentCore yet, you can still walk this tutorial using a *
   <Step title="Ingest your first Sessions">
     Once the runtime is connected, ingestion is automatic. Trust AI pulls AgentCore invocation logs every few minutes and each invocation becomes a Session row.
 
-    To pull immediately rather than wait: click **Sessions → Ingest now**. You'll see Sessions begin to appear within ~30 seconds for an active agent.
+    To pull immediately rather than wait: click **Sessions → Sync Now**. You'll see Sessions begin to appear within ~30 seconds for an active agent.
 
     Or via the API:
 
