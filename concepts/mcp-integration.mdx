@@ -1,0 +1,85 @@
+---
+title: "MCP Integration"
+icon: "cable"
+description: "How external AI agents and IDEs connect to Trust AI data through the Model Context Protocol."
+---
+
+Trust AI ships a [Model Context Protocol](https://modelcontextprotocol.io) (MCP) server that lets external AI agents and IDEs query and act on your Trust AI data directly. Any MCP-compatible client — Claude Desktop, Cursor, VS Code Copilot, or your own tooling — can connect, authenticate via WorkOS, and interact with the same data and operations available inside the product.
+
+## What MCP is
+
+MCP is an open protocol that standardizes how AI applications discover and invoke tools exposed by external systems. Instead of building bespoke integrations for each client, Trust AI publishes a single MCP server endpoint. Any client that speaks the protocol can connect, discover available tools, and call them — no custom SDK or plugin required. For protocol details, see [modelcontextprotocol.io](https://modelcontextprotocol.io).
+
+## What the Trust AI MCP server exposes
+
+The MCP server exposes two categories of tools:
+
+**Read tools** — unrestricted queries against your Trust AI data:
+
+- `query_data` — list and filter Sessions, Evaluations, Datasets, Projects, and other entities
+- `read_file` — retrieve full Session transcripts, Evaluation results, and Dataset contents
+- `analyze` — run analytical queries across your data (aggregations, comparisons, trend analysis)
+
+**Write tools** — operations that modify Trust AI state, each wrapped with an approval gate:
+
+- Paddington WRITE wrappers — create Annotations, curate Sessions into Datasets, trigger Evaluations, and other write operations. These are the same operations available through the Paddington agent assistant inside Trust AI, exposed over MCP so external clients can invoke them too.
+
+The tool surface is identical to what the Paddington assistant can do — no more, no less.
+
+## Authentication
+
+Every MCP connection requires a valid **WorkOS token**. The token determines which organization's data the client can access:
+
+- The token is scoped to your WorkOS organization — a client sees only the Projects, Sessions, and Evaluations that belong to that org
+- Token generation happens inside Trust AI at **Settings > Integrations > MCP**
+- Tokens follow standard WorkOS expiration and revocation policies
+
+There is no anonymous or API-key-only access path. WorkOS authentication is required for every connection.
+
+## The approval gate
+
+Write operations go through a `can_use_tool` confirmation step before executing:
+
+- **Read tools execute immediately.** Querying data, reading transcripts, and running analysis require no additional approval beyond a valid auth token.
+- **Write tools pause for confirmation.** When an MCP client attempts a write (creating an Annotation, adding a Session to a Dataset, triggering an Evaluation), Trust AI surfaces a confirmation prompt before the operation executes. The confirmation includes what will be changed and requires explicit approval.
+
+This gate exists because MCP clients are external — an IDE extension or AI agent should not silently modify Trust AI data without the user's knowledge. The same tools invoked through Paddington inside the product follow the same approval pattern.
+
+## Observability
+
+Every MCP tool invocation emits an **OpenInference tool span**, giving full observability into what external clients are doing with your data:
+
+- Each tool call is traced with its input arguments, output, latency, and status
+- Spans follow the OpenTelemetry standard, so they integrate with your existing observability stack
+- Failed calls (auth errors, validation failures, approval rejections) are traced with error metadata
+
+This means MCP activity is not a black box — every external interaction with Trust AI is instrumented and auditable.
+
+## Conformance
+
+The MCP server's tool surface is **tested against the Paddington registry** on every build:
+
+- A conformance test ensures that every tool Paddington can invoke is also available over MCP
+- If a new Paddington skill or tool is added, the MCP server must expose it too — the build fails otherwise
+- This guarantees that external MCP clients have the same capabilities as the built-in agent assistant
+
+The implication: when Trust AI ships new Paddington capabilities, MCP clients gain access to them automatically.
+
+## Supported clients
+
+The MCP server works with any client that implements the Model Context Protocol. Tested and documented clients include:
+
+- **Claude Desktop** — Anthropic's desktop application
+- **Cursor** — AI-native code editor
+- **VS Code** — via MCP-compatible extensions (e.g., GitHub Copilot MCP support)
+- **Custom clients** — any application that speaks MCP can connect using the same endpoint and authentication
+
+See [Connect an MCP client to Trust AI](/how-to/connect-mcp-client) for step-by-step setup instructions for each client.
+
+## Related concepts
+
+- **[Sessions](/concepts/sessions)** — the primary data MCP read tools query
+- **[Projects](/concepts/projects)** — the workspace boundary; MCP access is scoped to a Project's org
+- **[Evaluations](/concepts/evaluations)** — queryable via MCP and triggerable through write tools
+- **[Datasets](/concepts/datasets)** — readable and curatable through MCP
+- **[Connect an MCP client](/how-to/connect-mcp-client)** — step-by-step how-to for configuring your client
