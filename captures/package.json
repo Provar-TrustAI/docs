@@ -1,0 +1,17 @@
+{
+  "name": "trust-ai-docs-captures",
+  "private": true,
+  "scripts": {
+    "capture:all": "npx playwright test",
+    "capture:sessions": "npx playwright test sessions-table sessions-flyin",
+    "capture:datasets": "npx playwright test datasets-bulk-actions",
+    "capture:evaluations": "npx playwright test evaluations-results-matrix",
+    "capture:evaluators": "npx playwright test evaluators-create-flow",
+    "capture:welcome": "npx playwright test welcome-surface",
+    "capture:sidebar": "npx playwright test sidebar-navigation"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.50.0",
+    "playwright": "^1.50.0"
+  }
+}
