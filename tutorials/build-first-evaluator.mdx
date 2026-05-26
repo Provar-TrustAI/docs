@@ -34,15 +34,15 @@ If you skipped any of that, go back — calibration only works against real Anno
   </Step>
 
   <Step title="Open the Evaluator builder">
-    From the Project home, navigate to **Evaluators → + New Evaluator**. Pick **LLM Judge** as the type.
+    From the Project home, navigate to **Evaluators → New Evaluator**. Select **LLM Judge** as the evaluator kind, then choose **pass/fail** as the score type.
 
-    The builder is a three-pane view:
+    The create flow walks you through:
 
-    - **Left:** the rubric editor — system prompt, criteria, scoring scale, output format
-    - **Middle:** a preview of how the rubric will be presented to the judge LLM
-    - **Right:** the calibration panel — pick a Dataset, see live agreement with Annotations as you edit
+    - **Rubric editor** — system prompt, criteria, and output format
+    - **Score type** — pass/fail (binary) or 1–5 scale. Start with pass/fail; it's the easiest to calibrate.
+    - **Calibration** — pick a Dataset and see live agreement with Annotations as you edit the rubric
 
-    **You should see:** an empty rubric editor with placeholder text, and a "Calibrate against" dropdown listing your Datasets.
+    **You should see:** the rubric editor with placeholder text, and a dataset selector for calibration.
   </Step>
 
   <Step title="Write a plain-English rubric">
