@@ -58,15 +58,6 @@
       {
         "tab": "API Reference",
         "openapi": "api-reference/openapi.json"
-      },
-      {
-        "tab": "v2026.05.11",
-        "groups": [
-          { "group": "Concepts",  "icon": "book-open",      "pages": ["v2026.05.11/concepts/overview", "v2026.05.11/concepts/projects", "v2026.05.11/concepts/sessions", "v2026.05.11/concepts/annotations", "v2026.05.11/concepts/datasets", "v2026.05.11/concepts/evaluators", "v2026.05.11/concepts/evaluations", "v2026.05.11/concepts/agent-versions", "v2026.05.11/concepts/evaluation-loop"] },
-          { "group": "Tutorials", "icon": "graduation-cap", "pages": ["v2026.05.11/tutorials/quickstart", "v2026.05.11/tutorials/build-first-evaluator", "v2026.05.11/tutorials/run-first-evaluation"] },
-          { "group": "How-to",    "icon": "wrench",         "pages": ["v2026.05.11/how-to/connect-agentcore", "v2026.05.11/how-to/write-llm-judge-prompt", "v2026.05.11/how-to/compare-agent-versions"] }
-        ],
-        "openapi": "v2026.05.11/api-reference/openapi.json"
       }
     ]
   },
