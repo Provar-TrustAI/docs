@@ -4,6 +4,18 @@ icon: "history"
 description: "Trust AI release notes."
 ---
 
+<Update label="v2026.05.26 — May 2026">
+  **Complete UI/UX rebuild.** Every core surface has been redesigned and reimplemented: [Sessions](/concepts/sessions) (sortable/filterable table, fly-in detail panel with transcript viewer, keyboard navigation via J/K/F/Esc, on-demand Sync Now import), [Datasets](/concepts/datasets) (bulk actions toolbar, inline annotation editing, fly-in panel with io_split divider and tag picker), [Evaluators](/concepts/evaluators) (create/edit flow with LLM Judge and Structured Match kind selection, score type picker, criteria editor, side panel with trend and run history), and [Evaluations](/concepts/evaluations) (New Run flow with dataset picker and evaluator multi-select, results matrix with per-evaluator verdict chips, CSV export). A new Welcome surface greets users with contextual suggestion prompts, and the sidebar now includes a project switcher with search, collapsible icon-rail mode, and count badges.
+
+  **All actions wired.** Eleven previously placeholder buttons are now fully functional: Sync Now, Export CSV, Upload CSV, Run Evaluation, Remove Rows, Copy Sharing Link, Add to Dataset, Tag Row, Download Transcript, Export Sessions CSV, and Export Run Results CSV.
+
+  **MCP server for AI agents and IDEs.** A new MCP server lets external AI agents (Claude Desktop, Cursor, VS Code) query and act on Trust AI data directly. Read tools surface sessions, evaluations, and project data; write tools wrap Paddington operations with an approval gate. WorkOS authentication enforces per-tenant access.
+
+  **Multi-tenant security.** Organization ID enforcement is now complete across all domain entities — datasets, agent versions, personas, simulations, saved views, and budgets all carry a NOT NULL `organization_id` with cross-tenant denial enforced at the repository layer.
+
+  **Bug fixes.** io_split divider click handling corrected (cache key mismatch), dataset header stats now refresh after row removal, and the Delete Session menu item has been removed (sessions are immutable from the frontend).
+</Update>
+
 <Update label="v2026.05.22 — May 2026">
   **Rename evaluation runs.** `PATCH /v1/evaluations/{run_id}` lets you relabel a finished run from the Run Detail header — useful for tagging baselines, regressions, or experiment variants after the fact. See [Evaluations](/concepts/evaluations).
 
