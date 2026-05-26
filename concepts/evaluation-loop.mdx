@@ -39,7 +39,7 @@ The loop is not strictly linear — you'll often define an Evaluator before full
 
 Your agent runtime emits invocation logs. Trust AI's ingestion pipeline pulls those logs (or you push them via API) and surfaces each invocation as a structured **Session** in your **Project**.
 
-V0 supports AWS Bedrock AgentCore via a cross-account IAM role. Agentforce and Copilot Studio connectors are on the roadmap. The ingestion path is read-only; Trust AI never modifies the source runtime.
+Trust AI supports AWS Bedrock AgentCore today via a cross-account IAM role. Agentforce and Copilot Studio connectors are on the roadmap. The ingestion path is read-only; Trust AI never modifies the source runtime.
 
 **Read more:** [Sessions](/concepts/sessions) · [Connect an AWS Bedrock AgentCore agent](/how-to/connect-agentcore)
 
@@ -49,7 +49,7 @@ A **QA Practitioner** opens a Session, walks it Turn by Turn, and attaches **Ann
 
 The Annotations queue is the working surface here: filtered lists of Sessions needing review, organized by tag, intent, or recency. A team can blow through a few hundred Sessions in a sitting once the workflow clicks.
 
-**Read more:** [Annotations](/concepts/annotations) *(coming soon)* · [Sessions](/concepts/sessions)
+**Read more:** [Annotations](/concepts/annotations) · [Sessions](/concepts/sessions)
 
 ### 3. Curate a Dataset
 
@@ -76,7 +76,7 @@ An **Evaluation** is a single run: pick a Dataset, pick one or more Evaluators, 
 
 A subtle but important pattern (ADR 0006): **the agent responses produced during an Evaluation are themselves Sessions**, structurally indistinguishable from production Sessions. They show up in your Sessions list tagged "from-eval," available for re-annotation, re-evaluation, or curation into the next Dataset. The loop is genuinely a loop.
 
-**Read more:** [Evaluations](/concepts/evaluations) · [Run your first Evaluation](/tutorials/run-first-evaluation) *(coming soon)*
+**Read more:** [Evaluations](/concepts/evaluations) · [Run your first Evaluation](/tutorials/run-first-evaluation)
 
 ### 6. Compare Agent Versions
 
@@ -84,7 +84,7 @@ The headline workflow: same Dataset, same Evaluators, two **Agent Versions** (pr
 
 This is the regression-tracking primitive Trust AI is built around. The product exists to make this diff reliable, reviewable, and routine.
 
-**Read more:** [Compare two Agent Versions](/how-to/compare-agent-versions) *(coming soon)* · [Agent Versions](/concepts/agent-versions) *(coming soon)*
+**Read more:** [Compare two Agent Versions](/how-to/compare-agent-versions) · [Agent Versions](/concepts/agent-versions)
 
 ## Where this fits in your team's workflow
 
