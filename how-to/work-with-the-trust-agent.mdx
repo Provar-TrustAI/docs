@@ -1,0 +1,173 @@
+---
+title: "Work with the Trust Agent"
+icon: "sparkles"
+description: "How to open the Trust Agent, send a request, read its streaming reply and side rail, and answer its clarifying questions."
+---
+
+This how-to walks you through a working session with the **Trust Agent** — the in-app assistant that helps you do evaluation work on a [Project](/concepts/projects), live at `/projects/:id/agent`. After you've worked through it:
+
+- You can open the agent, recognize its three shells, and find your recent chats
+- You can send a request through the composer and pick how the agent works with **Ask / Plan / Act**
+- You can read a streaming reply — the reasoning rail, tool-call cards, the clickable object table, and the side rail
+- You can answer a clarifying question when the agent asks one before it acts
+
+<Note>
+  The **Trust Agent** is the assistant that helps you evaluate — not an [**Agent Version**](/concepts/agent-versions), which is the customer's agent *under test*. They share the word "agent" and nothing else: the Trust Agent is a chat surface you drive; an Agent Version is a pinned snapshot you score. This page is only about the former.
+</Note>
+
+## Prerequisites
+
+- A **Trust AI account** with access to at least one [Project](/concepts/projects)
+- A Project with at least one connected agent or ingested [Sessions](/concepts/sessions), so the agent has real records to act on
+
+## Work with the agent
+
+<Steps>
+  <Step title="Open the Trust Agent">
+    Go to `/projects/:id/agent` for your Project. The Trust Agent is the **default, flag-free experience** on every Project — there is no `?v2`, `?agui`, or `?legacy` flag to set, and the legacy assistant no longer exists.
+    {/* ACCURACY-AUDIT-PENDING: opening /projects/:id/agent with no query params renders the Trust Agent; ?legacy=1 / ?agui=1 / ?v2 are inert/removed — verify against the app on the release tag */}
+
+    Starting a new chat opens a **Welcome** page, and the welcome prompt is sent for you as the first turn — so a new chat opens already streaming its first message, not as an empty transcript.
+
+    <Frame caption="A new chat opens on the Welcome surface with the first turn already streaming.">
+      <img src="/images/welcome-surface.png" alt="The Trust Agent Welcome surface with the composer and the first agent turn streaming in" />
+    </Frame>
+
+    **You should see:** the agent surface — a composer and a streaming transcript — render at `/projects/:id/agent` with no flag set, opening on the Welcome message as turn one.
+  </Step>
+
+  <Step title="Recognize the three shells">
+    The agent runs from **one instance** that presents in three shells, and your chat state is preserved as you move between them:
+
+    - **Full page** — the agent seated in the Project content pane, with the core left nav (**Scenarios**, **Evaluators**, **Evaluations**, **Settings**) visible to its left and the composer anchored to the bottom.
+    - **Docked panel** — a panel docked in the corner so you can keep working elsewhere in the app.
+    - **Pill** — a collapsed pill. When a Project has no active agent task, the agent resolves to this minimized pill.
+    {/* ACCURACY-AUDIT-PENDING: full/docked/pill shell appearance, the exact left-nav labels (Scenarios/Evaluators/Evaluations/Settings), and bottom-anchored composer — verify against the app on the release tag */}
+
+    Your chat survives navigation: move to **Evaluations** or **Scenarios** and back, and the same chat is intact — there is one agent mount at the app root, not a fresh remount per page. A **floating chat selector** lists your recent chats, most-recent first, each with a status and an unread-indicator dot only when that chat has unread messages. Those recent chats are the Project's canonical task list. Reopening any chat shows its **real prior history** — transcripts are persisted, not reset to empty.
+
+    <Note>
+      The three shells are covered in depth — with stills of each — on the [Trust Agent concept page](/concepts/trust-agent). This recipe assumes the **full page** shell.
+    </Note>
+
+    <Frame caption="Capture pending — the full-page shell with the composer bottom-anchored and the core left nav visible.">
+      {/* CAPTURE-PENDING: trust-agent full-page shell still (left nav + transcript + bottom composer) — capture from the release tag and replace this placeholder */}
+      <img src="/images/welcome-surface.png" alt="Placeholder — the Trust Agent full-page shell" />
+    </Frame>
+
+    **You should see:** the same chat thread persist as you switch shells and navigate between tabs, and your recent chats listed most-recent first in the floating selector.
+  </Step>
+
+  <Step title="Compose a request and pick a mode">
+    Type your request in the composer and send it. The composer includes:
+
+    - An **@ picker** for mentioning a known entity. An @-mention is passed to the agent directly, so it acts on that entity without first running a search to find it.
+    - A **/ palette** for slash commands and skills.
+    - An inline **model selector** chip.
+    - An **Ask / Plan / Act** toggle that picks how the agent works.
+
+    Choose the mode for the job:
+
+    | Mode | What it does |
+    |---|---|
+    | **Ask** | Clarifies and pauses before each action |
+    | **Plan** | Proposes a task list for you to confirm before it changes anything |
+    | **Act** | Plans and executes end to end |
+    {/* ACCURACY-AUDIT-PENDING: the @ picker, / palette, inline model-selector chip, and the Ask/Plan/Act toggle (labels + per-mode behavior) — verify against the app on the release tag */}
+
+    **You should see:** typing `@` open the mention picker and `/` open the slash/skill palette, the model-selector chip and **Ask / Plan / Act** toggle present in the composer, and your sent message anchored at the top of the transcript.
+  </Step>
+
+  <Step title="Read the streaming reply, tool-call cards, and side rail">
+    The agent's reply **streams in live**, token by token — text appears incrementally as formatted markdown prose, with a typing-dots indicator and an accent caret while it streams, rather than arriving all at once when the turn finishes.
+
+    The wait before the first tokens is the **model's own thinking time**, not a fixed delay in the agent. A collapsible reasoning rail shows a live **Thinking… Ns** timer that fills the wait and collapses to **Thought for Xs** when done. There is no fixed duration or SLA — the timer surfaces however long the model takes.
+    {/* ACCURACY-AUDIT-PENDING: streaming markdown + typing dots + accent caret, and the "Thinking… Ns" → "Thought for Xs" reasoning rail labels — verify against the app on the release tag */}
+
+    As the agent works, it renders tool output as structured, clickable elements:
+
+    - **Tool-call cards** — when the agent calls a tool, the call appears as a card with a plain-language verb-and-object summary (for example, the records it is looking up), never raw arguments.
+    - **A clickable object table** — when the agent returns multiple records, they render as a table of real rows with human-readable labels, not bare IDs. Click a row to open that record's fly-in in context.
+    - **A single-record card** — a one-record reference renders as a card with a label and description (no bare ID); click it to open the real record's fly-in.
+
+    {/* ACCURACY-AUDIT-PENDING: tool-call card verb+object summaries, the clickable object table opening a real record fly-in, and the single-record reference card — verify against the app on the release tag */}
+
+    <Frame caption="Capture pending — a tool-call card and the clickable object table rendered in the transcript.">
+      {/* CAPTURE-PENDING: trust-agent tool-call card + clickable object table still — capture from the release tag and replace this placeholder */}
+      <img src="/images/sessions-list-overview.png" alt="Placeholder — a clickable object table of records in the agent transcript" />
+    </Frame>
+
+    Alongside the transcript, a **side rail** tracks the task in three sections, in order:
+
+    1. **Progress** — the plan and live step counts.
+    2. **Context** — the entities the task is working with.
+    3. **Outputs** — per-entity rows of what the agent created, updated, or ran, each deep-linking to a fly-in.
+
+    The side rail is hidden when the active task has no referenced entities.
+    {/* ACCURACY-AUDIT-PENDING: side-rail section order Progress → Context → Outputs, Outputs rows deep-linking to fly-ins, and the rail hidden when no entities are referenced — verify against the app on the release tag */}
+
+    <Frame caption="Capture pending — the Progress / Context / Outputs side rail beside the transcript.">
+      {/* CAPTURE-PENDING: trust-agent side-rail still (Progress, Context, Outputs sections) — capture from the release tag and replace this placeholder */}
+      <img src="/images/sessions-flyin-panel.png" alt="Placeholder — the Trust Agent side rail with Progress, Context, and Outputs sections" />
+    </Frame>
+
+    **You should see:** the reply stream in as markdown, a **Thinking… Ns** timer fill the wait, tool calls render as readable cards, multiple records render as a clickable table, and a **Progress** / **Context** / **Outputs** side rail track the task.
+  </Step>
+
+  <Step title="Answer a clarifying question">
+    For an open-ended or ambiguous request, the agent's first move is to **ask a clarifying question rather than act**. A question card appears in the composer slot — it replaces the composer while it is open — and nothing runs until you answer.
+
+    Single- and multi-question cards offer drafted choices plus a write-in **Other** option, and the card can be dismissed. A multi-question flow lets you move back and forth between questions before you submit; on submit, the agent resumes with your answers.
+    {/* ACCURACY-AUDIT-PENDING: clarify-question card replaces the composer, offers a write-in "Other" option, supports back/forward navigation across questions, and can be dismissed — verify against the app on the release tag */}
+
+    The prototype below is the multi-question clarify flow: move between questions, type a write-in answer, and submit to see the answers echoed back as a resolved card.
+
+    <Frame caption="Interactive prototype — a multi-question clarification card. Design reference.">
+      <iframe src="/demos/qa-flow.html" width="100%" height="660" style={{border:0}}
+              loading="lazy" allow="fullscreen" title="Multi-question clarification prototype" />
+    </Frame>
+
+    <Info>
+      The question copy in the prototype is illustrative only. The shipped agent draws its questions from your actual request — the embed shows the *interaction*, not specific wording.
+    </Info>
+
+    **You should see:** an ambiguous request surface a clarifying-question card in place of the composer, the run pause until you answer, a write-in **Other** field alongside the drafted choices, and your answers echoed back when you submit.
+  </Step>
+
+  <Step title="Know that writes pause for your approval">
+    When the agent proposes a **write** — creating, updating, or deleting a record — it pauses for your approval before doing anything. A permission card appears and the run waits until you decide; only an approved write executes. The agent only ever sees and acts on your **current organization's** Project data, so its work is scoped to your tenant.
+    {/* ACCURACY-AUDIT-PENDING: a proposed write surfaces a permission card and the run pauses until approved; the agent acts only on the current org's project data — verify against the app on the release tag */}
+
+    The full approval flow — the permission card, the rich write preview, approve-and-execute, and the audit echo — is its own recipe.
+
+    **You should see:** any create / update / delete proposal pause behind a permission card before it runs. To work through that flow end to end, continue to [Approve agent writes](/how-to/approve-agent-writes).
+  </Step>
+</Steps>
+
+## Common stumbles
+
+<AccordionGroup>
+  <Accordion title="The reply takes a while before any text appears">
+    That wait is the model's own thinking time (time to first token), not a stall in the agent. The reasoning rail's **Thinking… Ns** timer fills it and a working indicator shows the run is live; once tokens start, the reply streams in. There is no fixed timeout you can shorten from the UI — different models think for different lengths of time.
+  </Accordion>
+
+  <Accordion title="The agent asked a question instead of doing what I asked">
+    That is by design. For an ambiguous or open-ended request, the agent clarifies first and pauses until you answer — the question card replaces the composer. Answer the card (or pick **Other** and write your own answer) and the run resumes. If you want fewer interruptions for a well-specified task, send it in **Act** mode.
+  </Accordion>
+
+  <Accordion title="I asked the agent to change something and nothing happened yet">
+    Writes pause for approval. The agent surfaces a permission card describing the change and waits — nothing is created, updated, or deleted until you approve. See [Approve agent writes](/how-to/approve-agent-writes).
+  </Accordion>
+
+  <Accordion title="The side rail isn't showing">
+    The side rail is hidden when the active task has no referenced entities. Send a request that touches real records (for example, asking the agent to find Sessions) and the **Progress** / **Context** / **Outputs** rail appears.
+  </Accordion>
+</AccordionGroup>
+
+## Related reading
+
+- **[Trust Agent](/concepts/trust-agent)** — the concept page: the runtime, the full shell / transcript / side-rail model, and the disambiguation from Agent Versions in depth
+- **[Approve agent writes](/how-to/approve-agent-writes)** — the human-in-the-loop write-approval flow this page points to
+- **[Simulate with Scenarios](/how-to/simulate-with-scenarios)** — drive the agent against personas and goals in the Playground
+- **[Evaluate with the Trust Agent](/tutorials/evaluate-with-the-trust-agent)** — the end-to-end walkthrough that ties this into a full evaluation
+- **[Agent Versions](/concepts/agent-versions)** — the *other* "agent": the customer's agent under test, never explained here, only kept distinct

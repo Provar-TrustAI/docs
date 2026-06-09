@@ -26,7 +26,11 @@ If you skipped any of that, go back — calibration only works against real Anno
 
 <Steps>
   <Step title="Pick a Dataset to anchor the Evaluator">
-    Open your Project, navigate to **Datasets**, click the Dataset you created in the quickstart ("Order-status happy path" or similar).
+    <Note>
+      *Ask the Trust Agent:* "Open the Dataset I made in the quickstart — the order-status happy path one."
+    </Note>
+
+    You'll see the Dataset detail view with at least one row; or do it by hand: open your Project, navigate to **Datasets**, and click the Dataset you created in the quickstart ("Order-status happy path" or similar).
 
     The rows in this Dataset are what your Evaluator will be calibrated against. You don't need many — even one well-annotated row is enough to write a draft rubric. Three to five is the sweet spot for first-pass calibration; you can grow the set later.
 
@@ -34,7 +38,11 @@ If you skipped any of that, go back — calibration only works against real Anno
   </Step>
 
   <Step title="Open the Evaluator builder">
-    From the Project home, navigate to **Evaluators → New Evaluator**. Select **LLM Judge** as the evaluator kind, then choose **pass/fail** as the score type.
+    <Note>
+      *Ask the Trust Agent:* "Start a new LLM Judge evaluator with a pass/fail score."
+    </Note>
+
+    You'll land in the create flow with **LLM Judge** and **pass/fail** preselected; or do it by hand: from the Project home, navigate to **Evaluators → New Evaluator**, select **LLM Judge** as the evaluator kind, then choose **pass/fail** as the score type.
 
     The create flow walks you through:
 
@@ -46,7 +54,11 @@ If you skipped any of that, go back — calibration only works against real Anno
   </Step>
 
   <Step title="Write a plain-English rubric">
-    The rubric has four parts. Here's a working example for the order-status flow we curated in the quickstart:
+    <Note>
+      *Ask the Trust Agent:* "Draft a pass/fail rubric for the order-status flow — it should check that the agent identified the order ID, gave the actual current status, and explained the next step."
+    </Note>
+
+    The Trust Agent will populate the rubric editor with a first draft you can refine; or write it by hand in the editor. The rubric has four parts. Here's a working example for the order-status flow we curated in the quickstart:
 
     **System prompt:**
 
@@ -82,7 +94,11 @@ If you skipped any of that, go back — calibration only works against real Anno
   </Step>
 
   <Step title="Calibrate against your Annotations">
-    In the calibration panel on the right, pick the Dataset from step 1. The Evaluator runs against every row in the Dataset and shows you, per row:
+    <Note>
+      *Ask the Trust Agent:* "Calibrate this rubric against my order-status dataset and show me where it disagrees with my annotations."
+    </Note>
+
+    Or do it by hand: in the calibration panel on the right, pick the Dataset from step 1. The Evaluator runs against every row in the Dataset and shows you, per row:
 
     - The Evaluator's score (pass/fail) + the reasoning it captured
     - The human Annotation on that row
@@ -102,31 +118,13 @@ If you skipped any of that, go back — calibration only works against real Anno
   </Step>
 
   <Step title="Save and reuse">
-    Once agreement is high, click **Save Evaluator**. Give it a name (e.g., "Order status — three-part rubric"), an optional description, and confirm.
+    <Note>
+      *Ask the Trust Agent:* "Save this evaluator as 'Order status — three-part rubric'."
+    </Note>
 
-    The Evaluator is now in your Project's Evaluator library. Any future [Evaluation](/concepts/evaluations) — against any Dataset, against any Agent Version — can apply this Evaluator. It's reusable; that's the whole point.
+    Or do it by hand: once agreement is high, click **Save Evaluator**, give it a name (e.g., "Order status — three-part rubric"), an optional description, and confirm.
 
-    Or via the API:
-
-    <CodeGroup>
-      ```bash curl
-      curl -X POST https://api.provar.dev/v1/evaluators \
-        -H "Authorization: Bearer $TRUST_AI_TOKEN" \
-        -H "Content-Type: application/json" \
-        -d @evaluator.json
-      ```
-
-      ```typescript TypeScript
-      const evaluator = await client.evaluators.create({
-        project_id: project.id,
-        name: "Order status — three-part rubric",
-        type: "llm_judge",
-        system_prompt: "You are reviewing a customer-support agent...",
-        criteria: "A passing response must: (a)... (b)... (c)...",
-        scale: "binary",
-      });
-      ```
-    </CodeGroup>
+    The Evaluator is now in your Project's Evaluator library. Any future [Evaluation](/concepts/evaluations) — against any Dataset, against any Agent Version — can apply this Evaluator. It's reusable; that's the whole point. If you'd rather create Evaluators programmatically, the endpoint is in the [API Reference](/api-reference).
 
     **You should see:** the Evaluators list now shows your new Evaluator, ready to apply.
   </Step>

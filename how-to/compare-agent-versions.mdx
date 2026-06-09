@@ -26,7 +26,11 @@ If you find yourself wanting to compare two Evaluations that **don't share a Dat
   <Step title="Pick the two Evaluations to compare">
     Both Evaluations must have run **the same Dataset** and **the same Evaluator(s)**. The only variable allowed to differ is the **Agent Version**.
 
-    From the Project home, navigate to **Evaluations** and either:
+    <Note>
+    *Ask the Trust Agent:* "Compare my last two Evaluations of the order-status agent on the order-status happy-path dataset."
+    </Note>
+
+    The Trust Agent opens the comparison view on the two eligible runs. To do it by hand: from the Project home, navigate to **Evaluations** and either:
     - **Open one Evaluation and click "Compare"** — Trust AI surfaces the eligible comparison runs (same Dataset + Evaluators, different Agent Version) in a dropdown
     - **Select two Evaluations** from the list and click **Compare** in the bulk action bar
 
@@ -34,7 +38,11 @@ If you find yourself wanting to compare two Evaluations that **don't share a Dat
   </Step>
 
   <Step title="Read the aggregate diff">
-    The top of the comparison view shows the aggregate-level diff:
+    <Note>
+    *Ask the Trust Agent:* "Summarize the headline difference between these two versions — pass rate, failures, and latency."
+    </Note>
+
+    The Trust Agent reads back the deltas in plain language; the same numbers sit at the top of the comparison view for you to scan yourself. The aggregate-level diff looks like this:
 
     ```
     Dataset: Order-status happy path  (n=120)
@@ -56,7 +64,11 @@ If you find yourself wanting to compare two Evaluations that **don't share a Dat
   </Step>
 
   <Step title="Drill into the per-row deltas">
-    Below the aggregate, the per-row table shows every Dataset row's score under both Agent Versions, sorted by **delta direction**:
+    <Note>
+    *Ask the Trust Agent:* "Show me the rows that regressed — passed on the old version, failed on the candidate."
+    </Note>
+
+    The Trust Agent pulls up the regression rows for you to read; you can also scroll the per-row table directly. Below the aggregate, that table shows every Dataset row's score under both Agent Versions, sorted by **delta direction**:
 
     - **Regressions** (passed → failed) at the top — the rows that matter most
     - **Improvements** (failed → passed) next
@@ -83,7 +95,11 @@ If you find yourself wanting to compare two Evaluations that **don't share a Dat
   <Step title="Handle flapping rows">
     A flapping row is one where **the same Evaluator gives the same Agent Version a different score on different runs**. That's a calibration smell, not an agent regression.
 
-    Trust AI flags these with a yellow icon. Common causes:
+    <Note>
+    *Ask the Trust Agent:* "Which of these regressions are flapping rows rather than real agent changes?"
+    </Note>
+
+    The Trust Agent separates the flapping rows from the real regressions; in the table they carry a yellow icon you can spot at a glance. Common causes:
 
     - Evaluator temperature > 0 — fix: set to 0 on the judge model
     - Criteria are ambiguous enough that the judge picks a different interpretation per-call — fix: tighten the rubric (see [Write an effective LLM-judge prompt](/how-to/write-llm-judge-prompt))
@@ -93,7 +109,11 @@ If you find yourself wanting to compare two Evaluations that **don't share a Dat
   </Step>
 
   <Step title="Make the call">
-    With the per-row reading done, the decision usually fits one of three shapes:
+    <Note>
+    *Ask the Trust Agent:* "Mark the candidate as the new production version and note that the partial-match regression is acceptable for now." (Or, to block: "Keep the old version in production — the candidate has real regressions.")
+    </Note>
+
+    The Trust Agent promotes or holds the version and writes your rationale to the candidate's notes; you can do the same from the version's menu in the UI. With the per-row reading done, the decision usually fits one of three shapes:
 
     - **Ship the candidate.** Regressions are absent or all explainable as calibration noise / stale rows. Mark the candidate as the new production Agent Version; archive or demote the prior one.
     - **Block and investigate.** Real regressions in a category that matters. Hand the failed rows to the team owning the agent with the comparison link as the artifact.
@@ -123,33 +143,15 @@ The call: **block and investigate**. The 5 real regressions are localized and fi
 
 This kind of read takes ~15 minutes once you're fluent. Most of that is the per-row drilldown; the aggregate-level decision is usually obvious in under a minute.
 
-## Programmatic comparison
+## Gating deploys on the comparison
 
-The comparison view is also available via API for teams that want to gate deploys on regression-rate thresholds:
-
-<CodeGroup>
-  ```bash curl
-  curl -X POST https://api.provar.dev/v1/evaluations/$EVAL_A/compare/$EVAL_B \
-    -H "Authorization: Bearer $TRUST_AI_TOKEN"
-  ```
-
-  ```typescript TypeScript
-  const comparison = await client.evaluations.compare(evalA.id, evalB.id);
-
-  if (comparison.regressions.length > comparison.improvements.length) {
-    console.error("Net regression detected — blocking deploy");
-    process.exit(1);
-  }
-  ```
-</CodeGroup>
+Teams that want a deploy pipeline to block automatically on regressions can run the same comparison programmatically and read its regression and improvement counts; see the [API Reference](/api-reference) for the endpoint and response shape.
 
 Common gating policies:
 
 - **Hard fail on any regression in a specific category** — for surface area where any regression is unacceptable
 - **Soft warn on Δ pass rate < −2pp** — for general regression monitoring
 - **Block if any new failure has high Annotation priority** — for high-risk customer flows
-
-Full request/response shapes in the [API Reference](/api-reference).
 
 ## Related reading
 

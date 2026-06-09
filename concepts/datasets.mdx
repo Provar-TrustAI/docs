@@ -40,7 +40,7 @@ Three paths:
 
 <CardGroup cols={2}>
   <Card title="From annotated Sessions" icon="message-square">
-    The most common path. You annotate Sessions, filter to the ones worth testing against, bulk-add them to a Dataset. The human judgment travels with each row.
+    The most common path. You annotate Sessions, filter the Sessions list to the ones worth testing against, and bulk-add them to a Dataset — either from the list itself or by asking the Trust Agent to add them. The human judgment travels with each row.
   </Card>
   <Card title="Manual entry in the app" icon="pencil">
     Write prompts directly in the Dataset editor — useful for edge cases you anticipate before they happen in production, or for prompts that need synthetic data.
@@ -48,8 +48,8 @@ Three paths:
   <Card title="CSV upload" icon="upload">
     Drop in a CSV with columns for input, reference output, and tags. Useful for migrating existing test suites from spreadsheets or other tools.
   </Card>
-  <Card title="API ingestion" icon="code">
-    `POST /v1/datasets/{id}/rows` for programmatic curation. Useful when integrating Trust AI into an existing test-authoring workflow.
+  <Card title="Ask the Trust Agent" icon="sparkles">
+    Tell the Trust Agent which sessions to curate ("add the failing refund sessions to my regression set") and it adds the rows for you. Useful when you'd rather describe the set than click through it. Developers integrating Trust AI into an existing test-authoring workflow can find the row-ingestion endpoint in the [API Reference](/api-reference).
   </Card>
 </CardGroup>
 

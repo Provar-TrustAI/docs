@@ -1,0 +1,218 @@
+---
+title: "Trust Agent"
+icon: "bot"
+description: "The in-app assistant for evaluation work. It streams its reasoning, renders tool results as clickable records, and pauses for approval before any write."
+---
+
+The Trust Agent is the in-app assistant that helps you do evaluation work inside a [Project](/concepts/projects). You ask it to find sessions, build a dataset, draft an evaluator, run an evaluation, or analyze a regression — and it works in the open: streaming its reasoning, surfacing real records you can click into, planning before it acts, and pausing for your approval before it changes anything.
+
+It lives at `/projects/:id/agent` and is the default, flag-free experience on every project. The legacy agent implementation is gone — there is no `?v2`, `?agui`, or `?legacy` flag to opt into; the Trust Agent you see is the only one there is.
+{/* ACCURACY-AUDIT-PENDING: the Trust Agent renders by default at /projects/:id/agent and the ?v2 / ?agui / ?legacy flags are inert/removed — verify by driving the route on the release tag */}
+
+<Note>
+  **The Trust Agent is not an Agent Version.** They share the word "agent," but they are different concepts:
+
+  - The **Trust Agent** (this page) is *your* assistant inside Trust AI — the thing that helps you build and run evaluations.
+  - An **[Agent Version](/concepts/agent-versions)** is the *customer's agent under test* — a pinned snapshot of the agent you are judging.
+
+  The Trust Agent helps you evaluate Agent Versions. It is never itself "a version." Everywhere this page says "the agent," it means the Trust Agent.
+</Note>
+
+## The three shells
+
+The Trust Agent runs from a single instance that can show up in three shells, and your conversation moves with you between them:
+
+- **Full page** — the agent occupies the project content pane, with the streaming transcript, composer, and side rail.
+- **Docked panel** — a compact panel overlaying whatever tab you're on, so you can keep a conversation going while you work elsewhere.
+- **Collapsed pill** — a minimized indicator that gets out of your way until you need it.
+
+It is one mount, not three separate widgets. Switching from full to docked to pill and back preserves the transcript and the conversation state — it is the same session throughout. Because the agent is mounted at the app root, the chat survives navigation between core nav tabs: move to **Scenarios** or **Evaluations** and back, and your conversation is still there, not reset.
+{/* ACCURACY-AUDIT-PENDING: chat/thread state persists across full→docked→pill transitions AND across nav-tab navigation (one app-root mount, not remounted per page) — verify by driving the shells on the release tag */}
+
+When a project has no active agent task, the agent resolves to the minimized pill so it stays out of the way. If a backgrounded conversation hits an approval gate, the docked view auto-expands to surface the card that needs your decision.
+{/* ACCURACY-AUDIT-PENDING: no-active-task resolves to the pill; an approval gate while minimized auto-expands the docked view — verify by driving the app on the release tag */}
+
+The embed below is the clearest way to feel the three shells. Minimize a running chat to the dock, collapse it to the pill, then re-expand it — the conversation state carries across.
+
+<Frame caption="Interactive prototype — the full, docked, and pill shells. Design reference.">
+  <iframe src="/demos/floating-chat.html" width="100%" height="640" style={{border:0}}
+          loading="lazy" allow="fullscreen" title="Floating chat prototype — full, docked, and pill shells" />
+</Frame>
+
+### Recent chats and persistence
+
+A floating chat selector lists your recent chats, most-recent first, each with a per-chat status. An unread-indicator dot appears only on chats that actually have unread messages, so the list reads clean. Those recent chats are unified onto the project's canonical task list — the same conversations show up wherever the project tracks work.
+{/* ACCURACY-AUDIT-PENDING: chat selector sorts most-recent-first, each shows a status, unread dot only on unread chats, and recent chats are the project's canonical task list — verify against the app on the release tag */}
+
+Transcripts are persisted. Reopen a chat from the selector and you get its real prior history, not an empty transcript. Starting a *new* chat opens a Welcome page whose welcome prompt is auto-sent as the first turn — so a new chat opens already streaming its first message rather than showing a blank canvas.
+{/* ACCURACY-AUDIT-PENDING: reopening a chat renders persisted history; a new chat opens with the Welcome message auto-streamed as turn one — verify by driving the app on the release tag */}
+
+In the full view the composer is anchored to the bottom of the content pane, and the core left nav (**Scenarios**, **Evaluators**, **Evaluations**, **Settings**) stays visible beside the agent — the assistant is seated *inside* the app, not floating over it.
+{/* ACCURACY-AUDIT-PENDING: full-view composer is bottom-anchored and the core left nav (Scenarios / Evaluators / Evaluations / Settings) stays visible beside it — verify route + exact nav labels against the app on the release tag */}
+
+## The streaming transcript
+
+The agent thinks and answers in the open. Reasoning, text, and tool-call arguments all stream live, token by token — a turn does not buffer silently until it finishes and then dump a wall of text. Because of that, an approval card can paint mid-turn, the moment the agent reaches the tool call that needs your decision, rather than only after the whole turn completes.
+{/* ACCURACY-AUDIT-PENDING: text/reasoning/tool-args stream incrementally and a HITL card can paint mid-turn at the tool call — verify by driving a streaming + write turn on the release tag */}
+
+<Tabs>
+  <Tab title="Formatted turns">
+    Agent turns render as markdown-formatted prose — lists, paragraphs, and emphasis, not raw text. While a turn streams you see a typing-dots indicator and an accent caret; when it lands you get clean formatted prose. New turns are anchored to the **top** of the transcript on send: the message you just sent scrolls up, so the agent's response streams into view beneath it rather than pushing everything off the bottom.
+    {/* ACCURACY-AUDIT-PENDING: markdown rendering + typing-dots + accent caret while streaming, and new turns anchor to the top on send — verify by driving the app on the release tag */}
+
+    <Frame caption="A streaming agent turn: markdown prose with the reasoning rail above it and a tool-call card for the work it did.">
+      <img src="/images/trust-agent-transcript.png" alt="The Trust Agent transcript showing a markdown-formatted reply, a collapsed reasoning rail, and a tool-call card summarizing a read in plain language" />
+    </Frame>
+    {/* CAPTURE-PENDING: trust-agent-transcript.png — a streaming turn with markdown prose, reasoning rail, and a tool-call card */}
+  </Tab>
+  <Tab title="Reasoning rail">
+    The model's thinking streams into a collapsible **reasoning rail**. While the agent is working you see a live **Thinking… *Ns*** timer filling the wait; when the reasoning resolves it collapses to **Thought for *Xs***, expandable if you want to read what the agent considered.
+    {/* ACCURACY-AUDIT-PENDING: reasoning rail shows a live "Thinking… Ns" timer and collapses to "Thought for Xs", expandable — verify exact labels by driving a reasoning model on the release tag */}
+
+    Any wait you feel before a response or an approval card is upstream **model thinking time**, not a runtime delay or a bug. The Thinking timer and a working indicator are there to make that unavoidable wait legible — there is no fixed duration or service-level promise, because the time depends on the model and the infrastructure it runs on. See [the runtime](#how-the-trust-agent-runs) below.
+  </Tab>
+  <Tab title="Tool-call cards">
+    When the agent calls a tool, the transcript shows a **tool-call card** with a plain-language verb-plus-object summary of what it did — "searched your sessions," "created an evaluator" — never raw arguments or a dump of JSON. A failed call gets an error/danger state, and a deletion gets a delete-receipt pattern that shows what was removed and what depended on it.
+    {/* ACCURACY-AUDIT-PENDING: tool-call cards show a humanised verb+object summary (no raw JSON), with an error state for failures and a delete-receipt for deletions — verify by triggering read/failing/delete tools on the release tag */}
+
+    Tools that only drive the side rail — the planning steps and rail folds — deliberately do **not** emit their own card in the transcript. Their effect *is* the side rail, so they leave no redundant receipt in the conversation. When history gets long enough to be condensed, a visual compaction marker is shown between the condensed and live turns so you can see where the transcript was summarized.
+    {/* ACCURACY-AUDIT-PENDING: side-rail-control tools suppress their transcript card; a compaction marker renders between condensed and live turns — verify by driving a planning turn and a long conversation on the release tag */}
+  </Tab>
+</Tabs>
+
+## Tool results as clickable records
+
+The Trust Agent doesn't describe your records in paragraphs — it hands you the real things. When a tool result returns multiple records, they render as a **clickable object table** right in the chat: rows of real, human-readable records, no bare IDs. Click a row and the real record's fly-in opens in context, the same fly-in you'd get from the Sessions or Evaluations surface.
+{/* ACCURACY-AUDIT-PENDING: multi-object tool results render as a clickable table whose rows deep-link into real record fly-ins — verify by asking the agent for multiple records on the release tag */}
+
+<Accordion title="Single references, sub-entities, and evaluation results">
+  A single-object reference carries a human label and description instead of a UUID; clicking it opens the real, in-context record fly-in. A reference to a sub-entity resolves to its *parent* record's fly-in, so you always land somewhere real. For an evaluation result, the transcript renders an inline failure-analysis widget; opening an evaluator reference opens the real evaluator panel — not a placeholder.
+  {/* ACCURACY-AUDIT-PENDING: single references show label+description (no UUID) and open the real fly-in; sub-entity references resolve to the parent fly-in; eval-result references render an inline failure-analysis widget and evaluator references open the real evaluator panel — verify by driving these reference types on the release tag */}
+
+  <Frame caption="A multi-object tool result rendered as a clickable table in chat — each row is a real record that opens a fly-in.">
+    <img src="/images/trust-agent-object-table.png" alt="A clickable object table inside an agent chat turn, with rows of human-readable records that deep-link into record fly-ins" />
+  </Frame>
+  {/* CAPTURE-PENDING: trust-agent-object-table.png — a clickable multi-object table in chat with a record fly-in */}
+</Accordion>
+
+## The Progress / Context / Outputs side rail
+
+While the agent plans and works, a side rail tracks what's happening, in three sections in this order:
+
+1. **Progress** — the plan. Step counts and live execution status tick as the agent works through its task list.
+2. **Context** — the entities the agent is referencing for this task.
+3. **Outputs** — per-entity rows of what the agent created, updated, or ran, each deep-linking into a fly-in.
+
+The rail persists across the plan-then-execute phases, so it stays a stable map of the work rather than resetting between steps. It is hidden entirely when the active task has no referenced entities — no empty rail for a task that doesn't touch records.
+{/* ACCURACY-AUDIT-PENDING: side rail sections are labeled Progress / Context / Outputs in that order, track live step counts/context/outputs with deep-link fly-ins, persist across plan→execute, and the rail is hidden when there are no referenced entities — verify by driving a plan+execute turn on the release tag */}
+
+<Accordion title="See the side rail">
+  <Frame caption="The side rail: Progress (the plan, with step counts), Context (referenced entities), and Outputs (what the agent created or ran).">
+    <img src="/images/trust-agent-side-rail.png" alt="The Trust Agent side rail showing a Progress section with plan steps, a Context section of referenced entities, and an Outputs section of created and updated records" />
+  </Frame>
+  {/* CAPTURE-PENDING: trust-agent-side-rail.png — the Progress / Context / Outputs side rail */}
+</Accordion>
+
+## Human-in-the-loop approvals
+
+The Trust Agent stops for you before it does anything consequential. Approvals use an **interrupt shell** that replaces the composer in its slot and hosts three kinds of card:
+
+- A **permission card** — gates a write. When the agent emits a write tool, the run halts at that tool call and waits for your decision before continuing.
+- A **single-question card** — one clarifying question.
+- A **multi-question flow card** — a short sequence of clarifying questions with back-navigation between them.
+
+Permission cards are rich: the write preview shows the **diff**, the **dependencies**, and the **proposed end state** before you decide — not a bare ID you'd have to trust blindly. Approving a write actually executes it on the real agent run path: your **Approve** resumes the run and the mutation lands. It is not a preview that quietly does nothing.
+{/* ACCURACY-AUDIT-PENDING: the interrupt shell replaces the composer and hosts permission / single-question / multi-question cards; permission cards halt the run; write previews show diff/dependencies/proposed state; Approve executes the real write — verify by triggering writes and clarifies on the release tag */}
+
+Single- and multi-question cards offer a write-in **Other** option alongside the drafted choices, and the cards are dismissible. Once you answer, the decision is recorded in the transcript as a resolved state that echoes back what you chose (and the per-question answers for a multi-question flow) — an audit trail that persists after the turn finishes. And if an approval gate is reached while the agent is minimized, a backgrounded-approval-request indicator surfaces on the shells, so you know a decision is pending without the full view open.
+{/* ACCURACY-AUDIT-PENDING: question cards offer a write-in "Other" and are dismissible; resolved decisions echo back into the transcript as a persistent audit trail; a backgrounded-gate indicator surfaces on the shells — verify by driving these flows on the release tag */}
+
+<Accordion title="See a permission card">
+  <Frame caption="A permission card in the composer slot, showing the write preview — the diff, dependencies, and proposed end state — before you approve.">
+    <img src="/images/trust-agent-permission-card.png" alt="A Trust Agent permission card replacing the composer, with a rich write preview showing the diff, dependencies, and proposed end state, and Approve and dismiss actions" />
+  </Frame>
+  {/* CAPTURE-PENDING: trust-agent-permission-card.png — a permission/write-preview interrupt card in the composer slot */}
+</Accordion>
+
+The full approval flow — the three card types, the rich previews, and what "approve and execute" actually does to your data — is the subject of its own guide: [Approve agent writes](/how-to/approve-agent-writes).
+
+## The composer, modes, and skills
+
+The composer is where you drive the agent, and it's rich: an **@** picker for mentions, a **/** palette for slash commands and skills, an inline model selector chip, an **Ask** / **Plan** / **Act** mode toggle, and a plan-confirm bar.
+{/* ACCURACY-AUDIT-PENDING: composer has @ mention picker, / slash+skill palette, inline model selector, Ask/Plan/Act toggle, and a plan-confirm bar — verify by driving the composer on the release tag */}
+
+<Frame caption="The composer: the Ask / Plan / Act mode toggle, the inline model selector, and the @ and / pickers.">
+  <img src="/images/trust-agent-composer.png" alt="The Trust Agent composer showing the Ask / Plan / Act mode toggle, an inline model selector chip, and the @-mention and slash-command pickers" />
+</Frame>
+{/* CAPTURE-PENDING: trust-agent-composer.png — the composer with mode toggle, model selector, and @/slash pickers */}
+
+### Ask, Plan, Act
+
+The mode toggle picks how the agent works. The labels are human — **Ask**, **Plan**, **Act** — never raw wire tokens:
+
+| Mode | What it does |
+|---|---|
+| **Ask** | Clarifies first and pauses for approval before each action — the most cautious mode. |
+| **Plan** | Researches and proposes a task list for you to confirm. No changes happen yet. |
+| **Act** | Plans and executes end-to-end without pausing between steps. |
+
+In **Plan** mode the agent refines the *existing* plan instead of throwing it away and starting over, and a typed confirmation is what triggers the transition from planning to execution — nothing changes until you confirm.
+{/* ACCURACY-AUDIT-PENDING: three modes labeled Ask / Plan / Act with these semantics; Plan refines the existing plan; a typed confirmation moves planning→execution — verify by driving each mode on the release tag */}
+
+### Clarify-first
+
+Underneath the modes, the runtime enforces two gates. On an open-ended request the agent's first move is to **ask a clarifying question** — no preamble before the question, just the question. And planning stops for your confirmation before any write executes. The agent would rather ask than guess.
+{/* ACCURACY-AUDIT-PENDING: an ambiguous request surfaces a clarifying-question card as the first action (no preamble), and plans stop for confirmation before any write — verify by sending an ambiguous request on the release tag */}
+
+### The model selector
+
+The inline model selector lets you pick the model for the session as a price-performance control. Its default is the **quality** model. It deliberately shows you **no cost or latency figure** — those stay internal. You choose how much horsepower a conversation gets; you don't get a billing readout in the middle of your work.
+{/* ACCURACY-AUDIT-PENDING: the in-composer model selector sets the session model, defaults to the quality tier, and renders no cost/latency figure anywhere in the agent UI — verify by opening the selector on the release tag */}
+
+### Skills
+
+Skills are first-class. A skills registry backs the **/** palette, and a skills editor modal lets you create, edit, and delete skills — with the slash palette live-refreshing on every change. When you edit a skill, the editor pre-fills with its existing content. An **@**-mention is pre-loaded and grounded: mention a known entity and it's handed to the agent directly, so the agent skips a redundant search to go find it.
+{/* ACCURACY-AUDIT-PENDING: the skills editor modal does create/edit/delete with a live-refreshing / palette and pre-fills on edit; an @-mentioned entity is passed to the agent without a redundant search — verify by driving the skills editor and an @-mention on the release tag */}
+
+## How the Trust Agent runs
+
+You don't need to know the plumbing to use the agent, but a little context helps. The Trust Agent runs on one unconditional streaming runtime: the front end consumes a streaming event protocol, and the back end emits those events from the agent loop, with the model streaming over an OpenAI-compatible path. The response markdown is pre-rendered to HTML server-side before it reaches you. This is the single runtime on every project — there's no second implementation behind a flag.
+
+This is the seam where latency lives, and it's worth being precise about it: any wait you feel is the **upstream model's thinking time**, surfaced honestly by the Thinking timer and a working indicator. It is not a runtime timer, not an SLA, and not a bug. How long it takes depends on the model you selected and the infrastructure it runs on, which is exactly why the agent shows a live timer instead of promising a number.
+
+<Note>
+  The internal routes and runtime details behind the Trust Agent are implementation, not a public API. There is no agent-runtime endpoint to call directly — you drive the agent through the app.
+</Note>
+
+## Security and scope
+
+Write execution is **tenant-scoped and server-anchored**. An approved write executes only within your own organization and project; the organization's tool-permission allowlist is enforced at agent turn time; and execution is bound to the specific approval you gave, not trusted from the client. The agent cannot act on another organization's data. The platform side of that boundary lives in [Multi-tenancy](/concepts/multi-tenancy).
+{/* ACCURACY-AUDIT-PENDING: approved writes execute only within the user's org/project, the permission allowlist is enforced at turn time, and execution is bound to the approval (not client-trusted) — verify behaviorally on the release tag */}
+
+The Trust Agent surface meets WCAG AA contrast, with axe-core checks enforced in CI. The interrupt cards move focus into the card when they appear, restore it on dismiss, and announce interrupt events to assistive technology — so approvals are reachable by keyboard and screen reader, not just by mouse.
+{/* ACCURACY-AUDIT-PENDING: interrupt cards move focus in and restore it on dismiss and announce to AT; surface meets WCAG AA contrast — verify focus behavior by triggering an interrupt card on the release tag */}
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="Work with the Trust Agent" icon="messages-square" href="/how-to/work-with-the-trust-agent">
+    The task recipe: open the agent, send a request through the rich composer, read the streaming reply, and handle a clarifying question.
+  </Card>
+  <Card title="Approve agent writes" icon="shield-check" href="/how-to/approve-agent-writes">
+    The full approval flow — the permission, single-question, and multi-question cards, rich write previews, and what approving actually executes.
+  </Card>
+  <Card title="Evaluate with the Trust Agent" icon="graduation-cap" href="/tutorials/evaluate-with-the-trust-agent">
+    The end-to-end walkthrough: drive a real evaluation from start to finish with the agent, including the full self-playing demo.
+  </Card>
+  <Card title="Agent Versions" icon="git-branch" href="/concepts/agent-versions">
+    The *other* "agent" — the customer's agent under test that the Trust Agent helps you evaluate. A distinct concept.
+  </Card>
+</CardGroup>
+
+## Related concepts
+
+- **[Agent Versions](/concepts/agent-versions)** — the agent under test; the Trust Agent helps you evaluate these, but is not one
+- **[Scenarios](/concepts/scenarios)** — persona-and-goal scenario sets the agent can act on
+- **[Playground](/concepts/playground)** — the chat-and-simulate surface that pairs with the agent
+- **[Multi-tenancy](/concepts/multi-tenancy)** — the organization boundary the agent's writes are scoped to
+- **[Projects](/concepts/projects)** — the workspace the Trust Agent works inside

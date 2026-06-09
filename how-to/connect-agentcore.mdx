@@ -10,7 +10,7 @@ This how-to covers the end-to-end setup for connecting an **AWS Bedrock AgentCor
 - Each AgentCore invocation will surface as a [Session](/concepts/sessions) in the Project, including Tool Calls and skill activations
 - Each AgentCore alias/version will surface as an [Agent Version](/concepts/agent-versions) in the Project
 
-The setup is a one-time IAM role grant. Once it's in place, ingestion is automatic and Sessions appear within minutes of agent activity.
+The setup is a one-time IAM role grant. Once it's in place, ingestion is automatic and Sessions appear within minutes of agent activity. After the connection is live, day-to-day work happens through the [Trust Agent](/concepts/trust-agent) and the UI — you observe ingested Sessions, track Agent Versions, and run Evaluations without touching AWS again.
 
 <Warning>
   This integration requires a **cross-account IAM trust relationship** between the Trust AI control plane and the AWS account hosting your AgentCore runtime. Coordinate with your cloud security owner before granting the role. The policy below is the minimum surface area Trust AI needs and should not be widened.
@@ -180,7 +180,7 @@ This is the customer-readable summary of ADR 0015 (the connector design decision
 
     In the AWS console, open the AgentCore agent → **Settings** → **Tracing**, enable **Detailed tracing**, and save. The change applies to **new invocations only** — historical Sessions captured before tracing was enabled will remain Tool-Call-less.
 
-    Alternative: if you can't enable tracing globally on the runtime, you can enable it per-invocation by including `traceLevel: "ENABLED"` in your `InvokeAgent` request.
+    Alternative: if you can't enable tracing globally on the runtime, you can request detailed tracing for a single invocation instead. See the [API Reference](/api-reference) for the per-invocation trace option.
   </Accordion>
 
   <Accordion title="Probe succeeds but no agents discovered">

@@ -1,7 +1,7 @@
 ---
 title: "Glossary"
 icon: "book-marked"
-description: "Trust AI domain language at a glance — same icons you'll see in the app."
+description: "Trust AI domain terms, with the same icons used in the app's navigation."
 ---
 
 The vocabulary of Trust AI. Icons match the Trust AI app's navigation, so the concept you read about here is the same concept you'll click on in product. Cards link through to dedicated concept pages where they exist.
@@ -28,7 +28,7 @@ The vocabulary of Trust AI. Icons match the Trust AI app's navigation, so the co
     A single run of one or more Evaluators across a Dataset, scoped to a specific Agent Version. The output is a scored, comparable, reviewable record per Dataset row.
   </Card>
   <Card title="Agent Version" icon="git-branch" href="/concepts/agent-versions">
-    A snapshot of the agent under test — prompt, model, tool set, deployment. Comparing two Agent Versions on the same Dataset under the same Evaluators is the core regression-testing loop.
+    A pinned, immutable snapshot of the agent **under test** — prompt, model, tool set, deployment. Comparing two Agent Versions on the same Dataset under the same Evaluators is the core regression-testing loop. Not to be confused with the [Trust Agent](#the-trust-agent), which is your assistant inside Trust AI.
   </Card>
 </CardGroup>
 
@@ -43,11 +43,74 @@ The vocabulary of Trust AI. Icons match the Trust AI app's navigation, so the co
   </Card>
 </CardGroup>
 
+## The Trust Agent
+
+The in-app assistant that does evaluation work alongside you. Everything in this section is the **Trust Agent** — your assistant inside Trust AI. It is *not* an [Agent Version](#core-entities), which is the customer's agent under test. The two share the word "agent" and nothing else.
+
+<Note>
+  **Trust Agent vs Agent Version.** The **Trust Agent** is the assistant that operates *on* your project — it finds Sessions, builds Datasets, and runs Evaluations for you. An **[Agent Version](/concepts/agent-versions)** is the agent *under test* — a pinned snapshot every Evaluation is scoped to. The Trust Agent helps you evaluate Agent Versions; it is never itself "a version."
+</Note>
+
+<CardGroup cols={2}>
+  <Card title="Trust Agent" icon="bot" href="/concepts/trust-agent">
+    The in-app AI assistant that helps you do evaluation work. It lives at `/projects/:id/agent`, streams its reasoning and replies in the open, surfaces real records you can click into, and pauses for your approval before it writes. Available by default on every project, with no feature flag required.
+  </Card>
+  <Card title="Shell" icon="layout-panel-left" href="/concepts/trust-agent">
+    One of the three forms the Trust Agent takes from a single instance — **full page**, **docked panel**, or **collapsed pill** — with your conversation state preserved as you switch between them. When a project has no active agent task, the Trust Agent resolves to the minimized pill.
+  </Card>
+  <Card title="Streaming transcript" icon="text-cursor" href="/concepts/trust-agent">
+    The running record of a Trust Agent conversation. Markdown-formatted turns stream token by token with a typing indicator and an accent caret, alongside a collapsible reasoning rail, tool-call cards, and a history-compaction marker. Transcripts are persisted, so reopening a chat shows its real prior history.
+  </Card>
+  <Card title="Side rail" icon="panel-right-open" href="/concepts/trust-agent">
+    The Trust Agent's contextual panel, in three sections in order: **Progress** (the live plan and step counts), **Context** (referenced entities), and **Outputs** (per-entity rows of what the agent created, updated, or ran, each deep-linking to a real record fly-in). Hidden when the active task references no entities.
+  </Card>
+  <Card title="HITL approval" icon="hand" href="/concepts/trust-agent">
+    A human-in-the-loop approval — an interrupt card that replaces the composer and pauses the agent run until you decide. **Permission cards** gate writes; **single-** and **multi-question cards** gather clarification. Approving a write executes it on the real run path, and the resolved decision is recorded in the transcript as an audit trail.
+  </Card>
+  <Card title="Write preview" icon="file-diff" href="/concepts/trust-agent">
+    The rich preview on a permission card that shows a proposed write before you approve it — the **diff**, the **dependencies**, and the **proposed end state** — not a bare ID you'd have to trust blindly. Pairs with the [Approve agent writes](/how-to/approve-agent-writes) guide.
+  </Card>
+  <Card title="Skill" icon="puzzle" href="/concepts/trust-agent">
+    A reusable capability the Trust Agent can invoke — for example, drafting an LLM Judge rubric or summarizing Sessions that match a filter. Skills are first-class: a registry backs the composer's **/** palette, and a skills editor lets you create, edit, and delete them.
+  </Card>
+  <Card title="Task" icon="list-checks" href="/concepts/trust-agent">
+    A unit of work the Trust Agent plans and executes by composing Skills — how the assistant gets things done without you leaving the product. Each conversation is backed by a task, and recent chats live on the project's canonical task list.
+  </Card>
+</CardGroup>
+
+## Scenarios and simulation
+
+<CardGroup cols={2}>
+  <Card title="Scenario" icon="users-round" href="/concepts/scenarios">
+    A persona-and-goal test case for exercising an agent. **Scenarios** is the UI label for the surface the former **Datasets** list converged to — same route `/projects/:id/datasets`, same `/v1/datasets` API, now with **Persona** and **Goal** columns. There is no separate scenarios endpoint; a Scenario is a Dataset row with a persona and a goal.
+  </Card>
+  <Card title="Persona" icon="circle-user-round" href="/concepts/scenarios">
+    A reusable synthetic-user profile that role-plays the user side of a scenario or simulation. Personas are managed in a **Manage Personas** modal; at most one persona per project can be the default, and the list shows each persona's usage count.
+  </Card>
+  <Card title="Goal" icon="target" href="/concepts/scenarios">
+    The objective the synthetic user (the persona) is trying to accomplish in a scenario or simulation. Paired with a persona, a non-empty goal is what makes a scenario row **simulatable** — both are required.
+  </Card>
+  <Card title="Playground" icon="flask-conical" href="/concepts/playground">
+    A per-project surface at `/projects/:id/playground` for chatting with and simulating against a connected agent. An agent picker and a **Chat / Simulate** mode toggle: **Chat** is live manual conversation; **Simulate** auto-drives a persona-to-agent conversation from one persona and one goal.
+  </Card>
+  <Card title="Simulation" icon="bot-message-square" href="/concepts/playground">
+    An automated persona-to-agent conversation. The same primitive powers the Playground's **Simulate** mode and **Simulate at eval time**, where the evaluation worker drives a fresh persona-and-goal conversation per simulatable scenario row instead of replaying stored input turns. The captured transcript renders in the [evaluation](/concepts/evaluations) result detail fly-in.
+  </Card>
+</CardGroup>
+
+## Tenancy
+
+<CardGroup cols={2}>
+  <Card title="Organization (tenant)" icon="building-2" href="/concepts/multi-tenancy">
+    The top-level account boundary every Project belongs to. `organization_id` is enforced **NOT NULL** across the data model behind a shared tenant guard, so a Trust AI session only ever sees and acts on the current organization's data. The org/tenant footer reads **Tenant · Role**.
+  </Card>
+</CardGroup>
+
 ## UI patterns
 
 <CardGroup cols={2}>
   <Card title="Saved View" icon="bookmark" href="/concepts/saved-views">
-    A named, persisted combination of filters, sort order, and column configuration for a list surface. Save a lens on your data and share it with your team.
+    A named, persisted combination of filters, sort order, and column configuration for a list surface. Views can be saved per user and shared with the team.
   </Card>
   <Card title="Fly-in panel" icon="panel-right">
     A slide-out detail panel that opens from the right when you click a row in Sessions, Datasets, or Evaluations. Shows the full transcript, metadata, and contextual actions without leaving the list.
@@ -65,16 +128,5 @@ The vocabulary of Trust AI. Icons match the Trust AI app's navigation, so the co
 <CardGroup cols={2}>
   <Card title="MCP Server" icon="cable" href="/concepts/mcp-integration">
     The Model Context Protocol endpoint that lets external AI agents and IDEs read and write Trust AI data. Authenticated via WorkOS; write operations require approval.
-  </Card>
-</CardGroup>
-
-## Paddington (agent assistant)
-
-<CardGroup cols={2}>
-  <Card title="Skill" icon="puzzle">
-    A reusable capability the Paddington assistant can invoke inside Trust AI — for example, drafting an LLM Judge rubric or summarizing Sessions that match a filter.
-  </Card>
-  <Card title="Task" icon="list-checks">
-    A unit of work Paddington plans and executes by composing Skills. How the assistant gets things done without you leaving the product.
   </Card>
 </CardGroup>

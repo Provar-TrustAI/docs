@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Floating chat — shell transition · interactive prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+/* ───────────────────────────────────────────────────────────────
+   Self-contained styles for the floating-chat shell-transition demo.
+   Lifted from the agent-surface component library (app design tokens
+   + fx-* / ss-* / tcc-* component rules) and inlined here so the
+   prototype renders with no external CSS. Only the classes this one
+   demo exercises are kept; every other library surface is removed.
+   ─────────────────────────────────────────────────────────────── */
+:root {
+  /* Warm neutral palette (app tokens) */
+  --bg: oklch(0.992 0.003 90);
+  --bg-base: #fcfaf7;
+  --bg-subtle: oklch(0.975 0.004 90);
+  --bg-raised: oklch(1 0 0);
+  --bg-hover: oklch(0.965 0.005 90);
+  --bg-sunken: oklch(0.955 0.006 90);
+  --border: oklch(0.915 0.006 90);
+  --border-strong: oklch(0.86 0.008 90);
+
+  --ink: oklch(0.22 0.012 260);
+  --ink-2: oklch(0.38 0.012 260);
+  --ink-3: oklch(0.55 0.012 260);
+  --ink-4: oklch(0.72 0.008 260);
+  --ink-5: #d9d4cc;
+
+  /* Accent — indigo-leaning */
+  --accent: oklch(0.52 0.16 265);
+  --accent-hover: oklch(0.46 0.16 265);
+  --accent-soft: oklch(0.96 0.03 265);
+  --accent-ink: oklch(0.38 0.14 265);
+
+  --ok: oklch(0.55 0.13 150);
+
+  --mono: 'JetBrains Mono', ui-monospace, monospace;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.5;
+}
+
+.wrap {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 40px 28px 60px;
+}
+
+.eyebrow {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent-ink);
+}
+h1 {
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin: 6px 0 10px;
+}
+.lede {
+  font-size: 15px;
+  color: var(--ink-2);
+  max-width: 62ch;
+  margin: 0 0 4px;
+}
+.lede b { color: var(--ink); }
+
+.example {
+  margin-top: 26px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--bg-raised);
+  padding: 16px;
+}
+.example-head {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-4);
+  margin-bottom: 12px;
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+.ctl-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border-strong);
+  background: var(--bg-raised);
+  color: var(--ink-2);
+  font-family: inherit;
+  font-size: 12.5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 100ms, border-color 100ms, color 100ms;
+}
+.ctl-btn:hover { background: var(--bg-hover); color: var(--ink); }
+.ctl-btn[aria-pressed="true"] {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--accent-ink);
+}
+.ctl-btn svg { display: block; }
+.ctl-sep { width: 1px; height: 20px; background: var(--border); margin: 0 2px; }
+.ctl-hint { font-size: 12px; color: var(--ink-4); margin-left: auto; }
+
+.note {
+  margin-top: 22px;
+  border-left: 2px solid var(--ink-4);
+  padding: 4px 0 4px 14px;
+  font-size: 13.5px;
+  color: var(--ink-2);
+  line-height: 1.6;
+}
+.note b { color: var(--ink); }
+.note code {
+  font-family: var(--mono);
+  font-size: 12px;
+  background: var(--bg-sunken);
+  padding: 1px 5px;
+  border-radius: 3px;
+}
+
+.footer {
+  margin-top: 36px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+  font-size: 11.5px;
+  color: var(--ink-4);
+  font-style: italic;
+}
+
+/* ═══════════════════════════════════════════════════════
+   The shell demo — fx-* (host shell, full / float / closed)
+   ═══════════════════════════════════════════════════════ */
+.fx-shell {
+  position: relative;
+  width: 100%;
+  height: 480px;
+  border: 1px solid var(--border-strong);
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--bg-subtle);
+  display: flex;
+  font-size: 13px;
+  user-select: none;
+}
+/* faux left nav of the host app */
+.fx-nav {
+  width: 52px;
+  flex-shrink: 0;
+  background: var(--bg-raised);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding-top: 14px;
+}
+.fx-nav-dot { width: 22px; height: 22px; border-radius: 6px; background: var(--bg-subtle); border: 1px solid var(--border); }
+.fx-nav-dot.is-on { background: var(--accent-soft); border-color: var(--accent); }
+.fx-main { position: relative; flex: 1; min-width: 0; overflow: hidden; }
+
+/* faux app page behind the floating chat */
+.fx-app { position: absolute; inset: 0; padding: 22px 26px; overflow: hidden; }
+.fx-app-title { height: 16px; width: 180px; border-radius: 4px; background: var(--ink-5); margin-bottom: 20px; }
+.fx-app-row { height: 11px; border-radius: 3px; background: var(--border); margin-bottom: 12px; }
+
+/* full-screen chat fills the main area */
+.fx-full { position: absolute; inset: 0; display: flex; background: var(--bg-base); }
+.fx-full-thread { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.fx-full-rail { width: 230px; flex-shrink: 0; border-left: 1px solid var(--border); padding: 12px; background: var(--bg-subtle); overflow: auto; display: flex; flex-direction: column; gap: 10px; }
+
+/* the floating dock */
+.fx-float {
+  position: absolute;
+  right: 16px; bottom: 16px;
+  width: 320px; max-height: calc(100% - 32px);
+  background: var(--bg-raised);
+  border: 1px solid var(--border-strong);
+  border-radius: 12px;
+  box-shadow: 0 18px 50px oklch(0.2 0.02 260 / 0.22);
+  display: flex; flex-direction: column;
+  overflow: hidden;
+}
+.fx-float.is-enter { animation: fxDockIn 0.26s cubic-bezier(0.2, 0.8, 0.2, 1); }
+@keyframes fxDockIn { from { opacity: 0; transform: translateY(14px) scale(0.97); } to { opacity: 1; transform: none; } }
+
+/* shared chat chrome (used by both shells) */
+.fx-topbar { display: flex; align-items: center; gap: 8px; padding: 9px 12px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.fx-title { font-weight: 600; font-size: 13px; color: var(--ink); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fx-live { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; color: var(--ink-3); white-space: nowrap; }
+.fx-live-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+.fx-live.is-active .fx-live-dot { animation: fxPulse 1.1s ease-in-out infinite; }
+@keyframes fxPulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+.fx-ctl { width: 24px; height: 24px; border-radius: 6px; border: none; background: transparent; color: var(--ink-3); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
+.fx-ctl:hover { background: var(--bg-hover); color: var(--ink); }
+.fx-ctls { display: inline-flex; align-items: center; gap: 2px; }
+
+.fx-thread { flex: 1; overflow: auto; padding: 12px 14px; display: flex; flex-direction: column; gap: 11px; scroll-behavior: smooth; }
+.fx-thread .amsg { font-size: 13px; line-height: 1.5; }
+.fx-thread .tcc { font-size: 12.5px; }
+.fx-composer { border-top: 1px solid var(--border); padding: 9px 12px; color: var(--ink-4); font-size: 12.5px; flex-shrink: 0; }
+
+/* rail pill in the float header */
+.fx-floatbar { display: flex; align-items: center; padding: 7px 12px; border-bottom: 1px solid var(--border); }
+.fx-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  height: 22px; padding: 0 9px;
+  border-radius: 999px;
+  border: 1px solid var(--border-strong);
+  background: var(--bg-subtle);
+  font-size: 11px; font-weight: 500; color: var(--ink-2);
+  cursor: pointer; white-space: nowrap;
+}
+.fx-pill:hover { background: var(--bg-hover); }
+.fx-pill-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+.fx-pill-badge { color: var(--accent); font-weight: 600; }
+
+/* closed re-entry chip (the "pill" shell) */
+.fx-chip {
+  position: absolute; right: 16px; bottom: 16px;
+  display: inline-flex; align-items: center; gap: 8px;
+  height: 38px; padding: 0 14px 0 12px;
+  border-radius: 999px;
+  background: var(--ink); color: var(--bg-raised);
+  border: none; cursor: pointer;
+  box-shadow: 0 8px 24px oklch(0.2 0.02 260 / 0.25);
+  font-size: 12.5px; font-weight: 500;
+}
+.fx-chip.is-enter { animation: fxDockIn 0.24s ease; }
+.fx-chip-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); }
+.fx-chip.is-active .fx-chip-dot { animation: fxPulse 1.1s ease-in-out infinite; }
+
+/* caption strip under the demo */
+.fx-caption { display: flex; align-items: center; gap: 10px; margin-top: 12px; flex-wrap: wrap; font-size: 12px; color: var(--ink-3); }
+.fx-caption b { color: var(--ink); }
+.fx-tag { font-family: var(--mono); font-size: 11px; padding: 1px 7px; border-radius: 5px; background: var(--bg-subtle); border: 1px solid var(--border); color: var(--ink-2); }
+
+/* ═══════════════════════════════════════════════════════
+   StreamSidebar — Plan + Context + Outputs (rail, full view)
+   ═══════════════════════════════════════════════════════ */
+.ss-panel {
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.ss-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-subtle);
+}
+.ss-title { font-size: 12.5px; font-weight: 600; color: var(--ink); }
+.ss-count { margin-left: auto; font-size: 11px; color: var(--ink-4); font-variant-numeric: tabular-nums; }
+.ss-plan {
+  margin: 0; padding: 6px; list-style: none;
+  display: flex; flex-direction: column; gap: 1px;
+}
+.ss-plan li {
+  display: flex; align-items: center; gap: 9px;
+  padding: 7px 9px; border-radius: 5px;
+  font-size: 12.5px; color: var(--ink-2); line-height: 1.4;
+}
+.ss-plan-box {
+  width: 14px; height: 14px; border-radius: 3px;
+  border: 1.5px solid var(--border-strong); background: var(--bg-raised);
+  flex-shrink: 0; display: grid; place-items: center;
+}
+.ss-plan-done .ss-plan-box { background: var(--ok); border-color: var(--ok); color: #fff; }
+.ss-plan-check { font-size: 9px; font-weight: 700; line-height: 1; }
+.ss-plan-text { flex: 1; }
+.ss-plan-done .ss-plan-text { color: var(--ink-4); text-decoration: line-through; text-decoration-color: oklch(0.8 0.01 260); }
+.ss-list { display: flex; flex-direction: column; padding: 4px 0; }
+.ss-row { display: flex; align-items: center; gap: 9px; padding: 7px 14px; font-size: 12.5px; color: var(--ink); }
+.ss-row-text { flex: 1; color: var(--ink-2); }
+
+/* ═══════════════════════════════════════════════════════
+   Shared agent components used in the thread
+   ═══════════════════════════════════════════════════════ */
+.amsg {
+  display: flex; flex-direction: column; gap: 14px;
+  font-size: 15px; line-height: 1.65; color: var(--ink); max-width: 64ch;
+}
+.amsg p { margin: 0; text-wrap: pretty; }
+
+.stream-cursor {
+  display: inline-block; width: 8px; height: 16px;
+  background: var(--accent); margin-left: 2px; vertical-align: -2px;
+  animation: blink 0.9s steps(2) infinite;
+}
+@keyframes blink { 50% { opacity: 0.2; } }
+
+.tcc {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 12px; background: var(--bg-subtle);
+  border: 1px solid var(--border); border-radius: 7px;
+  font-size: 13.5px; line-height: 1.4; color: var(--ink-2);
+}
+.tcc-line {
+  flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis;
+  white-space: nowrap; color: var(--ink-2);
+}
+.tcc-line b { color: var(--ink); font-weight: 600; }
+.tcc-line i { font-style: italic; color: var(--ink); }
+.tcc-spinner {
+  width: 10px; height: 10px;
+  border: 1.5px solid var(--ink-3); border-top-color: transparent;
+  border-radius: 50%; animation: spin 0.8s linear infinite; flex-shrink: 0;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ═══════════════════════════════════════════════════════
+   Responsive hardening — reflow gracefully from ~320px up.
+   These demos render inside the Mintlify content column
+   (≈720px desktop → ≈360px phone). The desktop side-by-side
+   layout is preserved above the breakpoint; below it the faux
+   nav is dropped and the Plan rail stacks beneath the chat.
+   CSS-only: no copy / fixture / behavior changes.
+   ═══════════════════════════════════════════════════════ */
+
+/* Keep streamed prose + tool-call cards inside the container at any width */
+.amsg { max-width: 100%; }
+.fx-thread .amsg { max-width: 100%; }
+.tcc { max-width: 100%; }
+
+@media (max-width: 760px) {
+  .wrap { padding: 32px 20px 48px; }
+  h1 { font-size: 23px; }
+  .lede { font-size: 14px; }
+
+  /* Drop the faux host-app left nav and stack the chat + Plan rail */
+  .fx-shell { flex-direction: column; }
+  .fx-nav { display: none; }
+
+  /* full-screen shell: thread on top, rail underneath (top border, not left) */
+  .fx-full { flex-direction: column; }
+  .fx-full-thread { min-height: 0; }
+  .fx-full-rail {
+    width: 100%;
+    flex-shrink: 1;
+    border-left: none;
+    border-top: 1px solid var(--border);
+    max-height: 40%;
+  }
+
+  /* keep the docked float + pill inside the (now full-width) main area */
+  .fx-float { width: auto; left: 16px; right: 16px; max-width: calc(100% - 32px); }
+}
+
+@media (max-width: 480px) {
+  .wrap { padding: 24px 14px 40px; }
+  h1 { font-size: 21px; }
+
+  .example { padding: 12px; }
+
+  /* let the control row + buttons wrap and shrink a notch */
+  .controls { gap: 6px; }
+  .ctl-btn { height: 30px; padding: 0 10px; font-size: 12px; }
+  .ctl-hint { margin-left: 0; flex-basis: 100%; }
+
+  /* tighten chat chrome paddings on the smallest widths */
+  .fx-topbar { padding: 8px 10px; gap: 6px; }
+  .fx-floatbar { padding: 6px 10px; }
+  .fx-thread { padding: 10px 10px; }
+  .fx-composer { padding: 8px 10px; }
+  .fx-full-rail { padding: 10px; }
+
+  /* float dock hugs the edges with a small inset */
+  .fx-float { left: 10px; right: 10px; bottom: 10px; max-width: calc(100% - 20px); max-height: calc(100% - 20px); }
+  .fx-chip { right: 10px; bottom: 10px; }
+
+  /* allow the caption chips to wrap instead of pushing width */
+  .fx-caption { gap: 6px; }
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="eyebrow">Trust Agent</div>
+  <h1>Floating chat — one session, three shells</h1>
+  <p class="lede">
+    A single running agent session can be drawn three ways: <b>full screen</b>,
+    a <b>docked panel</b>, and a collapsed <b>pill</b>. Switching shells is a
+    change of <i>renderer</i>, not a change of session — the thread, the live
+    activity, and the Plan all carry over untouched. Drive the controls below
+    to move the same running chat between shells.
+  </p>
+
+  <div class="example">
+    <div class="example-head">Live · move the running session between shells</div>
+
+    <div class="controls" role="group" aria-label="Shell controls">
+      <button class="ctl-btn" id="btn-full" data-go="full" aria-pressed="false">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10V4h6M14 4h6v6M20 14v6h-6M10 20H4v-6"/></svg>
+        Full screen
+      </button>
+      <button class="ctl-btn" id="btn-float" data-go="float" aria-pressed="false">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4v5H4M15 4v5h5M15 20v-5h5M9 20v-5H4"/></svg>
+        Dock
+      </button>
+      <button class="ctl-btn" id="btn-closed" data-go="closed" aria-pressed="false">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        Pill
+      </button>
+      <span class="ctl-hint">or use the controls inside the chat chrome</span>
+    </div>
+
+    <div id="fx-shell-demo" class="fx-shell"></div>
+    <div class="fx-caption" id="fx-shell-caption"></div>
+  </div>
+
+  <div class="note">
+    <b>One session, three renderers.</b> A single state object holds the thread,
+    the live activity (streaming / running / idle) and the Plan. <code>view</code>
+    only selects which shell draws it — switching never tears down or replays the
+    session. The agent keeps streaming and the tool keeps running in whichever
+    shell you are in.
+  </div>
+
+  <div class="note">
+    <b>Progress folds, never disappears.</b> The full-screen Rail can't fit at
+    320&nbsp;px, so when docked it collapses to a compact
+    <code>Plan x/y</code> pill in the float header. Tapping the pill expands back
+    to full screen, where the whole Rail can be read again.
+  </div>
+
+</div>
+
+<script>
+/* ───────────────────────────────────────────────────────────────
+   Floating-chat shell-transition demo — vanilla JS, no framework.
+   (The source library renders this surface with plain DOM string
+   injection; there is no React in the original, so none is added.)
+
+   Re-authored from the library's ~22s auto-walkthrough down to a
+   CALM stream + single tool-call loop. Shell transitions are NOT on
+   a timer — they happen only when the reader clicks a control.
+   ─────────────────────────────────────────────────────────────── */
+(function () {
+  var root = document.getElementById('fx-shell-demo');
+  var cap = document.getElementById('fx-shell-caption');
+  if (!root) return;
+
+  var ICON_MIN = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4v5H4M15 4v5h5M15 20v-5h5M9 20v-5H4"/></svg>';
+  var ICON_EXP = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10V4h6M14 4h6v6M20 14v6h-6M10 20H4v-6"/></svg>';
+  var ICON_X   = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>';
+
+  // One source of truth. `view` only chooses the renderer.
+  var S = {
+    view: 'full',          // 'full' | 'float' | 'closed'
+    thread: [],            // prose + tool-call receipt blocks
+    stream: null,          // currently-streaming prose
+    tccIdx: null,          // index of the in-flight tool-call card
+    live: 'idle',          // 'streaming' | 'running' | 'idle'
+    plan: [
+      { t: 'Read this week’s refund sessions', d: false },
+      { t: 'Summarize the regression', d: false },
+    ],
+    dockedAt: 0,
+    chipAt: 0,
+  };
+
+  // ---- calm stream + single tool-call loop (NO shell changes here) ----
+  function startStream(text) { S.stream = { full: text, at: Date.now() }; S.live = 'streaming'; render(); }
+  function endStream() { if (S.stream) { S.thread.push({ type: 'prose', text: S.stream.full }); S.stream = null; } render(); }
+  function addTcc(runHTML, doneHTML) { S.thread.push({ type: 'tcc', tense: 'running', run: runHTML, done: doneHTML }); S.tccIdx = S.thread.length - 1; S.live = 'running'; render(); }
+  function doneTcc() { if (S.tccIdx != null) S.thread[S.tccIdx].tense = 'done'; render(); }
+  function planDone() { return S.plan.filter(function (p) { return p.d; }).length; }
+
+  function resetSession() {
+    S.thread = []; S.stream = null; S.tccIdx = null; S.live = 'idle';
+    S.plan.forEach(function (p) { p.d = false; });
+  }
+
+  // A short, repeating timeline. It only ever touches the SESSION
+  // (stream / tool / plan) — never S.view. Shell changes are user-driven.
+  var SCRIPT = [
+    { at: 400,  fn: function () { resetSession(); startStream('Reading this week’s refund transcripts — the CSAT dip looks like one failure mode, not several.'); } },
+    { at: 3600, fn: function () { endStream(); S.plan[0].d = true; } },
+    { at: 4000, fn: function () { addTcc('<b>Reviewing</b> refund sessions', '<b>Reviewed</b> refund sessions · <i>1 pattern</i>'); } },
+    { at: 6000, fn: function () { doneTcc(); S.plan[1].d = true; S.live = 'idle'; } },
+  ];
+  var LOOP_MS = 11000;   // calm cadence: ~6s of activity, then idle, then repeat
+  var timers = [];
+  function runLoop() {
+    timers.forEach(clearTimeout); timers = [];
+    SCRIPT.forEach(function (s) { timers.push(setTimeout(s.fn, s.at)); });
+    timers.push(setTimeout(runLoop, LOOP_MS));
+  }
+
+  // ---- render ----
+  function liveLabel() { return { streaming: 'Streaming response', running: 'Running a tool', idle: 'Idle' }[S.live]; }
+  function liveHTML() {
+    var cls = 'fx-live' + (S.live !== 'idle' ? ' is-active' : '');
+    return '<span class="' + cls + '"><span class="fx-live-dot"></span>' + liveLabel() + '</span>';
+  }
+  function streamShown() {
+    if (!S.stream) return '';
+    var ms = Date.now() - S.stream.at;
+    var n = Math.min(S.stream.full.length, Math.floor(ms / 14));
+    return S.stream.full.slice(0, n);
+  }
+  function threadHTML() {
+    var h = '';
+    S.thread.forEach(function (b) {
+      if (b.type === 'prose') h += '<div class="amsg"><p>' + b.text + '</p></div>';
+      else if (b.type === 'tcc') {
+        var running = (b.tense === 'running');
+        h += '<div class="tcc">' + (running ? '<span class="tcc-spinner"></span>' : '') +
+             '<span class="tcc-line">' + (running ? b.run : b.done) + '</span></div>';
+      }
+    });
+    if (S.stream) h += '<div class="amsg"><p class="fx-stream"><span class="fx-stream-text">' + streamShown() + '</span><span class="stream-cursor"></span></p></div>';
+    return h;
+  }
+  function railHTML() {
+    return '<div class="ss-panel"><div class="ss-head"><span class="ss-title">Plan</span><span class="ss-count">' + planDone() + ' of ' + S.plan.length + ' done</span></div><ul class="ss-plan">' +
+      S.plan.map(function (p) { return '<li class="' + (p.d ? 'ss-plan-done' : '') + '"><span class="ss-plan-box">' + (p.d ? '<span class="ss-plan-check">✓</span>' : '') + '</span><span class="ss-plan-text">' + p.t + '</span></li>'; }).join('') +
+      '</ul></div>';
+  }
+  function pillHTML() {
+    return '<button class="fx-pill" data-pill><span class="fx-pill-dot"></span>Plan ' + planDone() + '/' + S.plan.length + '</button>';
+  }
+  function appHTML() {
+    return '<div class="fx-app"><div class="fx-app-title"></div>' +
+      '<div class="fx-app-row" style="width:92%"></div><div class="fx-app-row" style="width:86%"></div><div class="fx-app-row" style="width:94%"></div><div class="fx-app-row" style="width:78%"></div><div class="fx-app-row" style="width:88%"></div></div>';
+  }
+
+  function render() {
+    // faux host-app left nav; the middle dot lights when full screen owns the canvas
+    var nav = '<div class="fx-nav"><div class="fx-nav-dot"></div><div class="fx-nav-dot' + (S.view === 'full' ? ' is-on' : '') + '"></div><div class="fx-nav-dot"></div></div>';
+    var main = '';
+    if (S.view === 'full') {
+      main = '<div class="fx-full"><div class="fx-full-thread">' +
+        '<div class="fx-topbar"><span class="fx-title">Refund CSAT slip · live</span>' + liveHTML() +
+        '<div class="fx-ctls"><button class="fx-ctl" data-min title="Minimize to dock">' + ICON_MIN + '</button><button class="fx-ctl" data-close title="Collapse to pill">' + ICON_X + '</button></div></div>' +
+        '<div class="fx-thread">' + threadHTML() + '</div>' +
+        '<div class="fx-composer">Reply to the agent…</div>' +
+        '</div><div class="fx-full-rail">' + railHTML() + '</div></div>';
+    } else if (S.view === 'float') {
+      var enter = (Date.now() - S.dockedAt < 280);
+      main = appHTML() +
+        '<div class="fx-float' + (enter ? ' is-enter' : '') + '">' +
+        '<div class="fx-topbar"><span class="fx-title">Refund CSAT slip</span>' + liveHTML() +
+        '<div class="fx-ctls"><button class="fx-ctl" data-expand title="Expand to full screen">' + ICON_EXP + '</button><button class="fx-ctl" data-close title="Collapse to pill">' + ICON_X + '</button></div></div>' +
+        '<div class="fx-floatbar">' + pillHTML() + '</div>' +
+        '<div class="fx-thread">' + threadHTML() + '</div>' +
+        '<div class="fx-composer">Reply to the agent…</div>' +
+        '</div>';
+    } else {
+      var ce = (Date.now() - S.chipAt < 280);
+      var cls = 'fx-chip' + (ce ? ' is-enter' : '') + (S.live !== 'idle' ? ' is-active' : '');
+      main = appHTML() + '<button class="' + cls + '" data-chip><span class="fx-chip-dot"></span>Agent' + (S.live !== 'idle' ? ' · working' : '') + '</button>';
+    }
+    root.innerHTML = nav + '<div class="fx-main">' + main + '</div>';
+    var th = root.querySelector('.fx-thread'); if (th) th.scrollTop = th.scrollHeight;
+    syncControls();
+    if (cap) cap.innerHTML = '<span class="fx-tag">view: ' + S.view + '</span><span>·</span><b>' + liveLabel() + '</b><span>·</span><span>Switch shells any time — the session keeps running, never resets.</span>';
+  }
+
+  // reflect the active shell on the external control buttons
+  function syncControls() {
+    ['full', 'float', 'closed'].forEach(function (v) {
+      var id = v === 'closed' ? 'btn-closed' : (v === 'float' ? 'btn-float' : 'btn-full');
+      var el = document.getElementById(id);
+      if (el) el.setAttribute('aria-pressed', String(S.view === v));
+    });
+  }
+
+  // user-driven shell switches — one helper, every entry point routes here
+  function goView(v) {
+    if (v === S.view) return;
+    S.view = v;
+    if (v === 'float') S.dockedAt = Date.now();
+    if (v === 'closed') S.chipAt = Date.now();
+    render();
+  }
+
+  // heartbeat: grows the streaming text WITHOUT recreating the shell
+  // (so the dock entrance animation never re-triggers mid-stream).
+  setInterval(function () {
+    if (S.stream) {
+      var el = root.querySelector('.fx-stream-text');
+      if (el) { el.textContent = streamShown(); var th = root.querySelector('.fx-thread'); if (th) th.scrollTop = th.scrollHeight; }
+    }
+  }, 120);
+
+  // in-chrome controls (minimize / expand / close / re-open / pill)
+  root.addEventListener('click', function (e) {
+    if (e.target.closest('[data-min]'))    { goView('float');  return; }
+    if (e.target.closest('[data-expand]')) { goView('full');   return; }
+    if (e.target.closest('[data-close]'))  { goView('closed'); return; }
+    if (e.target.closest('[data-chip]'))   { goView('float');  return; }
+    if (e.target.closest('[data-pill]'))   { goView('full');   return; }
+  });
+
+  // external control buttons
+  document.querySelectorAll('[data-go]').forEach(function (btn) {
+    btn.addEventListener('click', function () { goView(btn.getAttribute('data-go')); });
+  });
+
+  render();
+  runLoop();
+})();
+</script>
+
+<style>
+  #__fsbtn{position:fixed;top:10px;right:10px;z-index:99999;display:inline-flex;align-items:center;gap:6px;border:1px solid #e7e2d8;background:rgba(255,255,255,.95);border-radius:8px;padding:6px 10px;cursor:pointer;font:500 12px/1 Inter,system-ui,sans-serif;color:#5a534a;box-shadow:0 1px 3px rgba(0,0,0,.07)}
+  #__fsbtn:hover{background:#fff;color:#3a3530}
+  html:fullscreen{overflow:auto;background:#fcfaf7}
+  html:-webkit-full-screen{overflow:auto;background:#fcfaf7}
+  html:fullscreen .wrap,html:-webkit-full-screen .wrap{max-width:min(1120px,92vw)}
+  html:fullscreen .fx-shell,html:-webkit-full-screen .fx-shell{height:min(660px,72vh)}
+</style>
+<button id="__fsbtn" type="button" aria-label="View this demo full screen" title="View this demo full screen">⤢ Full window</button>
+<script>
+(function(){var b=document.getElementById('__fsbtn'),d=document;function on(){return d.fullscreenElement||d.webkitFullscreenElement;}function lbl(){b.textContent=on()?'⤡ Exit':'⤢ Full window';}b.addEventListener('click',function(){var e=d.documentElement;if(!on()){(e.requestFullscreen||e.webkitRequestFullscreen||function(){}).call(e);}else{(d.exitFullscreen||d.webkitExitFullscreen||function(){}).call(d);}});d.addEventListener('fullscreenchange',lbl);d.addEventListener('webkitfullscreenchange',lbl);})();
+</script>
+</body>
+</html>
