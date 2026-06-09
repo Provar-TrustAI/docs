@@ -87,10 +87,18 @@ real surface**. This is the highest-wow tier and the one the v7 prototype makes 
 
 ```mdx
 <Frame caption="Interactive prototype — the full, docked, and pill shells. Design reference.">
-  <iframe src="/demos/floating-chat.html" width="100%" height="640" style={{border:0}}
+  <iframe src="https://provar-trustai.github.io/docs/floating-chat.html" width="100%" height="640" style={{border:0}}
           loading="lazy" allow="fullscreen" title="Floating chat prototype" />
 </Frame>
 ```
+
+**Hosting rule — iframes point at the GitHub Pages origin, never at repo paths.** The deployed
+Mintlify host refuses to frame repo-served `.html`; only local `mint dev` serves it — which is a trap
+(local-clean, prod-broken; this shipped a P0 on 2026-06-09). `demos/` is published to
+`https://provar-trustai.github.io/docs/<demo>.html` by `.github/workflows/deploy-demos.yml` on every
+push to `main` that touches `demos/**`. Exposure: none new — the repo is public; Pages only makes the
+HTML render. **First-embed canary:** the first embed of any NEW asset class merges one canary asset and
+is confirmed rendering on the DEPLOYED docs host before pages depend on it.
 
 **Caption rule — one label, kept short.** The `<Frame caption>` is the ONLY label:
 `Interactive prototype — <what it is>. Design reference.` Do NOT restate behavior the prose already

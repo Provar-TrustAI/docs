@@ -1,0 +1,40 @@
+# Publishes the interactive prototype demos (demos/) to GitHub Pages so the docs site
+# can iframe them. The Mintlify production host refuses to frame repo-served .html
+# (works in `mint dev` only — discovered the hard way, 2026-06-09), so the demos live
+# on a framable origin: https://provar-trustai.github.io/docs/<demo>.html
+#
+# Exposure note: this repo is public, so the raw HTML was already world-readable;
+# Pages only makes it render. The demos are sanitized, self-contained design
+# prototypes with synthetic data (see docs-plan/doc-kit/demo-tooling.md).
+name: Deploy demos to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "demos/**"
+      - ".github/workflows/deploy-demos.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: demos
+      - id: deployment
+        uses: actions/deploy-pages@v4
