@@ -383,12 +383,12 @@ function V6PermissionCard({ block, onResolved }) {
   if (state === "answered" || state === "dismissed") {
     const chatCopy = block.chatCopy || `Trust AI can always ${block.verb || "do"} ${block.entityPlural || (block.entity ? block.entity + "s" : "this")} in this chat`;
     const onceCopy = block.onceCopy || (isDelete ? "Delete these" : "Just this one");
-    let html = "";
-    if (state === "dismissed") html = "You dismissed the request. I'll wait for your next message.";
-    else if (scope === "chat") html = `You approved: <b>${chatCopy}</b>`;
-    else if (scope === "once") html = `You approved: <b>${onceCopy}</b>`;
-    else if (scope === "reject") html = note ? `You rejected: <b>${note}</b>` : "You rejected.";
-    return <div className="pc-resolve" dangerouslySetInnerHTML={{ __html: html }} />;
+    let content = null;
+    if (state === "dismissed") content = "You dismissed the request. I'll wait for your next message.";
+    else if (scope === "chat") content = <>You approved: <b>{chatCopy}</b></>;
+    else if (scope === "once") content = <>You approved: <b>{onceCopy}</b></>;
+    else if (scope === "reject") content = note ? <>You rejected: <b>{note}</b></> : "You rejected.";
+    return <div className="pc-resolve">{content}</div>;
   }
 
   return (

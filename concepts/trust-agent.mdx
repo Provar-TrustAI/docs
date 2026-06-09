@@ -170,7 +170,7 @@ This is the seam where latency lives, and it's worth being precise about it: any
 Write execution is **tenant-scoped and server-anchored**. An approved write executes only within your own organization and project; the organization's tool-permission allowlist is enforced at agent turn time; and execution is bound to the specific approval you gave, not trusted from the client. The agent cannot act on another organization's data. The platform side of that boundary lives in [Multi-tenancy](/concepts/multi-tenancy).
 {/* ACCURACY-AUDIT-PENDING: approved writes execute only within the user's org/project, the permission allowlist is enforced at turn time, and execution is bound to the approval (not client-trusted) — verify behaviorally on the release tag */}
 
-The Trust Agent surface meets WCAG AA contrast, with axe-core checks enforced in CI. The interrupt cards move focus into the card when they appear, restore it on dismiss, and announce interrupt events to assistive technology — so approvals are reachable by keyboard and screen reader, not just by mouse.
+The Trust Agent surface is designed to meet WCAG AA contrast. The interrupt cards move focus into the card when they appear, restore it on dismiss, and announce interrupt events to assistive technology — so approvals are reachable by keyboard and screen reader, not just by mouse.
 {/* ACCURACY-AUDIT-PENDING: interrupt cards move focus in and restore it on dismiss and announce to AT; surface meets WCAG AA contrast — verify focus behavior by triggering an interrupt card on the release tag */}
 
 ## Next steps
@@ -183,7 +183,7 @@ The Trust Agent surface meets WCAG AA contrast, with axe-core checks enforced in
     The full approval flow — the permission, single-question, and multi-question cards, rich write previews, and what approving actually executes.
   </Card>
   <Card title="Evaluate with the Trust Agent" icon="graduation-cap" href="/tutorials/evaluate-with-the-trust-agent">
-    The end-to-end walkthrough: drive a real evaluation from start to finish with the agent, including the full self-playing demo.
+    The end-to-end walkthrough: drive a real evaluation from start to finish with the agent.
   </Card>
   <Card title="Agent Versions" icon="git-branch" href="/concepts/agent-versions">
     The *other* "agent" — the customer's agent under test that the Trust Agent helps you evaluate. A distinct concept.

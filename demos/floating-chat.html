@@ -472,6 +472,16 @@ h1 {
   var cap = document.getElementById('fx-shell-caption');
   if (!root) return;
 
+  // Escape any dynamic value before it is interpolated into an innerHTML string.
+  function escapeHtml(v) {
+    return String(v)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
   var ICON_MIN = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4v5H4M15 4v5h5M15 20v-5h5M9 20v-5H4"/></svg>';
   var ICON_EXP = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10V4h6M14 4h6v6M20 14v6h-6M10 20H4v-6"/></svg>';
   var ICON_X   = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>';
@@ -523,7 +533,7 @@ h1 {
   function liveLabel() { return { streaming: 'Streaming response', running: 'Running a tool', idle: 'Idle' }[S.live]; }
   function liveHTML() {
     var cls = 'fx-live' + (S.live !== 'idle' ? ' is-active' : '');
-    return '<span class="' + cls + '"><span class="fx-live-dot"></span>' + liveLabel() + '</span>';
+    return '<span class="' + cls + '"><span class="fx-live-dot"></span>' + escapeHtml(liveLabel()) + '</span>';
   }
   function streamShown() {
     if (!S.stream) return '';
@@ -534,19 +544,19 @@ h1 {
   function threadHTML() {
     var h = '';
     S.thread.forEach(function (b) {
-      if (b.type === 'prose') h += '<div class="amsg"><p>' + b.text + '</p></div>';
+      if (b.type === 'prose') h += '<div class="amsg"><p>' + escapeHtml(b.text) + '</p></div>';
       else if (b.type === 'tcc') {
         var running = (b.tense === 'running');
         h += '<div class="tcc">' + (running ? '<span class="tcc-spinner"></span>' : '') +
              '<span class="tcc-line">' + (running ? b.run : b.done) + '</span></div>';
       }
     });
-    if (S.stream) h += '<div class="amsg"><p class="fx-stream"><span class="fx-stream-text">' + streamShown() + '</span><span class="stream-cursor"></span></p></div>';
+    if (S.stream) h += '<div class="amsg"><p class="fx-stream"><span class="fx-stream-text">' + escapeHtml(streamShown()) + '</span><span class="stream-cursor"></span></p></div>';
     return h;
   }
   function railHTML() {
     return '<div class="ss-panel"><div class="ss-head"><span class="ss-title">Plan</span><span class="ss-count">' + planDone() + ' of ' + S.plan.length + ' done</span></div><ul class="ss-plan">' +
-      S.plan.map(function (p) { return '<li class="' + (p.d ? 'ss-plan-done' : '') + '"><span class="ss-plan-box">' + (p.d ? '<span class="ss-plan-check">✓</span>' : '') + '</span><span class="ss-plan-text">' + p.t + '</span></li>'; }).join('') +
+      S.plan.map(function (p) { return '<li class="' + (p.d ? 'ss-plan-done' : '') + '"><span class="ss-plan-box">' + (p.d ? '<span class="ss-plan-check">✓</span>' : '') + '</span><span class="ss-plan-text">' + escapeHtml(p.t) + '</span></li>'; }).join('') +
       '</ul></div>';
   }
   function pillHTML() {
@@ -586,7 +596,7 @@ h1 {
     root.innerHTML = nav + '<div class="fx-main">' + main + '</div>';
     var th = root.querySelector('.fx-thread'); if (th) th.scrollTop = th.scrollHeight;
     syncControls();
-    if (cap) cap.innerHTML = '<span class="fx-tag">view: ' + S.view + '</span><span>·</span><b>' + liveLabel() + '</b><span>·</span><span>Switch shells any time — the session keeps running, never resets.</span>';
+    if (cap) cap.innerHTML = '<span class="fx-tag">view: ' + escapeHtml(S.view) + '</span><span>·</span><b>' + escapeHtml(liveLabel()) + '</b><span>·</span><span>Switch shells any time — the session keeps running, never resets.</span>';
   }
 
   // reflect the active shell on the external control buttons
