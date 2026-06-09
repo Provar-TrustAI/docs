@@ -29,9 +29,7 @@ This how-to walks you through a working session with the **Trust Agent** — the
 
     Starting a new chat opens a **Welcome** page, and the welcome prompt is sent for you as the first turn — so a new chat opens already streaming its first message, not as an empty transcript.
 
-    <Frame caption="A new chat opens on the Welcome surface with the first turn already streaming.">
-      <img src="/images/welcome-surface.png" alt="The Trust Agent Welcome surface with the composer and the first agent turn streaming in" />
-    </Frame>
+    {/* CAPTURE-PENDING: the Trust Agent Welcome surface with the first turn streaming — capture from the release tag (the old welcome-surface.png predates the Trust Agent and shows the wrong nav) */}
 
     **You should see:** the agent surface — a composer and a streaming transcript — render at `/projects/:id/agent` with no flag set, opening on the Welcome message as turn one.
   </Step>
@@ -47,13 +45,10 @@ This how-to walks you through a working session with the **Trust Agent** — the
     Your chat survives navigation: move to **Evaluations** or **Scenarios** and back, and the same chat is intact — there is one agent mount at the app root, not a fresh remount per page. A **floating chat selector** lists your recent chats, most-recent first, each with a status and an unread-indicator dot only when that chat has unread messages. Those recent chats are the Project's canonical task list. Reopening any chat shows its **real prior history** — transcripts are persisted, not reset to empty.
 
     <Note>
-      The three shells are covered in depth — with stills of each — on the [Trust Agent concept page](/concepts/trust-agent). This recipe assumes the **full page** shell.
+      The three shells are covered in depth on the [Trust Agent concept page](/concepts/trust-agent). This recipe assumes the **full page** shell.
     </Note>
 
-    <Frame caption="Capture pending — the full-page shell with the composer bottom-anchored and the core left nav visible.">
-      {/* CAPTURE-PENDING: trust-agent full-page shell still (left nav + transcript + bottom composer) — capture from the release tag and replace this placeholder */}
-      <img src="/images/welcome-surface.png" alt="Placeholder — the Trust Agent full-page shell" />
-    </Frame>
+    {/* CAPTURE-PENDING: trust-agent full-page shell still (left nav + transcript + bottom composer) — capture from the release tag and replace this placeholder */}
 
     **You should see:** the same chat thread persist as you switch shells and navigate between tabs, and your recent chats listed most-recent first in the floating selector.
   </Step>
@@ -92,10 +87,7 @@ This how-to walks you through a working session with the **Trust Agent** — the
 
     {/* ACCURACY-AUDIT-PENDING: tool-call card verb+object summaries, the clickable object table opening a real record fly-in, and the single-record reference card — verify against the app on the release tag */}
 
-    <Frame caption="Capture pending — a tool-call card and the clickable object table rendered in the transcript.">
-      {/* CAPTURE-PENDING: trust-agent tool-call card + clickable object table still — capture from the release tag and replace this placeholder */}
-      <img src="/images/sessions-list-overview.png" alt="Placeholder — a clickable object table of records in the agent transcript" />
-    </Frame>
+    {/* CAPTURE-PENDING: trust-agent tool-call card + clickable object table still — capture from the release tag and replace this placeholder */}
 
     Alongside the transcript, a **side rail** tracks the task in three sections, in order:
 
@@ -106,10 +98,7 @@ This how-to walks you through a working session with the **Trust Agent** — the
     The side rail is hidden when the active task has no referenced entities.
     {/* ACCURACY-AUDIT-PENDING: side-rail section order Progress → Context → Outputs, Outputs rows deep-linking to fly-ins, and the rail hidden when no entities are referenced — verify against the app on the release tag */}
 
-    <Frame caption="Capture pending — the Progress / Context / Outputs side rail beside the transcript.">
-      {/* CAPTURE-PENDING: trust-agent side-rail still (Progress, Context, Outputs sections) — capture from the release tag and replace this placeholder */}
-      <img src="/images/sessions-flyin-panel.png" alt="Placeholder — the Trust Agent side rail with Progress, Context, and Outputs sections" />
-    </Frame>
+    {/* CAPTURE-PENDING: trust-agent side-rail still (Progress, Context, Outputs sections) — capture from the release tag and replace this placeholder */}
 
     **You should see:** the reply stream in as markdown, a **Thinking… Ns** timer fill the wait, tool calls render as readable cards, multiple records render as a clickable table, and a **Progress** / **Context** / **Outputs** side rail track the task.
   </Step>

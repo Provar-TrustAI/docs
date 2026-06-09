@@ -7,10 +7,13 @@ import LatestRelease from "/snippets/latest-release.mdx";
 
 Provar Trust AI is an **agent evaluation platform** for the teams building, integrating, and operating production AI agents. Ingest real agent sessions, review and annotate turns, curate test datasets, define automated evaluators, run evaluations against new agent versions, and catch regressions — all before a change ships to customers.
 
-<Frame caption="Interactive prototype — the Trust Agent across the full, docked, and pill shells. Design reference.">
-  <iframe src="/demos/floating-chat.html" width="100%" height="640" style={{border:0}}
-          loading="lazy" allow="fullscreen" title="Trust Agent floating chat prototype" />
+<Frame caption="The Trust AI welcome surface — personalized greeting, contextual suggestion prompts, and sidebar navigation with count badges.">
+  <img src="/images/welcome-surface.png" alt="Trust AI welcome screen showing personalized greeting, suggestion prompts for Curate data, Annotate data, Evaluate agent, and Analyze failures, with sidebar navigation" />
 </Frame>
+
+{/* P0 hotfix 2026-06-09: the interactive floating-chat hero is parked until demos are hosted on a framable origin
+   (GitHub Pages — pending approval). The deployed Mintlify host refuses to frame /demos/*.html, so the embed rendered
+   as a dead "refused to connect" box. The interactive demo lives on /concepts/trust-agent. */}
 
 <CardGroup cols={2}>
   <Card title="Concepts" icon="book-open" href="/concepts/overview">
