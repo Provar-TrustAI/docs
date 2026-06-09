@@ -68,19 +68,11 @@ Snapshots are immutable and named. Restoring a snapshot creates a new Project ra
   Projects are the **boundary**, not a step. Every step of the [evaluation loop](/concepts/evaluation-loop) — ingest, review, curate, define, run, compare — happens inside one Project. If you find yourself wanting to cross a Project boundary mid-workflow, that's a signal the workflow belongs in a single Project (or the Projects need merging).
 </Tip>
 
-## API surface
+## Working with Projects
 
-Projects appear in the `/v1/projects` endpoint family of the [API Reference](/api-reference). Common operations:
+You create and manage Projects from the UI: "+ New Project" spins one up, and a Project's Settings page is where you invite members, connect a runtime, and take or restore Snapshots. You can also ask the Trust Agent to do any of these — for example, "create a new Project for the support bot" or "snapshot this Project before I edit the Evaluators."
 
-- `POST /v1/projects` — create a Project
-- `GET /v1/projects/{project_id}` — fetch Project details
-- `GET /v1/projects` — list Projects in the org
-- `POST /v1/projects/{project_id}/members` — invite members
-- `POST /v1/projects/{project_id}/snapshots` — create a Snapshot
-- `POST /v1/projects/{project_id}/restore-from-snapshot` — restore from a Snapshot
-- `GET /v1/projects/{project_id}/requirements` — list configured requirements for the Project *(v2026.05.19+)*
-
-Full request/response shapes live in the auto-generated [API Reference](/api-reference).
+Developers who want the underlying endpoints — creating Projects, inviting members, snapshotting, and restoring — can find the full request/response shapes in the [API Reference](/api-reference).
 
 ## Related concepts
 

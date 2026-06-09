@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Multi-question clarification — interactive prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+/* ─────────────────────────────────────────────────────────
+   Multi-question clarification (QA-flow) — self-contained prototype.
+   All CSS below is inlined from the source kit's design tokens plus
+   the .chat-canvas / .amsg / .pc-* / .qa-* / .qaf-* rules the demo uses.
+   No external stylesheets; only the pinned Google Fonts link above.
+   ───────────────────────────────────────────────────────── */
+
+/* ───── Design tokens (warm neutral palette + indigo accent) ───── */
+:root {
+  --bg: oklch(0.992 0.003 90);
+  --bg-subtle: oklch(0.975 0.004 90);
+  --bg-raised: oklch(1 0 0);
+  --bg-hover: oklch(0.965 0.005 90);
+  --bg-active: oklch(0.94 0.008 90);
+  --border: oklch(0.915 0.006 90);
+  --border-strong: oklch(0.86 0.008 90);
+
+  --ink: oklch(0.22 0.012 260);
+  --ink-2: oklch(0.38 0.012 260);
+  --ink-3: oklch(0.55 0.012 260);
+  --ink-4: oklch(0.72 0.008 260);
+
+  --accent: oklch(0.52 0.16 265);
+  --accent-hover: oklch(0.46 0.16 265);
+  --accent-soft: oklch(0.96 0.03 265);
+  --accent-ink: oklch(0.38 0.14 265);
+
+  /* Library-only tokens */
+  --lib-shadow-card: 0 1px 2px oklch(0.2 0.01 260 / 0.04), 0 1px 3px oklch(0.2 0.01 260 / 0.06);
+  --lib-shadow-pc:   0 4px 16px oklch(0.2 0.01 260 / 0.06), 0 2px 4px oklch(0.2 0.01 260 / 0.04);
+  --lib-mono: 'JetBrains Mono', ui-monospace, monospace;
+  --bg-sunken: oklch(0.95 0.006 90);
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--ink);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: "cv11", "ss01", "ss03";
+}
+button { font-family: inherit; color: inherit; cursor: pointer; border: none; background: none; padding: 0; }
+input { font-family: inherit; color: inherit; }
+
+/* ───── Stage: centers the single card on the page ───── */
+.demo-stage {
+  max-width: 620px;
+  margin: 0 auto;
+  padding: 48px 24px 32px;
+}
+.demo-frame-head {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-4);
+  margin: 0 0 16px;
+}
+.demo-foot {
+  max-width: 620px;
+  margin: 0 auto;
+  padding: 4px 24px 48px;
+  font-size: 12px;
+  color: var(--ink-4);
+  text-align: center;
+}
+
+/* ───── Thread canvas + agent prose ───── */
+.chat-canvas {
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 32px 36px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.amsg {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--ink);
+  max-width: 64ch;
+}
+.amsg p { margin: 0; text-wrap: pretty; }
+.amsg code {
+  font-family: var(--lib-mono);
+  font-size: 13px;
+  background: var(--bg-sunken);
+  padding: 1px 5px;
+  border-radius: 3px;
+}
+
+/* ───── PermissionCard / QACard shared chrome (.pc-*) ───── */
+.pc {
+  background: var(--bg-raised);
+  border: 1px solid var(--border-strong);
+  border-radius: 12px;
+  box-shadow: var(--lib-shadow-pc);
+  overflow: hidden;
+  position: relative;
+  padding-top: 4px;
+}
+.pc-dismiss {
+  width: 24px; height: 24px;
+  border: none;
+  background: transparent;
+  color: var(--ink-3);
+  cursor: pointer;
+  font-size: 18px;
+  border-radius: 5px;
+  line-height: 1;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+.pc-dismiss:hover {
+  background: var(--bg-hover);
+  color: var(--ink);
+}
+.pc-description {
+  padding: 16px 20px 6px;
+  font-size: 14.5px;
+  color: var(--ink);
+  line-height: 1.65;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  text-wrap: pretty;
+}
+.pc-description p { margin: 0; }
+.pc-description code {
+  font-family: var(--lib-mono);
+  font-size: 12.5px;
+  background: var(--bg-sunken);
+  padding: 1px 5px;
+  border-radius: 3px;
+}
+.pc-foot {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 14px;
+  background: var(--bg-subtle);
+}
+.pc-foot-spacer { flex: 1; }
+.pc-btn {
+  font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 7px 16px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--bg-raised);
+  color: var(--ink);
+  cursor: pointer;
+  transition: background 100ms, border-color 100ms;
+  white-space: nowrap;
+  line-height: 1.3;
+}
+.pc-btn:hover { background: var(--bg-hover); border-color: var(--border-strong); }
+.pc-btn-primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+  box-shadow: 0 1px 2px oklch(0.3 0.15 265 / 0.2), inset 0 1px 0 oklch(1 0 0 / 0.15);
+}
+.pc-btn-primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+
+/* Resolution mark — italic, left-rule indent, muted ink. */
+.pc-resolve {
+  margin: 0;
+  padding: 4px 0 4px 14px;
+  border-left: 2px solid var(--border);
+  font-size: 13px;
+  color: var(--ink-3);
+  font-style: italic;
+  line-height: 1.6;
+  align-self: stretch;
+}
+.pc-resolve b {
+  color: var(--ink-2);
+  font-style: normal;
+  font-weight: 500;
+}
+
+/* ───── QACard choices (.qa-*) ───── */
+.qa-card {
+  box-shadow: var(--lib-shadow-card);
+  padding-top: 12px;
+  position: relative;
+}
+.qa-card-dismiss {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+}
+.qa-card .pc-description {
+  padding: 16px 20px 8px;
+}
+.qa-choices {
+  padding: 0 14px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.qa-choice {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 9px 10px;
+  border-radius: 6px;
+  font-size: 13.5px;
+  color: var(--ink-2);
+  cursor: pointer;
+  background: transparent;
+  flex-wrap: wrap;
+  line-height: 1.45;
+}
+.qa-choice:hover { background: var(--bg-hover); }
+.qa-choice.qa-checked-quiet { color: var(--ink); }
+.qa-box {
+  width: 16px; height: 16px;
+  border-radius: 4px;
+  border: 1.5px solid var(--border-strong);
+  background: var(--bg-raised);
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  margin-top: 1px;
+}
+.qa-checked-quiet .qa-box {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+.qa-check { font-size: 11px; font-weight: 700; line-height: 1; display: none; }
+.qa-checked-quiet .qa-check { display: block; }
+.qa-pip {
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border-strong);
+  background: var(--bg-raised);
+  flex-shrink: 0;
+  position: relative;
+  margin-top: 1px;
+}
+.qa-radio.qa-checked-quiet .qa-pip { border-color: var(--accent); }
+.qa-radio.qa-checked-quiet .qa-pip::after {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+/* Inline "Other" write-in field */
+.qa-other-inline {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  font-size: 13.5px;
+  color: var(--ink);
+  padding: 0;
+  margin: 0;
+}
+.qa-other-inline::placeholder { color: var(--ink-4); }
+.qa-other-inline:focus { outline: none; }
+.qa-choice.qa-other { cursor: text; }
+
+/* ───── Multi-question flow header / footer / dots (.qaf-*) ───── */
+.qa-flow .qaf-head {
+  padding: 14px 20px 10px;
+  border-bottom: 1px solid var(--border);
+}
+.qaf-lead {
+  font-size: 12.5px;
+  color: var(--ink-3);
+  margin: 0 0 10px;
+  line-height: 1.5;
+  text-wrap: pretty;
+}
+.qaf-lead b { color: var(--ink); font-weight: 600; }
+.qaf-progress-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.qaf-progress {
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-4);
+  white-space: nowrap;
+}
+.qaf-dots { display: flex; align-items: center; gap: 6px; }
+.qaf-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--bg-subtle);
+  border: 1.5px solid var(--border-strong);
+  flex-shrink: 0;
+  transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+}
+.qaf-dot.is-done { background: var(--accent); border-color: var(--accent); }
+.qaf-dot.is-current {
+  background: var(--bg-raised);
+  border-color: var(--accent);
+  transform: scale(1.28);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+.qa-flow .pc-description { padding-top: 12px; }
+
+/* Back button — quieter than the primary CTA */
+.qaf-back {
+  font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-3);
+  background: transparent;
+  border: none;
+  padding: 7px 6px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border-radius: 6px;
+}
+.qaf-back:hover { background: var(--bg-hover); color: var(--ink); }
+.qaf-back[disabled] { opacity: 0; pointer-events: none; }
+
+/* Gating: disabled primary in the flow */
+.qa-flow .pc-btn-primary[disabled] { opacity: 0.4; cursor: not-allowed; box-shadow: none; }
+.qa-flow .pc-btn-primary[disabled]:hover { background: var(--accent); border-color: var(--accent); }
+
+/* Consolidated resolution mark — one block listing every Q/A pair. */
+.qaf-resolved { display: flex; flex-direction: column; gap: 10px; }
+.qaf-resolved-head {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-3);
+}
+.qaf-resolved-item { display: flex; flex-direction: column; gap: 1px; }
+.qa-resolved-q { margin: 0; font-size: 13.5px; line-height: 1.5; color: var(--ink-3); }
+.qaf-rerun { margin-top: 12px; }
+.qaf-rerun .pc-btn { font-size: 12.5px; }
+
+/* ─────────────────────────────────────────────────────────
+   Responsive hardening. These demos render inside the Mintlify
+   docs content column — ~720px on desktop, ~360px on a phone,
+   anything in between on tablets / split windows / the sidebar.
+   Goal: no horizontal overflow at any width from ~320px up.
+   Side padding shrinks a notch at narrow widths; the question
+   options and the Back/Next footer wrap rather than overflow;
+   the progress dots stay on one row; the "Other" write-in stays
+   full width. CSS-only — copy, fixtures, and behavior unchanged.
+   ───────────────────────────────────────────────────────── */
+
+/* Tablet / docked-sidebar / split-window range (≤760px). */
+@media (max-width: 760px) {
+  .demo-stage { padding: 32px 16px 24px; }
+  .demo-foot { padding: 4px 16px 32px; }
+  .chat-canvas { padding: 24px 22px; gap: 16px; }
+  .amsg { font-size: 14.5px; }
+  .pc-description { padding: 14px 16px 6px; }
+  .qa-card .pc-description { padding: 14px 16px 8px; }
+  .qa-choices { padding: 0 10px 10px; }
+  .qa-flow .qaf-head { padding: 14px 16px 10px; }
+}
+
+/* Phone range (≤480px): scale type/padding down another notch,
+   let the footer controls wrap, keep the progress dots on one row. */
+@media (max-width: 480px) {
+  .demo-stage { padding: 24px 12px 20px; }
+  .demo-foot { padding: 4px 12px 28px; }
+  .chat-canvas { padding: 18px 14px; gap: 14px; border-radius: 10px; }
+  .amsg { font-size: 14px; }
+
+  .pc-description { padding: 12px 14px 6px; font-size: 14px; }
+  .qa-card .pc-description { padding: 12px 14px 8px; }
+  .qa-choices { padding: 0 6px 10px; }
+  .qa-choice { font-size: 13px; padding: 9px 8px; }
+
+  .qa-flow .qaf-head { padding: 12px 14px 10px; }
+  .qaf-lead { font-size: 12px; }
+
+  /* Keep the label + dots on one line; if the progress label runs
+     long it wraps under the dots instead of forcing overflow. */
+  .qaf-progress-row { flex-wrap: wrap; gap: 8px 10px; }
+  .qaf-progress { white-space: normal; }
+  .qaf-dots { flex-wrap: nowrap; }
+
+  /* Footer: let Back / CTA wrap when there isn't room side-by-side.
+     The spacer keeps them apart on one row but collapses on wrap. */
+  .pc-foot { flex-wrap: wrap; padding: 12px; gap: 8px; }
+  .pc-foot-spacer { min-width: 0; }
+  .pc-btn { padding: 7px 14px; }
+
+  /* The write-in "Other" field already flexes; this guarantees it
+     fills its row even after the option row wraps. */
+  .qa-other-inline { flex: 1 1 100%; }
+}
+</style>
+</head>
+<body>
+
+<main class="demo-stage">
+  <p class="demo-frame-head">QACard · multi-question clarification</p>
+  <!-- Mount point: the driver below renders the live card here. -->
+  <div id="qa-flow-demo"></div>
+</main>
+
+<script>
+// Multi-question clarification flow — one live card, forward/back navigable.
+// Self-contained vanilla-JS driver: renders a 4-question batch into
+// #qa-flow-demo, gates Next/Submit on answers, and collapses into a single
+// consolidated resolution mark on submit. Sample fixtures are synthetic.
+(function () {
+  var demoEl = document.getElementById('qa-flow-demo');
+  if (!demoEl) return;
+  var QUESTIONS = [
+    { id:'env', kind:'single', other:true, prompt:'Which environment should I run the regression against?',
+      choices:['Staging','Production mirror · read-only','Both — staging first, then mirror'] },
+    { id:'gates', kind:'multi', other:true, prompt:'Which signals should gate the rollout? Pick all that apply.',
+      choices:['CSAT delta vs. last week','Eval pass rate ≥ 90%','Manual review sign-off','p95 latency unchanged'] },
+    { id:'billing', kind:'single', other:false, prompt:'How should I handle the two billing-dispute sessions?',
+      choices:['Keep them in the set','Drop them','Split into their own set'] },
+    { id:'owner', kind:'single', other:false, prompt:'Who should own the requirement I file for the prompt fix?',
+      choices:['Assign to the agent','Assign to me','Leave unassigned for triage'] }
+  ];
+  var state;
+  function initState(){ state = { idx:0, done:false, answers:{} }; QUESTIONS.forEach(function(q){ state.answers[q.id] = { sel:[], other:'' }; }); }
+  function answered(q){ var a = state.answers[q.id]; var real = a.sel.some(function(x){ return x !== 'other'; }); var oth = a.sel.indexOf('other') >= 0 && a.other.trim() !== ''; return real || oth; }
+  function allAnswered(){ return QUESTIONS.every(answered); }
+  function esc(v){ return String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function pick(q, key){ var a = state.answers[q.id]; if (q.kind === 'single'){ a.sel = [key]; } else { var i = a.sel.indexOf(key); if (i >= 0) a.sel.splice(i,1); else a.sel.push(key); } }
+  function cardHTML(){
+    var q = QUESTIONS[state.idx], isLast = state.idx === QUESTIONS.length - 1, a = state.answers[q.id];
+    var rows = q.choices.map(function(c,i){
+      if (q.kind === 'single') return '<label class="qa-choice qa-radio" data-c="'+i+'"><span class="qa-pip"></span>'+c+'</label>';
+      return '<label class="qa-choice" data-c="'+i+'"><span class="qa-box"><span class="qa-check">✓</span></span>'+c+'</label>';
+    }).join('');
+    if (q.other){
+      var boxh = q.kind === 'single' ? '<span class="qa-pip"></span>' : '<span class="qa-box"><span class="qa-check">✓</span></span>';
+      rows += '<label class="qa-choice '+(q.kind==='single'?'qa-radio ':'')+'qa-other" data-c="other">'+boxh+'<input class="qa-other-inline" placeholder="Or type your own answer…" value="'+esc(a.other)+'"></label>';
+    }
+    var dots = ''; for (var i=0;i<QUESTIONS.length;i++){ dots += '<span class="qaf-dot"></span>'; }
+    return '<div class="pc qa-card qa-flow">'
+      + '<button class="pc-dismiss qa-card-dismiss" aria-label="Dismiss">×</button>'
+      + '<div class="qaf-head"><p class="qaf-lead">Before I set up the remediation run I need a few details — <b>'+QUESTIONS.length+' quick questions</b>. Move back and forth freely; nothing runs until you submit.</p>'
+      + '<div class="qaf-progress-row"><span class="qaf-progress">Question '+(state.idx+1)+' of '+QUESTIONS.length+(isLast?' · last':'')+'</span><div class="qaf-dots">'+dots+'</div></div></div>'
+      + '<div class="pc-description"><p>'+q.prompt+'</p></div>'
+      + '<div class="qa-choices">'+rows+'</div>'
+      + '<footer class="pc-foot"><button class="qaf-back"'+(state.idx===0?' disabled':'')+'>← Back</button><div class="pc-foot-spacer"></div><button class="pc-btn pc-btn-primary">'+(isLast?'Submit':'Next →')+'</button></footer>'
+      + '</div>';
+  }
+  function sync(){
+    var q = QUESTIONS[state.idx];
+    demoEl.querySelectorAll('.qa-choice').forEach(function(el){ var k = el.getAttribute('data-c'); var key = k === 'other' ? 'other' : parseInt(k,10); el.classList.toggle('qa-checked-quiet', state.answers[q.id].sel.indexOf(key) >= 0); });
+    demoEl.querySelectorAll('.qaf-dot').forEach(function(d,i){ d.className = 'qaf-dot' + (i === state.idx ? ' is-current' : (answered(QUESTIONS[i]) ? ' is-done' : '')); });
+    var primary = demoEl.querySelector('.pc-btn-primary');
+    if (primary){ var isLast = state.idx === QUESTIONS.length - 1; primary.disabled = isLast ? !allAnswered() : !answered(q); }
+  }
+  function render(){ demoEl.innerHTML = cardHTML(); sync(); }
+  function answerText(q){
+    var a = state.answers[q.id];
+    var parts = a.sel.filter(function(x){ return x !== 'other'; }).map(function(i){ return '<b>'+q.choices[i]+'</b>'; });
+    var oth = (a.sel.indexOf('other') >= 0 && a.other.trim() !== '') ? ('"'+esc(a.other.trim())+'"') : '';
+    if (parts.length && oth) return 'You chose '+parts.join(', ')+' and added: '+oth+'.';
+    if (parts.length) return 'You chose '+parts.join(', ')+'.';
+    if (oth) return 'You wrote your own answer: '+oth+'.';
+    return 'You answered.';
+  }
+  function rerun(){ return '<div class="qaf-rerun"><button class="pc-btn" data-rerun>↻ Run through again</button></div>'; }
+  function submit(){
+    state.done = true;
+    var items = QUESTIONS.map(function(q){ return '<div class="qaf-resolved-item"><p class="qa-resolved-q">'+q.prompt.replace(' Pick all that apply.','')+'</p><div class="pc-resolve">'+answerText(q)+'</div></div>'; }).join('');
+    demoEl.innerHTML = '<div class="chat-canvas"><div class="amsg"><div class="qaf-resolved"><div class="qaf-resolved-head">You answered '+QUESTIONS.length+' questions</div>'+items+'</div></div>'+rerun()+'</div>';
+  }
+  function dismiss(){
+    state.done = true;
+    demoEl.innerHTML = "<div class='chat-canvas'><div class='amsg'><div class='pc-resolve'>You dismissed the questions. I'll wait for your next message.</div></div>"+rerun()+"</div>";
+  }
+  demoEl.addEventListener('click', function(ev){
+    if (ev.target.closest('[data-rerun]')){ initState(); render(); return; }
+    if (state.done) return;
+    if (ev.target.closest('.qa-card-dismiss')){ dismiss(); return; }
+    if (ev.target.closest('.qaf-back')){ if (state.idx > 0){ state.idx--; render(); } return; }
+    var primary = ev.target.closest('.pc-btn-primary');
+    if (primary){ if (primary.disabled) return; if (state.idx === QUESTIONS.length - 1) submit(); else { state.idx++; render(); } return; }
+    if (ev.target.closest('.qa-other-inline')) return;
+    var choice = ev.target.closest('.qa-choice');
+    if (choice && demoEl.contains(choice)){
+      var k = choice.getAttribute('data-c'); var key = k === 'other' ? 'other' : parseInt(k,10);
+      pick(QUESTIONS[state.idx], key);
+      if (key === 'other'){ var inp = choice.querySelector('.qa-other-inline'); if (inp) setTimeout(function(){ inp.focus(); }, 0); }
+      sync();
+    }
+  });
+  demoEl.addEventListener('input', function(ev){
+    var inp = ev.target.closest('.qa-other-inline'); if (!inp || state.done) return;
+    var q = QUESTIONS[state.idx], a = state.answers[q.id];
+    a.other = inp.value;
+    if (a.sel.indexOf('other') < 0){ if (q.kind === 'single') a.sel = ['other']; else a.sel.push('other'); }
+    sync();
+  });
+  initState();
+  render();
+})();
+</script>
+
+<style>
+  #__fsbtn{position:fixed;top:10px;right:10px;z-index:99999;display:inline-flex;align-items:center;gap:6px;border:1px solid #e7e2d8;background:rgba(255,255,255,.95);border-radius:8px;padding:6px 10px;cursor:pointer;font:500 12px/1 Inter,system-ui,sans-serif;color:#5a534a;box-shadow:0 1px 3px rgba(0,0,0,.07)}
+  #__fsbtn:hover{background:#fff;color:#3a3530}
+  html:fullscreen{overflow:auto;background:#fcfaf7}
+  html:-webkit-full-screen{overflow:auto;background:#fcfaf7}
+</style>
+<button id="__fsbtn" type="button" aria-label="View this demo full screen" title="View this demo full screen">⤢ Full window</button>
+<script>
+(function(){var b=document.getElementById('__fsbtn'),d=document;function on(){return d.fullscreenElement||d.webkitFullscreenElement;}function lbl(){b.textContent=on()?'⤡ Exit':'⤢ Full window';}b.addEventListener('click',function(){var e=d.documentElement;if(!on()){(e.requestFullscreen||e.webkitRequestFullscreen||function(){}).call(e);}else{(d.exitFullscreen||d.webkitExitFullscreen||function(){}).call(d);}});d.addEventListener('fullscreenchange',lbl);d.addEventListener('webkitfullscreenchange',lbl);})();
+</script>
+</body>
+</html>

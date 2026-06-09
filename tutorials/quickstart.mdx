@@ -6,6 +6,8 @@ description: "Project creation through your first curated Dataset, end to end."
 
 This tutorial walks you from a brand-new Trust AI account to a curated [Dataset](/concepts/datasets) ready for evaluation, in roughly ten minutes. It assumes the **SI Consultant** persona: setting up Trust AI for a customer agent for the first time. The shape is the same for an Agent Owner adding a new agent to an existing workspace.
 
+Most of these steps you'll drive by asking the [Trust Agent](/concepts/trust-agent) — the in-app assistant — in plain language, then watching the results land in the UI. Where you'd rather do something by hand, the manual UI path is right there too.
+
 By the end you'll have:
 
 - A [Project](/concepts/projects) wired to a deployed agent
@@ -16,7 +18,7 @@ By the end you'll have:
 That's the smallest complete pass through the first three steps of [the evaluation loop](/concepts/evaluation-loop). Once it works once, the rest of Trust AI is "do this same thing at scale."
 
 <Tip>
-  Every code sample below is illustrative. Exact endpoint names and payload shapes are auto-rendered in the [API Reference](/api-reference) and will be the authoritative source.
+  Prefer to work through the API directly? Every endpoint, request shape, and response shape is auto-rendered in the [API Reference](/api-reference), the authoritative source.
 </Tip>
 
 ## Before you start
@@ -35,32 +37,7 @@ If your agent isn't on AgentCore yet, you can still walk this tutorial using a *
   <Step title="Create your first Project">
     A [Project](/concepts/projects) is the workspace boundary around one agent (or fleet) under evaluation. Members, runtime credentials, and every artifact downstream belong to it.
 
-    In the app: click **+ New Project** in the top bar, name it after the agent under evaluation (e.g., "Acme Support Agent"), pick the org it belongs to, and click **Create**.
-
-    Or via the API:
-
-    <CodeGroup>
-      ```bash curl
-      curl -X POST https://api.provar.dev/v1/projects \
-        -H "Authorization: Bearer $TRUST_AI_TOKEN" \
-        -H "Content-Type: application/json" \
-        -d '{
-          "name": "Acme Support Agent",
-          "description": "Production AgentCore agent for Acme's customer support flow"
-        }'
-      ```
-
-      ```typescript TypeScript
-      import { TrustAI } from "@provar/trust-ai";
-
-      const client = new TrustAI({ token: process.env.TRUST_AI_TOKEN });
-
-      const project = await client.projects.create({
-        name: "Acme Support Agent",
-        description: "Production AgentCore agent for Acme's customer support flow",
-      });
-      ```
-    </CodeGroup>
+    Creating a Project is the one setup step you do before the Trust Agent comes into play — the agent lives *inside* a Project, so you need one first. Click **+ New Project** in the top bar, name it after the agent under evaluation (e.g., "Acme Support Agent"), pick the org it belongs to, and click **Create**.
 
     **You should see:** the Project's empty home view, with five empty surfaces (Sessions, Annotations, Datasets, Evaluators, Evaluations) and a banner prompting you to connect a runtime.
   </Step>
@@ -86,32 +63,11 @@ If your agent isn't on AgentCore yet, you can still walk this tutorial using a *
   <Step title="Ingest your first Sessions">
     Once the runtime is connected, ingestion is automatic. Trust AI pulls AgentCore invocation logs every few minutes and each invocation becomes a Session row.
 
-    To pull immediately rather than wait: click **Sessions → Sync Now**. You'll see Sessions begin to appear within ~30 seconds for an active agent.
+    <Note>
+      *Ask the Trust Agent:* "Pull my latest sessions and show me the ten most recent."
+    </Note>
 
-    Or via the API:
-
-    <CodeGroup>
-      ```bash curl
-      # Trigger an on-demand ingestion pull
-      curl -X POST https://api.provar.dev/v1/projects/$PROJECT_ID/ingest \
-        -H "Authorization: Bearer $TRUST_AI_TOKEN"
-
-      # Then list the Sessions that came back
-      curl https://api.provar.dev/v1/sessions?project_id=$PROJECT_ID&limit=10 \
-        -H "Authorization: Bearer $TRUST_AI_TOKEN"
-      ```
-
-      ```typescript TypeScript
-      await client.projects.ingest(project.id);
-
-      const sessions = await client.sessions.list({
-        project_id: project.id,
-        limit: 10,
-      });
-
-      console.log(`Ingested ${sessions.total} Sessions`);
-      ```
-    </CodeGroup>
+    The agent runs the pull for you and renders the Sessions it found as a clickable table you can read right there. You'll see Sessions begin to appear within ~30 seconds for an active agent; or do it by hand from the **Sessions** tab with **Sync Now**.
 
     **You should see:** the Sessions list populated with rows. Each row shows: timestamp, Agent Version, turn count, latency, and any intent classification your agent emits.
   </Step>
@@ -124,30 +80,13 @@ If your agent isn't on AgentCore yet, you can still walk this tutorial using a *
     - Skill activations as colored badges
     - A side panel where Annotations live
 
-    Pick a single Turn — say, the one where the agent responded to the user's primary question — and apply a pass/fail [Annotation](/concepts/annotations) with a short freeform note explaining why. Click **Save**.
+    Pick a single Turn — say, the one where the agent responded to the user's primary question.
 
-    Or via the API:
+    <Note>
+      *Ask the Trust Agent:* "On the order-status session, mark the turn where the agent answered the customer as a pass, and note that it resolved order status and explained next steps clearly."
+    </Note>
 
-    <CodeGroup>
-      ```bash curl
-      curl -X POST https://api.provar.dev/v1/sessions/$SESSION_ID/turns/$TURN_ID/annotations \
-        -H "Authorization: Bearer $TRUST_AI_TOKEN" \
-        -H "Content-Type: application/json" \
-        -d '{
-          "label": "pass",
-          "note": "Correctly resolved order status and explained next steps clearly"
-        }'
-      ```
-
-      ```typescript TypeScript
-      await client.annotations.create({
-        session_id: sessionId,
-        turn_id: turnId,
-        label: "pass",
-        note: "Correctly resolved order status and explained next steps clearly",
-      });
-      ```
-    </CodeGroup>
+    Because adding an Annotation is a write, the Trust Agent pauses and shows you an approval card with the exact label and note before it saves — approve it and the Annotation lands. Prefer to do it by hand? Apply a pass/fail [Annotation](/concepts/annotations) directly on the Turn with a short freeform note, then click **Save**.
 
     **You should see:** the Annotation appear in the Session's side panel, time-stamped, attributed to you. The Sessions list now shows this row as **Annotated**.
   </Step>
@@ -155,41 +94,11 @@ If your agent isn't on AgentCore yet, you can still walk this tutorial using a *
   <Step title="Curate your first Dataset">
     Now turn that one annotated Session into the first row of a curated [Dataset](/concepts/datasets).
 
-    In the app: from the Sessions list, click the **+ Add to Dataset** action on your annotated Session, choose **+ New Dataset**, name it (e.g., "Order-status happy path"), and confirm.
+    <Note>
+      *Ask the Trust Agent:* "Create a new dataset called 'Order-status happy path' and add that annotated session to it as the first row."
+    </Note>
 
-    Or via the API:
-
-    <CodeGroup>
-      ```bash curl
-      # Create the Dataset
-      curl -X POST https://api.provar.dev/v1/datasets \
-        -H "Authorization: Bearer $TRUST_AI_TOKEN" \
-        -H "Content-Type: application/json" \
-        -d '{
-          "project_id": "'$PROJECT_ID'",
-          "name": "Order-status happy path"
-        }'
-
-      # Add the annotated Session as a row
-      curl -X POST https://api.provar.dev/v1/datasets/$DATASET_ID/rows \
-        -H "Authorization: Bearer $TRUST_AI_TOKEN" \
-        -H "Content-Type: application/json" \
-        -d '{
-          "source_session_id": "'$SESSION_ID'"
-        }'
-      ```
-
-      ```typescript TypeScript
-      const dataset = await client.datasets.create({
-        project_id: project.id,
-        name: "Order-status happy path",
-      });
-
-      await client.datasets.rows.add(dataset.id, {
-        source_session_id: sessionId,
-      });
-      ```
-    </CodeGroup>
+    The agent drafts the new Dataset and the row, then pauses for your approval before it writes either — confirm, and both land. Or do it by hand: from the Sessions list, click the **+ Add to Dataset** action on your annotated Session, choose **+ New Dataset**, name it (e.g., "Order-status happy path"), and confirm.
 
     **You should see:** the Datasets list now has one entry with one row. Open it — the row carries the Session's input, the agent's full response, and the Annotation you applied.
   </Step>

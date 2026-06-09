@@ -28,7 +28,11 @@ You should have, from the prior two tutorials:
 
 <Steps>
   <Step title="Pick your Dataset and Evaluator(s)">
-    From the Project home, navigate to **Evaluations → New Run**.
+    <Note>
+      *Ask the Trust Agent:* "Start a new Evaluation run using the Dataset I curated in the quickstart and the Evaluator I just authored."
+    </Note>
+
+    You'll see the run configuration open with those artifacts pre-selected; or set it up by hand: from the Project home, navigate to **Evaluations → New Run**.
 
     The run configuration asks for three things:
 
@@ -40,6 +44,10 @@ You should have, from the prior two tutorials:
   </Step>
 
   <Step title="Pick the Agent Version">
+    <Note>
+      *Ask the Trust Agent:* "Set this run to evaluate my production Agent Version."
+    </Note>
+
     For the **Agent Version**, pick the version your Project has currently active. If you connected an AgentCore runtime in the quickstart, Trust AI has already auto-discovered the deployed alias and surfaced it in this dropdown.
 
     If multiple versions are available, **pick the production one** for your first run. You'll compare against another version in step 5.
@@ -50,7 +58,11 @@ You should have, from the prior two tutorials:
   </Step>
 
   <Step title="Kick off the run">
-    Click **Run Evaluation**.
+    <Note>
+      *Ask the Trust Agent:* "Run this Evaluation now."
+    </Note>
+
+    You'll see the run start immediately; or do it by hand: click **Run Evaluation**.
 
     What happens in the background, in roughly this order:
 
@@ -62,43 +74,17 @@ You should have, from the prior two tutorials:
 
     For a small Dataset (5-10 rows) this completes in 30-60 seconds. For larger Datasets it can run for several minutes; the page stays live and shows rows filling in as they complete.
 
-    Or via the API:
-
-    <CodeGroup>
-      ```bash curl
-      curl -X POST https://api.provar.dev/v1/evaluations \
-        -H "Authorization: Bearer $TRUST_AI_TOKEN" \
-        -H "Content-Type: application/json" \
-        -d '{
-          "project_id": "'$PROJECT_ID'",
-          "dataset_id": "'$DATASET_ID'",
-          "evaluator_ids": ["'$EVALUATOR_ID'"],
-          "agent_version_id": "'$AGENT_VERSION_ID'"
-        }'
-      ```
-
-      ```typescript TypeScript
-      const evaluation = await client.evaluations.create({
-        project_id: project.id,
-        dataset_id: dataset.id,
-        evaluator_ids: [evaluator.id],
-        agent_version_id: agentVersion.id,
-      });
-
-      // Poll until complete; or use the streaming endpoint
-      let result = await client.evaluations.get(evaluation.id);
-      while (result.status !== "complete") {
-        await new Promise(r => setTimeout(r, 5000));
-        result = await client.evaluations.get(evaluation.id);
-      }
-      ```
-    </CodeGroup>
+    If you need to kick off runs programmatically, the endpoint is documented in the [API Reference](/api-reference).
 
     **You should see:** the Evaluation detail page transitions from `In progress` to `Complete`. Aggregate stats appear at the top.
   </Step>
 
   <Step title="Read the results">
-    The Run Detail page shows:
+    <Note>
+      *Ask the Trust Agent:* "Summarize this Evaluation — what's the pass rate, and which rows failed?"
+    </Note>
+
+    You'll get a written rundown you can act on; or read it yourself in the UI. The Run Detail page shows:
 
     - **Aggregate stats** — pass rate, score distribution, latency, common failure patterns
     - **Results matrix** — each Dataset row × each Evaluator, with per-evaluator verdict chips (green for pass, red for fail). Click any cell to open a fly-in with the full evaluation card — score, reasoning, and reference comparison.
@@ -116,9 +102,11 @@ You should have, from the prior two tutorials:
   <Step title="Compare to a previous Agent Version">
     If your Project has more than one Agent Version (the demo data ships with two; a real Project gets a second one when you deploy a new version of your agent), do one more thing:
 
-    Click **Run again against a different version** from the Evaluation detail page. Pick the second Agent Version (e.g., the previous week's deployment, or the demo's `v2026-05-04-prod`). Trust AI re-runs the same Dataset + same Evaluator(s) against the alternate version.
+    <Note>
+      *Ask the Trust Agent:* "Re-run this same Evaluation against my previous Agent Version, then compare the two runs."
+    </Note>
 
-    When the second run completes, open either Evaluation and click **Compare**. Pick the other run.
+    You'll see the second run kick off and a comparison open when it finishes; or do it by hand: click **Run again against a different version** from the Evaluation detail page, then pick the second Agent Version (e.g., the previous week's deployment, or the demo's `v2026-05-04-prod`). Trust AI re-runs the same Dataset + same Evaluator(s) against the alternate version. When the second run completes, open either Evaluation and click **Compare**, then pick the other run.
 
     **You should see:** a side-by-side view of the same Dataset rows, scored against both Agent Versions. Per row, the diff: pass → fail (regression), fail → pass (improvement), same → same. Aggregate: the headline pass-rate delta.
 

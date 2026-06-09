@@ -85,21 +85,11 @@ Common failure patterns and what they usually mean:
 - **A category of rows that all fail together** → usually a category regression in the agent (a whole intent broke, a tool's not being called, etc.). Filter by row tag to localize.
 - **A row where the agent didn't respond at all** (timeout, error) → infrastructure problem; not a judgment problem. Re-run those rows; if persistent, debug the runtime.
 
-## API surface
+## Working with Evaluations
 
-Evaluations appear in the `/v1/evaluations` endpoint family of the [API Reference](/api-reference). Common operations:
+You drive Evaluations from the Trust AI app, or by asking the Trust Agent. Kick off a new run by clicking **New Run** (pick a Dataset, Evaluators, and Agent Version), or by telling the Trust Agent to evaluate a Dataset against an Agent Version. Open a run from the run list to watch progress, read per-row results, compare it to a prior run, cancel an in-progress run, or rename a finished one — all from the Run Detail surface. The Trust Agent can also pull aggregate stats (pass-rate trends, latency) and slice results by cohort for you.
 
-- `POST /v1/evaluations` — kick off a new Evaluation run (Dataset + Evaluators + Agent Version)
-- `GET /v1/evaluations/{evaluation_id}` — fetch run state + aggregate results
-- `GET /v1/evaluations/{evaluation_id}/rows` — per-row scored results (paginated)
-- `POST /v1/evaluations/{evaluation_id}/compare/{other_evaluation_id}` — generate the per-row comparison
-- `GET /v1/evaluations` — list / filter Evaluations in a Project
-- `POST /v1/evaluations/{run_id}/cancel` — cancel an in-progress Evaluation run *(v2026.05.19+)*
-- `GET /v1/evaluations/stats` — aggregate Evaluation stats across the Project (pass-rate trends, latency distributions) *(v2026.05.19+)*
-- `POST /v1/evaluations/cohort-breakdown` — slice an Evaluation's per-row results by cohort (intent, tag, custom dimension) *(v2026.05.19+)*
-- `PATCH /v1/evaluations/{run_id}` — rename a finished Evaluation run *(v2026.05.22+)*
-
-Full request/response shapes live in the auto-generated [API Reference](/api-reference).
+Developers who want the underlying endpoints and request/response shapes can find them in the auto-generated [API Reference](/api-reference).
 
 ## Related concepts
 

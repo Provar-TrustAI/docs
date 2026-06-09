@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Permission / Approval Card — interactive prototype</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+
+<!-- Pinned React / ReactDOM / Babel UMD — integrity hashes copied verbatim
+     from the Paddington v7 prototype HTML <head>. Never @latest. -->
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<style>
+  /* ---- Design tokens (subset of the app's warm-neutral palette) ---- */
+  :root {
+    --bg: oklch(0.992 0.003 90);
+    --bg-subtle: oklch(0.975 0.004 90);
+    --bg-raised: oklch(1 0 0);
+    --bg-hover: oklch(0.965 0.005 90);
+    --bg-sunken: oklch(0.95 0.006 90);
+    --border: oklch(0.915 0.006 90);
+    --border-strong: oklch(0.86 0.008 90);
+
+    --ink: oklch(0.22 0.012 260);
+    --ink-2: oklch(0.38 0.012 260);
+    --ink-3: oklch(0.55 0.012 260);
+    --ink-4: oklch(0.72 0.008 260);
+
+    --accent: oklch(0.52 0.16 265);
+    --accent-hover: oklch(0.46 0.16 265);
+    --accent-soft: oklch(0.96 0.03 265);
+    --accent-ink: oklch(0.38 0.14 265);
+
+    /* --danger is intentionally undefined so the pc-* rules below fall back
+       exactly the way they do in the shipped library (accent pip / red CTA). */
+
+    --lib-shadow-pc: 0 4px 16px oklch(0.2 0.01 260 / 0.06), 0 2px 4px oklch(0.2 0.01 260 / 0.04);
+    --lib-mono: 'JetBrains Mono', ui-monospace, monospace;
+  }
+
+  /* ---- Page chrome (demo harness only — not part of the card) ---- */
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .demo-wrap {
+    max-width: 560px;
+    margin: 0 auto;
+    padding: 40px 20px 80px;
+  }
+  .demo-title {
+    font-size: 20px;
+    font-weight: 700;
+    margin: 0 0 4px;
+    letter-spacing: -0.01em;
+  }
+  .demo-sub {
+    font-size: 14px;
+    color: var(--ink-3);
+    margin: 0 0 32px;
+    line-height: 1.5;
+  }
+  .demo-case { margin-bottom: 36px; }
+  .demo-case-label {
+    font-size: 11.5px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ink-4);
+    margin: 0 0 10px;
+  }
+  .demo-foot {
+    margin-top: 48px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+    font-size: 12px;
+    color: var(--ink-4);
+    text-align: center;
+    line-height: 1.5;
+  }
+
+  /* ---- PermissionCard (pc-*) — inlined from paddington-lib.css + app-styles.css ---- */
+  .pc {
+    background: var(--bg-raised);
+    border: 1px solid var(--border-strong);
+    border-radius: 12px;
+    box-shadow: var(--lib-shadow-pc);
+    overflow: hidden;
+    position: relative;
+    padding-top: 4px;
+  }
+
+  .pc-dismiss {
+    width: 24px; height: 24px;
+    border: none;
+    background: transparent;
+    color: var(--ink-3);
+    cursor: pointer;
+    font-size: 18px;
+    border-radius: 5px;
+    line-height: 1;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+  }
+  .pc-dismiss:hover { background: var(--bg-hover); color: var(--ink); }
+  .pc-dismiss-floating {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 2;
+  }
+
+  /* Templated header question */
+  .pc-permission-q {
+    padding: 16px 20px 6px;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--ink);
+    line-height: 1.45;
+  }
+
+  .pc-scope {
+    padding: 8px 14px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .pc-scope-opt {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 9px 10px;
+    border-radius: 6px;
+    font-size: 13.5px;
+    color: var(--ink-2);
+    cursor: pointer;
+    line-height: 1.45;
+    flex-wrap: wrap;
+  }
+  .pc-scope-opt:hover { background: var(--bg-hover); }
+  .pc-pip {
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    border: 1.5px solid var(--border-strong);
+    background: var(--bg-raised);
+    flex-shrink: 0;
+    position: relative;
+    margin-top: 1px;
+  }
+  .pc-scope-checked .pc-pip { border-color: var(--accent); }
+  .pc-scope-checked .pc-pip::after {
+    content: "";
+    position: absolute;
+    inset: 3px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+  .pc-scope-text {
+    flex: 1 1 auto;
+    min-width: 0;
+    color: var(--ink-2);
+  }
+  .pc-scope-text b { color: var(--ink); font-weight: 600; }
+  .pc-scope-text i { font-style: italic; color: var(--ink); }
+  .pc-scope-checked .pc-scope-text { color: var(--ink); }
+
+  /* Reject row: when checked, danger pip (falls back to accent) */
+  .pc-delete .pc-scope-reject .pc-pip,
+  .pc-scope-reject.pc-scope-checked .pc-pip {
+    border-color: var(--danger, var(--accent));
+  }
+  .pc-delete .pc-scope-reject.pc-scope-checked .pc-pip::after,
+  .pc-scope-reject.pc-scope-checked .pc-pip::after {
+    background: var(--danger, var(--accent));
+  }
+  .pc-scope-checked { background: var(--bg-subtle); }
+  .pc-scope-reject.pc-scope-checked { background: oklch(0.98 0.02 25); }
+  .pc-scope-opt.pc-scope-reject { cursor: text; }
+
+  /* Inline reject note input (QA-other style) */
+  .pc-reject-inline {
+    flex: 1;
+    min-width: 0;
+    border: none;
+    background: transparent;
+    font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+    font-size: 13.5px;
+    color: var(--ink);
+    padding: 0;
+    margin: 0;
+  }
+  .pc-reject-inline::placeholder { color: var(--ink-4); }
+  .pc-reject-inline:focus { outline: none; }
+
+  .pc-foot {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 14px;
+    background: var(--bg-subtle);
+  }
+  .pc-foot-spacer { flex: 1; }
+  .pc-btn {
+    font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 7px 16px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--bg-raised);
+    color: var(--ink);
+    cursor: pointer;
+    transition: background 100ms, border-color 100ms;
+    white-space: nowrap;
+    line-height: 1.3;
+  }
+  .pc-btn:hover { background: var(--bg-hover); border-color: var(--border-strong); }
+  .pc-btn-primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+    box-shadow: 0 1px 2px oklch(0.3 0.15 265 / 0.2), inset 0 1px 0 oklch(1 0 0 / 0.15);
+  }
+  .pc-btn-primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+  .pc-btn-danger {
+    background: var(--danger, oklch(0.58 0.17 25));
+    border-color: var(--danger, oklch(0.58 0.17 25));
+    color: #fff;
+    box-shadow: 0 1px 2px oklch(0.35 0.17 25 / 0.2), inset 0 1px 0 oklch(1 0 0 / 0.15);
+  }
+  .pc-btn-danger:hover { background: oklch(0.5 0.17 25); border-color: oklch(0.5 0.17 25); }
+
+  /* Resolution mark — reasoning-style inline log of what the user chose */
+  .pc-resolve {
+    margin: 0;
+    padding: 4px 0 4px 14px;
+    border-left: 2px solid var(--border);
+    font-size: 13px;
+    color: var(--ink-3);
+    font-style: italic;
+    line-height: 1.6;
+  }
+  .pc-resolve b {
+    color: var(--ink-2);
+    font-style: normal;
+    font-weight: 500;
+  }
+
+  /* ---- Responsive hardening (CSS-only) ----------------------------------
+     These demos render inside the Mintlify content column, which is ~720px
+     on desktop but can be ~360px on a phone (and anything in between on
+     tablets / split windows / the docked sidebar). The rules below keep the
+     approval cards fluid and reflow control rows so nothing overflows
+     horizontally down to ~320px. Layout/structure/copy are unchanged. */
+
+  /* Belt-and-suspenders: never let any child force a horizontal scrollbar. */
+  html, body { max-width: 100%; overflow-x: hidden; }
+  .demo-wrap { width: 100%; }
+
+  /* The card is already block-level inside .demo-wrap, but make the fluid
+     intent explicit so it can never exceed its column. */
+  .pc { width: 100%; max-width: 100%; }
+
+  /* The inline reject input is fluid; guarantee it can shrink and, when its
+     row wraps, claim the full width of the row instead of overflowing. */
+  .pc-reject-inline { width: 100%; max-width: 100%; }
+
+  /* Tablet / narrow content column: trim the generous desktop padding a
+     notch and let the footer's button row wrap if it ever needs to. */
+  @media (max-width: 760px) {
+    .demo-wrap { padding: 32px 16px 64px; }
+    .demo-title { font-size: 19px; }
+    .demo-sub { margin-bottom: 28px; }
+    .demo-case { margin-bottom: 30px; }
+
+    .pc-permission-q { padding: 15px 16px 6px; }
+    .pc-scope { padding: 8px 12px 12px; }
+    .pc-foot {
+      padding: 11px 12px;
+      flex-wrap: wrap;
+    }
+  }
+
+  /* Phone / very narrow (split windows, docked sidebar): tighten further,
+     drop font sizes a notch, and make every control row wrap rather than
+     clip. The reject row and the action button each go full width so the
+     reject-with-note field and the Approve / Reject / danger button never
+     spill past the card edge. */
+  @media (max-width: 480px) {
+    .demo-wrap { padding: 24px 12px 56px; }
+    .demo-title { font-size: 18px; }
+    .demo-sub { font-size: 13.5px; }
+
+    .pc-permission-q {
+      padding: 14px 14px 6px;
+      font-size: 14.5px;
+    }
+    .pc-scope { padding: 6px 10px 10px; }
+    .pc-scope-opt {
+      padding: 9px 8px;
+      font-size: 13px;
+      gap: 9px;
+    }
+    .pc-scope-text { font-size: 13px; }
+
+    /* When the reject row wraps, the input claims the whole next line. */
+    .pc-reject-inline {
+      flex: 1 1 100%;
+      font-size: 13px;
+    }
+
+    .pc-foot {
+      padding: 10px;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    /* Let the action button wrap onto its own full-width line and let its
+       label wrap instead of forcing the card wider than the column. */
+    .pc-foot-spacer { flex: 1 1 100%; }
+    .pc-btn {
+      white-space: normal;
+      flex: 1 1 auto;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="demo-wrap">
+  <h1 class="demo-title">Permission / Approval Card</h1>
+  <p class="demo-sub">
+    Before Trust AI performs a write, it asks. Pick a scope and approve, or reject
+    with a note. Each card resolves into an inline record of your choice. Try both
+    Approve and Reject on each card below.
+  </p>
+  <div id="root"></div>
+</div>
+
+<script type="text/babel">
+// ---------- V6 PermissionCard ----------
+// Faithful port of the shipped component. The _autoplay / timeline wiring has
+// been removed: this is a user-driven card — the reader clicks Approve or Reject.
+function permissionQuestion(block) {
+  const verb = block.verb || "create";
+  const n = block.count;
+  const entity = block.entity || block.entityPlural || "item";
+  const verbWord = { create: "create", update: "update", delete: "delete", run: "run" }[verb] || verb;
+  if (n && n > 1) {
+    const plural = block.entityPlural || (entity + "s");
+    const newWord = verb === "create" ? "new " : "";
+    return `Allow Trust AI to ${verbWord} ${n} ${newWord}${plural}?`;
+  }
+  const newWord = verb === "create" ? "a new " : "the ";
+  return `Allow Trust AI to ${verbWord} ${newWord}${entity}?`;
+}
+
+function V6PermissionCard({ block, onResolved }) {
+  const [state, setState] = React.useState(block.state || "pending");
+  const [scope, setScope] = React.useState(block.scope || block.defaultScope || "chat");
+  const [note, setNote] = React.useState(block.note || "");
+  const isDelete = block.verb === "delete";
+
+  function resolve(nextState, nextScope) {
+    const s = nextScope || scope;
+    setState(nextState);
+    block.state = nextState;
+    block.scope = s;
+    block.note = note;
+    block._resolved = true;
+    if (onResolved) onResolved({ state: nextState, scope: s, note });
+  }
+
+  if (state === "answered" || state === "dismissed") {
+    const chatCopy = block.chatCopy || `Trust AI can always ${block.verb || "do"} ${block.entityPlural || (block.entity ? block.entity + "s" : "this")} in this chat`;
+    const onceCopy = block.onceCopy || (isDelete ? "Delete these" : "Just this one");
+    let html = "";
+    if (state === "dismissed") html = "You dismissed the request. I'll wait for your next message.";
+    else if (scope === "chat") html = `You approved: <b>${chatCopy}</b>`;
+    else if (scope === "once") html = `You approved: <b>${onceCopy}</b>`;
+    else if (scope === "reject") html = note ? `You rejected: <b>${note}</b>` : "You rejected.";
+    return <div className="pc-resolve" dangerouslySetInnerHTML={{ __html: html }} />;
+  }
+
+  return (
+    <div className={`pc ${isDelete ? "pc-delete" : ""}`}>
+      <button className="pc-dismiss pc-dismiss-floating" aria-label="Dismiss" onClick={() => resolve("dismissed")}>×</button>
+      <div className="pc-permission-q" dangerouslySetInnerHTML={{ __html: block.question || permissionQuestion(block) }} />
+      <div className="pc-scope">
+        <label
+          className={`pc-scope-opt ${scope === "once" ? "pc-scope-checked" : ""}`}
+          onClick={() => setScope("once")}>
+          <span className="pc-pip" />
+          <span className="pc-scope-text">
+            {block.onceCopy || (isDelete ? "Delete these" : "Just this one")}
+          </span>
+        </label>
+        {!isDelete &&
+        <label
+          className={`pc-scope-opt ${scope === "chat" ? "pc-scope-checked" : ""}`}
+          onClick={() => setScope("chat")}>
+            <span className="pc-pip" />
+            <span className="pc-scope-text">
+              {block.chatCopy || `Always ${block.alwaysAction || "do this"} in this chat`}
+            </span>
+          </label>
+        }
+        <label
+          className={`pc-scope-opt pc-scope-reject ${scope === "reject" ? "pc-scope-checked" : ""}`}
+          onClick={(e) => { if (e.target.tagName === "INPUT") return; setScope("reject"); }}>
+          <span className="pc-pip" />
+          <input
+            className="pc-reject-inline"
+            placeholder="Reject — and tell me why (optional)"
+            value={note}
+            onFocus={() => setScope("reject")}
+            onChange={(e) => { setNote(e.target.value); setScope("reject"); }} />
+        </label>
+      </div>
+      <footer className="pc-foot">
+        <div className="pc-foot-spacer" />
+        <button
+          className={`pc-btn ${isDelete && scope !== "reject" ? "pc-btn-danger" : "pc-btn-primary"}`}
+          onClick={() => resolve("answered")}>
+          {scope === "reject" ? "Send rejection" : isDelete ? `Delete ${block.deleteCount || ""} items`.trim() : "Approve"}
+        </button>
+      </footer>
+    </div>);
+}
+
+// ---------- Demo fixtures (synthetic sample data) ----------
+function Demo() {
+  // Two fresh block objects per mount so the cards are independently resolvable.
+  const createBlock = React.useRef({
+    verb: "create",
+    entity: "test case",
+    entityPlural: "test cases",
+    count: 1,
+    defaultScope: "once",
+    onceCopy: "Just this one",
+    chatCopy: "Always create test cases in this chat",
+  }).current;
+
+  const deleteBlock = React.useRef({
+    verb: "delete",
+    entity: "data set",
+    entityPlural: "data sets",
+    count: 3,
+    deleteCount: "3",
+    defaultScope: "once",
+    onceCopy: "Delete these 3 sample data sets",
+  }).current;
+
+  // Re-render the parent when a card resolves so the resolution mark shows.
+  const [, force] = React.useState(0);
+  const onResolved = () => force((n) => n + 1);
+
+  return (
+    <React.Fragment>
+      <div className="demo-case">
+        <p className="demo-case-label">Create approval — approve or reject with a note</p>
+        <V6PermissionCard block={createBlock} onResolved={onResolved} />
+      </div>
+      <div className="demo-case">
+        <p className="demo-case-label">Delete approval — danger styling</p>
+        <V6PermissionCard block={deleteBlock} onResolved={onResolved} />
+      </div>
+    </React.Fragment>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<Demo />);
+</script>
+<style>
+  #__fsbtn{position:fixed;top:10px;right:10px;z-index:99999;display:inline-flex;align-items:center;gap:6px;border:1px solid #e7e2d8;background:rgba(255,255,255,.95);border-radius:8px;padding:6px 10px;cursor:pointer;font:500 12px/1 Inter,system-ui,sans-serif;color:#5a534a;box-shadow:0 1px 3px rgba(0,0,0,.07)}
+  #__fsbtn:hover{background:#fff;color:#3a3530}
+  html:fullscreen{overflow:auto;background:#fcfaf7}
+  html:-webkit-full-screen{overflow:auto;background:#fcfaf7}
+</style>
+<button id="__fsbtn" type="button" aria-label="View this demo full screen" title="View this demo full screen">⤢ Full window</button>
+<script>
+(function(){var b=document.getElementById('__fsbtn'),d=document;function on(){return d.fullscreenElement||d.webkitFullscreenElement;}function lbl(){b.textContent=on()?'⤡ Exit':'⤢ Full window';}b.addEventListener('click',function(){var e=d.documentElement;if(!on()){(e.requestFullscreen||e.webkitRequestFullscreen||function(){}).call(e);}else{(d.exitFullscreen||d.webkitExitFullscreen||function(){}).call(d);}});d.addEventListener('fullscreenchange',lbl);d.addEventListener('webkitfullscreenchange',lbl);})();
+</script>
+</body>
+</html>
