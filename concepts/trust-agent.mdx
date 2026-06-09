@@ -60,9 +60,6 @@ The agent thinks and answers in the open. Reasoning, text, and tool-call argumen
     Agent turns render as markdown-formatted prose — lists, paragraphs, and emphasis, not raw text. While a turn streams you see a typing-dots indicator and an accent caret; when it lands you get clean formatted prose. New turns are anchored to the **top** of the transcript on send: the message you just sent scrolls up, so the agent's response streams into view beneath it rather than pushing everything off the bottom.
     {/* ACCURACY-AUDIT-PENDING: markdown rendering + typing-dots + accent caret while streaming, and new turns anchor to the top on send — verify by driving the app on the release tag */}
 
-    <Frame caption="A streaming agent turn: markdown prose with the reasoning rail above it and a tool-call card for the work it did.">
-      <img src="/images/trust-agent-transcript.png" alt="The Trust Agent transcript showing a markdown-formatted reply, a collapsed reasoning rail, and a tool-call card summarizing a read in plain language" />
-    </Frame>
     {/* CAPTURE-PENDING: trust-agent-transcript.png — a streaming turn with markdown prose, reasoning rail, and a tool-call card */}
   </Tab>
   <Tab title="Reasoning rail">
@@ -89,9 +86,6 @@ The Trust Agent doesn't describe your records in paragraphs — it hands you the
   A single-object reference carries a human label and description instead of a UUID; clicking it opens the real, in-context record fly-in. A reference to a sub-entity resolves to its *parent* record's fly-in, so you always land somewhere real. For an evaluation result, the transcript renders an inline failure-analysis widget; opening an evaluator reference opens the real evaluator panel — not a placeholder.
   {/* ACCURACY-AUDIT-PENDING: single references show label+description (no UUID) and open the real fly-in; sub-entity references resolve to the parent fly-in; eval-result references render an inline failure-analysis widget and evaluator references open the real evaluator panel — verify by driving these reference types on the release tag */}
 
-  <Frame caption="A multi-object tool result rendered as a clickable table in chat — each row is a real record that opens a fly-in.">
-    <img src="/images/trust-agent-object-table.png" alt="A clickable object table inside an agent chat turn, with rows of human-readable records that deep-link into record fly-ins" />
-  </Frame>
   {/* CAPTURE-PENDING: trust-agent-object-table.png — a clickable multi-object table in chat with a record fly-in */}
 </Accordion>
 
@@ -106,12 +100,7 @@ While the agent plans and works, a side rail tracks what's happening, in three s
 The rail persists across the plan-then-execute phases, so it stays a stable map of the work rather than resetting between steps. It is hidden entirely when the active task has no referenced entities — no empty rail for a task that doesn't touch records.
 {/* ACCURACY-AUDIT-PENDING: side rail sections are labeled Progress / Context / Outputs in that order, track live step counts/context/outputs with deep-link fly-ins, persist across plan→execute, and the rail is hidden when there are no referenced entities — verify by driving a plan+execute turn on the release tag */}
 
-<Accordion title="See the side rail">
-  <Frame caption="The side rail: Progress (the plan, with step counts), Context (referenced entities), and Outputs (what the agent created or ran).">
-    <img src="/images/trust-agent-side-rail.png" alt="The Trust Agent side rail showing a Progress section with plan steps, a Context section of referenced entities, and an Outputs section of created and updated records" />
-  </Frame>
-  {/* CAPTURE-PENDING: trust-agent-side-rail.png — the Progress / Context / Outputs side rail */}
-</Accordion>
+{/* CAPTURE-PENDING: trust-agent-side-rail.png — the Progress / Context / Outputs side rail (re-add inside an Accordion titled "See the side rail" once captured) */}
 
 ## Human-in-the-loop approvals
 
@@ -127,12 +116,7 @@ Permission cards are rich: the write preview shows the **diff**, the **dependenc
 Single- and multi-question cards offer a write-in **Other** option alongside the drafted choices, and the cards are dismissible. Once you answer, the decision is recorded in the transcript as a resolved state that echoes back what you chose (and the per-question answers for a multi-question flow) — an audit trail that persists after the turn finishes. And if an approval gate is reached while the agent is minimized, a backgrounded-approval-request indicator surfaces on the shells, so you know a decision is pending without the full view open.
 {/* ACCURACY-AUDIT-PENDING: question cards offer a write-in "Other" and are dismissible; resolved decisions echo back into the transcript as a persistent audit trail; a backgrounded-gate indicator surfaces on the shells — verify by driving these flows on the release tag */}
 
-<Accordion title="See a permission card">
-  <Frame caption="A permission card in the composer slot, showing the write preview — the diff, dependencies, and proposed end state — before you approve.">
-    <img src="/images/trust-agent-permission-card.png" alt="A Trust Agent permission card replacing the composer, with a rich write preview showing the diff, dependencies, and proposed end state, and Approve and dismiss actions" />
-  </Frame>
-  {/* CAPTURE-PENDING: trust-agent-permission-card.png — a permission/write-preview interrupt card in the composer slot */}
-</Accordion>
+{/* CAPTURE-PENDING: trust-agent-permission-card.png — a permission/write-preview interrupt card in the composer slot (re-add inside an Accordion titled "See a permission card" once captured) */}
 
 The full approval flow — the three card types, the rich previews, and what "approve and execute" actually does to your data — is the subject of its own guide: [Approve agent writes](/how-to/approve-agent-writes).
 
@@ -141,9 +125,6 @@ The full approval flow — the three card types, the rich previews, and what "ap
 The composer is where you drive the agent, and it's rich: an **@** picker for mentions, a **/** palette for slash commands and skills, an inline model selector chip, an **Ask** / **Plan** / **Act** mode toggle, and a plan-confirm bar.
 {/* ACCURACY-AUDIT-PENDING: composer has @ mention picker, / slash+skill palette, inline model selector, Ask/Plan/Act toggle, and a plan-confirm bar — verify by driving the composer on the release tag */}
 
-<Frame caption="The composer: the Ask / Plan / Act mode toggle, the inline model selector, and the @ and / pickers.">
-  <img src="/images/trust-agent-composer.png" alt="The Trust Agent composer showing the Ask / Plan / Act mode toggle, an inline model selector chip, and the @-mention and slash-command pickers" />
-</Frame>
 {/* CAPTURE-PENDING: trust-agent-composer.png — the composer with mode toggle, model selector, and @/slash pickers */}
 
 ### Ask, Plan, Act

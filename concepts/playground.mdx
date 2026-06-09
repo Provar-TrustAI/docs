@@ -26,17 +26,11 @@ The Playground is a full-screen chat surface — there is no floating dock here.
   <Tab title="Chat mode">
     In **Chat** mode you type messages and the connected agent streams a real reply back, token by token. A follow-up continues the same conversation against the same agent.
 
-    <Frame caption="Chat mode — the grouped agent picker in the topbar, the Chat / Simulate toggle in the composer, and the greeting empty state before you send.">
-      <img src="/images/playground-shell.png" alt="The Playground in Chat mode: a topbar agent picker grouped by source system, a segmented Chat / Simulate toggle in the composer, and a greeting empty state naming the connected agent" />
-    </Frame>
     {/* CAPTURE-PENDING: playground-shell.png — Chat mode with the grouped agent picker, the Chat/Simulate toggle, and the greeting empty state (or a live streaming Chat transcript) */}
   </Tab>
   <Tab title="Simulate mode">
     In **Simulate** mode you pick a persona and write a goal, then the persona role-plays the user pursuing that goal against the agent — both sides streaming live while you watch.
 
-    <Frame caption="Simulate mode — the 'Simulate a conversation' config modal: a single-select persona picker, a goal field, and the Full auto / Stay in the loop run-mode control.">
-      <img src="/images/playground-simulate-modal.png" alt="The Simulate a conversation config modal showing a single-select persona picker, a goal text field, and a run-mode control with Full auto and Stay in the loop options" />
-    </Frame>
     {/* CAPTURE-PENDING: playground-simulate-modal.png — the 'Simulate a conversation' config modal (persona picker + goal field + Full auto / Stay in the loop run modes) */}
   </Tab>
 </Tabs>
@@ -114,9 +108,6 @@ The Playground keeps a **History** view of the project's past sessions, newest f
 History is real, persisted data — the project's actual sessions, not mock entries and not something kept only in your browser. Reopen a session from History and its full transcript reloads from the server; it survives a hard reload and shows up no matter which browser you signed in from.
 {/* ACCURACY-AUDIT-PENDING: History is server-persisted (the project's real sessions), not mock and not browser-local — reopening a session reloads its persisted transcript and it survives a hard reload / different browser — verify on the release tag */}
 
-<Frame caption="The History menu open — past sessions listed newest-first, each with its persona or agent label and a turn count. Reopening a session reloads its real transcript.">
-  <img src="/images/playground-history.png" alt="The Playground History menu open, listing past sessions newest-first with persona and agent labels and turn counts" />
-</Frame>
 {/* CAPTURE-PENDING: playground-history.png — the History menu open, listing real past sessions newest-first with persona/agent labels and turn counts */}
 
 ## Running the same simulation at evaluation time

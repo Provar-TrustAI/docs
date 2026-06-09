@@ -37,26 +37,17 @@ Each row in the detail view carries:
 - **Goal** — what that persona is trying to accomplish.
 - **Source** — the row's origin: `uploaded`, `generated`, or `simulated` (see [Where scenarios come from](#where-scenarios-come-from)).
 
-<Frame caption="The Scenarios list — the surface formerly called Datasets, with the left-nav row now reading Scenarios.">
-  <img src="/images/scenarios-list-overview.png" alt="The Scenarios list view at /projects/:id/datasets, showing scenario sets in a table with the left-nav row labelled Scenarios" />
-</Frame>
 {/* CAPTURE-PENDING: scenarios-list-overview.png — the Scenarios list at /projects/:id/datasets with the nav row reading "Scenarios" */}
 
 ### The Persona, Goal, and Source columns
 
 Open a scenario set and you get the row table. Alongside the per-row content, the detail view renders a **Persona** column, a **Goal** column, and a **Source** column.
 
-<Frame caption="A scenario-set detail view — each row is one scenario, with Persona, Goal, and Source columns.">
-  <img src="/images/scenarios-detail-view.png" alt="A scenario-set detail view at /projects/:id/datasets/:datasetId showing rows with Persona, Goal, and Source columns" />
-</Frame>
 {/* CAPTURE-PENDING: scenarios-detail-view.png — scenario-set detail showing Persona + Goal + Source columns */}
 {/* ACCURACY-AUDIT-PENDING: the scenario-set detail view renders a Persona column, a Goal column, and a Source/origin column — verify by opening /projects/:id/datasets/:datasetId on the release tag */}
 
 Click any row to open a **fly-in detail panel** on top of the list — the same fly-in interaction the rest of Trust AI uses, so you never lose your place. The panel has a **Personas and Goals** tab for editing the row's actors and objective.
 
-<Frame caption="Click a scenario row to open the fly-in — the row's transcript and a Personas and Goals tab, without leaving the list.">
-  <img src="/images/scenarios-row-flyin.png" alt="A scenario row fly-in panel with the row detail and a Personas and Goals tab open over the scenario-set list" />
-</Frame>
 {/* CAPTURE-PENDING: scenarios-row-flyin.png — a scenario row fly-in with the Personas and Goals tab */}
 {/* ACCURACY-AUDIT-PENDING: clicking a row opens a fly-in panel over the list with a "Personas and Goals" tab — verify the exact tab label by driving a row on the release tag */}
 
@@ -73,9 +64,6 @@ You manage personas in a **Manage Personas** modal, opened from the **Persona** 
   {/* ACCURACY-AUDIT-PENDING: Manage Personas opens as a page-root modal from the Persona cell "Manage personas" popover footer (no standalone Settings page), and the legacy /settings/personas URL redirects into the simulator personas view — verify by driving the popover + the legacy URL on the release tag */}
 </Note>
 
-<Frame caption="The Manage Personas modal and the Persona editor — each persona shows a usage count, and exactly one persona is the protected default.">
-  <img src="/images/scenarios-persona-editor.png" alt="The Manage Personas modal listing personas with usage counts, a single default marker, and the Persona editor open for one persona" />
-</Frame>
 {/* CAPTURE-PENDING: scenarios-persona-editor.png — Manage Personas modal + Persona editor showing usage count and the default persona */}
 
 In the modal, each persona carries:
@@ -131,17 +119,9 @@ The **Generate scenarios from scratch** wizard builds a whole scenario set from 
 
 {/* ACCURACY-AUDIT-PENDING: the wizard is labeled "Generate scenarios from scratch", step 1 is a multi-select persona table with an add-persona sub-view, step 2 is a numbered goal list with a connected-agent picker, step 3 generates per persona×goal, step 4 is a selectable review table, the progress track shows THREE pips (Select personas / Define goals / Generate & review), and kept rows land with a Generated origin — verify by driving the wizard on the release tag */}
 
-<Frame caption="The generate-from-scratch wizard — a three-pip progress track over four logical steps, starting at Select personas.">
-  <img src="/images/scenarios-generate-wizard.png" alt="The generate scenarios from scratch wizard showing the three-pip progress track Select personas, Define goals, Generate and review, on the Select personas step" />
-</Frame>
 {/* CAPTURE-PENDING: scenarios-generate-wizard.png — the wizard on step 1 with the three-pip track */}
 
-<Accordion title="Watch the generate wizard end to end">
-  <Frame caption="The four-step generate flow: select personas, define goals, generate each persona × goal pair, then review and add the ones you want.">
-    <img src="/images/scenarios-generate-wizard.gif" alt="Animated demo: the generate-from-scratch wizard moving through select personas, define goals, generate, and the selectable review table" />
-  </Frame>
-  {/* CAPTURE-PENDING: scenarios-generate-wizard.gif — the wizard walked end to end (recorded, not autoplaying) */}
-</Accordion>
+{/* CAPTURE-PENDING: scenarios-generate-wizard.gif — animated end-to-end walkthrough of the generate wizard, to be re-wrapped in an Accordion ("Watch the generate wizard end to end") in the capture pass */}
 
 ## Snapshots and reproducibility
 

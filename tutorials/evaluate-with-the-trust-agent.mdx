@@ -37,10 +37,7 @@ This tutorial uses **Plan mode** as its spine — the agent proposes a task list
     In the composer, set the mode toggle to **Plan**. The three modes are shown with human labels — **Ask**, **Plan**, **Act** — never raw tokens. In **Plan** the agent researches and proposes a task list for you to confirm; nothing changes until you do.
     {/* ACCURACY-AUDIT-PENDING: claim 4 — composer mode toggle offers Ask / Plan / Act with human labels; Plan proposes a confirmable task list and makes no change before confirmation — verify by driving the composer on the release tag */}
 
-    <Frame caption="Starting a chat with the Trust Agent in the full view: the Welcome surface streams the first turn, the mode toggle is set to Plan, and the core left nav stays beside the agent.">
-      <img src="/images/agent-tutorial-clarify.gif" alt="Opening the Trust Agent full view, the Welcome message streaming as turn one, and the composer mode toggle set to Plan" />
-    </Frame>
-    {/* CAPTURE-PENDING: agent-tutorial-<open>.gif — opening the agent on the Welcome surface with the mode toggle on Plan (this beat shares the clarify GIF slice) */}
+    {/* CAPTURE-PENDING: agent-tutorial-open.gif — opening the Trust Agent full view on the Welcome surface, the welcome message streaming as turn one, the composer mode toggle set to Plan, and the core left nav still beside the agent (this beat shares the clarify GIF slice) */}
 
     **You should see:** the Trust Agent's full view with a streaming welcome turn, the composer pinned to the bottom with the mode toggle on **Plan**, and the project nav still on your left.
   </Step>
@@ -59,10 +56,7 @@ This tutorial uses **Plan mode** as its spine — the agent proposes a task list
     Both kinds offer the drafted choices plus a write-in **Other** field for an answer that isn't listed, and both are dismissible. On a multi-question flow, answering one question advances you to the next; nothing runs until you submit the whole flow.
     {/* ACCURACY-AUDIT-PENDING: claim 6 — single- and multi-question cards replace the composer, offer drafted choices + a write-in "Other", are dismissible, and a multi-question flow advances question-by-question and runs nothing until submitted — verify by triggering both card types on the release tag */}
 
-    <Frame caption="On an open-ended brief the agent leads with a question card in the composer slot — drafted choices plus a write-in Other, advancing step by step on a multi-question flow.">
-      <img src="/images/agent-tutorial-clarify.gif" alt="A Trust Agent clarifying-question card replacing the composer, showing drafted choices and a write-in Other field, with a multi-question flow advancing step by step" />
-    </Frame>
-    {/* CAPTURE-PENDING: agent-tutorial-clarify.gif — the clarify-first question card (single + multi-question flow) sliced from the autoplay recording */}
+    {/* CAPTURE-PENDING: agent-tutorial-clarify.gif — the clarify-first question card replacing the composer (single + multi-question flow), drafted choices plus a write-in Other, advancing step by step, sliced from the autoplay recording */}
 
     Answer the questions to scope the work the way you want it, then submit.
 
@@ -83,10 +77,7 @@ This tutorial uses **Plan mode** as its spine — the agent proposes a task list
     Then the agent proposes a **plan** — a task list scoped to your answers — and stops. In **Plan** mode nothing executes until you confirm: a typed confirmation is what triggers the transition from planning to execution. If you want to adjust the plan first, send a refinement; the agent **amends the existing plan** rather than throwing it away and starting over.
     {/* ACCURACY-AUDIT-PENDING: claim 9 — Plan mode proposes a plan and stops; a typed confirmation moves planning→execution; a refinement amends the existing plan rather than replacing it — verify by refining and confirming a plan on the release tag */}
 
-    <Frame caption="The agent reasons in the open — a Thinking… timer fills the wait — then proposes a plan and stops. A typed confirmation moves it from planning to execution.">
-      <img src="/images/agent-tutorial-plan.gif" alt="The Trust Agent streaming its reasoning with a live Thinking timer, then proposing a task-list plan in the transcript and waiting for a typed confirmation" />
-    </Frame>
-    {/* CAPTURE-PENDING: agent-tutorial-plan.gif — reasoning rail + plan proposed + typed confirmation, sliced from the autoplay recording */}
+    {/* CAPTURE-PENDING: agent-tutorial-plan.gif — the agent reasoning in the open with a live Thinking… timer, then proposing a task-list plan and stopping for a typed confirmation that moves planning→execution, sliced from the autoplay recording */}
 
     Confirm the plan to start execution.
 
@@ -111,10 +102,7 @@ This tutorial uses **Plan mode** as its spine — the agent proposes a task list
       {/* ACCURACY-AUDIT-PENDING: claim 17 — approved writes execute only within the current org/project, bound to the approval, enforced server-side — verify behaviorally (the agent only ever reads/writes the current project's data) on the release tag */}
     </Note>
 
-    <Frame caption="A permission card in the composer slot: the rich write preview — diff, dependencies, proposed end state — then Approve resumes the run and the write actually executes.">
-      <img src="/images/agent-tutorial-approve.gif" alt="A Trust Agent permission card replacing the composer with a write preview showing the diff, dependencies, and proposed end state, then approving it and the write executing" />
-    </Frame>
-    {/* CAPTURE-PENDING: agent-tutorial-approve.gif — permission card + write preview + Approve + execute, sliced from the autoplay recording */}
+    {/* CAPTURE-PENDING: agent-tutorial-approve.gif — the permission card replacing the composer with the rich write preview (diff, dependencies, proposed end state), then Approve resuming the run and the write actually executing, sliced from the autoplay recording */}
 
     Approve the writes as they come up. The focused recipe for the approval flow — all three card types, rejecting with a note, and exactly what approving does to your data — lives in [Approve agent writes](/how-to/approve-agent-writes).
 
@@ -145,10 +133,7 @@ This tutorial uses **Plan mode** as its spine — the agent proposes a task list
     The work this tutorial drives lands on real surfaces. The Scenario set the agent built appears at `/projects/:id/datasets` — **Scenarios** is the UI name for the datasets surface, so the route is `/datasets` (there's no separate scenarios API), and the **[Scenarios](/concepts/scenarios)** concept page covers it in full. The Evaluation it started is the same run you'd otherwise configure under **Evaluations → New Run**.
     {/* ACCURACY-AUDIT-PENDING: claim 19 — the agent-built scenario set appears at /projects/:id/datasets (route is /datasets, not /scenarios; no /v1/scenarios) and the Evaluation appears under Evaluations — verify the route + network calls (/v1/datasets, /v1/evaluations) on the release tag */}
 
-    <Frame caption="Tool results as clickable records: a clickable object table in chat, the Progress / Context / Outputs side rail with the work the agent did, and a record fly-in opening from a row.">
-      <img src="/images/agent-tutorial-objects.gif" alt="A clickable object table inside an agent chat turn, the Progress / Context / Outputs side rail, and a record fly-in opening when a row is clicked" />
-    </Frame>
-    {/* CAPTURE-PENDING: agent-tutorial-objects.gif — object table + side-rail Outputs + record fly-in, sliced from the autoplay recording */}
+    {/* CAPTURE-PENDING: agent-tutorial-objects.gif — a clickable object table in chat, the Progress / Context / Outputs side rail with the work the agent did, and a record fly-in opening from a clicked row, sliced from the autoplay recording */}
 
     Click a row in the object table — or an **Outputs** row in the side rail — to open the real record and confirm the agent built exactly what you approved.
 
@@ -194,22 +179,12 @@ Each beat of this flow stands on its own — link straight to the one you need.
 
 ## Watch it run
 
-Want to see the whole thing first, then come back and do it? The reel below plays the entire flow end to end — clarify, plan, approve, build a Scenario set, start an Evaluation, and read the result — in one continuous take. It's collapsed and click-to-play so it never gets in the way; expand it when you're ready.
+Want to see the whole thing first, then come back and do it? A single continuous reel that plays the entire flow end to end — clarify, plan, approve, build a Scenario set, start an Evaluation, and read the result — will live here once it's captured.
 
-<Accordion title="Watch the entire flow end-to-end (optional)">
-  <Frame caption="The full Trust Agent evaluation walkthrough — clarify-first, plan and confirm, approve each write, build a Scenario set, start an Evaluation, and read the result. The data values are illustrative; the flow is what's shipped.">
-    <video
-      controls
-      preload="none"
-      poster="/images/evaluate-with-trust-agent-poster.png"
-      width="100%"
-    >
-      <source src="/images/evaluate-with-trust-agent.mp4" type="video/mp4" />
-      Your browser doesn't support embedded video. <a href="/images/evaluate-with-trust-agent.gif">View the walkthrough as a GIF.</a>
-    </video>
-  </Frame>
-  {/* CAPTURE-PENDING: evaluate-with-trust-agent.mp4 (+ .gif fallback + poster) — the full autoplay reel rendered once via pipeline/, click-to-play, gated here at the end */}
-</Accordion>
+<Note>
+  The end-to-end walkthrough reel is coming in a later capture pass. Until then, the [steps above](#the-end-to-end-flow) walk the same flow beat by beat.
+</Note>
+{/* CAPTURE-PENDING: evaluate-with-trust-agent.mp4 (+ .gif fallback + poster) — the full autoplay reel rendered once via pipeline/, click-to-play, gated here at the end inside a "Watch the entire flow end-to-end (optional)" Accordion */}
 
 ## Next steps
 

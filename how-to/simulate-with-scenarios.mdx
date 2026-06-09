@@ -100,29 +100,11 @@ The **Playground** is a per-project surface for driving a connected agent by han
     Press **Simulate** and the persona-versus-agent conversation **auto-drives** — the persona role-plays the user and the agent replies, without you typing any turns.
     {/* ACCURACY-AUDIT-PENDING: the Simulate config modal takes exactly one persona + one goal + one run mode, the run modes are labeled "Full auto" and "Stay in the loop", and pressing Simulate auto-drives the persona↔agent conversation with no manual typing — verify by driving the modal on the release tag */}
 
-    <Frame caption="Pick one persona, enter one goal, and choose Full auto or Stay in the loop, then press Simulate.">
-      {/* CAPTURE-PENDING: playground-simulate-modal screenshot — the Simulate config modal (one persona, one goal, run-mode choice) */}
-      <img src="/images/playground-simulate-modal.png" alt="The Playground Simulate config modal with a single persona picker, a goal field, and Full auto / Stay in the loop run-mode options" />
-    </Frame>
+    {/* CAPTURE-PENDING: playground-simulate-modal screenshot — the Simulate config modal (one persona, one goal, run-mode choice) */}
 
-    The walkthrough below shows the full Simulate flow — switch to **Simulate**, configure the run, and watch the persona-and-agent conversation auto-drive:
+    {/* CAPTURE-PENDING: result-fly-in still — an eval result-detail fly-in showing a captured simulated transcript */}
 
-    <Tabs>
-      <Tab title="Simulated transcript (still)">
-        <Frame caption="An evaluation result row's detail fly-in showing a captured simulated persona↔agent transcript, with per-turn role and persona tags.">
-          {/* CAPTURE-PENDING: result-fly-in still — an eval result-detail fly-in showing a captured simulated transcript */}
-          <img src="/images/playground-simulate-result-flyin.png" alt="An evaluation result detail fly-in showing a full simulated persona-and-agent transcript with per-turn role and persona tags" />
-        </Frame>
-      </Tab>
-      <Tab title="Auto-drive walkthrough (video)">
-        <Frame caption="Walkthrough — switch the Playground to Simulate, pick one persona and one goal, choose a run mode, and watch the persona↔agent conversation auto-drive. Click to play.">
-          {/* CAPTURE-PENDING: playground-simulate.mp4 — Remotion walkthrough captured from the shipped app via captures/scripts/playground-simulate.ts; click-to-play, not autoplay; GIF fallback at playground-simulate.gif */}
-          <video controls preload="none" poster="/images/playground-simulate-poster.png" width="100%">
-            <source src="/images/playground-simulate.mp4" type="video/mp4" />
-          </video>
-        </Frame>
-      </Tab>
-    </Tabs>
+    {/* CAPTURE-PENDING: playground-simulate.mp4 — Remotion walkthrough captured from the shipped app via captures/scripts/playground-simulate.ts; click-to-play, not autoplay; GIF fallback at playground-simulate.gif */}
 
     **You should see:** the config modal accept one persona, one goal, and one run mode, and pressing **Simulate** auto-drive the conversation.
   </Step>
