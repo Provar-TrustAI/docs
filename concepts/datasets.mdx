@@ -49,7 +49,7 @@ Three paths:
     Drop in a CSV with columns for input, reference output, and tags. Useful for migrating existing test suites from spreadsheets or other tools.
   </Card>
   <Card title="Ask the Trust Agent" icon="sparkles">
-    Tell the Trust Agent which sessions to curate ("add the failing refund sessions to my regression set") and it adds the rows for you. Useful when you'd rather describe the set than click through it. Developers integrating Trust AI into an existing test-authoring workflow can find the row-ingestion endpoint in the [API Reference](/api-reference).
+    Tell the Trust Agent which sessions to curate ("add the failing refund sessions to my regression set") and it adds the rows for you. Useful when you'd rather describe the set than click through it.
   </Card>
 </CardGroup>
 
@@ -105,24 +105,7 @@ Common operations in the app:
 - **Upload CSV** — import test cases via the toolbar button. Columns map to input, reference output, and tags.
 - **Dataset header stats** — the detail page header shows aggregate stats (row count, annotation coverage) that update in real time as rows are added or removed.
 
-## API surface
-
-Datasets appear in the `/v1/datasets` endpoint family of the [API Reference](/api-reference). Common operations:
-
-- `POST /v1/datasets` — create a Dataset
-- `GET /v1/datasets/{dataset_id}` — fetch Dataset metadata
-- `GET /v1/datasets/{dataset_id}/rows` — list rows (paginated)
-- `POST /v1/datasets/{dataset_id}/rows` — add a row (manual entry or programmatic)
-- `POST /v1/datasets/{dataset_id}/rows/bulk-add-from-sessions` — curate from a Session set
-- `POST /v1/datasets/{dataset_id}/snapshot` — freeze the Dataset at the current revision
-- `POST /v1/datasets/{dataset_id}/duplicate` — clone a Dataset (including all rows) to experiment with a variant *(v2026.05.19+)*
-- `GET /v1/datasets/{dataset_id}/export.csv` — download the Dataset as CSV *(v2026.05.19+)*
-- `GET /v1/datasets/{dataset_id}/tag-vocabulary` — list the tags currently in use across the Dataset *(v2026.05.19+)*
-- `PUT /v1/datasets/{dataset_id}/tag-vocabulary` — define the controlled tag set the Dataset accepts *(v2026.05.19+)*
-- `PATCH /v1/datasets/{dataset_id}/rows/{row_id}` — update a row's tags and source_session_id without touching turn content or annotations *(v2026.05.22+)*
-- `GET /v1/datasets/{dataset_id}/columns/{column_key}/option-usage` — for enumerated columns, frequency of each option across rows *(v2026.05.19+)*
-
-Full request/response shapes live in the auto-generated [API Reference](/api-reference).
+Everything above — creating a Dataset, adding rows, snapshotting, duplicating, exporting — you can drive by asking the Trust Agent, which pauses for your approval before any write. Developers who want the underlying endpoints (including the `v2026.05.19` duplicate, CSV-export, and tag-vocabulary additions) can find full request/response shapes in the [API Reference](/api-reference).
 
 ## Related concepts
 

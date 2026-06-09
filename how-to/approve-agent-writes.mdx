@@ -44,7 +44,7 @@ When a write is proposed, the permission card greets you with a **write preview*
 - **The dependencies** — the linked records the write would affect
 - **The proposed end state** — what the record will look like after the change
 
-The interactive prototype below lets you click through the permission card to feel the interaction. The shipped-app screenshot of the write preview is coming in a later capture pass.
+The interactive prototype below lets you click through the permission card to feel the interaction.
 
 {/* CAPTURE-PENDING: shipped write-preview (diff/dependencies/proposed state) #1722 */}
 
@@ -69,16 +69,16 @@ Once you've read the preview, you have three ways to resolve a permission card.
   </Step>
 
   <Step title="Dismiss to decline">
-    If you don't want the change, **dismiss** the card with its close (×) affordance. The write does not run, and the agent waits for your next message instead of acting. A resolved row still lands in the transcript so the declined decision is on the record.
+    If you don't want the change, **dismiss** the card. The write does not run, and the agent waits for your next message instead of acting. A resolved row still lands in the transcript so the declined decision is on the record.
 
     **You should see:** no change to the record, and the composer return so you can redirect the agent.
     {/* ACCURACY-AUDIT-PENDING: dismissing the permission card (× affordance) declines the write — nothing executes — and the agent pauses for your next message; a resolved/dismissed row is written to the transcript — verify against the app on the release tag */}
   </Step>
 
-  <Step title="Reject with a note">
-    To turn the agent down *and* tell it why, use the reject affordance to write a note, then send it. Your note goes back to the agent as the reason — useful when the proposed write is close but wrong, so the agent can adjust rather than guess.
+  <Step title="Reject and tell the agent why">
+    If the proposed write is close but wrong, the card offers a way to reject it and tell the agent why. Your reason goes back to the agent, so it can adjust rather than guess.
 
-    **You should see:** your rejection and its note echoed into the transcript, and the agent respond to your reasoning on its next turn.
+    **You should see:** your rejection and your reason echoed into the transcript, and the agent respond to your reasoning on its next turn.
     {/* ACCURACY-AUDIT-PENDING: the permission card offers a reject-with-note path (an inline note field → send) whose note is passed back to the agent — verify the exact label/affordance against the app on the release tag; do not assert prototype-only scope copy as shipped */}
   </Step>
 </Steps>
@@ -124,7 +124,7 @@ You don't have to keep the full agent open to catch an approval. If you've colla
 
 ## Accessibility
 
-The approval flow is keyboard- and screen-reader-friendly. When a card appears, focus moves into it automatically; when you resolve or dismiss it, focus returns to where it was. The interrupt is announced to assistive technology, and the whole surface meets WCAG AA contrast, with axe-core checks enforced in CI.
+The approval flow is keyboard- and screen-reader-friendly. When a card appears, focus moves into it automatically; when you resolve or dismiss it, focus returns to where it was. The interrupt is announced to assistive technology, and the whole surface is designed to meet WCAG AA contrast.
 {/* ACCURACY-AUDIT-PENDING: card appearance moves focus into the card and restores it on resolve/dismiss; the interrupt is announced to assistive technology — verify the focus slice against the app on the release tag */}
 
 ## Related reading

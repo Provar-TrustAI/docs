@@ -5,7 +5,7 @@ description: "Agent evaluation platform — test, validate, and monitor AI agent
 
 import LatestRelease from "/snippets/latest-release.mdx";
 
-Provar Trust AI is an **agent evaluation platform** for the teams building, integrating, and operating production AI agents. Ingest real agent sessions, review and annotate turns, curate test datasets, define automated evaluators, run evaluations against new agent versions, and catch regressions — all before a change ships to customers.
+Provar Trust AI is an **agent evaluation platform** for the teams building, integrating, and operating production AI agents. Ingest real agent sessions, review and annotate turns, curate test datasets, define automated evaluators, run evaluations against new agent versions, and catch regressions — all before a change ships to customers. A built-in Trust Agent drives this loop for you in plain language, pausing for your approval before any write.
 
 <Frame caption="The Trust AI welcome surface — personalized greeting, contextual suggestion prompts, and sidebar navigation with count badges.">
   <img src="/images/welcome-surface.png" alt="Trust AI welcome screen showing personalized greeting, suggestion prompts for Curate data, Annotate data, Evaluate agent, and Analyze failures, with sidebar navigation" />
@@ -22,11 +22,11 @@ Provar Trust AI is an **agent evaluation platform** for the teams building, inte
   <Card title="Tutorials" icon="rocket" href="/tutorials/quickstart">
     Step-by-step walkthroughs. Start with your first 10 minutes ingesting sessions and curating a dataset.
   </Card>
-  <Card title="How-to guides" icon="wrench" href="/how-to/connect-agentcore">
-    Task-focused guides — connect agent runtimes, write effective LLM-judge prompts, compare agent versions across evaluations.
+  <Card title="How-to guides" icon="wrench" href="/how-to/work-with-the-trust-agent">
+    Work with the Trust Agent, approve its writes, simulate with scenarios — plus runtime connection guides.
   </Card>
   <Card title="API Reference" icon="code" href="/api-reference">
-    The full `/v1` HTTP API — auto-generated from the FastAPI OpenAPI spec. Every endpoint, schema, and request/response shape.
+    The full `/v1` HTTP API — rendered from the release's OpenAPI spec. Every endpoint, schema, and request/response shape.
   </Card>
 </CardGroup>
 
@@ -41,7 +41,7 @@ Trust AI is built around one core workflow: **ingest → annotate → curate →
 5. **Run** an [Evaluation](/concepts/evaluations) against a specific Agent Version — scored results per row.
 6. **Compare** two Agent Versions on the same Dataset — the diff is the regression signal.
 
-Then ingest the next batch of sessions and the loop continues. Read the full narrative at [The evaluation loop](/concepts/evaluation-loop).
+Then ingest the next batch of sessions and the loop continues. Read the full narrative at [The evaluation loop](/concepts/evaluation-loop). To run the whole loop by conversation with the Trust Agent, work through the capstone tutorial: [Evaluate with the Trust Agent](/tutorials/evaluate-with-the-trust-agent).
 
 ## What's new
 
