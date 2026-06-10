@@ -1,7 +1,3 @@
-> **First-time setup**: Customize this file for your project. Prompt the user to customize this file for their project.
-> For Mintlify product knowledge (components, configuration, writing standards),
-> install the Mintlify skill: `npx skills add https://mintlify.com/docs`
-
 # Documentation project instructions
 
 ## About this project
@@ -9,25 +5,51 @@
 - This is a documentation site built on [Mintlify](https://mintlify.com)
 - Pages are MDX files with YAML frontmatter
 - Configuration lives in `docs.json`
-- Run `mint dev` to preview locally
+- Run `mint dev` to preview locally (use `--port 3333`)
 - Run `mint broken-links` to check links
+- **`mint dev` is not production.** The deployed Mintlify host refuses to frame repo-served `.html`
+  and the site is auth-gated; local rendering proves nothing about the live site. Interactive demo
+  iframes point at the GitHub Pages origin (`https://provar-trustai.github.io/docs/…`), never at repo
+  paths — see `docs-plan/doc-kit/demo-tooling.md`.
 
 ## Terminology
 
-{/* Add product-specific terms and preferred usage */}
-{/* Example: Use "workspace" not "project", "member" not "user" */}
+- The in-app assistant is the **Trust Agent** — never "Paddington" (internal codename), never
+  "the bot", never "the AI". Lowercase "the agent" is fine once the page has established it.
+- An **Agent Version** is the *customer's agent under test* — a pinned snapshot being evaluated.
+  It is a different concept from the Trust Agent; never conflate them, and disambiguate on any
+  page that uses both.
+- **Scenarios** is the nav label for the surface whose route, data model, and API remain
+  `/datasets` / `/v1/datasets`. Never invent a `/scenarios` route or API.
+- The Playground's segmented toggle is **Chat / Simulate** (there is no "Ask mode"). The side
+  rail's first section label is **Progress** (reserve "plan" for the planning phase).
 
 ## Style preferences
-
-{/* Add any project-specific style rules below */}
 
 - Use active voice and second person ("you")
 - Keep sentences concise — one idea per sentence
 - Use sentence case for headings
 - Bold for UI elements: Click **Settings**
 - Code formatting for file names, commands, paths, and code references
+- Headlines and captions are concrete and informational — these are reference docs, not marketing.
+  No superlatives, no boilerplate slop; every label, caption, and fixture is specific and deliberate.
+- **Icons: never use the lucide `bot` icon.** Trust Agent surfaces use `sparkles` (the site's
+  established AI affordance). Pick icons already in use before introducing new ones.
+- Audience is largely non-technical and **agent-first**: lead task guides with what to ask the
+  Trust Agent; the UI is the observation pane and manual fallback. No inline curl/SDK in guides or
+  concepts — one API Reference pointer per page; the API Reference tab owns endpoints.
+- Every page must reflow with no horizontal overflow at 375 px (responsive is an audit dimension).
 
 ## Content boundaries
 
-{/* Define what should and shouldn't be documented */}
-{/* Example: Don't document internal admin features */}
+- No internal routes (`/paddington/*`, `/v1/internal/*`), internal codenames, or machine-local
+  paths anywhere reader-visible — **including the published OpenAPI spec**, which is re-exported
+  from the release tag and sanitized at every landing.
+- Unverified claims read as unverified: behavior the running app hasn't confirmed carries an
+  `{/* ACCURACY-AUDIT-PENDING */}` marker and is written at behavior level, hedged, never asserted
+  with mechanics. Never vouch for an unverified security property.
+- Interactive demos are sanitized, self-contained design prototypes with synthetic data, always
+  captioned "Interactive prototype — … Design reference." The surrounding prose, never the
+  prototype, is the authority on shipped behavior.
+- Don't document internal build/process vocabulary ("capture pass", ticket IDs, codenames) in
+  reader-visible prose.
