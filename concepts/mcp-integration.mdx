@@ -16,13 +16,13 @@ The MCP server exposes two categories of tools:
 
 **Read tools** — unrestricted queries against your Trust AI data:
 
-- `query_data` — list and filter Sessions, Evaluations, Datasets, Projects, and other entities
-- `read_file` — retrieve full Session transcripts, Evaluation results, and Dataset contents
+- `query_data` — list and filter Sessions, Evaluations, Scenario sets, Projects, and other entities
+- `read_file` — retrieve full Session transcripts, Evaluation results, and Scenario set contents
 - `analyze` — run analytical queries across your data (aggregations, comparisons, trend analysis)
 
 **Write tools** — operations that modify Trust AI state, each wrapped with an approval gate:
 
-- Trust Agent WRITE wrappers — create Annotations, curate Sessions into Datasets, trigger Evaluations, and other write operations. These are the same operations available through the Trust Agent assistant inside Trust AI, exposed over MCP so external clients can invoke them too.
+- Trust Agent WRITE wrappers — create Annotations, curate Sessions into Scenario sets, trigger Evaluations, and other write operations. These are the same operations available through the Trust Agent assistant inside Trust AI, exposed over MCP so external clients can invoke them too.
 
 The tool surface is identical to what the Trust Agent can do — no more, no less.
 
@@ -41,7 +41,7 @@ There is no anonymous or API-key-only access path. WorkOS authentication is requ
 Write operations go through a `can_use_tool` confirmation step before executing:
 
 - **Read tools execute immediately.** Querying data, reading transcripts, and running analysis require no additional approval beyond a valid auth token.
-- **Write tools pause for confirmation.** When an MCP client attempts a write (creating an Annotation, adding a Session to a Dataset, triggering an Evaluation), Trust AI surfaces a confirmation prompt before the operation executes. The confirmation includes what will be changed and requires explicit approval.
+- **Write tools pause for confirmation.** When an MCP client attempts a write (creating an Annotation, adding a Session to a Scenario set, triggering an Evaluation), Trust AI surfaces a confirmation prompt before the operation executes. The confirmation includes what will be changed and requires explicit approval.
 
 This gate exists because MCP clients are external — an IDE extension or AI agent should not silently modify Trust AI data without the user's knowledge. The same tools invoked through the Trust Agent inside the product follow the same approval pattern.
 
@@ -81,5 +81,5 @@ See [Connect an MCP client to Trust AI](/how-to/connect-mcp-client) for step-by-
 - **[Sessions](/concepts/sessions)** — the primary data MCP read tools query
 - **[Projects](/concepts/projects)** — the workspace boundary; MCP access is scoped to a Project's org
 - **[Evaluations](/concepts/evaluations)** — queryable via MCP and triggerable through write tools
-- **[Datasets](/concepts/datasets)** — readable and curatable through MCP
+- **[Scenarios](/concepts/scenarios)** — readable and curatable through MCP
 - **[Connect an MCP client](/how-to/connect-mcp-client)** — step-by-step how-to for configuring your client

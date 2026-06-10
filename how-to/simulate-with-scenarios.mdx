@@ -13,7 +13,7 @@ This how-to walks you through driving a connected agent against **personas** and
 This page is a task recipe. For what scenarios, personas, goals, and the Playground *are*, read the concept pages it links to — [Scenarios](/concepts/scenarios) and [Playground](/concepts/playground) — rather than re-deriving them here.
 
 <Note>
-  **"Scenarios" is the UI name for a scenario set; the API and older docs call the same thing a [Dataset](/concepts/datasets).** The nav item labeled **Scenarios** opens at `/projects/:id/datasets` (not `/scenarios`), and it is backed by the `/v1/datasets` API. There is no `/v1/scenarios` endpoint and no `/projects/:id/scenarios` route — the scenarios backend was removed and rebuilt as datasets. When this page names a network call it uses the `/v1/datasets` and simulations families; everything else is the **Scenarios** label you see in the app.
+  **"Scenarios" is the UI name for the surface; the route and the API keep the pre-rename names.** The nav item labeled **Scenarios** opens at the pre-rename browser route and is backed by the pre-rename API family — the rename is UI-layer only, and there is no scenarios endpoint or scenarios route. This page uses the **Scenarios** vocabulary you see in the app throughout; the precise route-and-endpoint mapping lives in the API note on [Scenarios](/concepts/scenarios).
   {/* ACCURACY-AUDIT-PENDING: the nav item reading "Scenarios" resolves to the browser URL /projects/:id/datasets and list calls hit /v1/datasets with no /v1/scenarios request — verify by driving the route + network tab on the release tag */}
 </Note>
 
@@ -35,10 +35,10 @@ The steps below mirror that flow so you can watch it happen, or do any part by h
 
 <Steps>
   <Step title="Open the Scenarios list">
-    *Ask the Trust Agent:* "Show me my scenario sets." It pulls them up so you can pick one — or open the nav item that reads **Scenarios** on your Project by hand. It opens the scenario-set list at `/projects/:id/datasets`. A scenario set's detail view shows **Persona** and **Goal** columns, a **Source** column for where each row came from, and every row opens a fly-in detail panel when you click it. The **Persona** cell's **Manage personas** popover footer opens the **Manage Personas** modal.
+    *Ask the Trust Agent:* "Show me my scenario sets." It pulls them up so you can pick one — or open the nav item that reads **Scenarios** on your Project by hand. It opens the scenario-set list (the browser URL keeps the old route name — see the note above). A scenario set's detail view shows **Persona** and **Goal** columns, a **Source** column for where each row came from, and every row opens a fly-in detail panel when you click it. The **Persona** cell's **Manage personas** popover footer opens the **Manage Personas** modal.
     {/* ACCURACY-AUDIT-PENDING: scenario-set detail shows Persona + Goal + Source columns, rows open a fly-in, and the Persona cell's Manage personas popover footer opens the Manage Personas modal — verify by driving /projects/:id/datasets/:datasetId on the release tag */}
 
-    **You should see:** the Scenarios list render at `/projects/:id/datasets`, and opening any set show Persona / Goal / Source columns with clickable rows.
+    **You should see:** the Scenarios list render, and opening any set show Persona / Goal / Source columns with clickable rows.
   </Step>
 
   <Step title="Manage your personas (once)">
@@ -168,8 +168,8 @@ Beyond the Playground, an [evaluation](/concepts/evaluations) can drive persona-
 ## Common stumbles
 
 <AccordionGroup>
-  <Accordion title="The nav says Scenarios but the URL says datasets">
-    That is expected. **Scenarios** is the UI name for a scenario set; the route is `/projects/:id/datasets` and the backing API is `/v1/datasets`. The old scenarios backend was removed and rebuilt as datasets, so there is no `/v1/scenarios` endpoint. See [Scenarios](/concepts/scenarios).
+  <Accordion title="The nav says Scenarios but the browser URL doesn't match">
+    That is expected. **Scenarios** is the UI name for the surface; the route and backing API kept their original name, so the rename is UI-layer only. See the note at the top of this page for the exact route and endpoint, and [Scenarios](/concepts/scenarios) for the full mapping.
   </Accordion>
 
   <Accordion title="The generate wizard only shows three pips but four steps">
@@ -191,7 +191,7 @@ Beyond the Playground, an [evaluation](/concepts/evaluations) can drive persona-
 
 ## Related reading
 
-- **[Scenarios](/concepts/scenarios)** — the concept page: what scenario sets, personas, and goals are, and how Scenarios maps to Datasets
+- **[Scenarios](/concepts/scenarios)** — the concept page: what scenario sets, personas, and goals are, and how the Scenarios name maps onto the underlying route and API
 - **[Playground](/concepts/playground)** — the concept page: Chat vs Simulate, the connected-agent picker, and capture-as-scenario in depth
 - **[Evaluations](/concepts/evaluations)** — the evaluation model that the **Simulate at eval time** toggle plugs into
 - **[Run your first evaluation](/tutorials/run-first-evaluation)** — the end-to-end evaluation flow this page adds the simulate delta to

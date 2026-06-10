@@ -4,9 +4,9 @@ icon: "tag"
 description: "Human judgment attached to Sessions and Turns. The signal every Evaluator calibrates against."
 ---
 
-An Annotation is a piece of **human judgment** attached to a [Session](/concepts/sessions) or to a single Turn within one. Pass/fail, rubric score, freeform note, or tag — Annotations are how reviewer judgment becomes data. They are the **signal** every [Evaluator](/concepts/evaluators) calibrates against, and the **filter** that selects rows worth promoting into a [Dataset](/concepts/datasets).
+An Annotation is a piece of **human judgment** attached to a [Session](/concepts/sessions) or to a single Turn within one. Pass/fail, rubric score, freeform note, or tag — Annotations are how reviewer judgment becomes data. They are the **signal** every [Evaluator](/concepts/evaluators) calibrates against, and the **filter** that selects rows worth promoting into a [Scenario set](/concepts/scenarios).
 
-Without Annotations, the rest of Trust AI is theater: Evaluators would have nothing to calibrate to, Datasets would be unfiltered firehoses, and Evaluations would produce scores no one trusted.
+Without Annotations, the rest of Trust AI is theater: Evaluators would have nothing to calibrate to, Scenario sets would be unfiltered firehoses, and Evaluations would produce scores no one trusted.
 
 ## Annotation types
 
@@ -20,12 +20,10 @@ An Annotation can be any of:
 A single Session can carry many Annotations across types: a pass/fail at the Session level, a 1-5 rubric on Turn 3, freeform notes on Turns 1 and 5, and a set of tags applied for filtering. The annotation surface is additive.
 
 <Note>
-  As of v2026.05.26, the Trust AI UI also supports **axial** annotations in addition to the types listed above. Annotations can be edited inline in the **Dataset detail view** as well as in the Sessions view.
+  As of v2026.05.26, the Trust AI UI also supports **axial** annotations in addition to the types listed above. Annotations can be edited inline in the **Scenario set detail view** as well as in the Sessions view.
 </Note>
 
-<Frame caption="Inline annotation editing — toggle pass/fail directly on dataset rows without leaving the table.">
-  <img src="/images/datasets-inline-annotation.gif" alt="Animated demo: toggling pass/fail verdicts inline on dataset rows" />
-</Frame>
+{/* CAPTURE-PENDING: scenarios-inline-annotation.gif — toggling pass/fail verdicts inline on scenario rows in the scenario-set detail, without leaving the table (replaces the retired pre-rename capture datasets-inline-annotation.gif, whose UI still reads "Datasets") */}
 
 ## Session-level vs Turn-level
 
@@ -44,9 +42,9 @@ A queue is typically:
 
 - **Filtered** to Sessions needing review (no Annotation yet, or annotated by someone whose judgment another reviewer wants to verify)
 - **Sliced** by criteria — by intent classification, by tag, by Agent Version, by time window
-- **Bulk-actionable** — apply a tag or a label to many Sessions at once; bulk-add a filtered slice to a Dataset
+- **Bulk-actionable** — apply a tag or a label to many Sessions at once; bulk-add a filtered slice to a Scenario set
 
-A team's annotation rate is the practical bottleneck on Dataset quality. A reviewer churning through 50 Sessions a day will, over a quarter, produce enough signal to calibrate Evaluators well; one churning through five will not. The queue UX exists to optimize for the former.
+A team's annotation rate is the practical bottleneck on Scenario set quality. A reviewer churning through 50 Sessions a day will, over a quarter, produce enough signal to calibrate Evaluators well; one churning through five will not. The queue UX exists to optimize for the former.
 
 ## Annotations vs Evaluator scores — different things, paired
 
@@ -55,7 +53,7 @@ It's easy to confuse Annotations and Evaluator scores. They're structurally simi
 | | Annotation | Evaluator score |
 |---|---|---|
 | **Source** | Human reviewer | LLM Judge or Structured Match |
-| **Purpose** | Calibrate Evaluators; curate Datasets | Compare Agent Versions at scale |
+| **Purpose** | Calibrate Evaluators; curate Scenario sets | Compare Agent Versions at scale |
 | **Cost per row** | Reviewer minutes | LLM tokens / compute |
 | **When applied** | After ingestion, during review | At Evaluation time, programmatically |
 | **Authoritative?** | Yes, by definition | Only insofar as it agrees with Annotations |
@@ -71,7 +69,7 @@ The common annotation patterns:
     Open a filtered queue. Open a Session. Read it. Apply pass/fail + a freeform note if needed. Move to the next. The bread-and-butter pattern for QA Practitioners.
   </Card>
   <Card title="Bulk tag" icon="tags">
-    Filter to a slice ("all Sessions where the agent invoked `refund_lookup`"), bulk-apply a tag ("refund-flow"), use the tag downstream for Dataset curation or Evaluator targeting.
+    Filter to a slice ("all Sessions where the agent invoked `refund_lookup`"), bulk-apply a tag ("refund-flow"), use the tag downstream for Scenario set curation or Evaluator targeting.
   </Card>
   <Card title="Turn-by-Turn for hard cases" icon="search">
     Some Sessions need granular annotation — Turn 3 was wrong, Turn 5 recovered. Apply Annotations at the Turn level so the Evaluator calibration is precise.
@@ -85,7 +83,7 @@ The common annotation patterns:
 
 Annotations only justify their cost if they get used downstream. The three uses, in order of payoff:
 
-1. **Curate Datasets** — filter to annotated Sessions of interest, bulk-add to a Dataset. The human judgment travels with each row.
+1. **Curate Scenario sets** — filter to annotated Sessions of interest, bulk-add to a Scenario set. The human judgment travels with each row.
 2. **Calibrate Evaluators** — pick annotated rows, run the draft Evaluator against them, compare scores. Refine the rubric until agreement is high.
 3. **Spot-check Agent Versions** — when you suspect a regression, filter to recent annotated Sessions of a specific category and inspect the deltas across Agent Versions before running a full Evaluation.
 
@@ -93,13 +91,13 @@ All three close the loop on the [evaluation loop](/concepts/evaluation-loop) —
 
 ## Working with Annotations
 
-Most annotation work happens directly in the UI: open a Session or a Dataset row, apply a pass/fail, a rubric score, a freeform note, or a tag — at either the Session level or the Turn level. To label many Sessions at once, filter the Sessions list to the slice you want and bulk-apply a tag, or ask the Trust Agent to tag a filtered set for you. Removing an Annotation is the same gesture in reverse, done inline on the row.
+Most annotation work happens directly in the UI: open a Session or a scenario, apply a pass/fail, a rubric score, a freeform note, or a tag — at either the Session level or the Turn level. To label many Sessions at once, filter the Sessions list to the slice you want and bulk-apply a tag, or ask the Trust Agent to tag a filtered set for you. Removing an Annotation is the same gesture in reverse, done inline on the row.
 
 For teams who want to read or write Annotations programmatically, the endpoint details live in the [API Reference](/api-reference).
 
 ## Related concepts
 
 - **[Sessions](/concepts/sessions)** — what Annotations attach to
-- **[Datasets](/concepts/datasets)** — annotated Sessions become curated test beds
+- **[Scenarios](/concepts/scenarios)** — annotated Sessions become scenarios in curated test beds
 - **[Evaluators](/concepts/evaluators)** — Evaluator scores are trusted insofar as they agree with Annotations
 - **[The evaluation loop](/concepts/evaluation-loop)** — Annotations are step 2

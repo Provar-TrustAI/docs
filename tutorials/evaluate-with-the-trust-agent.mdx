@@ -6,7 +6,7 @@ description: "Chat with the Trust Agent to build and run an Evaluation end to en
 
 This walkthrough covers the full evaluation flow end to end. Instead of clicking through Scenarios, Evaluators, and Evaluations by hand, you'll **drive a full evaluation through conversation** with the [Trust Agent](/concepts/trust-agent) — the in-app assistant that finds your sessions, proposes a plan, and does the work, pausing for your approval before it writes anything.
 
-By the end you'll have done a complete round of the [evaluation loop](/concepts/evaluation-loop) without leaving the chat: answered the agent's clarifying questions, confirmed a plan, approved each write as it landed, watched a **Scenario** set get built and an **Evaluation** start, and read the result — all in the open, with every step legible.
+By the end you'll have done a complete round of the [evaluation loop](/concepts/evaluation-loop) without leaving the chat: answered the agent's clarifying questions, confirmed a plan, approved each write as it landed, watched a **Scenario set** get built and an **Evaluation** start, and read the result — all in the open, with every step legible.
 
 <Note>
   **The Trust Agent is not an Agent Version.** They share the word "agent," but the **[Trust Agent](/concepts/trust-agent)** is *your* assistant inside Trust AI — the thing you chat with in this tutorial. An **[Agent Version](/concepts/agent-versions)** is the *customer's agent under test* — the pinned snapshot the Evaluation grades. In this tutorial you use the Trust Agent to evaluate an Agent Version; they're distinct concepts.
@@ -115,7 +115,7 @@ This tutorial uses **Plan mode** as its spine — the agent proposes a task list
   </Step>
 
   <Step title="Click into the objects it built {#ch-objects}">
-    When a step reads records, the agent renders them as clickable record objects in the chat rather than describing them in prose. When a step reads multiple records (lists your scenario sets, or the refund Sessions it pulled), the result renders as a **clickable object table** right in the chat: rows of real, human-readable records, no bare IDs. Click a row and that record's real **fly-in** opens in context — the same fly-in you'd get from the Sessions or Evaluations surface.
+    When a step reads records, the agent renders them as clickable record objects in the chat rather than describing them in prose. When a step reads multiple records (lists your Scenario sets, or the refund Sessions it pulled), the result renders as a **clickable object table** right in the chat: rows of real, human-readable records, no bare IDs. Click a row and that record's real **fly-in** opens in context — the same fly-in you'd get from the Sessions or Evaluations surface.
     {/* ACCURACY-AUDIT-PENDING: claim 11 — multi-record results render as a clickable object table of human-readable rows that deep-link into real record fly-ins — verify by asking the agent for multiple records on the release tag */}
 
     A single-record result renders a **reference card** with a human label and description — never a bare UUID — and clicking it opens the correct record fly-in. A reference to a sub-entity resolves to its *parent* record's fly-in, so you always land somewhere real, and an evaluator reference opens the real evaluator panel rather than a placeholder.
@@ -130,7 +130,7 @@ This tutorial uses **Plan mode** as its spine — the agent proposes a task list
     The rail persists across the plan and execute phases, so it stays a stable map of the work rather than resetting between steps. (It's hidden entirely when a task references no entities — no empty rail.)
     {/* ACCURACY-AUDIT-PENDING: claim 10 — side rail sections are Progress / Context / Outputs in that order, with live step counts, and persist across plan→execute; rail hidden when no referenced entities — verify by driving a plan+execute turn on the release tag */}
 
-    The work this tutorial drives lands on real surfaces. The Scenario set the agent built appears at `/projects/:id/datasets` — **Scenarios** is the UI name for the datasets surface, so the route is `/datasets` (there's no separate scenarios API), and the **[Scenarios](/concepts/scenarios)** concept page covers it in full. The Evaluation it started is the same run you'd otherwise configure under **Evaluations → New Run**.
+    The work this tutorial drives lands on real surfaces. The Scenario set the agent built appears under **Scenarios** in the left nav — the **[Scenarios](/concepts/scenarios)** concept page covers the surface in full, including a note on how the underlying route and API are named. The Evaluation it started is the same run you'd otherwise configure under **Evaluations → New Run**.
     {/* ACCURACY-AUDIT-PENDING: claim 19 — the agent-built scenario set appears at /projects/:id/datasets (route is /datasets, not /scenarios; no /v1/scenarios) and the Evaluation appears under Evaluations — verify the route + network calls (/v1/datasets, /v1/evaluations) on the release tag */}
 
     {/* CAPTURE-PENDING: agent-tutorial-objects.gif — a clickable object table in chat, the Progress / Context / Outputs side rail with the work the agent did, and a record fly-in opening from a clicked row, sliced from the autoplay recording */}
@@ -200,6 +200,6 @@ Each beat of this flow stands on its own — link straight to the one you need.
 
 - **[Trust Agent](/concepts/trust-agent)** — the assistant you drove in this tutorial
 - **[Agent Versions](/concepts/agent-versions)** — the agent under test the Evaluation grades; not the Trust Agent
-- **[Scenarios](/concepts/scenarios)** — the UI name for the datasets surface the agent built a set on
+- **[Scenarios](/concepts/scenarios)** — the surface the agent built a Scenario set on
 - **[Evaluations](/concepts/evaluations)** — the run the agent started, and the manual path to configure one
 - **[Multi-tenancy](/concepts/multi-tenancy)** — the organization boundary the agent's writes are scoped to

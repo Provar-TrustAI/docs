@@ -4,7 +4,7 @@ icon: "sliders-horizontal"
 description: "The top-level workspace container for an agent or agent fleet under evaluation."
 ---
 
-A Project is the workspace boundary around a single agent (or fleet of related agents) under evaluation. Members, runtime credentials, and every Trust AI artifact — Sessions, Annotations, Datasets, Evaluators, Evaluations, Agent Versions — belong to one Project.
+A Project is the workspace boundary around a single agent (or fleet of related agents) under evaluation. Members, runtime credentials, and every Trust AI artifact — Sessions, Annotations, Scenario sets, Evaluators, Evaluations, Agent Versions — belong to one Project.
 
 ## What's in a Project
 
@@ -18,7 +18,7 @@ Every Project owns five things:
     Credentials for the agent platform you're evaluating — AWS Bedrock AgentCore IAM role, Salesforce Agentforce OAuth, etc. One set per Project (you can't half-connect).
   </Card>
   <Card title="Inventory of artifacts" icon="folder-open">
-    Sessions ingested, Annotations applied, Datasets curated, Evaluators defined, Evaluations run, Agent Versions tracked. All scoped to this Project.
+    Sessions ingested, Annotations applied, Scenario sets curated, Evaluators defined, Evaluations run, Agent Versions tracked. All scoped to this Project.
   </Card>
   <Card title="Settings" icon="sliders-horizontal">
     Project name, description, default Evaluator pool, evaluation defaults, and the snapshot/restore configuration covered below.
@@ -38,8 +38,8 @@ In both cases, you're answering the question: "Do these things deserve to share 
 
 Practical guidance:
 
-- **Different production agents** → different Projects. Even if they share an underlying model, the Datasets and Evaluators that judge them are different. Don't conflate.
-- **Multiple environments of the same agent** (staging vs prod) → **one Project**, two Agent Versions. The Datasets and Evaluators want to be shared across environments; what differs is the version under test.
+- **Different production agents** → different Projects. Even if they share an underlying model, the Scenario sets and Evaluators that judge them are different. Don't conflate.
+- **Multiple environments of the same agent** (staging vs prod) → **one Project**, two Agent Versions. The Scenario sets and Evaluators want to be shared across environments; what differs is the version under test.
 - **A fleet of similar agents** (one per customer, one per region) → judgment call. If the evaluator criteria are identical, consider sharing. If they diverge, split.
 
 ## Runtime connection config
@@ -52,7 +52,7 @@ Salesforce Agentforce and Microsoft Copilot Studio connectors are on the roadmap
 
 ## Project Snapshots
 
-A Project is the unit of restore. The snapshot system captures the full state of a Project at a moment in time — its Sessions, Annotations, Datasets, Evaluators, Evaluations, and Agent Versions — so it can be restored or audited later.
+A Project is the unit of restore. The snapshot system captures the full state of a Project at a moment in time — its Sessions, Annotations, Scenario sets, Evaluators, Evaluations, and Agent Versions — so it can be restored or audited later.
 
 Snapshots are useful for:
 
@@ -77,6 +77,6 @@ Developers who want the underlying endpoints — creating Projects, inviting mem
 ## Related concepts
 
 - **[Sessions](/concepts/sessions)** — the raw material every Project ingests from its connected runtime
-- **[Datasets](/concepts/datasets)** — curated test beds, scoped to one Project
+- **[Scenarios](/concepts/scenarios)** — curated test beds, scoped to one Project
 - **[Evaluators](/concepts/evaluators)** — reusable judgment functions, scoped to one Project
 - **[The evaluation loop](/concepts/evaluation-loop)** — the workflow that happens inside a Project

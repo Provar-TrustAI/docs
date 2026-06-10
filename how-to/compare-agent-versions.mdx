@@ -4,7 +4,7 @@ icon: "git-branch"
 description: "The regression-tracking workflow — read a side-by-side diff and decide whether to ship."
 ---
 
-This how-to walks through the **regression-tracking workflow** Trust AI is built around: comparing two [Agent Versions](/concepts/agent-versions) side-by-side on the same [Dataset](/concepts/datasets) under the same [Evaluators](/concepts/evaluators).
+This how-to walks through the **regression-tracking workflow** Trust AI is built around: comparing two [Agent Versions](/concepts/agent-versions) side-by-side on the same [Scenario set](/concepts/scenarios) under the same [Evaluators](/concepts/evaluators).
 
 It picks up where [Run your first Evaluation](/tutorials/run-first-evaluation) leaves off — you already have at least one finished [Evaluation](/concepts/evaluations) and an alternate Agent Version to compare against. If you don't, run that tutorial first.
 
@@ -14,24 +14,24 @@ The goal is to turn an Evaluation diff into a **ship / don't-ship / investigate*
 
 The three most common triggers:
 
-- **Before deploying a new agent prompt.** Run the candidate against the same Dataset the production version ran against; ship only if the diff is acceptable.
+- **Before deploying a new agent prompt.** Run the candidate against the same Scenario set the production version ran against; ship only if the diff is acceptable.
 - **After deploying.** A weekly cadence comparing this week's production against last week's surfaces drift that wasn't visible in the candidate review.
 - **Ranking parallel candidates.** Multiple prompt variants competing for production; the comparison view ranks them on the same axes.
 
-If you find yourself wanting to compare two Evaluations that **don't share a Dataset or don't share an Evaluator**, stop — the diff isn't apples-to-apples and won't tell you what you think it does. Re-run instead.
+If you find yourself wanting to compare two Evaluations that **don't share a Scenario set or don't share an Evaluator**, stop — the diff isn't apples-to-apples and won't tell you what you think it does. Re-run instead.
 
 ## The comparison setup
 
 <Steps>
   <Step title="Pick the two Evaluations to compare">
-    Both Evaluations must have run **the same Dataset** and **the same Evaluator(s)**. The only variable allowed to differ is the **Agent Version**.
+    Both Evaluations must have run **the same Scenario set** and **the same Evaluator(s)**. The only variable allowed to differ is the **Agent Version**.
 
     <Note>
-    *Ask the Trust Agent:* "Compare my last two Evaluations of the order-status agent on the order-status happy-path dataset."
+    *Ask the Trust Agent:* "Compare my last two Evaluations of the order-status agent on the order-status happy-path scenario set."
     </Note>
 
     The Trust Agent opens the comparison view on the two eligible runs. To do it by hand: from the Project home, navigate to **Evaluations** and either:
-    - **Open one Evaluation and click "Compare"** — Trust AI surfaces the eligible comparison runs (same Dataset + Evaluators, different Agent Version) in a dropdown
+    - **Open one Evaluation and click "Compare"** — Trust AI surfaces the eligible comparison runs (same Scenario set + Evaluators, different Agent Version) in a dropdown
     - **Select two Evaluations** from the list and click **Compare** in the bulk action bar
 
     **You should see:** the comparison view loads, with both Agent Versions surfaced as colored [VersionPills](/concepts/agent-versions#the-versionpill-what-users-see-in-the-app) at the top.
@@ -45,7 +45,7 @@ If you find yourself wanting to compare two Evaluations that **don't share a Dat
     The Trust Agent reads back the deltas in plain language; the same numbers sit at the top of the comparison view for you to scan yourself. The aggregate-level diff looks like this:
 
     ```
-    Dataset: Order-status happy path  (n=120)
+    Scenario set: Order-status happy path  (n=120)
     Evaluator: Order status — three-part rubric  (binary)
 
     [v2026-05-11-prod]  →  [v2026-05-19-candidate]
@@ -56,7 +56,7 @@ If you find yourself wanting to compare two Evaluations that **don't share a Dat
 
     Three things to check before going row-by-row:
 
-    1. **Pass-rate delta.** Is it within the noise floor for this Dataset size? On a Dataset of 120 binary rows, ±2pp is roughly the noise floor at typical Evaluator agreement rates. ±3.3pp is real signal, worth investigating.
+    1. **Pass-rate delta.** Is it within the noise floor for this Scenario set's size? On a Scenario set of 120 binary rows, ±2pp is roughly the noise floor at typical Evaluator agreement rates. ±3.3pp is real signal, worth investigating.
     2. **Failure count.** Pass rate hides direction — 4 new failures vs. 4 new passes both move pass rate by 3.3pp in opposite directions.
     3. **Latency.** If the candidate is significantly slower (or faster), that's a separate signal from the Evaluator scores and often gets ignored — don't.
 
@@ -68,7 +68,7 @@ If you find yourself wanting to compare two Evaluations that **don't share a Dat
     *Ask the Trust Agent:* "Show me the rows that regressed — passed on the old version, failed on the candidate."
     </Note>
 
-    The Trust Agent pulls up the regression rows for you to read; you can also scroll the per-row table directly. Below the aggregate, that table shows every Dataset row's score under both Agent Versions, sorted by **delta direction**:
+    The Trust Agent pulls up the regression rows for you to read; you can also scroll the per-row table directly. Below the aggregate, that table shows every scenario's score under both Agent Versions, sorted by **delta direction**:
 
     - **Regressions** (passed → failed) at the top — the rows that matter most
     - **Improvements** (failed → passed) next
@@ -78,7 +78,7 @@ If you find yourself wanting to compare two Evaluations that **don't share a Dat
 
     For each regression row, click in to see:
 
-    - The Dataset row input
+    - The scenario's input
     - **Both** agent responses (production vs candidate) side by side
     - **Both** Evaluator scores + reasoning
     - The Annotation, if any, that traveled with the row from its source Session
@@ -87,7 +87,7 @@ If you find yourself wanting to compare two Evaluations that **don't share a Dat
 
     - **Real regression** — the candidate's response is clearly worse. Agent change is the problem.
     - **Calibration noise** — both responses are reasonable; the Evaluator scored them differently on subjective edge cases. Tighten the rubric, don't blame the agent.
-    - **Dataset row is now stale** — the agent's response is fine but the row's premise no longer applies (the order ID is from a closed test environment, etc.). Update the row.
+    - **Scenario is now stale** — the agent's response is fine but the row's premise no longer applies (the order ID is from a closed test environment, etc.). Update the row.
 
     **You should see:** the per-row drilldown showing both responses + scores + Annotation in one view. The pattern becomes legible after looking at 5-10 regressions.
   </Step>
@@ -103,7 +103,7 @@ If you find yourself wanting to compare two Evaluations that **don't share a Dat
 
     - Evaluator temperature > 0 — fix: set to 0 on the judge model
     - Criteria are ambiguous enough that the judge picks a different interpretation per-call — fix: tighten the rubric (see [Write an effective LLM-judge prompt](/how-to/write-llm-judge-prompt))
-    - The row sits on a genuine edge of the criteria — fix: decide whether the row belongs in the Dataset at all, or whether the criteria need refinement to handle this kind of edge case
+    - The row sits on a genuine edge of the criteria — fix: decide whether the scenario belongs in the set at all, or whether the criteria need refinement to handle this kind of edge case
 
     Flapping rows shouldn't drive a ship/don't-ship decision; they're a signal to fix the calibration, not the agent.
   </Step>
@@ -126,7 +126,7 @@ If you find yourself wanting to compare two Evaluations that **don't share a Dat
 ## A worked example
 
 ```
-Dataset: Order-status happy path  (n=120)
+Scenario set: Order-status happy path  (n=120)
 Evaluator: Order status — three-part rubric
 
 [v2026-05-11-prod]  →  [v2026-05-19-candidate]
@@ -137,7 +137,7 @@ Per-row drilldown reveals:
 
 - **5 real regressions** — all in a sub-category where the user's message contains a partial order ID. The candidate's prompt was tightened on confidence thresholds; it now refuses to answer when it isn't 100% sure, which causes legitimate partial-match cases to fail. **Action:** block on this; loosen the candidate's confidence threshold for partial-match cases.
 - **3 flapping rows** — yellow-flagged. Evaluator temperature was 0.3. **Action:** unrelated to this comparison; ticket the calibration fix separately.
-- **2 stale rows** — order IDs from a deprecated test environment. **Action:** update or remove these Dataset rows.
+- **2 stale rows** — order IDs from a deprecated test environment. **Action:** update or remove these scenarios.
 
 The call: **block and investigate**. The 5 real regressions are localized and fixable; ship a v3 candidate with the confidence-threshold change reverted on the partial-match path.
 

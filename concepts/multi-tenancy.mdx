@@ -10,7 +10,7 @@ This page is a security and data-model concept, not a workflow. The claims here 
 
 ## The organization is the tenant boundary
 
-In Trust AI, an **organization** is the tenant. An organization owns many Projects, and every Project — together with all of its **[Sessions](/concepts/sessions)**, **[Datasets](/concepts/datasets)**, **[Personas](/concepts/scenarios)**, **[Evaluators](/concepts/evaluators)**, **[Evaluations](/concepts/evaluations)**, simulations, and **[Trust Agent](/concepts/trust-agent)** tasks — belongs to exactly one organization. Identity, and the organization itself, are federated through **WorkOS SSO**: your company's single sign-on is the source of truth for who you are and which tenant you belong to.
+In Trust AI, an **organization** is the tenant. An organization owns many Projects, and every Project — together with all of its **[Sessions](/concepts/sessions)**, **[Scenario sets](/concepts/scenarios)**, **[Personas](/concepts/scenarios)**, **[Evaluators](/concepts/evaluators)**, **[Evaluations](/concepts/evaluations)**, simulations, and **[Trust Agent](/concepts/trust-agent)** tasks — belongs to exactly one organization. Identity, and the organization itself, are federated through **WorkOS SSO**: your company's single sign-on is the source of truth for who you are and which tenant you belong to.
 {/* ACCURACY-AUDIT-PENDING: an organization owns many Projects and every Project + its artifacts belongs to exactly one org; identity + org federated via WorkOS SSO — ADR/code + concepts/projects.mdx framing, not UI-drivable on this page */}
 
 <Info>
@@ -19,7 +19,7 @@ In Trust AI, an **organization** is the tenant. An organization owns many Projec
 
 ## organization_id, on every tenant-anchored row
 
-The tenant boundary is carried in the data itself. Every tenant-anchored table has a required `organization_id` column — `NOT NULL`, never optional. That holds across the project-scoped anchor tables (`datasets`, `personas`, `evaluations`, `sessions`, `simulations`) and the agent-core anchor tables (the Trust Agent's tasks and its audit log). Every tenant-anchored row carries a non-null `organization_id`, so the tenant a row belongs to is never ambiguous.
+The tenant boundary is carried in the data itself. Every tenant-anchored table has a required `organization_id` column — `NOT NULL`, never optional. That holds across the project-scoped anchor tables (the tables behind scenario sets, personas, evaluations, sessions, and simulations) and the agent-core anchor tables (the Trust Agent's tasks and its audit log). Every tenant-anchored row carries a non-null `organization_id`, so the tenant a row belongs to is never ambiguous.
 {/* ACCURACY-AUDIT-PENDING: organization_id is NOT NULL on datasets/personas/evaluations/sessions/simulations + agent-core tasks & audit log — schema property verified in models.py (datasets:67, personas:66, evaluations:61, simulations:90, sessions:69, agent domain:174/764), not UI-drivable */}
 
 `organization_id` is **denormalized onto each row from the parent Project at create time**. The platform derives the tenant from the row's Project and stamps it on every child write, so list and index queries can filter by tenant directly instead of joining through `projects`. This is a performance property of the schema, not something you configure.
@@ -78,7 +78,7 @@ Not every write has a user behind it. Session imports, agent sync receipts and c
 The service-level guard is the first line, not the only one. Beneath it, tenant-scoped repository reads filter on `organization_id` directly, so a cross-tenant id **collapses to a not-found**: ask for another organization's record by id and the query returns nothing, exactly as if the id never existed. This is **defense in depth** — a deliberate belt-and-braces second check so that even a future bug that skipped the service guard would surface an empty result rather than a foreign row.
 {/* ACCURACY-AUDIT-PENDING: tenant-scoped repository reads filter on organization_id so a cross-tenant id collapses to None (not-found) — code property (datasets/repository.py:94 collapse-to-None + :858 belt-and-braces; personas/repository.py org filter), not UI-drivable here */}
 
-Because the foreign id collapses to a not-found, **a cross-tenant request returns the same response as a non-existent one.** The boundary never confirms that a foreign record exists — there's no "you're not allowed to see this" leak that would tell an attacker the record is real. Addressing another organization's Dataset, Persona, simulation, or agent task id directly returns a **403 / 404**, indistinguishable from a missing id.
+Because the foreign id collapses to a not-found, **a cross-tenant request returns the same response as a non-existent one.** The boundary never confirms that a foreign record exists — there's no "you're not allowed to see this" leak that would tell an attacker the record is real. Addressing another organization's Scenario set, Persona, simulation, or agent task id directly returns a **403 / 404**, indistinguishable from a missing id.
 {/* ACCURACY-AUDIT-PENDING: a foreign-tenant id returns the same 403/404 as a non-existent id (no existence leak) — drive Org A → Org B id on the release tag; verified by the agent domain's test_tenant_denial.py under tests/domain (assert status_code in (403, 404)), evaluations/test_tenant_isolation.py, sessions/test_tenant_denial.py */}
 
 ### Across the API ↔ gateway boundary
@@ -92,9 +92,9 @@ The tenant follows the request even when it leaves the API. When the gateway loo
   - **The column.** On every tenant-anchored table, `organization_id` is defined as `mapped_column(String(255), ForeignKey("evaluation.workspace_settings.org_id", ondelete="RESTRICT"), nullable=False, index=True)`. It is non-null, indexed for tenant-filtered queries, and foreign-keyed to the organization's workspace settings.
   - **`ondelete="RESTRICT"`.** An organization can't be deleted out from under rows that still reference it — the database refuses, rather than silently orphaning tenant-anchored data.
   - **Denormalized, not joined.** The org is copied from the parent Project onto each child row at write time, so list and index queries filter by tenant without joining through `projects`.
-  - **The representative anchor tables.** `datasets`, `personas`, `evaluations`, `sessions`, `simulations`, and the Trust Agent's `tasks` and audit log each carry the column. This is the representative set, not an exhaustive enumeration — the schema is the authority for the full list.
+  - **The representative anchor tables.** The tables behind scenario sets, personas, evaluations, sessions, simulations, and the Trust Agent's tasks and audit log each carry the column. This is the representative set, not an exhaustive enumeration — the schema is the authority for the full list.
 
-  {/* ACCURACY-AUDIT-PENDING: organization_id column = String(255) FK to evaluation.workspace_settings.org_id, ondelete=RESTRICT, nullable=False, index=True, denormalized from parent project — schema property verified across models.py, not UI-drivable */}
+  {/* ACCURACY-AUDIT-PENDING: organization_id column = String(255) FK to evaluation.workspace_settings.org_id, ondelete=RESTRICT, nullable=False, index=True, denormalized from parent project — schema property verified across models.py; anchor tables on the wire/schema are datasets, personas, evaluations, sessions, simulations + the agent's tasks and audit log (scenario sets are the datasets table — UI rename only), not UI-drivable */}
 </Accordion>
 
 ## The Trust Agent runs inside the boundary

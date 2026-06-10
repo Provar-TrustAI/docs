@@ -6,7 +6,7 @@ description: "A pinned, immutable snapshot of the agent under test. Each Evaluat
 
 An Agent Version is a **pinned snapshot of the agent under test** — its prompt, model, tool set, retrieval config, and deployment target captured as a single, named, immutable reference. Every [Evaluation](/concepts/evaluations) runs against exactly one Agent Version, and every regression-tracking workflow is a diff between two.
 
-If [Sessions](/concepts/sessions) are the raw material, [Datasets](/concepts/datasets) the test bed, and [Evaluators](/concepts/evaluators) the rubric, then Agent Versions are **what's being judged**.
+If [Sessions](/concepts/sessions) are the raw material, [Scenario sets](/concepts/scenarios) the test bed, and [Evaluators](/concepts/evaluators) the rubric, then Agent Versions are **what's being judged**.
 
 <Note>
   **An Agent Version is not the Trust Agent.** They share the word "agent," but they are opposite ends of the evaluation:
@@ -21,17 +21,17 @@ If [Sessions](/concepts/sessions) are the raw material, [Datasets](/concepts/dat
 
 The core regression-tracking pattern:
 
-1. Pick a stable **Dataset**.
+1. Pick a stable **Scenario set**.
 2. Pick the same set of **Evaluators**.
 3. Pick **two Agent Versions** — the production one and a candidate replacement.
 4. Run an Evaluation against each.
 5. Compare per-row deltas.
 
-When the same Dataset and the same Evaluators are held constant, **the only variable left is the agent itself**. Whatever changes in the Evaluation results between the two runs is attributable to the version change. That's the loop the Agent Version concept exists to make legible.
+When the same Scenario set and the same Evaluators are held constant, **the only variable left is the agent itself**. Whatever changes in the Evaluation results between the two runs is attributable to the version change. That's the loop the Agent Version concept exists to make legible.
 
 Hold any of those three constants and you get a different signal:
 
-- **Hold Agent Version, vary Dataset** → "does this version regress on a different slice?"
+- **Hold Agent Version, vary Scenario set** → "does this version regress on a different slice?"
 - **Hold Agent Version, vary Evaluator** → "does the new rubric judge this version differently?"
 - **Hold both, vary Agent Version** → **the regression diff**, the daily workflow
 
@@ -84,7 +84,7 @@ Versions don't expire on their own; archive is a manual or policy-driven action.
 
 The common pattern is a two-version comparison, but the underlying primitive supports more:
 
-- **A vs B vs C** — same Dataset, three versions. Useful for evaluating prompt-A vs prompt-B vs prompt-C in parallel. The comparison view surfaces each version's row-level score; rows where one stands out localize where each version excels or fails.
+- **A vs B vs C** — same Scenario set, three versions. Useful for evaluating prompt-A vs prompt-B vs prompt-C in parallel. The comparison view surfaces each version's row-level score; rows where one stands out localize where each version excels or fails.
 - **A baseline + N candidates** — useful when iterating on a candidate replacement; the baseline stays pinned, candidates rotate.
 - **A vs A across time** — re-running the same Evaluation on the same Agent Version weeks apart. Surfaces non-determinism in the Evaluator (a calibration smell) and any drift in the agent's runtime behavior between the two runs.
 
