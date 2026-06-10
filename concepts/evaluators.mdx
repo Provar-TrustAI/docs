@@ -4,7 +4,7 @@ icon: "wand-sparkles"
 description: "Reusable judgment functions — LLM Judge or Structured Match — that score Sessions and Turns against criteria."
 ---
 
-An Evaluator is a reusable judgment function. You define it once in a [Project](/concepts/projects), and it gets reused across many [Evaluations](/concepts/evaluations) — applied to whatever [Dataset](/concepts/datasets) you point it at, against whatever [Agent Version](/concepts/agent-versions) you're testing. The same Evaluator scoring the same Dataset across two Agent Versions is **the apples-to-apples comparison** Trust AI is built around.
+An Evaluator is a reusable judgment function. You define it once in a [Project](/concepts/projects), and it gets reused across many [Evaluations](/concepts/evaluations) — applied to whatever [Scenario set](/concepts/scenarios) you point it at, against whatever [Agent Version](/concepts/agent-versions) you're testing. The same Evaluator scoring the same Scenario set across two Agent Versions is **the apples-to-apples comparison** Trust AI is built around.
 
 ## The two families
 
@@ -30,7 +30,7 @@ An LLM Judge has four parts:
 3. **Scoring scale** — pass/fail or 1–5 scale (the two score types available in the app). Pass/fail is the easiest to calibrate; 1–5 is more nuanced but harder to get reviewer agreement on. A freeform-with-extraction option also exists, though it's less common.
 4. **Output format** — JSON with a structured score field, so the result is machine-readable.
 
-The create/edit flow in the app walks you through these four parts — you pick the evaluator kind (LLM Judge or Structured Match), choose a score type (pass/fail or 1–5 scale), and author the criteria in a dedicated editor. The rubric gets stored as a template that re-runs against every Dataset row at Evaluation time.
+The create/edit flow in the app walks you through these four parts — you pick the evaluator kind (LLM Judge or Structured Match), choose a score type (pass/fail or 1–5 scale), and author the criteria in a dedicated editor. The rubric gets stored as a template that re-runs against every scenario at Evaluation time.
 
 For how to author rubrics that actually work, see [Write an effective LLM-judge prompt](/how-to/write-llm-judge-prompt).
 
@@ -53,14 +53,14 @@ Structured Match is exact-match by default — useful when the agent emits struc
 - **Evaluator list view** — The Evaluators surface shows every evaluator in the project. Create a new evaluator or click an existing one to edit.
 - **Create/edit flow** — Select the evaluator kind (LLM Judge or Structured Match), choose a score type (pass/fail or 1–5 scale), and author the criteria in a dedicated editor.
 - **Side panel** — Click any evaluator to open a side panel showing the recent trend sparkline and run history.
-- **Inline delete** — Delete an evaluator from the side panel. Before removing one, ask the Trust Agent which Datasets and Evaluations still reference it — or check the references shown in the side panel — so you don't break a comparison that depends on it.
+- **Inline delete** — Delete an evaluator from the side panel. Before removing one, ask the Trust Agent which Scenario sets and Evaluations still reference it — or check the references shown in the side panel — so you don't break a comparison that depends on it.
 
 ## Calibration — the loop that makes LLM Judges trustworthy
 
 LLM Judges are useful only if their scores agree with informed humans. Calibration is the loop:
 
 1. **Write a draft rubric** (the first pass — often too vague or too strict)
-2. **Score it against 10 annotated rows** from a Dataset (rows that already have human Annotations)
+2. **Score it against 10 annotated rows** from a Scenario set (rows that already have human Annotations)
 3. **Compare** Evaluator pass/fail vs Annotation pass/fail
 4. **Refine** the rubric where they disagree — usually by tightening criteria
 5. **Repeat** until agreement is high (90%+ for binary scales)
@@ -69,13 +69,13 @@ A well-calibrated LLM Judge agrees with a thoughtful human reviewer most of the 
 
 Trust AI's Evaluator builder shows the calibration agreement rate live as you edit the rubric, which is why getting a usable Evaluator is mostly an iterative authoring task, not a "spec it once and forget" task.
 
-## Reusing Evaluators across Datasets, Agent Versions, time
+## Reusing Evaluators across Scenario sets, Agent Versions, time
 
 A defined Evaluator is reusable; that's the whole point. You point it at:
 
-- **Different Datasets** — apply the same judgment criteria to different test beds
-- **Different Agent Versions** — same Dataset, same criteria, different agent under test = **regression signal**
-- **Different time horizons** — re-running the same Evaluator on the same Dataset two months later tells you about drift
+- **Different Scenario sets** — apply the same judgment criteria to different test beds
+- **Different Agent Versions** — same Scenario set, same criteria, different agent under test = **regression signal**
+- **Different time horizons** — re-running the same Evaluator on the same Scenario set two months later tells you about drift
 
 Evaluators are versioned (lightly) — major rubric edits create a new revision. This matters mostly for audit ("which version of the rubric scored this Evaluation?"); minor wording tweaks don't bump.
 
@@ -96,7 +96,7 @@ Everything you'd want to do with an Evaluator is available through the Trust Age
 - **Define** an Evaluator (LLM Judge or Structured Match) — ask the Trust Agent to create one, or use the create flow in the Evaluators surface.
 - **List** the Evaluators in a Project, or open one to review its rubric or assertion definition, from the Evaluator list view.
 - **Calibrate** an LLM Judge against your annotated rows — the builder runs this as you edit and shows the agreement rate live.
-- **Edit** a rubric — major edits create a new revision (see [Reusing Evaluators](#reusing-evaluators-across-datasets-agent-versions-time) above).
+- **Edit** a rubric — major edits create a new revision (see [Reusing Evaluators](#reusing-evaluators-across-scenario-sets-agent-versions-time) above).
 - **Check references** before archiving or making rubric-breaking edits — ask the Trust Agent, or read the references shown in the side panel.
 
 Developers who want the underlying endpoints, request/response shapes, and version notes (such as the `v2026.05.19` body-shape rename and the reference-check addition) can find them in the [API Reference](/api-reference).
@@ -104,7 +104,7 @@ Developers who want the underlying endpoints, request/response shapes, and versi
 ## Related concepts
 
 - **[Annotations](/concepts/annotations)** — the human signal that calibrates LLM Judges
-- **[Datasets](/concepts/datasets)** — the test beds Evaluators score
-- **[Evaluations](/concepts/evaluations)** — the runs that apply Evaluators to Datasets
+- **[Scenarios](/concepts/scenarios)** — the Scenario sets Evaluators score
+- **[Evaluations](/concepts/evaluations)** — the runs that apply Evaluators to Scenario sets
 - **[The evaluation loop](/concepts/evaluation-loop)** — Evaluators are the "define" step
 - **[Write an effective LLM-judge prompt](/how-to/write-llm-judge-prompt)** — practical authoring guide

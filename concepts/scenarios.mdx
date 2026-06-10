@@ -1,22 +1,20 @@
 ---
 title: "Scenarios"
 icon: "users"
-description: "Persona-and-goal test sets: the versioned collection of test cases an Evaluation scores an agent against."
+description: "Test sets of scenarios — curated from sessions, uploaded, generated, or simulated — the versioned collections every Evaluation scores an agent against."
 ---
 
-A scenario is one persona-and-goal test case: an actor with a system prompt, a goal it is trying to accomplish, and the context an agent gets exercised against. A **scenario set** is the curated, versioned collection of those rows — the stable test bed every [Evaluation](/concepts/evaluations) runs against. You build scenario sets by hand, generate them from scratch with a wizard, or capture them from a live [Playground](/concepts/playground) run, then score an agent against them.
+A **scenario** is one test case worth scoring an agent on — a curated [Session](/concepts/sessions), a hand-written prompt, a CSV-imported example, or a persona-and-goal pair: an actor with a system prompt and a goal it is trying to accomplish. A **Scenario set** is the curated, versioned collection of those rows — the stable test bed every [Evaluation](/concepts/evaluations) runs against. You build scenario sets by curating sessions, writing rows by hand, importing a CSV, generating rows from scratch with a wizard, or capturing them from a live [Playground](/concepts/playground) run, then score an agent against them.
 
 <Note>
-  **Scenarios is the new name for the surface formerly called Datasets.** The left-nav row reads **Scenarios** and the surface follows the persona-and-goal design — but the route, the data model, and the API all stay `datasets`. You open it at `/projects/:id/datasets`, list calls hit `/v1/datasets`, and **there is no `/v1/scenarios` endpoint**. The old `scenarios` backend domain was deleted long ago (ADR 0002) and never came back; today's "Scenarios" is a UI-layer rename over the existing `datasets` domain, not a revived API.
+  **Formerly Datasets.** The surface and its collections were renamed to Scenarios — the left-nav row reads **Scenarios** and a collection is a **Scenario set** — but the route and the API did not move: you open the surface at `/projects/:id/datasets`, list calls hit `/v1/datasets`, wire fields keep names like `dataset_id`, and **there is no scenarios endpoint**. This page uses **scenario** and **scenario set** in prose, because that is what the UI says; where a route or field name matters, it is shown in code as its real `datasets` token.
   {/* ACCURACY-AUDIT-PENDING: nav label reads "Scenarios", route is /projects/:id/datasets, list calls hit /v1/datasets, and no /v1/scenarios endpoint exists — verify by driving the route + network tab on the release tag */}
-
-  This page still uses **scenario** and **scenario set** in prose, because that is what the UI says. Where a field or route name matters, it is shown in code as its real `datasets` token.
 </Note>
 
 <Note>
   **Scenarios is not the Trust Agent, and not an Agent Version.** All three use the word "agent" nearby, so it is worth pinning them apart:
 
-  - **Scenarios** (this page) are the persona-and-goal *test cases* you score an agent against. A curation surface — a table of rows.
+  - **Scenarios** (this page) are the *test cases* you score an agent against — curated sessions, hand-written prompts, persona-and-goal rows. A curation surface — a table of rows.
   - The **[Trust Agent](/concepts/trust-agent)** is your in-app *assistant* — the thing that helps you build sets, draft evaluators, and run evaluations. It lives at `/projects/:id/agent`.
   - An **[Agent Version](/concepts/agent-versions)** is the *agent under test* — an immutable snapshot of the customer's agent whose behavior you are judging.
 
@@ -25,17 +23,23 @@ A scenario is one persona-and-goal test case: an actor with a system prompt, a g
 
 ## What's in a scenario set
 
-A scenario set mirrors the Dataset it supersedes — a named, versioned collection of rows — with persona-and-goal columns layered on:
+A scenario set is a named, versioned collection of rows, with persona-and-goal columns layered onto the test-case content:
 
 - **A name + description** — what this set is for ("Refund-flow personas," "Onboarding edge cases").
 - **Rows** — the scenarios themselves. Each row is one test case.
 - **Version** — every set is implicitly versioned; edits create a new revision, and Evaluations pin to a revision (see [Snapshots and reproducibility](#snapshots-and-reproducibility)).
+- **Tags** — for filtering and organization.
+- **Annotations baked in** — when rows are curated from annotated [Sessions](/concepts/sessions), the human judgment travels with them.
 
 Each row in the detail view carries:
 
-- **Persona** — the actor that role-plays the user for this scenario (shown by name as a chip).
+- **Persona** — the actor that role-plays the user for this scenario (shown by name as a chip). Rows curated from sessions may have no persona — they replay instead of simulate (see [Which rows are simulatable](#which-rows-are-simulatable)).
 - **Goal** — what that persona is trying to accomplish.
 - **Source** — the row's origin: `uploaded`, `generated`, or `simulated` (see [Where scenarios come from](#where-scenarios-come-from)).
+- **Input** — the prompt or snapshotted Session content that gets sent to the agent at evaluation time.
+- **Reference output** (optional) — what "good" looks like for this row, used by some Evaluator types.
+- **Reference annotations** (optional) — the human signal that was attached to the source Session.
+- **Row-level tags** — for slicing results ("regression," "high-priority," "happy-path").
 
 {/* CAPTURE-PENDING: scenarios-list-overview.png — the Scenarios list at /projects/:id/datasets with the nav row reading "Scenarios" */}
 
@@ -46,10 +50,12 @@ Open a scenario set and you get the row table. Alongside the per-row content, th
 {/* CAPTURE-PENDING: scenarios-detail-view.png — scenario-set detail showing Persona + Goal + Source columns */}
 {/* ACCURACY-AUDIT-PENDING: the scenario-set detail view renders a Persona column, a Goal column, and a Source/origin column — verify by opening /projects/:id/datasets/:datasetId on the release tag */}
 
-Click any row to open a **fly-in detail panel** on top of the list — the same fly-in interaction the rest of Trust AI uses, so you never lose your place. The panel has a **Personas and Goals** tab for editing the row's actors and objective.
+Click any row to open a **fly-in detail panel** on top of the list — the same fly-in interaction the rest of Trust AI uses, so you never lose your place. The panel has a **Personas and Goals** tab for editing the row's actors and objective. For rows that carry a conversation, it also renders the full transcript — with an `io_split` divider separating the input turns from the output being scored — plus a tag picker and an action for adding the row to another scenario set.
 
 {/* CAPTURE-PENDING: scenarios-row-flyin.png — a scenario row fly-in with the Personas and Goals tab */}
+{/* CAPTURE-PENDING: scenarios-flyin-demo.gif — clicking a row opens the fly-in with the transcript, io_split divider, and tag picker (replaces the retired pre-rename capture datasets-flyin-demo.gif) */}
 {/* ACCURACY-AUDIT-PENDING: clicking a row opens a fly-in panel over the list with a "Personas and Goals" tab — verify the exact tab label by driving a row on the release tag */}
+{/* ACCURACY-AUDIT-PENDING: the row fly-in includes a transcript viewer with an io_split input/output divider, a tag picker, and an add-to-scenario-set action (label formerly "Add to Dataset") — verify the panel contents and the exact action label on the release tag */}
 
 ## Personas
 
@@ -84,7 +90,7 @@ Every row carries a **Source** that records how it got into the set — one of t
 
 <CardGroup cols={3}>
   <Card title="Uploaded" icon="upload">
-    `uploaded` — a row you added by CSV import or by hand. The manual path, for edge cases you anticipate before you see them in production.
+    `uploaded` — a row you curated from a [Session](/concepts/sessions), wrote by hand, or imported by CSV. The curation path, including the edge cases you anticipate before you see them in production.
   </Card>
   <Card title="Generated" icon="wand-magic-sparkles">
     `generated` — a row built by the [generate wizard](#the-generate-from-scratch-wizard), or by a goal-only [Playground](/concepts/playground) chat. The synthetic-from-personas path.
@@ -100,6 +106,18 @@ The **Source** column on the detail view reflects each row's origin, so you can 
 <Note>
   Turning a Playground session into a scenario row is a Playground task, not a Scenarios one — this page only notes that it happens (origin `simulated` or `generated`). For the step-by-step capture flow, see [Simulate with scenarios](/how-to/simulate-with-scenarios).
 </Note>
+
+### Curating sessions into a scenario set
+
+The richest `uploaded` path starts in [Sessions](/concepts/sessions). You could imagine running Evaluators directly against all Sessions, but that breaks down quickly: the Sessions list changes every minute as new ones get ingested, comparing results across runs is meaningless if the input set keeps shifting, and you want to evaluate against the hard cases specifically — not the firehose. Some test cases never come from real Sessions at all. A scenario set is the **stable, curated, deliberately-selected test bed** — think of it like an integration test suite for agent behavior.
+
+The common flow: annotate Sessions, filter the Sessions list down to the ones worth testing against, and bulk-add them to a scenario set — either from the list itself or by asking the [Trust Agent](/concepts/trust-agent) to curate for you ("add the failing refund sessions to my regression set"). The human judgment travels with each row as reference annotations, and the row lands with an `uploaded` origin.
+{/* ACCURACY-AUDIT-PENDING: sessions can be bulk-added to a scenario set from the Sessions list and via the Trust Agent, and session-curated rows land with an uploaded origin — verify the bulk-add affordance and the resulting Source value on the release tag */}
+
+### CSV import and export
+
+The other `uploaded` path is a spreadsheet. Drop in a CSV with columns that map to input, reference output, and tags — useful for migrating existing test suites from spreadsheets or other tools. The same toolbar takes rows back out: select rows (or the whole set) and export to CSV for offline analysis or sharing.
+{/* ACCURACY-AUDIT-PENDING: CSV upload maps columns to input / reference output / tags, and CSV export is available from the bulk actions toolbar — pre-rename behaviors; verify both survived the Scenarios rename on the release tag */}
 
 ### The generate-from-scratch wizard
 
@@ -125,11 +143,23 @@ The **Generate scenarios from scratch** wizard builds a whole scenario set from 
 
 ## Snapshots and reproducibility
 
-Scenario sets inherit the Dataset reproducibility guarantee unchanged: rows are **snapshots, not deep-links**. Adding a row captures its content into the set rather than holding a pointer to a source Session, so editing a row never mutates the original and a re-annotated Session never silently changes a historical test case.
+Scenario-set rows are **snapshots, not deep-links**. Adding a Session to a set captures its content into the row rather than holding a pointer to the original, which buys three guarantees:
 
-Combined with versioning — every edit is a new revision, and an Evaluation pins to a specific revision — that is what keeps results comparable over time. An Evaluation you ran two months ago re-runs today against the same rows.
+- **Edits upstream don't change historical results.** If a Session is re-ingested or its Annotation changes, prior Evaluations are unaffected — the row is what was scored.
+- **Sets stay reproducible across time.** An Evaluation from two months ago can be re-run with confidence today.
+- **You can edit a row** without affecting the source Session — useful for prompt tweaks specific to a test case.
 
-(For the full architectural rationale, see ADR 0004 "Snapshot dataset rows, not deep-links" in the trust-ai-app repo, and the [Datasets](/concepts/datasets) page this surface supersedes.)
+The cost: a scenario set and its source Sessions can diverge. If a Session is corrected upstream, the set doesn't auto-update — that's a deliberate curation choice ("does this test case still represent what I want to test?").
+
+Versioning completes the guarantee. Every edit to a set is a new revision, and Evaluations always pin to a specific revision, so:
+
+- An Evaluation run yesterday is reproducible today (same revision → same input rows)
+- You can compare the same Agent Version across two revisions of a set — useful when you've expanded the set and want to know if the new rows surface anything
+- You can compare two Agent Versions across the same revision — the **core regression-tracking workflow**
+
+The combination — rows are snapshots, sets are versioned, Evaluations pin to a version — is what makes Trust AI evaluations trustworthy as a regression signal.
+
+(For the full architectural rationale, see ADR 0004 in the trust-ai-app repo.)
 {/* ACCURACY-AUDIT-PENDING: scenario-set rows hold snapshotted content (editing a row does not mutate a source Session) and Evaluations pin to a revision — inherited datasets-domain property per ADR 0004; verify indirectly by editing a row and confirming the source is untouched on the release tag */}
 
 ## Simulation at evaluation time
@@ -163,6 +193,11 @@ The Scenarios surface is the curation home in a Project — the list of scenario
   <Tab title="Persona &amp; Goal columns">
     The detail view's row table renders a **Persona** column, a **Goal** column, and a **Source** column alongside the row content. Click a row for the fly-in with its **Personas and Goals** tab.
   </Tab>
+  <Tab title="Working with rows">
+    Select one or more rows to reveal the **bulk actions toolbar** — CSV export, CSV upload, and row removal. Annotations are editable inline on rows (toggle pass/fail, pick a 1–5 score, apply tags) without a round-trip to Sessions. You can also filter rows by tag, source, annotation status, or content; bulk-tag subsets ("regression," "smoke-test"); configure which columns the table shows; and duplicate a set to experiment with variants without touching the original. The detail header's aggregate stats (row count, annotation coverage) update in real time as rows are added or removed.
+    {/* ACCURACY-AUDIT-PENDING: bulk actions toolbar (CSV export / CSV upload / remove rows), inline annotation editing, row filtering, bulk tagging, column configuration, set duplication, and live header stats — pre-rename behaviors; verify each survived the Scenarios rename, plus the exact toolbar button labels, on the release tag */}
+    {/* CAPTURE-PENDING: scenarios-detail-rows.png — scenario-set detail with annotation columns, inline pass/fail editing, and the bulk actions toolbar (replaces the retired pre-rename capture datasets-detail-view.png) */}
+  </Tab>
   <Tab title="Personas">
     The **Manage Personas** modal — opened from the **Persona** cell's **Manage personas** popover footer — lists personas with usage counts and a single protected default, and the **Persona editor** lets you edit one in place.
   </Tab>
@@ -171,9 +206,11 @@ The Scenarios surface is the curation home in a Project — the list of scenario
   </Tab>
 </Tabs>
 
+Everything above — creating a set, curating rows, importing and exporting CSV, duplicating — you can also drive by asking the [Trust Agent](/concepts/trust-agent), which pauses for your approval before any write.
+
 ## API surface
 
-Scenario sets are served by the `/v1/datasets` endpoint family — the name is UI-layer only, so the API keeps the `datasets` vocabulary. There is no `/v1/scenarios` endpoint. The persona-and-goal additions surface as fields on the existing dataset shapes: a row's `origin` (`uploaded` / `generated` / `simulated`), a set's `simulatable_row_count`, and an evaluation run's `simulate_at_eval_time` flag.
+The rename is UI-layer only: scenario sets are served by the same endpoint family as before, under the pre-rename route names spelled out in the note at the top of this page — and **there is no scenarios endpoint**. The persona-and-goal additions surface as fields on the existing wire shapes: a row's `origin` (`uploaded` / `generated` / `simulated`), a set's `simulatable_row_count`, and an evaluation run's `simulate_at_eval_time` flag. The earlier `v2026.05.19` additions — duplicate, CSV export, and the tag vocabulary — live in the same family.
 
 Full request/response shapes live in the [API Reference](/api-reference).
 
@@ -185,9 +222,12 @@ Full request/response shapes live in the [API Reference](/api-reference).
 
 ## Related concepts
 
-- **[Datasets](/concepts/datasets)** — the concept Scenarios supersedes; the route, data model, and API stay `datasets`
+- **[Sessions](/concepts/sessions)** — the most common source of curated scenario rows
+- **[Annotations](/concepts/annotations)** — the human judgment that travels with curated rows
 - **[Playground](/concepts/playground)** — the chat-and-simulate surface where persona runs become `simulated` scenario rows
+- **[Evaluators](/concepts/evaluators)** — what scores scenario rows
 - **[Evaluations](/concepts/evaluations)** — the runs that score an Agent Version against a scenario set, with optional eval-time simulation
+- **[The evaluation loop](/concepts/evaluation-loop)** — the workflow scenario curation is a step in
 - **[Agent Versions](/concepts/agent-versions)** — the agent under test you score against a scenario set; *not* this surface
 - **[Trust Agent](/concepts/trust-agent)** — the in-app assistant that helps you build and run sets; *not* this surface and *not* an Agent Version
 - **[Projects](/concepts/projects)** — the workspace boundary a scenario set belongs to

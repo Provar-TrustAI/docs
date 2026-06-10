@@ -1,19 +1,19 @@
 ---
 title: "Evaluations"
 icon: "chart-line"
-description: "Single runs of Evaluators across a Dataset, scoped to a specific Agent Version. Where regressions get caught."
+description: "Single runs of Evaluators across a Scenario set, scoped to a specific Agent Version. Where regressions get caught."
 ---
 
-An Evaluation is a single run: take one or more [Evaluators](/concepts/evaluators), apply them to every row of a [Dataset](/concepts/datasets), against a specific [Agent Version](/concepts/agent-versions). The output is a scored, reviewable record per row — pass/fail or rubric score, alongside the reasoning the Evaluator captured.
+An Evaluation is a single run: take one or more [Evaluators](/concepts/evaluators), apply them to every scenario in a [Scenario set](/concepts/scenarios), against a specific [Agent Version](/concepts/agent-versions). The output is a scored, reviewable record per row — pass/fail or rubric score, alongside the reasoning the Evaluator captured.
 
-An Evaluation is **the artifact regressions get caught in**. It's also the artifact every other Trust AI surface ultimately serves: Sessions exist to feed Datasets, Annotations exist to calibrate Evaluators, Datasets and Evaluators exist to produce Evaluations.
+An Evaluation is **the artifact regressions get caught in**. It's also the artifact every other Trust AI surface ultimately serves: Sessions exist to feed Scenario sets, Annotations exist to calibrate Evaluators, Scenario sets and Evaluators exist to produce Evaluations.
 
 ## The run lifecycle
 
 Every Evaluation moves through four states:
 
-1. **Configured** — you've picked the Dataset, the Evaluator(s), and the Agent Version. Nothing's running yet.
-2. **In progress** — Trust AI is sending each Dataset row to the live agent (via the [Project's runtime connection](/concepts/projects)), collecting structured responses, scoring them with the Evaluators. Long-running; the app surfaces progress as rows complete.
+1. **Configured** — you've picked the Scenario set, the Evaluator(s), and the Agent Version. Nothing's running yet.
+2. **In progress** — Trust AI is sending each scenario to the live agent (via the [Project's runtime connection](/concepts/projects)), collecting structured responses, scoring them with the Evaluators. Long-running; the app surfaces progress as rows complete.
 3. **Complete** — every row has an Evaluator result. Aggregate stats are available (pass rate, score distribution, common failure patterns).
 4. **Compared** *(optional)* — paired with a prior Evaluation against a different Agent Version. The results matrix highlights per-row deltas (regressions, improvements, unchanged) so you can see exactly which rows moved.
 
@@ -23,28 +23,28 @@ The lifecycle is observable. You can open an in-progress Evaluation and watch ro
 
 The Evaluations surface in Trust AI maps directly to the lifecycle above:
 
-- **Evaluation run list** — a table showing all runs in the Project with columns for status, dataset, pass rate, evaluator accuracy, and triggered-by (manual or CI).
-- **New Run flow** — click **New Run** to open the creation flow: pick a dataset, multi-select evaluators, and choose an agent version. The run enters the *Configured* state and starts immediately.
-- **Run Detail** — click any run to open the results matrix. Each row is a dataset entry; each column is an evaluator. Cells display verdict chips (pass, fail, or a rubric score).
-- **Result fly-in** — click any verdict chip to open a fly-in panel with the full evaluation card: score, reasoning narrative, and reference comparison (when the dataset row has a reference output).
+- **Evaluation run list** — a table showing all runs in the Project with columns for status, scenario set, pass rate, evaluator accuracy, and triggered-by (manual or CI).
+- **New Run flow** — click **New Run** to open the creation flow: pick a scenario set, multi-select evaluators, and choose an agent version. The run enters the *Configured* state and starts immediately.
+- **Run Detail** — click any run to open the results matrix. Each row is a scenario; each column is an evaluator. Cells display verdict chips (pass, fail, or a rubric score).
+- **Result fly-in** — click any verdict chip to open a fly-in panel with the full evaluation card: score, reasoning narrative, and reference comparison (when the scenario has a reference output).
 - **CSV export** — from the Run Detail toolbar, export the full results matrix as CSV for offline analysis or sharing.
 - **Run renaming** — relabel a finished run from the Run Detail header to tag it as a baseline, regression, or experiment variant.
 
 ## What's in an Evaluation result
 
-Per Dataset row, an Evaluation captures:
+Per scenario, an Evaluation captures:
 
-- **The input** sent to the agent (from the Dataset row)
+- **The input** sent to the agent (from the scenario)
 - **The agent's full response** — what it said back, including tool calls and intermediate steps. This **is itself a Session** — see "Evaluation results are Sessions, too" below.
 - **Per-Evaluator scores** — one per Evaluator applied to this run
 - **Reasoning** — for LLM Judges, the rubric reasoning that led to the score. For Structured Match, the assertion that fired (or didn't).
-- **Reference comparison** *(optional)* — if the Dataset row has a reference output, the delta between expected and actual
+- **Reference comparison** *(optional)* — if the scenario has a reference output, the delta between expected and actual
 
 At the Evaluation level:
 
 - Aggregate pass/fail rate, score distribution, latency stats
 - Failure categories (rows that failed Evaluator A but not Evaluator B, etc.)
-- Comparison to prior Evaluations against the same Dataset
+- Comparison to prior Evaluations against the same Scenario set
 
 ## Evaluation results are Sessions, too
 
@@ -53,7 +53,7 @@ A subtle but important pattern (ADR 0006 in the trust-ai-app repo): **the agent 
 This is what unlocks:
 
 - **Re-evaluating an Evaluation's outputs with a different Evaluator** without re-running against the live agent
-- **Curating the "evaluation Sessions" into a Dataset of their own** for higher-resolution regression testing
+- **Curating the "evaluation Sessions" into a Scenario set of their own** for higher-resolution regression testing
 - **Treating Evaluation outputs as just another agent invocation** for downstream tooling — no special-case API surface
 
 The trade: Sessions get noisier (you'll see both production and evaluation Sessions in lists). Tags + filters handle this; the structural simplicity is worth more than the namespace cost.
@@ -62,7 +62,7 @@ The trade: Sessions get noisier (you'll see both production and evaluation Sessi
 
 The headline workflow Trust AI exists for. The pattern:
 
-1. Pick the **same Dataset** and **same Evaluators**.
+1. Pick the **same Scenario set** and **same Evaluators**.
 2. Pick **Agent Version A** (e.g., production) and **Agent Version B** (e.g., a candidate replacement).
 3. Run an Evaluation against each.
 4. Open the comparison view.
@@ -87,13 +87,13 @@ Common failure patterns and what they usually mean:
 
 ## Working with Evaluations
 
-You drive Evaluations from the Trust AI app, or by asking the Trust Agent. Kick off a new run by clicking **New Run** (pick a Dataset, Evaluators, and Agent Version), or by telling the Trust Agent to evaluate a Dataset against an Agent Version. Open a run from the run list to watch progress, read per-row results, compare it to a prior run, cancel an in-progress run, or rename a finished one — all from the Run Detail surface. The Trust Agent can also pull aggregate stats (pass-rate trends, latency) and slice results by cohort for you.
+You drive Evaluations from the Trust AI app, or by asking the Trust Agent. Kick off a new run by clicking **New Run** (pick a Scenario set, Evaluators, and Agent Version), or by telling the Trust Agent to evaluate a Scenario set against an Agent Version. Open a run from the run list to watch progress, read per-row results, compare it to a prior run, cancel an in-progress run, or rename a finished one — all from the Run Detail surface. The Trust Agent can also pull aggregate stats (pass-rate trends, latency) and slice results by cohort for you.
 
 Developers who want the underlying endpoints and request/response shapes can find them in the [API Reference](/api-reference).
 
 ## Related concepts
 
-- **[Datasets](/concepts/datasets)** — the test bed an Evaluation runs against
+- **[Scenarios](/concepts/scenarios)** — the Scenario set an Evaluation runs against
 - **[Evaluators](/concepts/evaluators)** — the judgment functions applied to each row
 - **[Agent Versions](/concepts/agent-versions)** — what's under test
 - **[Sessions](/concepts/sessions)** — what Evaluation outputs are (structurally)

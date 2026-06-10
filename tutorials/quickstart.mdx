@@ -1,10 +1,10 @@
 ---
 title: "Your first 10 minutes in Trust AI"
 icon: "rocket"
-description: "Project creation through your first curated Dataset, end to end."
+description: "Project creation through your first curated Scenario set, end to end."
 ---
 
-This tutorial walks you from a brand-new Trust AI account to a curated [Dataset](/concepts/datasets) ready for evaluation, in roughly ten minutes. It assumes the **SI Consultant** persona: setting up Trust AI for a customer agent for the first time. The shape is the same for an Agent Owner adding a new agent to an existing workspace.
+This tutorial walks you from a brand-new Trust AI account to a curated [Scenario set](/concepts/scenarios) ready for evaluation, in roughly ten minutes. It assumes the **SI Consultant** persona: setting up Trust AI for a customer agent for the first time. The shape is the same for an Agent Owner adding a new agent to an existing workspace.
 
 Most of these steps you'll drive by asking the [Trust Agent](/concepts/trust-agent) — the in-app assistant — in plain language, then watching the results land in the UI. Where you'd rather do something by hand, the manual UI path is right there too.
 
@@ -13,7 +13,7 @@ By the end you'll have:
 - A [Project](/concepts/projects) wired to a deployed agent
 - One ingested [Session](/concepts/sessions) you can read end-to-end
 - An [Annotation](/concepts/annotations) on a single Turn
-- A starter Dataset with one curated row
+- A starter Scenario set with one curated scenario
 
 That's the smallest complete pass through the first three steps of [the evaluation loop](/concepts/evaluation-loop). Once it works once, the rest of Trust AI is "do this same thing at scale."
 
@@ -39,7 +39,7 @@ If your agent isn't on AgentCore yet, you can still walk this tutorial using a *
 
     Creating a Project is the one setup step you do before the Trust Agent comes into play — the agent lives *inside* a Project, so you need one first. Click **+ New Project** in the top bar, name it after the agent under evaluation (e.g., "Acme Support Agent"), pick the org it belongs to, and click **Create**.
 
-    **You should see:** the Project's empty home view, with five empty surfaces (Sessions, Annotations, Datasets, Evaluators, Evaluations) and a banner prompting you to connect a runtime.
+    **You should see:** the Project's empty home view, with five empty surfaces (Sessions, Annotations, Scenarios, Evaluators, Evaluations) and a banner prompting you to connect a runtime.
   </Step>
 
   <Step title="Connect an agent runtime">
@@ -91,22 +91,22 @@ If your agent isn't on AgentCore yet, you can still walk this tutorial using a *
     **You should see:** the Annotation appear in the Session's side panel, time-stamped, attributed to you. The Sessions list now shows this row as **Annotated**.
   </Step>
 
-  <Step title="Curate your first Dataset">
-    Now turn that one annotated Session into the first row of a curated [Dataset](/concepts/datasets).
+  <Step title="Curate your first Scenario set">
+    Now turn that one annotated Session into the first scenario in a curated [Scenario set](/concepts/scenarios).
 
     <Note>
-      *Ask the Trust Agent:* "Create a new dataset called 'Order-status happy path' and add that annotated session to it as the first row."
+      *Ask the Trust Agent:* "Create a new scenario set called 'Order-status happy path' and add that annotated session to it as the first scenario."
     </Note>
 
-    The agent drafts the new Dataset and the row, then pauses for your approval before it writes either — confirm, and both land. Or do it by hand: from the Sessions list, click the **+ Add to Dataset** action on your annotated Session, choose **+ New Dataset**, name it (e.g., "Order-status happy path"), and confirm.
+    The agent drafts the new Scenario set and the scenario, then pauses for your approval before it writes either — confirm, and both land. Or do it by hand: from the Sessions list, use the add-to-scenario-set action on your annotated Session and create a new set — it starts as "Untitled scenario set"; rename it (e.g., "Order-status happy path") and confirm.
 
-    **You should see:** the Datasets list now has one entry with one row. Open it — the row carries the Session's input, the agent's full response, and the Annotation you applied.
+    **You should see:** the Scenarios surface now has one Scenario set with one scenario. Open it — the scenario carries the Session's input, the agent's full response, and the Annotation you applied.
   </Step>
 </Steps>
 
 ## You're done with the first half of the loop
 
-You've done the first three steps of [the evaluation loop](/concepts/evaluation-loop) — ingest, annotate, curate. The next three are **define an Evaluator**, **run an Evaluation**, and **compare Agent Versions**. The Dataset you just curated is the test bed they all run against. You can continue click by click with the next two tutorials, or let the Trust Agent drive the rest of the loop by conversation in [Evaluate with the Trust Agent](/tutorials/evaluate-with-the-trust-agent).
+You've done the first three steps of [the evaluation loop](/concepts/evaluation-loop) — ingest, annotate, curate. The next three are **define an Evaluator**, **run an Evaluation**, and **compare Agent Versions**. The Scenario set you just curated is the test bed they all run against. You can continue click by click with the next two tutorials, or let the Trust Agent drive the rest of the loop by conversation in [Evaluate with the Trust Agent](/tutorials/evaluate-with-the-trust-agent).
 
 ## What's next
 
@@ -118,7 +118,7 @@ You've done the first three steps of [the evaluation loop](/concepts/evaluation-
     Author an LLM Judge or Structured Match Evaluator and calibrate it against the Annotation you just applied.
   </Card>
   <Card title="Run your first Evaluation" icon="chart-line" href="/tutorials/run-first-evaluation">
-    Apply your Evaluator across the Dataset, against the current Agent Version. The first scored result.
+    Apply your Evaluator across the Scenario set, against the current Agent Version. The first scored result.
   </Card>
   <Card title="Read the conceptual model" icon="book-open" href="/concepts/overview">
     The nouns and verbs Trust AI is built around, in one place. Worth ten minutes if anything in this tutorial felt under-explained.

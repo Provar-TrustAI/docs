@@ -10,27 +10,29 @@ The vocabulary of Trust AI. Icons match the Trust AI app's navigation, so the co
 
 <CardGroup cols={2}>
   <Card title="Project" icon="sliders-horizontal" href="/concepts/projects">
-    The top-level workspace container. Owns members, runtime connection config (AgentCore, Salesforce Agentforce, and similar), and every Session, Dataset, Evaluator, Evaluation, and Agent Version under it.
+    The top-level workspace container. Owns members, runtime connection config (AgentCore, Salesforce Agentforce, and similar), and every Session, Scenario set, Evaluator, Evaluation, and Agent Version under it.
   </Card>
   <Card title="Session" icon="message-square" href="/concepts/sessions">
-    One real interaction between a user and an agent — a sequence of Turns and Tool Calls captured from production or staging. The raw material every downstream Dataset and Evaluation builds on.
+    One real interaction between a user and an agent — a sequence of Turns and Tool Calls captured from production or staging. The raw material every downstream Scenario set and Evaluation builds on.
   </Card>
   <Card title="Annotation" icon="tag" href="/concepts/annotations">
     A human-authored signal attached to a Turn or Session — a pass/fail label, rubric score, or freeform note. Encodes reviewer judgment into data that Evaluators can be calibrated against.
   </Card>
-  <Card title="Dataset" icon="database" href="/concepts/datasets">
-    A curated, versioned collection of Sessions or Turns chosen as a representative test bed. Rows come from ingested Sessions, manual entries, or CSV uploads. The stable substrate every Evaluation runs against.
+  <Card title="Scenario set" icon="users-round" href="/concepts/scenarios">
+    A curated, versioned collection of **scenarios** — persona-and-goal test cases. Rows are curated from ingested Sessions, added manually, uploaded via CSV, generated, or captured from simulation runs; a scenario carrying both a persona and a goal is simulatable. The stable substrate every Evaluation runs against. Only the API keeps the pre-rename names — see the API note on the [Scenarios](/concepts/scenarios) concept page for the exact mapping.
   </Card>
   <Card title="Evaluator" icon="wand-sparkles" href="/concepts/evaluators">
     A reusable judgment function — LLM Judge (plain-English criteria sent to Claude or GPT) or Structured Match (deterministic checks on agent output metadata) — that scores a Turn or Session against criteria.
   </Card>
   <Card title="Evaluation" icon="chart-line" href="/concepts/evaluations">
-    A single run of one or more Evaluators across a Dataset, scoped to a specific Agent Version. The output is a scored, comparable, reviewable record per Dataset row.
+    A single run of one or more Evaluators across a Scenario set, scoped to a specific Agent Version. The output is a scored, comparable, reviewable record per scenario.
   </Card>
   <Card title="Agent Version" icon="git-branch" href="/concepts/agent-versions">
-    A pinned, immutable snapshot of the agent **under test** — prompt, model, tool set, deployment. Comparing two Agent Versions on the same Dataset under the same Evaluators is the core regression-testing loop. Not to be confused with the [Trust Agent](#the-trust-agent), which is your assistant inside Trust AI.
+    A pinned, immutable snapshot of the agent **under test** — prompt, model, tool set, deployment. Comparing two Agent Versions on the same Scenario set under the same Evaluators is the core regression-testing loop. Not to be confused with the [Trust Agent](#the-trust-agent), which is your assistant inside Trust AI.
   </Card>
 </CardGroup>
+
+{/* ACCURACY-AUDIT-PENDING: the Scenario set card uses the users-round icon (the nav icon was database when the surface was named Datasets) — verify the Scenarios nav icon on the release tag */}
 
 ## Session internals
 
@@ -48,7 +50,7 @@ The vocabulary of Trust AI. Icons match the Trust AI app's navigation, so the co
 The in-app assistant that does evaluation work alongside you. Everything in this section is the **Trust Agent** — your assistant inside Trust AI. It is *not* an [Agent Version](#core-entities), which is the customer's agent under test. The two share the word "agent" and nothing else.
 
 <Note>
-  **Trust Agent vs Agent Version.** The **Trust Agent** is the assistant that operates *on* your project — it finds Sessions, builds Datasets, and runs Evaluations for you. An **[Agent Version](/concepts/agent-versions)** is the agent *under test* — a pinned snapshot every Evaluation is scoped to. The Trust Agent helps you evaluate Agent Versions; it is never itself "a version."
+  **Trust Agent vs Agent Version.** The **Trust Agent** is the assistant that operates *on* your project — it finds Sessions, builds Scenario sets, and runs Evaluations for you. An **[Agent Version](/concepts/agent-versions)** is the agent *under test* — a pinned snapshot every Evaluation is scoped to. The Trust Agent helps you evaluate Agent Versions; it is never itself "a version."
 </Note>
 
 <CardGroup cols={2}>
@@ -80,21 +82,20 @@ The in-app assistant that does evaluation work alongside you. Everything in this
 
 ## Scenarios and simulation
 
+A **scenario** — one persona-and-goal test case — and the **Scenario set** that collects them are defined under [Core entities](#core-entities). The supporting terms live here.
+
 <CardGroup cols={2}>
-  <Card title="Scenario" icon="users-round" href="/concepts/scenarios">
-    A persona-and-goal test case for exercising an agent. **Scenarios** is the UI label for the surface the former **Datasets** list converged to — same route `/projects/:id/datasets`, same `/v1/datasets` API, now with **Persona** and **Goal** columns. There is no separate scenarios endpoint; a Scenario is a Dataset row with a persona and a goal.
-  </Card>
   <Card title="Persona" icon="circle-user-round" href="/concepts/scenarios">
     A reusable synthetic-user profile that role-plays the user side of a scenario or simulation. Personas are managed in a **Manage Personas** modal; at most one persona per project can be the default, and the list shows each persona's usage count.
   </Card>
   <Card title="Goal" icon="target" href="/concepts/scenarios">
-    The objective the synthetic user (the persona) is trying to accomplish in a scenario or simulation. Paired with a persona, a non-empty goal is what makes a scenario row **simulatable** — both are required.
+    The objective the synthetic user (the persona) is trying to accomplish in a scenario or simulation. Paired with a persona, a non-empty goal is what makes a scenario **simulatable** — both are required.
   </Card>
   <Card title="Playground" icon="flask-conical" href="/concepts/playground">
     A per-project surface at `/projects/:id/playground` for chatting with and simulating against a connected agent. An agent picker and a **Chat / Simulate** mode toggle: **Chat** is live manual conversation; **Simulate** auto-drives a persona-to-agent conversation from one persona and one goal.
   </Card>
   <Card title="Simulation" icon="bot-message-square" href="/concepts/playground">
-    An automated persona-to-agent conversation. The same primitive powers the Playground's **Simulate** mode and **Simulate at eval time**, where the evaluation worker drives a fresh persona-and-goal conversation per simulatable scenario row instead of replaying stored input turns. The captured transcript renders in the [evaluation](/concepts/evaluations) result detail fly-in.
+    An automated persona-to-agent conversation. The same primitive powers the Playground's **Simulate** mode and **Simulate at eval time**, where the evaluation worker drives a fresh persona-and-goal conversation per simulatable scenario instead of replaying stored input turns. The captured transcript renders in the [evaluation](/concepts/evaluations) result detail fly-in.
   </Card>
 </CardGroup>
 
@@ -113,13 +114,13 @@ The in-app assistant that does evaluation work alongside you. Everything in this
     A named, persisted combination of filters, sort order, and column configuration for a list surface. Views can be saved per user and shared with the team.
   </Card>
   <Card title="Fly-in panel" icon="panel-right">
-    A slide-out detail panel that opens from the right when you click a row in Sessions, Datasets, or Evaluations. Shows the full transcript, metadata, and contextual actions without leaving the list.
+    A slide-out detail panel that opens from the right when you click a row in Sessions, Scenarios, or Evaluations. Shows the full transcript, metadata, and contextual actions without leaving the list.
   </Card>
   <Card title="Verdict chip" icon="badge-check">
-    A color-coded pass/fail or score badge on the Evaluation results matrix. Each evaluator applied to a dataset row produces one verdict chip. Green = pass, red = fail, numeric = rubric score.
+    A color-coded pass/fail or score badge on the Evaluation results matrix. Each evaluator applied to a scenario produces one verdict chip. Green = pass, red = fail, numeric = rubric score.
   </Card>
   <Card title="Results matrix" icon="grid-3x3">
-    The grid view on the Evaluation Run Detail page. Rows are dataset entries, columns are evaluators. Each cell is a verdict chip. The matrix is the at-a-glance view of how an agent version performed.
+    The grid view on the Evaluation Run Detail page. Rows are scenarios, columns are evaluators. Each cell is a verdict chip. The matrix is the at-a-glance view of how an agent version performed.
   </Card>
 </CardGroup>
 

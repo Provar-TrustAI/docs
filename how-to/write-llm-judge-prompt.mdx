@@ -8,7 +8,7 @@ This is the **deep how-to** on authoring LLM Judge rubrics. If you just want to 
 
 - Calibrates to ~90%+ agreement with a careful human reviewer
 - Stays stable when you re-run it next month
-- Doesn't drift across Dataset rows that should score the same
+- Doesn't drift across scenarios that should score the same
 
 Authoring LLM Judges is a craft. The patterns below come from teams that have iterated on dozens of rubrics; they save real time when you internalize them.
 
@@ -104,7 +104,7 @@ The role is specific (customer-support, order-status), the task is bounded (appl
 Authoring is half the work. The other half is calibrating against [Annotations](/concepts/annotations):
 
 1. **Write the draft rubric.**
-2. **Pick 10-20 annotated rows** from a [Dataset](/concepts/datasets), spanning both passes and fails (don't only pick the easy cases).
+2. **Pick 10-20 annotated rows** from a [Scenario set](/concepts/scenarios), spanning both passes and fails (don't only pick the easy cases).
 3. **Run the Evaluator against them** in the calibration panel.
 4. **Inspect every disagreement.** The disagreements are the data — they tell you exactly where the rubric is wrong.
 5. **Refine the rubric.** Tighten an over-lenient clause, loosen an over-strict one, fix a leading phrase in the system prompt.

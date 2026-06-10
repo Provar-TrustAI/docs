@@ -12,7 +12,7 @@ The Playground is a per-project surface at `/projects/:id/playground`. It is pro
 <Note>
   **The Playground is not the Trust Agent.** They are two different chats, on two different routes:
 
-  - The **[Trust Agent](/concepts/trust-agent)** is *your* in-app assistant at `/projects/:id/agent` — it does evaluation work for you (finds sessions, builds datasets, runs evaluations) and stops for your approval before it writes.
+  - The **[Trust Agent](/concepts/trust-agent)** is *your* in-app assistant at `/projects/:id/agent` — it does evaluation work for you (finds sessions, builds scenario sets, runs evaluations) and stops for your approval before it writes.
   - The **Playground** (this page) at `/projects/:id/playground` is where you chat with and simulate against the *agent under test* — the customer's [Agent Version](/concepts/agent-versions) you are judging.
 
   They do not share a thread. When this page says "the agent," it means the connected agent under test, not the Trust Agent.

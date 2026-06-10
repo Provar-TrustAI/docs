@@ -4,7 +4,7 @@ icon: "sparkles"
 description: "The in-app assistant for evaluation work. It streams its reasoning, renders tool results as clickable records, and pauses for approval before any write."
 ---
 
-The Trust Agent is the in-app assistant that helps you do evaluation work inside a [Project](/concepts/projects). You ask it to find sessions, build a dataset, draft an evaluator, run an evaluation, or analyze a regression — and it works in the open: streaming its reasoning, surfacing real records you can click into, planning before it acts, and pausing for your approval before it changes anything.
+The Trust Agent is the in-app assistant that helps you do evaluation work inside a [Project](/concepts/projects). You ask it to find sessions, build a scenario set, draft an evaluator, run an evaluation, or analyze a regression — and it works in the open: streaming its reasoning, surfacing real records you can click into, planning before it acts, and pausing for your approval before it changes anything.
 
 It lives at `/projects/:id/agent` and is the default, flag-free experience on every project. The legacy agent implementation is gone — there is no `?v2`, `?agui`, or `?legacy` flag to opt into; the Trust Agent you see is the only one there is.
 {/* ACCURACY-AUDIT-PENDING: the Trust Agent renders by default at /projects/:id/agent and the ?v2 / ?agui / ?legacy flags are inert/removed — verify by driving the route on the release tag */}

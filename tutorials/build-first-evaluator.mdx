@@ -18,23 +18,23 @@ You should have, from [the quickstart](/tutorials/quickstart):
 
 - A [Project](/concepts/projects) with a connected runtime (or demo data)
 - At least one Session with an [Annotation](/concepts/annotations) on a Turn — ideally a pass/fail with a short freeform note explaining why
-- A starter [Dataset](/concepts/datasets) with that annotated Session as a row
+- A starter [Scenario set](/concepts/scenarios) with that annotated Session curated as a scenario
 
 If you skipped any of that, go back — calibration only works against real Annotations.
 
 ## The five steps
 
 <Steps>
-  <Step title="Pick a Dataset to anchor the Evaluator">
+  <Step title="Pick a Scenario set to anchor the Evaluator">
     <Note>
-      *Ask the Trust Agent:* "Open the Dataset I made in the quickstart — the order-status happy path one."
+      *Ask the Trust Agent:* "Open the scenario set I made in the quickstart — the order-status happy path one."
     </Note>
 
-    You'll see the Dataset detail view with at least one row; or do it by hand: open your Project, navigate to **Datasets**, and click the Dataset you created in the quickstart ("Order-status happy path" or similar).
+    You'll see the Scenario set detail view with at least one scenario; or do it by hand: open your Project, navigate to **Scenarios**, and click the Scenario set you created in the quickstart ("Order-status happy path" or similar).
 
-    The rows in this Dataset are what your Evaluator will be calibrated against. You don't need many — even one well-annotated row is enough to write a draft rubric. Three to five is the sweet spot for first-pass calibration; you can grow the set later.
+    The scenarios in this set are what your Evaluator will be calibrated against. You don't need many — even one well-annotated scenario is enough to write a draft rubric. Three to five is the sweet spot for first-pass calibration; you can grow the set later.
 
-    **You should see:** the Dataset detail view with at least one row, the row showing the original Session content + your Annotation.
+    **You should see:** the Scenario set detail view with at least one scenario, the scenario showing the original Session content + your Annotation.
   </Step>
 
   <Step title="Open the Evaluator builder">
@@ -48,9 +48,9 @@ If you skipped any of that, go back — calibration only works against real Anno
 
     - **Rubric editor** — system prompt, criteria, and output format
     - **Score type** — pass/fail (binary) or 1–5 scale. Start with pass/fail; it's the easiest to calibrate.
-    - **Calibration** — pick a Dataset and see live agreement with Annotations as you edit the rubric
+    - **Calibration** — pick a Scenario set and see live agreement with Annotations as you edit the rubric
 
-    **You should see:** the rubric editor with placeholder text, and a dataset selector for calibration.
+    **You should see:** the rubric editor with placeholder text, and a scenario-set selector for calibration.
   </Step>
 
   <Step title="Write a plain-English rubric">
@@ -95,24 +95,24 @@ If you skipped any of that, go back — calibration only works against real Anno
 
   <Step title="Calibrate against your Annotations">
     <Note>
-      *Ask the Trust Agent:* "Calibrate this rubric against my order-status dataset and show me where it disagrees with my annotations."
+      *Ask the Trust Agent:* "Calibrate this rubric against my order-status scenario set and show me where it disagrees with my annotations."
     </Note>
 
-    Or do it by hand: in the calibration panel on the right, pick the Dataset from step 1. The Evaluator runs against every row in the Dataset and shows you, per row:
+    Or do it by hand: in the calibration panel on the right, pick the Scenario set from step 1. The Evaluator runs against every scenario in the set and shows you, per scenario:
 
     - The Evaluator's score (pass/fail) + the reasoning it captured
-    - The human Annotation on that row
+    - The human Annotation on that scenario
     - Whether they agree
 
-    **You should see:** an agreement rate at the top (e.g., `4 / 5 rows agree — 80%`), and per-row detail below.
+    **You should see:** an agreement rate at the top (e.g., 4 of 5 scenarios agreeing — 80%), and per-scenario detail below.
 
-    Look at the rows where they **disagree** — that's where calibration happens. Common patterns:
+    Look at the scenarios where they **disagree** — that's where calibration happens. Common patterns:
 
-    - The Evaluator passed a row a human failed → rubric is too lenient. Add a tightening clause.
-    - The Evaluator failed a row a human passed → rubric is too strict. Loosen or remove an over-specified clause.
+    - The Evaluator passed a scenario a human failed → rubric is too lenient. Add a tightening clause.
+    - The Evaluator failed a scenario a human passed → rubric is too strict. Loosen or remove an over-specified clause.
     - Both pass or both fail with different reasoning → calibration is roughly aligned; you can move on or refine further.
 
-    Edit the rubric, click **Re-calibrate**, and watch the agreement rate move. **The goal is ~90% agreement** for a binary rubric on a small set. Don't chase 100% — perfect agreement on a small Dataset often means you've over-fit the rubric to the specific rows.
+    Edit the rubric, click **Re-calibrate**, and watch the agreement rate move. **The goal is ~90% agreement** for a binary rubric on a small set. Don't chase 100% — perfect agreement on a small set often means you've over-fit the rubric to the specific scenarios.
 
     Iterate. This is the work.
   </Step>
@@ -124,7 +124,7 @@ If you skipped any of that, go back — calibration only works against real Anno
 
     Or do it by hand: once agreement is high, click **Save Evaluator**, give it a name (e.g., "Order status — three-part rubric"), an optional description, and confirm.
 
-    The Evaluator is now in your Project's Evaluator library. Any future [Evaluation](/concepts/evaluations) — against any Dataset, against any Agent Version — can apply this Evaluator. It's reusable; that's the whole point. If you'd rather create Evaluators programmatically, the endpoint is in the [API Reference](/api-reference).
+    The Evaluator is now in your Project's Evaluator library. Any future [Evaluation](/concepts/evaluations) — against any Scenario set, against any Agent Version — can apply this Evaluator. It's reusable; that's the whole point. If you'd rather create Evaluators programmatically, the endpoint is in the [API Reference](/api-reference).
 
     **You should see:** the Evaluators list now shows your new Evaluator, ready to apply.
   </Step>
@@ -146,7 +146,7 @@ Three lines. No calibration. No LLM cost per evaluation. **If you find yourself 
 
 <CardGroup cols={2}>
   <Card title="Run your first Evaluation" icon="chart-line" href="/tutorials/run-first-evaluation">
-    Apply the Evaluator you just authored across a Dataset, against a specific Agent Version. The first scored run.
+    Apply the Evaluator you just authored across a Scenario set, against a specific Agent Version. The first scored run.
   </Card>
   <Card title="Write an effective LLM-judge prompt" icon="message-square-text" href="/how-to/write-llm-judge-prompt">
     The deep how-to on rubric authoring — patterns that calibrate well, anti-patterns to avoid, when to break each rule.

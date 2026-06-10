@@ -19,8 +19,11 @@
 - An **Agent Version** is the *customer's agent under test* — a pinned snapshot being evaluated.
   It is a different concept from the Trust Agent; never conflate them, and disambiguate on any
   page that uses both.
-- **Scenarios** is the nav label for the surface whose route, data model, and API remain
-  `/datasets` / `/v1/datasets`. Never invent a `/scenarios` route or API.
+- The product noun is the **Scenario set** everywhere reader-visible: the surface/nav is
+  **Scenarios**, a row is a **scenario**, and the collection is a **Scenario set** (lowercase
+  "set" mid-sentence). "Dataset" is the legacy name and survives only in the API — the wire
+  still serves `/v1/datasets` with `dataset_id` fields. Never invent a `/v1/scenarios`
+  endpoint, a scenarios route, or scenario-named wire fields.
 - The Playground's segmented toggle is **Chat / Simulate** (there is no "Ask mode"). The side
   rail's first section label is **Progress** (reserve "plan" for the planning phase).
 

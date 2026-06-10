@@ -6,8 +6,8 @@ description: "Configure Claude Desktop, Cursor, or VS Code to query and act on T
 
 This how-to covers connecting an **MCP-compatible client** to Trust AI's [MCP server](/concepts/mcp-integration). After it's done:
 
-- Your AI client can query Trust AI data — Sessions, Evaluations, Datasets, Projects — without leaving the tool
-- Write operations (create Annotations, curate Datasets, trigger Evaluations) are available with an approval gate
+- Your AI client can query Trust AI data — Sessions, Evaluations, Scenario sets, Projects — without leaving the tool
+- Write operations (create Annotations, curate Scenario sets, trigger Evaluations) are available with an approval gate
 - Every MCP interaction is traced and auditable via OpenInference spans
 
 The setup takes under five minutes. You'll generate credentials in Trust AI, paste a config snippet into your client, and verify the connection with a test query.
@@ -103,7 +103,7 @@ The setup takes under five minutes. You'll generate credentials in Trust AI, pas
   </Step>
 
   <Step title="Understand write tool approval">
-    Read operations work immediately. When your MCP client attempts a **write operation** — creating an Annotation, adding a Session to a Dataset, triggering an Evaluation — the approval gate activates:
+    Read operations work immediately. When your MCP client attempts a **write operation** — creating an Annotation, adding a Session to a Scenario set, triggering an Evaluation — the approval gate activates:
 
     1. The MCP client sends the write request to Trust AI
     2. Trust AI surfaces a **confirmation prompt** describing what will be changed
@@ -152,7 +152,7 @@ The setup takes under five minutes. You'll generate credentials in Trust AI, pas
 
     Check, in order:
     1. **Permissions** — your WorkOS user role must have write access to the target entity. Read-only users can query data via MCP but cannot perform writes even with approval.
-    2. **Entity exists** — the target Session, Dataset, or Evaluation must exist. If the MCP client is referencing an ID from a previous query, confirm it's still valid.
+    2. **Entity exists** — the target Session, Scenario set, or Evaluation must exist. If the MCP client is referencing an ID from a previous query, confirm it's still valid.
     3. **Rate limits** — rapid successive write operations may trigger rate limiting. Wait a moment and retry.
   </Accordion>
 </AccordionGroup>
