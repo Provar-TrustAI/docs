@@ -1,85 +1,80 @@
 ---
 title: "MCP Integration"
 icon: "cable"
-description: "How external AI agents and IDEs connect to Trust AI data through the Model Context Protocol."
+description: "How Trust AI exposes the Trust Agent's tools over the Model Context Protocol, and how access is authenticated and gated."
 ---
 
-Trust AI ships a [Model Context Protocol](https://modelcontextprotocol.io) (MCP) server that lets external AI agents and IDEs query and act on your Trust AI data directly. Any MCP-compatible client — Claude Desktop, Cursor, VS Code Copilot, or your own tooling — can connect, authenticate via WorkOS, and interact with the same data and operations available inside the product.
+Trust AI runs a [Model Context Protocol](https://modelcontextprotocol.io) (MCP) server that exposes a curated subset of the **Trust Agent's** tools — the same read and write operations the agent uses inside the product — so they can be driven over a standard protocol instead of a bespoke integration.
+
+{/* ACCURACY-AUDIT-PENDING: this page describes the MCP server as implemented at the v2026.06.09.2 tag (services/api/src/mcp_server.py — cookie-session auth, the nine exposed tools, the can_use_tool gate). Re-verify against the running app on the release tag. */}
+
+<Note>
+  **Today, the MCP server is reached through your authenticated Trust AI session.** That makes it the tool layer behind the in-product Trust Agent and Trust AI's own in-process agent runtime. **Connecting a standalone external client** (Claude Desktop, Cursor, a VS Code MCP extension) over the internet is **on the roadmap** — it needs OAuth-based authentication that is being designed, not the manual token flow earlier drafts of this page described. See [Connect an MCP client](/how-to/connect-mcp-client) for current status.
+</Note>
 
 ## What MCP is
 
-MCP is an open protocol that standardizes how AI applications discover and invoke tools exposed by external systems. Instead of building bespoke integrations for each client, Trust AI publishes a single MCP server endpoint. Any client that speaks the protocol can connect, discover available tools, and call them — no custom SDK or plugin required. For protocol details, see [modelcontextprotocol.io](https://modelcontextprotocol.io).
+MCP is an open protocol that standardizes how AI applications discover and invoke tools exposed by external systems. A server publishes a tool surface; any client that speaks the protocol can connect, discover the available tools, and call them — no custom SDK or plugin per client. For protocol details, see [modelcontextprotocol.io](https://modelcontextprotocol.io).
 
 ## What the Trust AI MCP server exposes
 
-The MCP server exposes two categories of tools:
+The server exposes a **deliberate subset** of the Trust Agent's tool registry — the data and write operations a caller needs, without the agent's internal prompt-scaffolding tools.
 
-**Read tools** — unrestricted queries against your Trust AI data:
+**Read tools** — queries against your Trust AI data, executed immediately:
 
-- `query_data` — list and filter Sessions, Evaluations, Scenario sets, Projects, and other entities
-- `read_file` — retrieve full Session transcripts, Evaluation results, and Scenario set contents
-- `analyze` — run analytical queries across your data (aggregations, comparisons, trend analysis)
+- `get_project_state` — a structured summary of a Project: entity counts, setup flags, and the most recent evaluation run
+- `query_data` — list and filter Sessions, Scenario sets, Evaluators, and Evaluations
+- `read_file` — retrieve the extracted text of a task-attached file
+- `analyze` — run a structured failure analysis over a completed evaluation run
 
 **Write tools** — operations that modify Trust AI state, each wrapped with an approval gate:
 
-- Trust Agent WRITE wrappers — create Annotations, curate Sessions into Scenario sets, trigger Evaluations, and other write operations. These are the same operations available through the Trust Agent assistant inside Trust AI, exposed over MCP so external clients can invoke them too.
+- Sync Sessions from a connected platform, curate Sessions into a Scenario set, update or delete Scenario rows, and start an Evaluation. These are the Trust Agent's own write operations, surfaced over MCP and held behind the same confirmation step.
 
-The tool surface is identical to what the Trust Agent can do — no more, no less.
+{/* ACCURACY-AUDIT-PENDING: exact exposed tool list + descriptions (get_project_state/query_data/read_file/analyze + sync_sessions/save_dataset/update_items/delete_items/run_evaluation) per _MCP_EXPOSED_TOOLS in mcp_server.py — confirm against the app on the release tag. */}
 
 ## Authentication
 
-Every MCP connection requires a valid **WorkOS token**. The token determines which organization's data the client can access:
+The MCP server enforces the **same auth boundary as the rest of the Trust AI API** — there is no separate permission shape for it. A request is authenticated by your Trust AI **WorkOS session**, and access is scoped to your organization: a caller sees only the Projects, Sessions, and Evaluations that belong to your org, exactly as in the UI.
 
-- The token is scoped to your WorkOS organization — a client sees only the Projects, Sessions, and Evaluations that belong to that org
-- Token generation happens inside Trust AI at **Settings > Integrations > MCP**
-- Tokens follow standard WorkOS expiration and revocation policies
-
-There is no anonymous or API-key-only access path. WorkOS authentication is required for every connection.
+Because that session is the credential, the server today serves callers that already carry it — the in-product Trust Agent and Trust AI's in-process runtime. A **standalone external client cannot present that session**, so direct third-party connection is gated on a dedicated, OAuth-issued credential that is on the roadmap (see the roadmap note above). There is no anonymous access path.
 
 ## The approval gate
 
-Write operations go through a `can_use_tool` confirmation step before executing:
+Write operations pass through a `can_use_tool` confirmation step before they execute:
 
-- **Read tools execute immediately.** Querying data, reading transcripts, and running analysis require no additional approval beyond a valid auth token.
-- **Write tools pause for confirmation.** When an MCP client attempts a write (creating an Annotation, adding a Session to a Scenario set, triggering an Evaluation), Trust AI surfaces a confirmation prompt before the operation executes. The confirmation includes what will be changed and requires explicit approval.
+- **Read tools execute immediately.** Querying data, reading a file, and running analysis need no extra approval beyond a valid session.
+- **Write tools pause for confirmation.** When a caller attempts a write — curating Sessions into a Scenario set, syncing Sessions, starting an Evaluation — Trust AI builds a preview of exactly what would change and holds the operation until it is explicitly approved. Approvals have a short time-to-live; an unanswered request times out rather than executing.
 
-This gate exists because MCP clients are external — an IDE extension or AI agent should not silently modify Trust AI data without the user's knowledge. The same tools invoked through the Trust Agent inside the product follow the same approval pattern.
+This gate exists because a caller — an agent or an IDE — should not silently modify Trust AI data. The same write tools invoked through the Trust Agent inside the product follow the same approval pattern.
 
 ## Observability
 
-Every MCP tool invocation emits an **OpenInference tool span**, giving full observability into what external clients are doing with your data:
+Every MCP tool invocation emits an **OpenInference tool span**:
 
-- Each tool call is traced with its input arguments, output, latency, and status
-- Spans follow the OpenTelemetry standard, so they integrate with your existing observability stack
-- Failed calls (auth errors, validation failures, approval rejections) are traced with error metadata
+- Each call is traced with its tool name, tenant context (project / org / user), input arguments, output, and status
+- Spans follow the OpenTelemetry / OpenInference conventions, so they slot into a Phoenix-style trace view alongside the agent runtime's own tool spans
+- Failed calls (auth, validation, approval rejection or timeout) are traced with error metadata
 
-This means MCP activity is not a black box — every external interaction with Trust AI is instrumented and auditable.
+Every tool call — including a denied one — is recorded, so MCP activity is auditable rather than a black box.
 
 ## Conformance
 
-The MCP server's tool surface is **tested against the Trust Agent's tool registry** on every build:
+The exposed tool surface is **checked against the Trust Agent's tool registry on every build**:
 
-- A conformance test ensures that every tool the Trust Agent can invoke is also available over MCP
-- If a new Trust Agent skill or tool is added, the MCP server must expose it too — the build fails otherwise
-- This guarantees that external MCP clients have the same capabilities as the built-in agent assistant
+- A conformance test asserts the MCP-exposed allowlist matches the set actually registered on the transport, so the documented surface can't silently drift from what's live
+- Tools deliberately held back (the agent's internal prompt-scaffolding) stay out of the external surface by design
 
-The implication: when Trust AI ships new Trust Agent capabilities, MCP clients gain access to them automatically.
+{/* ACCURACY-AUDIT-PENDING: conformance test is tests/mcp_server/test_mcp_surface_conformance.py — confirm it still asserts the allowlist on the release tag. */}
 
 ## Supported clients
 
-The MCP server works with any client that implements the Model Context Protocol. Tested and documented clients include:
-
-- **Claude Desktop** — Anthropic's desktop application
-- **Cursor** — AI-native code editor
-- **VS Code** — via MCP-compatible extensions (e.g., GitHub Copilot MCP support)
-- **Custom clients** — any application that speaks MCP can connect using the same endpoint and authentication
-
-See [Connect an MCP client to Trust AI](/how-to/connect-mcp-client) for step-by-step setup instructions for each client.
+The server speaks standard MCP, so any conformant client can — in principle — drive it. **Direct external connection (Claude Desktop, Cursor, VS Code) is not yet available**; it ships with the OAuth authentication work described above. Today the agent's capabilities reach you through the product's own Trust Agent.
 
 ## Related concepts
 
-- **[Sessions](/concepts/sessions)** — the primary data MCP read tools query
+- **[Trust Agent](/concepts/trust-agent)** — the assistant whose tool surface MCP exposes
+- **[Sessions](/concepts/sessions)** — the primary data the read tools query
 - **[Projects](/concepts/projects)** — the workspace boundary; MCP access is scoped to a Project's org
-- **[Evaluations](/concepts/evaluations)** — queryable via MCP and triggerable through write tools
-- **[Scenarios](/concepts/scenarios)** — readable and curatable through MCP
-- **[Connect an MCP client](/how-to/connect-mcp-client)** — step-by-step how-to for configuring your client
+- **[Scenarios](/concepts/scenarios)** — readable, and curatable through the gated write tools
+- **[Connect an MCP client](/how-to/connect-mcp-client)** — current status and what external connection will require
