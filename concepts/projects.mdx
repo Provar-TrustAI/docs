@@ -47,8 +47,8 @@ Practical guidance:
 A Project can hold multiple runtime connections at once. In **Project Settings → Connection**, the **Add connection** picker offers three platforms:
 
 - **AWS Bedrock AgentCore** — a guided setup wizard built around an admin handoff: your AWS admin provisions a cross-account role, and you paste back the role ARN. For the full walkthrough, see [Connect an AWS Bedrock AgentCore agent](/how-to/connect-agentcore).
-- **Salesforce Agentforce** — a credential form: your Salesforce instance URL plus a sign-in method (JWT via an External Client App is recommended; username + password is the legacy fallback).
-- **Claude Managed Agent** — a credential form for an Anthropic managed agent on AWS: API key, region, and workspace, agent, and environment IDs.
+- **[Salesforce Agentforce](/how-to/connect-agentforce)** — a credential form: your Salesforce instance URL plus a sign-in method (JWT via an External Client App is recommended; username + password is the legacy fallback).
+- **[Claude Managed Agent](/how-to/connect-claude-managed-agent)** — a credential form for an Anthropic managed agent on AWS: API key, region, and workspace, agent, and environment IDs.
 
 Connections are peers, not alternatives — each connected agent gets its own **Sync now** entry on the Sessions page, and ingestion, evaluation-time invocation, and version discovery all flow through its connection. Connection secrets are write-only: once saved, Trust AI masks them and never displays them again.
 
@@ -56,7 +56,7 @@ Connections are peers, not alternatives — each connected agent gets its own **
 
 Access to a Project has two layers:
 
-- **Workspace membership** — people join your workspace through **Workspace settings → Members**, where invitations are sent and managed. Identity is federated via WorkOS — your organization's SSO is the source of truth.
+- **Workspace membership** — people join your workspace through **Workspace settings → Members**, where invitations are sent and managed — see [Administer workspace access](/how-to/administer-workspace-access). Identity is federated via WorkOS — your organization's SSO is the source of truth.
 - **Per-Project grants** — a Project's **Settings → Members** tab shows the **Project access** panel: who can reach this Project, and whether each grant is direct or inherited from a team. **Grant access** gives an existing workspace member or team **Viewer** or **Editor** access, and you change a grant's role inline from the same list.
 
 The Project boundary holds even for administrators: a workspace admin who isn't a member of a Project doesn't automatically see its contents — content access resolves against the Project's own grants.

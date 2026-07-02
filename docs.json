@@ -48,11 +48,71 @@
       {
         "tab": "Documentation",
         "groups": [
-          { "group": "Welcome",   "icon": "sparkles",       "pages": ["index"] },
-          { "group": "Concepts",  "icon": "book-open",      "pages": ["concepts/overview", "concepts/trust-agent", "concepts/projects", "concepts/sessions", "concepts/annotations", "concepts/scenarios", "concepts/playground", "concepts/evaluators", "concepts/evaluations", "concepts/agent-versions", "concepts/evaluation-loop", "concepts/saved-views", "concepts/mcp-integration", "concepts/multi-tenancy"] },
-          { "group": "Tutorials", "icon": "graduation-cap", "pages": ["tutorials/quickstart", "tutorials/build-first-evaluator", "tutorials/run-first-evaluation", "tutorials/evaluate-with-the-trust-agent"] },
-          { "group": "How-to",    "icon": "wrench",         "pages": ["how-to/work-with-the-trust-agent", "how-to/approve-agent-writes", "how-to/simulate-with-scenarios", "how-to/connect-agentcore", "how-to/connect-mcp-client", "how-to/write-llm-judge-prompt", "how-to/compare-agent-versions"] },
-          { "group": "Resources", "icon": "bookmark",       "pages": ["glossary", "changelog"] }
+          {
+            "group": "Welcome",
+            "icon": "sparkles",
+            "pages": [
+              "index"
+            ]
+          },
+          {
+            "group": "Concepts",
+            "icon": "book-open",
+            "pages": [
+              "concepts/overview",
+              "concepts/trust-agent",
+              "concepts/projects",
+              "concepts/sessions",
+              "concepts/annotations",
+              "concepts/scenarios",
+              "concepts/playground",
+              "concepts/evaluators",
+              "concepts/evaluations",
+              "concepts/agent-versions",
+              "concepts/evaluation-loop",
+              "concepts/saved-views",
+              "concepts/tables-and-panels",
+              "concepts/mcp-integration",
+              "concepts/multi-tenancy"
+            ]
+          },
+          {
+            "group": "Tutorials",
+            "icon": "graduation-cap",
+            "pages": [
+              "tutorials/quickstart",
+              "tutorials/build-first-evaluator",
+              "tutorials/run-first-evaluation",
+              "tutorials/evaluate-with-the-trust-agent"
+            ]
+          },
+          {
+            "group": "How-to",
+            "icon": "wrench",
+            "pages": [
+              "how-to/work-with-the-trust-agent",
+              "how-to/approve-agent-writes",
+              "how-to/simulate-with-scenarios",
+              "how-to/annotate-sessions",
+              "how-to/evaluate-sessions",
+              "how-to/connect-agentcore",
+              "how-to/connect-agentforce",
+              "how-to/connect-claude-managed-agent",
+              "how-to/connect-mcp-client",
+              "how-to/write-llm-judge-prompt",
+              "how-to/calibrate-an-evaluator",
+              "how-to/compare-agent-versions",
+              "how-to/administer-workspace-access"
+            ]
+          },
+          {
+            "group": "Resources",
+            "icon": "bookmark",
+            "pages": [
+              "glossary",
+              "changelog"
+            ]
+          }
         ]
       },
       {
@@ -68,6 +128,9 @@
     }
   ],
   "contextual": {
-    "options": ["copy", "view"]
+    "options": [
+      "copy",
+      "view"
+    ]
   }
 }
