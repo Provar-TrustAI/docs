@@ -1,124 +1,140 @@
 ---
 title: "Your first 10 minutes in Trust AI"
 icon: "rocket"
-description: "Project creation through your first curated Scenario set, end to end."
+description: "Project creation through your first scored evaluation, end to end."
 ---
 
-This tutorial walks you from a brand-new Trust AI account to a curated [Scenario set](/concepts/scenarios) ready for evaluation, in roughly ten minutes. It assumes the **SI Consultant** persona: setting up Trust AI for a customer agent for the first time. The shape is the same for an Agent Owner adding a new agent to an existing workspace.
+This tutorial walks you from a brand-new Trust AI account to your first scored evaluation of a real agent, in roughly ten minutes. It assumes you're setting Trust AI up for a customer agent for the first time; the shape is the same when you add a new agent to an existing workspace.
 
-Most of these steps you'll drive by asking the [Trust Agent](/concepts/trust-agent) — the in-app assistant — in plain language, then watching the results land in the UI. Where you'd rather do something by hand, the manual UI path is right there too.
+Most of these steps you'll drive by asking the [Trust Agent](/concepts/trust-agent) — the in-app assistant — in plain language, then watching the results land in the UI. Where you'd rather do something by hand, the manual UI path is right there too. On a brand-new project the Trust Agent is taught exactly this arc — connect, explore, create coverage, evaluate — so you can also just follow its lead.
 
 By the end you'll have:
 
-- A [Project](/concepts/projects) wired to a deployed agent
-- One ingested [Session](/concepts/sessions) you can read end-to-end
-- An [Annotation](/concepts/annotations) on a single Turn
-- A starter Scenario set with one curated scenario
+- A [Project](/concepts/projects) connected to your agent's platform
+- Real [Sessions](/concepts/sessions) you can read end to end
+- Starter [Evaluators](/concepts/evaluators) and [Scenarios](/concepts/scenarios) adopted from the Trust Library
+- One scored [Evaluation](/concepts/evaluations) run you know how to read
 
-That's the smallest complete pass through the first three steps of [the evaluation loop](/concepts/evaluation-loop). Once it works once, the rest of Trust AI is "do this same thing at scale."
-
-<Tip>
-  Prefer to work through the API directly? Every endpoint, request shape, and response shape is auto-rendered in the [API Reference](/api-reference), the authoritative source.
-</Tip>
+That's one complete pass through [the evaluation loop](/concepts/evaluation-loop). Once it works once, the rest of Trust AI is "do this same thing at scale."
 
 ## Before you start
 
 You'll need:
 
-- A Trust AI account with **Admin** or **SI Consultant** role on at least one org
-- An agent **deployed and reachable** — today that means a Bedrock AgentCore runtime alias in an AWS account you can create an IAM role in
+- A Trust AI account with access to a workspace where you can create projects
+- An agent on one of the three platforms Trust AI connects to — **AWS Bedrock AgentCore**, **Salesforce Agentforce**, or **Claude Managed Agent** — plus its connection credentials, or an admin who has them
 - About 10 minutes
 
-If your agent isn't on AgentCore yet, you can still walk this tutorial using a **demo Project** seeded with example Sessions (we'll flag that variant inline).
+<Tip>
+  **No credentials at hand?** Start anyway. When you ask the Trust Agent to connect your agent, it hands you a plain-English, per-platform checklist of exactly what to gather — something you can forward to your admin. For AgentCore, the setup wizard produces an admin handoff package your AWS admin can deploy without you.
+</Tip>
 
-## The five steps
+## The six steps
 
 <Steps>
-  <Step title="Create your first Project">
-    A [Project](/concepts/projects) is the workspace boundary around one agent (or fleet) under evaluation. Members, runtime credentials, and every artifact downstream belong to it.
+  <Step title="Create your first project">
+    A [Project](/concepts/projects) is the workspace boundary around one agent under evaluation. Members, connections, and every artifact downstream belong to it.
 
-    Creating a Project is the one setup step you do before the Trust Agent comes into play — the agent lives *inside* a Project, so you need one first. Click **+ New Project** in the top bar, name it after the agent under evaluation (e.g., "Acme Support Agent"), pick the org it belongs to, and click **Create**.
+    Creating a Project is the one setup step you do before the Trust Agent comes into play — the conversation lives *inside* a Project, so you need one first. Open the project switcher at the top of the sidebar and click **Create new project** (on a workspace with no projects yet, you'll land on a **Create your first project** screen with a **New project** button instead). Name it after the agent under evaluation (e.g., "Acme Support Agent") — a description is optional — and click **Create project**.
 
-    **You should see:** the Project's empty home view, with five empty surfaces (Sessions, Annotations, Scenarios, Evaluators, Evaluations) and a banner prompting you to connect a runtime.
+    **You should see:** you land inside the new Project. The left nav shows its surfaces: **New chat**, **Playground**, **Scenarios**, **Sessions**, **Evaluators**, **Evaluations**, **Requirements**, and **Project Settings** — all empty for now.
   </Step>
 
-  <Step title="Connect an agent runtime">
-    The supported connector today is **AWS Bedrock AgentCore**. The setup is a one-time IAM role grant; once it's in place, Sessions flow automatically.
+  <Step title="Connect your agent">
+    Click **New chat**. On a brand-new project, the welcome screen greets you with four starter prompts that trace this exact tutorial: **Connect agent**, **Explore behaviour**, **Create scenarios**, and **Run evaluation**. Clicking one pre-fills the message box — nothing sends until you do.
 
-    From the Project home, click **Connect runtime → AWS Bedrock AgentCore**. Trust AI walks you through:
+    <Note>
+      *Ask the Trust Agent:* "Help me connect the agent I want to test."
+    </Note>
 
-    1. Generating a CloudFormation snippet that creates a cross-account IAM role
-    2. Deploying it in your AWS account
-    3. Pasting the role ARN back into Trust AI
+    The agent first checks whether a build is already connected. If not, its guided connect flow covers **Salesforce Agentforce** and **Claude Managed Agent**: it asks which platform you're on, gives you a plain-English checklist of the credentials to gather, then sends you to the connection form to enter them. Secrets are write-only — once saved, Trust AI never displays them back.
 
-    Full step-by-step (with the CloudFormation snippet inline): [Connect an AWS Bedrock AgentCore agent](/how-to/connect-agentcore).
+    Prefer the manual path, or connecting an **AWS Bedrock AgentCore** agent? Open **Project Settings**, switch to the **Connection** tab, and click **Add connection**. You'll pick from the three platforms:
 
-    **You should see:** Project home now shows the runtime as **Connected**, with the AgentCore agent name + alias pinned to the Project's metadata.
+    - **AWS Bedrock AgentCore** — a guided setup wizard: prepare an admin handoff package, have your AWS admin deploy the cross-account role, then paste the role ARN back. Full walkthrough: [Connect an AWS Bedrock AgentCore agent](/how-to/connect-agentcore).
+    - **Salesforce Agentforce** — a form pointing at your Salesforce org (JWT sign-in via an External Client App is the recommended method).
+    - **Claude Managed Agent** — a form for an Anthropic Managed Agent on Claude Platform on AWS.
+
+    **You should see:** your agent listed as a connection on the **Connection** tab.
+  </Step>
+
+  <Step title="Observe real sessions">
+    With the agent connected, pull in the conversations it's already having.
+
+    <Note>
+      *Ask the Trust Agent:* "Pull in some of my real conversations so we have material to work from."
+    </Note>
+
+    Or do it by hand: open **Sessions** and click **Sync now** — it's a per-agent dropdown, so pick your connected agent. Conversations pulled from your platform land in the list with Source **External** (a Session's [Source](/concepts/sessions) is always one of **Scenario**, **Playground**, or **External**). Alongside Source, the list shows things like **Routed To**, turn count, and date.
+
+    Click any Session to open it. The fly-in leads with the full **Transcript** — every turn, tool calls included — plus tabs for **Annotations**, **Evaluations**, and **Details**. Read one end to end; this is the raw material everything downstream grades.
 
     <Tip>
-      **Don't have AgentCore handy?** Skip to a demo Project: from your org's home, click **+ New Project → Use demo data**. You'll get a Project pre-seeded with ~50 example Sessions across two Agent Versions. The rest of the tutorial works the same way against the demo data.
+      **Agent has no traffic yet?** Ask the Trust Agent: "Try my agent with a few example questions and show me how it responds." It runs an observe-only exploration — a real conversation with your connected agent, watched but not scored — so you can see its behavior before you define what "good" means.
     </Tip>
+
+    **You should see:** the Sessions list populated, and at least one Session you've read end to end.
   </Step>
 
-  <Step title="Ingest your first Sessions">
-    Once the runtime is connected, ingestion is automatic. Trust AI pulls AgentCore invocation logs every few minutes and each invocation becomes a Session row.
+  <Step title="Adopt starter evaluators and scenarios">
+    A new project doesn't start from a blank slate: the Trust Library ships curated defaults you can adopt in one move, and the Trust Agent can draft coverage specific to your agent.
 
     <Note>
-      *Ask the Trust Agent:* "Pull my latest sessions and show me the ten most recent."
+      *Ask the Trust Agent:* "Generate a first set of test scenarios for my agent." Then: "Add some security scenarios that probe for unsafe or off-policy answers."
     </Note>
 
-    The agent runs the pull for you and renders the Sessions it found as a clickable table you can read right there. You'll see Sessions begin to appear within ~30 seconds for an active agent; or do it by hand from the **Sessions** tab with **Sync Now**.
+    The agent proposes [Scenarios](/concepts/scenarios) — each a persona plus a goal, the test cases your evaluations will run — and pauses with an approval card showing exactly what it will create before anything is saved. Approve, and they land in your Scenarios list.
 
-    **You should see:** the Sessions list populated with rows. Each row shows: timestamp, Agent Version, turn count, latency, and any intent classification your agent emits.
+    The manual path is the Trust Library:
+
+    - On **Evaluators**, click **Add recommended** to adopt from the 12 recommended [Evaluators](/concepts/evaluators) — six Quality and six Safety presets, each a plain-language pass/fail judge.
+    - On **Scenarios**, click **Add recommended scenarios** to adopt from the 10 starter safety scenarios — one per failure mode in the OWASP Agentic Top 10.
+
+    Everything you adopt becomes an ordinary, fully editable evaluator or scenario — no special status.
+
+    **You should see:** the Scenarios list populated, each scenario carrying a stable id like `SCN-000022`, and the Evaluators list showing your adopted judges.
   </Step>
 
-  <Step title="Review and annotate a Session">
-    Open the first Session in your list. Read through the Turns. The viewer shows:
-
-    - The full conversation, top to bottom
-    - Tool Calls inline (request + response, latency)
-    - Skill activations as colored badges
-    - A side panel where Annotations live
-
-    Pick a single Turn — say, the one where the agent responded to the user's primary question.
+  <Step title="Run your first evaluation">
+    Now run those scenarios against your connected agent.
 
     <Note>
-      *Ask the Trust Agent:* "On the order-status session, mark the turn where the agent answered the customer as a pass, and note that it resolved order status and explained next steps clearly."
+      *Ask the Trust Agent:* "Run my first evaluation against the connected agent."
     </Note>
 
-    Because adding an Annotation is a write, the Trust Agent pauses and shows you an approval card with the exact label and note before it saves — approve it and the Annotation lands. Prefer to do it by hand? Apply a pass/fail [Annotation](/concepts/annotations) directly on the Turn with a short freeform note, then click **Save**.
+    By hand: on **Scenarios**, click **Run** (select specific scenarios first, or leave the selection empty to run the current view). The evaluation launcher opens with a fan-out preview — one conversation per persona per scenario, simulated live against your connected agent, then graded by your evaluators. Confirm to launch. The same launcher also opens from **New evaluation** on the **Evaluations** page.
 
-    **You should see:** the Annotation appear in the Session's side panel, time-stamped, attributed to you. The Sessions list now shows this row as **Annotated**.
+    You stay on the Scenarios list while the run executes: each scenario shows a live progress badge that settles as it finishes.
+
+    **You should see:** per-scenario badges settling, and a new run appearing on the **Evaluations** page.
   </Step>
 
-  <Step title="Curate your first Scenario set">
-    Now turn that one annotated Session into the first scenario in a curated [Scenario set](/concepts/scenarios).
+  <Step title="Read the results">
+    Open the run from **Evaluations**.
 
-    <Note>
-      *Ask the Trust Agent:* "Create a new scenario set called 'Order-status happy path' and add that annotated session to it as the first scenario."
-    </Note>
+    The headline is the **pass rate** — how the agent did across the run. Every persona is scored on its own, so the per-persona matrix shows you *who* the agent struggles with, not just whether it struggles. A second headline, **evaluator accuracy**, fills in once you've recorded human Pass/Fail verdicts on sessions — it measures how often the automated judges agree with a person, grading the judges rather than the agent.
 
-    The agent drafts the new Scenario set and the scenario, then pauses for your approval before it writes either — confirm, and both land. Or do it by hand: from the Sessions list, use the add-to-scenario-set action on your annotated Session and create a new set — it starts as "Untitled scenario set"; rename it (e.g., "Order-status happy path") and confirm.
+    Open any result to read the full conversation — the transcript labels itself **Simulated**. And if something outside the agent broke — a guardrail block, an infrastructure hiccup — that result is marked an environment problem and excluded from the score, never counted as an agent failure.
 
-    **You should see:** the Scenarios surface now has one Scenario set with one scenario. Open it — the scenario carries the Session's input, the agent's full response, and the Annotation you applied.
+    **You should see:** a scored run with a pass rate, per-persona results, and readable transcripts behind every verdict.
   </Step>
 </Steps>
 
-## You're done with the first half of the loop
+## You've walked the loop once
 
-You've done the first three steps of [the evaluation loop](/concepts/evaluation-loop) — ingest, annotate, curate. The next three are **define an Evaluator**, **run an Evaluation**, and **compare Agent Versions**. The Scenario set you just curated is the test bed they all run against. You can continue click by click with the next two tutorials, or let the Trust Agent drive the rest of the loop by conversation in [Evaluate with the Trust Agent](/tutorials/evaluate-with-the-trust-agent).
+Connect, observe, define coverage, run, read — that's [the evaluation loop](/concepts/evaluation-loop), end to end, once. From here it's depth, not new shape: author expected outputs on the scenarios that matter, tailor the recommended evaluators to your agent's rules, and record human verdicts on sessions so evaluator accuracy has ground truth to grade against.
 
 ## What's next
 
 <CardGroup cols={2}>
   <Card title="Evaluate with the Trust Agent" icon="sparkles" href="/tutorials/evaluate-with-the-trust-agent">
-    Drive the whole loop by conversation — find sessions, build a scenario set, run an evaluation, approving each write.
+    Drive the whole loop by conversation — find sessions, generate scenarios, run an evaluation, approving each write.
   </Card>
   <Card title="Build your first Evaluator" icon="wand-sparkles" href="/tutorials/build-first-evaluator">
-    Author an LLM Judge or Structured Match Evaluator and calibrate it against the Annotation you just applied.
+    Author an LLM Judge or Structured Match Evaluator — or tailor a recommended one — and calibrate it against human verdicts.
   </Card>
   <Card title="Run your first Evaluation" icon="chart-line" href="/tutorials/run-first-evaluation">
-    Apply your Evaluator across the Scenario set, against the current Agent Version. The first scored result.
+    A deeper pass on the launcher: sources, fan-out, repeat trials, and reading run detail.
   </Card>
   <Card title="Read the conceptual model" icon="book-open" href="/concepts/overview">
     The nouns and verbs Trust AI is built around, in one place. Worth ten minutes if anything in this tutorial felt under-explained.
@@ -129,5 +145,5 @@ You've done the first three steps of [the evaluation loop](/concepts/evaluation-
 </CardGroup>
 
 <Tip>
-  **Stuck?** The most common first-time blocker is the AgentCore IAM role: make sure the trust policy lists Trust AI's account and the role's permissions cover `bedrock:GetAgentRuntime` and `logs:FilterLogEvents`. The [Connect AgentCore how-to](/how-to/connect-agentcore) has the full troubleshooting matrix.
+  **Stuck?** The most common first-time blocker is the connection itself. For AgentCore, the wizard's cross-account role is protected by an External ID, and person-bound AWS SSO roles are rejected — use the admin-setup role the wizard prepares. The [Connect AgentCore how-to](/how-to/connect-agentcore) has the full walkthrough.
 </Tip>
