@@ -31,7 +31,7 @@ The app assembles your rules into the exact criteria the live judge reads — ea
 This narrows the craft in a useful way. All the classic judge-prompt advice about neutral system-prompt framing, output schemas, and temperature tuning is handled for you. **Your entire authoring surface is the rules** — which is exactly where the judgment quality lives.
 
 <Note>
-  *Ask the Trust Agent:* "Draft an evaluator that checks my agent never promises a refund it can't actually authorize." It drafts the rules and the evaluator definition, shows you the write for [approval](/how-to/approve-agent-writes) before anything is saved, and can queue a calibration check against sessions you've already marked once you approve.
+  *Ask the Trust Agent:* "Draft an evaluator that checks my agent never promises a refund it can't actually authorize." It drafts the rules and the evaluator definition, shows you the write for [approval](/how-to/approve-agent-writes) before anything is saved, and can queue a calibration check against scenarios you've already marked pass or fail once you approve.
 </Note>
 
 ## Start from a recommended evaluator when one fits
@@ -71,7 +71,7 @@ This works because:
 - Each rule names an **observable behavior** in the transcript, not a quality
 - A different reviewer applying these rules would reach the same verdict on most scenarios
 
-A useful test: **could a mechanical check catch this failure?** If the thing you're checking is which route the session took or which tools the agent called, you may not need an LLM Judge at all — the **Structured Match** family (**Routing match** and **Tool match**) is the right fit; see [Evaluators](/concepts/evaluators). If the judgment really does need natural-language reasoning, keep it in rules — but make each rule as observable as the problem allows.
+A useful test: **could a mechanical check catch this failure?** If the thing you're checking is which route the session took or which tools the agent called, you may not need an LLM Judge at all — author it as a structural check in the scenario's **Expected Output** editor (**Expected routes** and **Expected actions**, picked from vocabulary learned from your real sessions); see [Scenarios](/concepts/scenarios). Legacy **Structured Match** evaluators (**Routing match**, **Tool match**) you already have keep working as ordinary evaluator objects. If the judgment really does need natural-language reasoning, keep it in rules — but make each rule as observable as the problem allows.
 
 ### One criterion per rule
 
@@ -101,7 +101,7 @@ The **Reason step by step** toggle makes the judge think through each criterion 
 
 ## Calibrate — the loop that makes the rules trustworthy
 
-Authoring is half the work. The other half is proving the judge agrees with you, on the **Calibrate** tab of the evaluator's panel (LLM Judge evaluators only — Structured Match has nothing to calibrate). A judge is only useful if its verdicts agree with yours, and human verdicts are the ground truth here — your verdict grades the judge; it never overrides the automated result (see [Annotations](/concepts/annotations)).
+Authoring is half the work. The other half is proving the judge agrees with you, on the **Calibrate** tab of the evaluator's panel (LLM Judge evaluators only — Structured Match has nothing to calibrate). A judge is only useful if its verdicts agree with yours, and the pass/fail verdicts you recorded on scenarios are the ground truth here — your verdict grades the judge; it never overrides the automated result.
 
 <Note>
   *Ask the Trust Agent:* "Update my Policy Quote Accuracy evaluator's rules and calibrate it against the scenarios I've marked." It proposes the rule edit for approval and follows it with a calibration check, so you see the agreement move in the same conversation.
@@ -110,11 +110,11 @@ Authoring is half the work. The other half is proving the judge agrees with you,
 The loop:
 
 1. **Mark scenarios pass or fail yourself.** Pick 10–20 spanning both passes and fails — don't only mark the easy cases. If nothing is marked yet, the Calibrate tab's empty state points you at the exact place to do it.
-2. **Run Check agreement.** The **Check agreement** section runs the *exact production judge* — same model, same prompt, same parser as a real evaluation run — against your marked scenarios. Calibration samples at most 20 scenarios per check and takes about a minute.
+2. **Click Calibrate in the Check agreement section.** The check runs the *exact production judge* — same model, same prompt, same parser as a real evaluation run — against your marked scenarios. Calibration samples at most 20 scenarios per check and takes about a minute.
 3. **Read the agreement headline.** You get a plain-language agreement rate with a verdict breakdown. The vocabulary is *agreement*, deliberately — no F1 or precision to decode.
 4. **Work the disagreements.** The **Row by row — disagreements first** table puts every scenario where you and the judge split at the top. The disagreements are the data — they show exactly where the rules are wrong.
 5. **Tighten the rules and save.** Rule edits commit with **Save grading rules**. Once you've edited, the last result shows a stale-rubric warning — the agreement on screen reflects the *old* rules until you re-check.
-6. **Re-check and repeat.** **Calibration history** keeps every check, newest first, so you can watch agreement climb as the rules tighten.
+6. **Re-calibrate and repeat.** After a first result the button reads **Re-calibrate**. **Calibration history** keeps every check, newest first, so you can watch agreement climb as the rules tighten.
 
 Don't chase 100%. Perfect agreement on a small set usually means the rules have over-fit those specific scenarios. A well-calibrated rubric tolerates a small disagreement rate — and on a healthy rubric, the remaining disagreements are typically the genuinely ambiguous cases a human reviewer would also have flagged for discussion.
 
@@ -208,7 +208,7 @@ Set the **Pass threshold** to **≥3** so an adequate-but-flat response still pa
     Full conceptual reference — the evaluator families, the recommended-evaluator catalog, and reuse semantics.
   </Card>
   <Card title="Read about Annotations" icon="tag" href="/concepts/annotations">
-    The human signal LLM Judges calibrate against — your verdicts grade the judge, never the other way around.
+    Session-level human verdicts, which ground evaluator accuracy on runs — your verdicts grade the judges, never the other way around.
   </Card>
   <Card title="Compare two Agent Versions" icon="git-branch" href="/how-to/compare-agent-versions">
     Where the calibrated Evaluators ultimately serve — tracking regressions across versions.

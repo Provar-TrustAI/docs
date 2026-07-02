@@ -19,9 +19,9 @@ Allow about 10 minutes. Most of that time is the run itself processing — the c
 
 You should have, from the prior two tutorials:
 
-- A [Project](/concepts/projects) with at least one connected agent. If none is connected yet, the launcher will tell you: **No connected agents. Connect one in Settings → Connections.**
+- A [Project](/concepts/projects) with at least one connected agent. If none is connected yet, the launcher will tell you: **Connect an agent in Settings → Connections before running this scenario** (that's the **Connection** tab of Project Settings).
 - At least 3-5 scenarios in your **Scenarios** list (more is better)
-- At least one saved [Evaluator](/concepts/evaluators). Calibrating it against your Annotations (the prior tutorial) makes its verdicts trustworthy, but it isn't a gate — you can run before calibrating.
+- At least one saved [Evaluator](/concepts/evaluators). Calibrating it against the pass/fail verdicts you recorded on scenarios (the prior tutorial) makes its verdicts trustworthy, but it isn't a gate — you can run before calibrating.
 
 One thing to check before launching: **evaluators travel with each scenario**, not with the run. Open a scenario's fly-in, and on its **Expected Output** tab make sure your Evaluator appears under **Expected behavior**. At run time the launcher inherits those evaluators automatically — there is no evaluator picker for a scenarios run.
 
@@ -83,7 +83,7 @@ One thing to check before launching: **evaluators travel with each scenario**, n
     You'll get a written rundown you can act on; or read it yourself in the UI. The run detail page leads with a **dual headline**:
 
     - **Pass rate** grades the *agent* — how often it passed each case.
-    - **Evaluator accuracy** grades the *judges* — how often the evaluators' combined verdict agreed with a human verdict on the same case. It only appears once human verdict annotations exist; with none yet, only the pass rate shows.
+    - **Evaluator accuracy** grades the *judges* — how often the evaluators' combined verdict agreed with a human verdict on the same case. It only appears once [human verdict annotations](/how-to/annotate-sessions) exist; with none yet, only the pass rate shows.
 
     Below that, the **results matrix** has one row per scenario × persona — the persona's name leads each row — and one column per evaluator, with verdict chips. Click any result to open it in full: score, reasoning, and a **Transcript** tab labeled **Simulated** (a fresh conversation was driven for this run) or **Replayed** (stored turns were graded). **Export** in the header downloads the full results.
 
@@ -95,7 +95,7 @@ One thing to check before launching: **evaluators travel with each scenario**, n
     2. **Failed results, top-down.** Open the first failure. Read the evaluator's reasoning, then the transcript. The triage is three-way: did the agent regress, did the evaluator over-reject, or is it marked as an environment problem (in which case it's already excluded and points at infrastructure, not the agent)? Each answer sends you in a different direction.
     3. **Persona spread.** If one persona fails where the others pass, the matrix's divergence hints will say so in plain English — that's a behavior gap tied to *who's asking*, which a single aggregate number would have hidden.
 
-    One more headline you may meet later: a run configured to repeat each test case multiple times leads with a **Pass^K** reliability rate instead — the share of cases that passed *every* attempt, with the full curve on hover. Your first run scores each case once, so you'll see the plain pass rate.
+    One more headline you may meet later: a run whose test cases were attempted more than once leads with a **Pass^K** reliability rate instead — the share of cases that passed *every* attempt, with the full curve on hover. Your first run scores each case once, so you'll see the plain pass rate.
 
     **You should see:** an Evaluation that tells a story — pass rate, per-persona spread, and the reasoning behind each verdict. This is the evidence Trust AI exists to produce.
   </Step>
@@ -109,9 +109,9 @@ One thing to check before launching: **evaluators travel with each scenario**, n
       *Ask the Trust Agent:* "Run the same evaluation again, but against my previous agent version. Then tell me which scenarios changed verdict between the two runs."
     </Note>
 
-    By hand: launch from your Scenarios list again with the same selection, and this time pick the other agent in the **Agent** selector. When it completes, open both runs from the Evaluations list — in two tabs works well — and read them side by side: the headline pass rates, then the per-persona matrices, scenario by scenario. A pass that became a fail is a regression; a fail that became a pass is an improvement.
+    By hand: open the finished run, click **Re-run**, and change **only the Agent** to the other build. When it completes, open both runs from the Evaluations list — in two tabs works well — and read them side by side: the headline pass rates, then the per-persona matrices, scenario by scenario. A pass that became a fail is a regression; a fail that became a pass is an improvement.
 
-    There's no dedicated run-vs-run comparison view yet — the side-by-side reading is manual (or delegated to the Trust Agent, which is exactly the kind of cross-referencing it's good at). This is still the regression-tracking habit Trust AI is built around: same scenarios, same evaluators, different agent, and the diff is your evidence.
+    There's no dedicated run-vs-run comparison view yet — the side-by-side reading is manual (or delegated to the Trust Agent, which is exactly the kind of cross-referencing it's good at). This is still the regression-tracking habit Trust AI is built around: same scenarios, same evaluators, different agent, and the diff is your evidence. [Compare two Agent Versions](/how-to/compare-agent-versions) is the full workflow — matched configuration, reading the flipped cases, making the ship call.
   </Step>
 </Steps>
 

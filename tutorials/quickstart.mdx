@@ -52,8 +52,8 @@ You'll need:
     Prefer the manual path, or connecting an **AWS Bedrock AgentCore** agent? Open **Project Settings**, switch to the **Connection** tab, and click **Add connection**. You'll pick from the three platforms:
 
     - **AWS Bedrock AgentCore** — a guided setup wizard: prepare an admin handoff package, have your AWS admin deploy the cross-account role, then paste the role ARN back. Full walkthrough: [Connect an AWS Bedrock AgentCore agent](/how-to/connect-agentcore).
-    - **Salesforce Agentforce** — a form pointing at your Salesforce org (JWT sign-in via an External Client App is the recommended method).
-    - **Claude Managed Agent** — a form for an Anthropic Managed Agent on Claude Platform on AWS.
+    - **Salesforce Agentforce** — a form pointing at your Salesforce org (JWT sign-in via an External Client App is the recommended method). Full walkthrough: [Connect a Salesforce Agentforce agent](/how-to/connect-agentforce).
+    - **Claude Managed Agent** — a form for an Anthropic Managed Agent on Claude Platform on AWS. Full walkthrough: [Connect a Claude Managed Agent](/how-to/connect-claude-managed-agent).
 
     **You should see:** your agent listed as a connection on the **Connection** tab.
   </Step>
@@ -122,7 +122,7 @@ You'll need:
 
 ## You've walked the loop once
 
-Connect, observe, define coverage, run, read — that's [the evaluation loop](/concepts/evaluation-loop), end to end, once. From here it's depth, not new shape: author expected outputs on the scenarios that matter, tailor the recommended evaluators to your agent's rules, and record human verdicts on sessions so evaluator accuracy has ground truth to grade against.
+Connect, observe, define coverage, run, read — that's [the evaluation loop](/concepts/evaluation-loop), end to end, once. From here it's depth, not new shape: author expected outputs on the scenarios that matter, tailor the recommended evaluators to your agent's rules, and [record human verdicts on sessions](/how-to/annotate-sessions) so evaluator accuracy has ground truth to grade against.
 
 ## What's next
 

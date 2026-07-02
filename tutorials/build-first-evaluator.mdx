@@ -4,7 +4,7 @@ icon: "ruler"
 description: "Adopt a recommended Evaluator, draft plain-language grading rules with Tailor with AI, and calibrate the judge against your own pass/fail verdicts."
 ---
 
-This tutorial continues directly from [Your first 10 minutes in Trust AI](/tutorials/quickstart). You'll set up your first [Evaluators](/concepts/evaluators) — LLM judges that grade sessions against plain-language rules — in two ways: adopting from the recommended catalog, and creating your own with AI-drafted rules. Then you'll **calibrate** the judge against your own pass/fail verdicts. By the end you'll have an Evaluator that agrees with you on the cases you care about.
+This tutorial continues directly from [Your first 10 minutes in Trust AI](/tutorials/quickstart). You'll set up your first [Evaluators](/concepts/evaluators) — LLM judges that grade sessions against plain-language rules — in two ways: adopting from the recommended catalog, and creating your own with AI-drafted rules. Then you'll **calibrate** the judge against the pass/fail verdicts you recorded on your scenarios. By the end you'll have an Evaluator that agrees with you on the cases you care about.
 
 The whole walkthrough should take about 15 minutes. Most of that time is **iterating on the grading rules**, which is also the most important skill you'll develop as an Evaluator author.
 
@@ -17,8 +17,11 @@ The whole walkthrough should take about 15 minutes. Most of that time is **itera
 You should have, from [the quickstart](/tutorials/quickstart):
 
 - A [Project](/concepts/projects) with a connected runtime (or demo data)
-- A few [scenarios](/concepts/scenarios) in your Scenarios list — the order-status happy path from the quickstart is perfect
-- Your own **pass/fail verdicts** on some of those scenarios: a pass/fail column on the Scenarios list with a few scenarios marked
+- A few [scenarios](/concepts/scenarios) in your Scenarios list — any scenarios work; this tutorial uses an order-status happy path as its running example
+
+And one thing the quickstart didn't set up — the small extra step this tutorial adds:
+
+- Your own **pass/fail verdicts** on some of those scenarios, recorded in a pass/fail verdict column on the scenario data, with a few scenarios marked
 
 That last one matters most. Calibration compares the judge's verdicts with yours, so it only works against verdicts you actually recorded. If you haven't marked any scenarios yet, open **Scenarios**, add a pass/fail column, and mark a handful before you start.
 
@@ -107,7 +110,7 @@ That last one matters most. Calibration compares the judge's verdicts with yours
 
     Or do it by hand: open your Evaluator and switch to its **Calibrate** tab (LLM judges only). Calibration runs this judge — the same model, rules, and settings production uses — against scenarios you already marked pass or fail, and reports the **agreement**.
 
-    Pick the scenarios to check against and, under **Your verdicts**, the pass/fail column you marked, then click **Calibrate**. The check covers up to 20 marked scenarios and takes about a minute.
+    In the **Check agreement** section, pick the scenarios to check against and, under **Your verdicts**, the pass/fail column you marked — it counts the marked scenarios it found — then click **Calibrate**. The check covers up to 20 marked scenarios and takes about a minute.
 
     **You should see:** an agreement headline for the latest check, and a **Row by row — disagreements first** table comparing the judge's verdict with yours on each scenario.
 
@@ -120,7 +123,7 @@ That last one matters most. Calibration compares the judge's verdicts with yours
 
     **The goal is roughly 90% agreement** on a small set. Don't chase 100% — perfect agreement on a handful of scenarios usually means the rules over-fit those exact cases.
 
-    Iterate. This is the work.
+    Iterate. This is the work. When you come back to it outside the tutorial, [Calibrate an evaluator](/how-to/calibrate-an-evaluator) is the focused recipe for this loop.
   </Step>
 
   <Step title="Put the Evaluator to work">

@@ -41,7 +41,7 @@ This tutorial uses **Plan mode** as its spine — the agent proposes a task list
     **You should see:** the Trust Agent's full view on the Welcome surface with its starter-prompt pills, the composer pinned to the bottom with the mode toggle on **Plan**, and the project nav still on your left.
   </Step>
 
-  <Step title="Answer the agent's clarifying questions {#ch-clarify}">
+  <Step title="Answer the agent's clarifying questions">
     Send the agent an open-ended brief — describe the problem in your words, the way you'd ask a teammate. Something like: *"Our support agent handles refunds, and I need to trust it before Friday's release. Can you build test coverage and run it?"*
 
     On an open-ended request, the agent's **first move is to ask a clarifying question** rather than guess — clarify-first. There's no wall of preamble before the question; it leads with the question itself.
@@ -61,7 +61,7 @@ This tutorial uses **Plan mode** as its spine — the agent proposes a task list
     **You should see:** a question card in place of the composer, your answers captured, and — once you submit — the agent moving on to think and plan.
   </Step>
 
-  <Step title="Watch it reason, then confirm the plan {#ch-plan}">
+  <Step title="Watch it reason, then confirm the plan">
     After you answer, the agent thinks in the open. Its reasoning, the reply text, and any tool-call arguments all **stream live, token by token** — a turn doesn't buffer silently and then dump a wall of text. Replies render as markdown-formatted prose (lists, paragraphs, emphasis), with a typing-dots indicator and an accent caret while a turn is still streaming.
     {/* ACCURACY-AUDIT-PENDING: text/reasoning/tool-args stream incrementally token-by-token; turns render as markdown prose with typing-dots + accent caret while streaming — verify by driving a streaming turn on the release tag */}
 
@@ -73,8 +73,8 @@ This tutorial uses **Plan mode** as its spine — the agent proposes a task list
 
     Then the agent proposes a **plan** — a task list scoped to your answers — and stops. For this brief, expect two big beats: **generate scenarios**, then **run an evaluation with simulation**. A [Scenario](/concepts/scenarios) is a test case pairing a persona (who the simulated customer is) with a goal (what they're trying to get done) — there's **no transcript yet**. The conversations are played out later, by the automated simulator, when the evaluation runs.
 
-    In **Plan** mode nothing executes until you confirm: a typed confirmation is what triggers the transition from planning to execution. If you want to adjust the plan first, send a refinement; the agent **amends the existing plan** rather than throwing it away and starting over.
-    {/* ACCURACY-AUDIT-PENDING: Plan mode proposes a plan and stops; a typed confirmation moves planning→execution; a refinement amends the existing plan rather than replacing it — verify by refining and confirming a plan on the release tag */}
+    In **Plan** mode nothing executes until you confirm the plan: tap **Approve & run** on the plan-confirm bar, or type a go-ahead in the composer — either moves planning to execution. If you want to adjust the plan first, send a refinement; the agent **amends the existing plan** rather than throwing it away and starting over.
+    {/* ACCURACY-AUDIT-PENDING: Plan mode proposes a plan and stops; a refinement amends the existing plan rather than replacing it — verify by refining a plan on the release tag */}
 
     {/* CAPTURE-PENDING: agent-tutorial-plan.gif — the agent reasoning in the open with a live Thinking… timer, then proposing a task-list plan (generate scenarios → run an evaluation with simulation) and stopping for a typed confirmation, sliced from the autoplay recording */}
 
@@ -83,7 +83,7 @@ This tutorial uses **Plan mode** as its spine — the agent proposes a task list
     **You should see:** a streaming reasoning rail with a **Thinking… *Ns*** timer, a proposed task list in the transcript, and — once you confirm — the agent beginning to work the plan.
   </Step>
 
-  <Step title="Approve each write the agent proposes {#ch-approve}">
+  <Step title="Approve each write the agent proposes">
     As the agent works the plan, it stops for you before it does anything consequential. When it reaches a step that **writes** — generating the batch of Scenarios, starting an Evaluation — the run **halts at that tool call** and a **permission card** replaces the composer. The agent does not continue until you decide.
 
     The permission card is a rich preview, not a bare ID to trust blindly. Before you approve, it shows the **diff**, the **dependencies**, and the **proposed end state** of the write — so you can see exactly what's about to change and what depends on it.
@@ -111,7 +111,7 @@ This tutorial uses **Plan mode** as its spine — the agent proposes a task list
     **You should see:** a permission card in place of the composer with a diff/dependencies/proposed-state preview, your **Approve** landing the write for real, and a resolved row in the transcript recording the decision.
   </Step>
 
-  <Step title="Click into the objects it built {#ch-objects}">
+  <Step title="Click into the objects it built">
     When a step reads records, the agent renders them as clickable record objects in the chat rather than describing them in prose. When a step reads multiple records — the batch of Scenarios it just generated, say — the result renders as a **clickable object table** right in the chat: real, human-readable records, no bare IDs. Click an entry and that record's real **fly-in** opens in context — the same fly-in you'd get from the Scenarios or Evaluations surface.
     {/* ACCURACY-AUDIT-PENDING: multi-record results render as a clickable object table of human-readable records that deep-link into real record fly-ins — verify by asking the agent for multiple records on the release tag */}
 
@@ -157,22 +157,12 @@ Transcripts are persisted, too. Navigate away or reload, then reopen the chat, a
 
 ## Jump back to a beat
 
-Each beat of this flow stands on its own — link straight to the one you need.
+Each beat of this flow stands on its own — scroll back to the step you need:
 
-<CardGroup cols={2}>
-  <Card title="Clarify-first questions" icon="message-circle-question" href="#ch-clarify">
-    The agent leads with a question instead of guessing — single- and multi-question cards with a write-in Other.
-  </Card>
-  <Card title="Plan, then confirm" icon="list-checks" href="#ch-plan">
-    Streaming reasoning, a proposed task list, and the typed confirmation that moves planning to execution.
-  </Card>
-  <Card title="Approve the writes" icon="shield-check" href="#ch-approve">
-    The permission card, the rich write preview, and what "Approve" actually executes.
-  </Card>
-  <Card title="Click into the objects" icon="table" href="#ch-objects">
-    Clickable object tables, record fly-ins, and the Progress / Context / Outputs side rail.
-  </Card>
-</CardGroup>
+- **Clarify-first questions** — the agent leads with a question instead of guessing: single- and multi-question cards with a write-in Other.
+- **Plan, then confirm** — streaming reasoning, a proposed task list, and the **Approve & run** confirmation that moves planning to execution.
+- **Approve the writes** — the permission card, the rich write preview, and what "Approve" actually executes.
+- **Click into the objects** — clickable object tables, record fly-ins, and the Progress / Context / Outputs side rail.
 
 {/* CAPTURE-PENDING: evaluate-with-trust-agent.mp4 (+ .gif fallback + poster) — the full autoplay reel rendered once via pipeline/, click-to-play, gated here at the end inside a "Watch the entire flow end-to-end (optional)" Accordion */}
 
