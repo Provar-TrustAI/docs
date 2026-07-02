@@ -5,6 +5,8 @@ description: "Agent evaluation platform — test, validate, and monitor AI agent
 
 import LatestRelease from "/snippets/latest-release.mdx";
 
+<LatestRelease />
+
 Provar Trust AI is an **agent evaluation platform** for the teams building, integrating, and operating production AI agents. Connect your agent, define scenarios — persona-and-goal test cases with an authored expected output — run evaluations that score every persona, grade the real conversations your agent already had, and check the automated judges against your own verdicts — all before a change ships to customers. A built-in Trust Agent drives this loop for you in plain language, guiding you from an empty project to a first scored evaluation, and pausing for your approval before any write.
 
 <Frame caption="Interactive prototype — the Trust Agent across the full, docked, and pill shells. Design reference.">
@@ -37,7 +39,7 @@ Trust AI is built around one core workflow: **connect → annotate → define �
 1. **Connect** your agent — AWS Bedrock AgentCore, Salesforce Agentforce, or a Claude-managed agent — and ingest its real [Sessions](/concepts/sessions), including the agent's reasoning and model calls where the runtime provides them.
 2. **Annotate** sessions with pass/fail verdicts, severity, and notes — human judgment becomes the ground truth the automated judges are measured against.
 3. **Define** [Scenarios](/concepts/scenarios) — each one a named persona-and-goal test case with an authored expected output. Every project has one flat, searchable Scenarios list.
-4. **Pick** [Evaluators](/concepts/evaluators) — LLM Judges for qualitative judgment, Structured Match for deterministic checks — or adopt the Trust Library's recommended evaluators and OWASP-aligned starter safety scenarios in one move, then tailor the rubrics in plain language.
+4. **Pick** [Evaluators](/concepts/evaluators) — plain-language LLM judges you tailor with Passes-when / Fails-when rules — or adopt the Trust Library's recommended evaluators and OWASP-aligned starter safety scenarios in one move. Deterministic checks (expected actions and routes) live on each scenario's Expected Output.
 5. **Run** an [Evaluation](/concepts/evaluations) against a specific Agent Version — scenarios simulate one conversation per persona, and captured sessions can be graded directly.
 6. **Review** the dual-headline results — how often the agent passed, and how often the evaluators agreed with a human verdict — persona by persona, then refine and run again.
 
