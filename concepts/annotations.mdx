@@ -1,103 +1,105 @@
 ---
 title: "Annotations"
 icon: "tag"
-description: "Human judgment attached to Sessions and Turns. The signal every Evaluator calibrates against."
+description: "Human judgment recorded in typed columns on Sessions. The ground truth that grades every automated judge."
 ---
 
-An Annotation is a piece of **human judgment** attached to a [Session](/concepts/sessions) or to a single Turn within one. Pass/fail, rubric score, freeform note, or tag — Annotations are how reviewer judgment becomes data. They are the **signal** every [Evaluator](/concepts/evaluators) calibrates against, and the **filter** that selects rows worth promoting into a [Scenario set](/concepts/scenarios).
+An Annotation is a piece of **human judgment** attached to a [Session](/concepts/sessions). You record it in typed **annotation columns** on the Sessions surface — a pass/fail verdict, a severity, a score, tags, or a reviewer note — and it becomes data the rest of Trust AI can use. The human **Verdict** is the ground truth every [Evaluator](/concepts/evaluators) is measured against: it grades the judges.
 
-Without Annotations, the rest of Trust AI is theater: Evaluators would have nothing to calibrate to, Scenario sets would be unfiltered firehoses, and Evaluations would produce scores no one trusted.
+Without Annotations, Evaluator scores are unaccountable — the app can tell you what its judges decided, but not how often those judges agree with a person.
 
-## Annotation types
+## The annotation column model
 
-An Annotation can be any of:
+Annotations live in a project-wide schema of typed columns. Each column holds one value per Session, and every project starts with three seeded columns:
 
-- **Pass / fail label** — binary reviewer judgment. The most common form; cheap to apply, easy to aggregate.
-- **Rubric score** — Likert (1-5), letter grade, or domain-specific scale. Useful when binary is too lossy.
-- **Freeform note** — prose explaining *why* this Session is interesting, broken, or representative. The richest form; hardest to aggregate.
-- **Tag** — a named label applied to a Session for filtering, slicing, or bulk operations ("regression," "happy-path," "high-priority").
+- **Verdict** — a Pass / Fail judgment of the whole Session. This column is reserved: you can't delete it or change its type, because it is the human ground-truth channel that evaluator accuracy is measured against.
+- **Severity** — a single choice among **minor**, **major**, and **blocker**.
+- **Reviewer note** — a free-text comment.
 
-A single Session can carry many Annotations across types: a pass/fail at the Session level, a 1-5 rubric on Turn 3, freeform notes on Turns 1 and 5, and a set of tags applied for filtering. The annotation surface is additive.
+You add your own columns from the Sessions table's add-column menu with **New annotation column**. Five types are available:
 
-<Note>
-  As of v2026.05.26, the Trust AI UI also supports **axial** annotations in addition to the types listed above. Annotations can be edited inline in the **Scenario set detail view** as well as in the Sessions view.
-</Note>
+| Type | Holds |
+|---|---|
+| **Pass / Fail** | A binary verdict |
+| **Score** | A numeric rating (1–5) |
+| **Category** | A single choice from options you define |
+| **Tags** | Multiple tags from a palette |
+| **Comment** | A free-text note |
 
-{/* CAPTURE-PENDING: scenarios-inline-annotation.gif — toggling pass/fail verdicts inline on scenario rows in the scenario-set detail, without leaving the table (replaces the retired pre-rename capture datasets-inline-annotation.gif, whose UI still reads "Datasets") */}
+Annotations are **Session-level**: each value judges the conversation as a whole. There is no per-Turn annotation — if a specific exchange is what matters, say so in a **Reviewer note** or a **Comment** column.
 
-## Session-level vs Turn-level
+## Where you annotate
 
-Annotations attach at one of two granularities:
+Annotation happens where the Sessions already are — there is no separate review surface:
 
-- **Session-level** — judges the whole interaction. "Did this Session as a whole resolve the user's intent?"
-- **Turn-level** — judges a specific exchange or tool call. "Did Turn 3 — the refund lookup — return the correct value?"
+- **Inline in the Sessions table.** **Verdict** and **Severity** cells are editable directly in the table, so a reviewer can sweep down the list without opening anything. The Verdict column shows by default; other annotation columns can be shown from the column menu.
+- **In the Session fly-in.** The fly-in's **Annotations** tab is the full schema-driven editor for every column, alongside the **Transcript**, **Evaluations**, and **Details** tabs. The same panel appears when you drill into a session from a scenario. An edit made in a table cell repaints any open panel for that Session, so the two never disagree.
 
-The original Trust AI design (ADR 0005) considered a third level, "rule-level," where Annotations would attach to a specific rule firing within a Turn. We dropped it: it was conceptually pure but operationally painful (reviewer cognitive load, annotation queue branching). Session-level and Turn-level cover every real workflow we've observed.
+{/* CAPTURE-PENDING: sessions-inline-annotation.gif — setting Verdict and Severity inline in the Sessions table, then opening the fly-in's Annotations tab to add a Reviewer note */}
 
-## The annotation queue
+To work through Sessions in volume, filter the list to the slice you care about — by Source, tag, or agent version — and save the filter as a [saved view](/concepts/saved-views). Selecting multiple Sessions raises the bulk-actions bar (**Evaluate** · **Tag** · **Download**); **Tag** applies tags from a vocabulary shared across Scenarios and Sessions, with autocomplete.
 
-The **annotation queue** is the shared workspace where QA Practitioners apply Annotations. It is the surface they live in.
+## Two verdicts, one rule
 
-A queue is typically:
+A Session can carry two verdicts at once, and they never overwrite each other:
 
-- **Filtered** to Sessions needing review (no Annotation yet, or annotated by someone whose judgment another reviewer wants to verify)
-- **Sliced** by criteria — by intent classification, by tag, by Agent Version, by time window
-- **Bulk-actionable** — apply a tag or a label to many Sessions at once; bulk-add a filtered slice to a Scenario set
+- The **automated verdict** — the three-state pill (**Pass** / **Fail** / **Not evaluated**) produced by [Evaluations](/concepts/evaluations). Only automated results set it.
+- The **human Verdict annotation** — your Pass / Fail judgment in the reserved Verdict column.
 
-A team's annotation rate is the practical bottleneck on Scenario set quality. A reviewer churning through 50 Sessions a day will, over a quarter, produce enough signal to calibrate Evaluators well; one churning through five will not. The queue UX exists to optimize for the former.
+The rule: **your Verdict grades the judges, and never overrides the automated verdict.** When a Session carries both, Trust AI compares them, and the agreement rate surfaces as the **Evaluator accuracy** headline on evaluation results — how often the automated judges reached the same conclusion a person did. A Session where the two disagree is exactly the signal worth investigating: either the agent's behavior is subtle, or the Evaluator's rubric needs work.
 
 ## Annotations vs Evaluator scores — different things, paired
 
-It's easy to confuse Annotations and Evaluator scores. They're structurally similar (a number or label attached to a Session/Turn) but they come from different sources and serve different purposes:
+Annotations and Evaluator scores are structurally similar — a judgment attached to a Session — but they come from different sources and answer different questions:
 
 | | Annotation | Evaluator score |
 |---|---|---|
 | **Source** | Human reviewer | LLM Judge or Structured Match |
-| **Purpose** | Calibrate Evaluators; curate Scenario sets | Compare Agent Versions at scale |
-| **Cost per row** | Reviewer minutes | LLM tokens / compute |
-| **When applied** | After ingestion, during review | At Evaluation time, programmatically |
-| **Authoritative?** | Yes, by definition | Only insofar as it agrees with Annotations |
+| **Question answered** | "Was this actually acceptable?" | "Does this pass the rubric, at scale?" |
+| **Cost per Session** | Reviewer minutes | LLM tokens / compute |
+| **When applied** | During review, any time after capture | At Evaluation time, programmatically |
+| **Role** | Ground truth for evaluator accuracy | Sets the automated verdict |
 
-The relationship is **calibration**: Evaluator scores are trusted to the degree they agree with Annotations on the same rows. The calibration loop ([Evaluators → Calibration](/concepts/evaluators#calibration-the-loop-that-makes-llm-judges-trustworthy)) is the bridge between the two.
+The relationship is **calibration**: Evaluator scores earn trust to the degree they agree with human Verdicts on the same Sessions. That agreement is what the calibration surfaces on [Evaluators](/concepts/evaluators) measure.
 
 ## Workflows
 
 The common annotation patterns:
 
 <CardGroup cols={2}>
-  <Card title="Walk-and-judge" icon="walking">
-    Open a filtered queue. Open a Session. Read it. Apply pass/fail + a freeform note if needed. Move to the next. The bread-and-butter pattern for QA Practitioners.
+  <Card title="Walk and grade" icon="walking">
+    Filter the Sessions list, open the first fly-in, read the transcript, set **Verdict** and **Severity**, add a **Reviewer note** if the why matters. Step to the next Session without closing the panel. The bread-and-butter pattern.
   </Card>
-  <Card title="Bulk tag" icon="tags">
-    Filter to a slice ("all Sessions where the agent invoked `refund_lookup`"), bulk-apply a tag ("refund-flow"), use the tag downstream for Scenario set curation or Evaluator targeting.
+  <Card title="Sweep the table" icon="table">
+    For quick judgments, skip the fly-in: edit **Verdict** and **Severity** cells inline, straight down the table. Fastest way to build ground truth across a large slice.
   </Card>
-  <Card title="Turn-by-Turn for hard cases" icon="search">
-    Some Sessions need granular annotation — Turn 3 was wrong, Turn 5 recovered. Apply Annotations at the Turn level so the Evaluator calibration is precise.
+  <Card title="Bulk tag a slice" icon="tags">
+    Filter to a slice, select all, hit **Tag**. Tags share one vocabulary across Scenarios and Sessions, so the same label works for filtering on both surfaces.
   </Card>
-  <Card title="Calibration set authoring" icon="target">
-    Pick 10-20 representative Sessions, annotate them with intentional care, mark them as the calibration set for an Evaluator. The Evaluator's rubric gets iterated against this set.
+  <Card title="Add a review dimension" icon="sliders-horizontal">
+    When pass/fail is too lossy, create a **Score** or **Category** column with **New annotation column** — "tone 1–5," "failure mode" — and grade the slice against it.
   </Card>
 </CardGroup>
 
-## What you do with annotated data
+## What annotated data feeds
 
-Annotations only justify their cost if they get used downstream. The three uses, in order of payoff:
+Annotations justify their cost downstream:
 
-1. **Curate Scenario sets** — filter to annotated Sessions of interest, bulk-add to a Scenario set. The human judgment travels with each row.
-2. **Calibrate Evaluators** — pick annotated rows, run the draft Evaluator against them, compare scores. Refine the rubric until agreement is high.
-3. **Spot-check Agent Versions** — when you suspect a regression, filter to recent annotated Sessions of a specific category and inspect the deltas across Agent Versions before running a full Evaluation.
+1. **Evaluator accuracy** — every human Verdict on an evaluated Session sharpens the judge-vs-human agreement number on evaluation results. This is the primary payoff: it tells you whether to trust the automated scores.
+2. **Evaluator calibration** — when accuracy is low, the disagreeing Sessions show you exactly where the rubric misjudges. Refine the Evaluator and re-run.
+3. **Review-driven evaluation** — filter to the Sessions your review flagged, select them, and hit **Evaluate** to grade them with your judges. Annotation is not a prerequisite: you can evaluate Sessions you haven't annotated at all.
 
-All three close the loop on the [evaluation loop](/concepts/evaluation-loop) — Annotations are the input that makes everything downstream trustworthy.
+All three close the loop described in [the evaluation loop](/concepts/evaluation-loop) — Annotations are what keep the automated half of that loop honest.
 
 ## Working with Annotations
 
-Most annotation work happens directly in the UI: open a Session or a scenario, apply a pass/fail, a rubric score, a freeform note, or a tag — at either the Session level or the Turn level. To label many Sessions at once, filter the Sessions list to the slice you want and bulk-apply a tag, or ask the Trust Agent to tag a filtered set for you. Removing an Annotation is the same gesture in reverse, done inline on the row.
+Annotating is one of the few genuinely hands-on tasks in Trust AI — the judgment is the point, so no agent does it for you. You can ask the Trust Agent to find the Sessions worth reviewing ("which sessions from this week have no verdict yet?"), then grade them yourself inline or in the fly-in.
 
-For teams who want to read or write Annotations programmatically, the endpoint details live in the [API Reference](/api-reference).
+Earlier releases attached annotations to entries in the legacy dataset container; those values survive on the wire through the legacy API, but the Sessions annotation columns are the product's annotation surface. For reading or writing annotation columns and values programmatically, the endpoint details live in the [API Reference](/api-reference).
 
 ## Related concepts
 
 - **[Sessions](/concepts/sessions)** — what Annotations attach to
-- **[Scenarios](/concepts/scenarios)** — annotated Sessions become scenarios in curated test beds
-- **[Evaluators](/concepts/evaluators)** — Evaluator scores are trusted insofar as they agree with Annotations
-- **[The evaluation loop](/concepts/evaluation-loop)** — Annotations are step 2
+- **[Evaluators](/concepts/evaluators)** — the judges your Verdicts grade
+- **[Evaluations](/concepts/evaluations)** — where Evaluator accuracy surfaces
+- **[The evaluation loop](/concepts/evaluation-loop)** — how annotation fits the larger cycle
