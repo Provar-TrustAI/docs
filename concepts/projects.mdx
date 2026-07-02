@@ -4,32 +4,32 @@ icon: "sliders-horizontal"
 description: "The top-level workspace container for an agent or agent fleet under evaluation."
 ---
 
-A Project is the workspace boundary around a single agent (or fleet of related agents) under evaluation. Members, runtime credentials, and every Trust AI artifact — Sessions, Annotations, Scenario sets, Evaluators, Evaluations, Agent Versions — belong to one Project.
+A Project is the workspace boundary around a single agent (or fleet of related agents) under evaluation. Member access, runtime connections, and every Trust AI artifact — Sessions, Annotations, Scenarios, Evaluators, Evaluations, Agent Versions — belong to one Project.
 
 ## What's in a Project
 
-Every Project owns five things:
+Every Project owns four things:
 
 <CardGroup cols={2}>
   <Card title="Members + access" icon="users">
-    Who can read, annotate, define Evaluators, or run Evaluations. Identity is federated via WorkOS — your organization's SSO is the source of truth.
+    Who can read, annotate, define Evaluators, or run Evaluations. Workspace members get per-Project **Viewer** or **Editor** access — granted directly, or inherited from a team.
   </Card>
-  <Card title="Runtime connection config" icon="plug">
-    Credentials for the agent platform you're evaluating — AWS Bedrock AgentCore IAM role, Salesforce Agentforce OAuth, etc. One set per Project (you can't half-connect).
+  <Card title="Runtime connections" icon="plug">
+    One or more connections to the agent platforms you're evaluating. AWS Bedrock AgentCore, Salesforce Agentforce, and Claude Managed Agent connections coexist in one Project as peers.
   </Card>
   <Card title="Inventory of artifacts" icon="folder-open">
-    Sessions ingested, Annotations applied, Scenario sets curated, Evaluators defined, Evaluations run, Agent Versions tracked. All scoped to this Project.
+    Sessions ingested, Annotations applied, Scenarios curated, Evaluators defined, Evaluations run, Agent Versions tracked. All scoped to this Project.
   </Card>
   <Card title="Settings" icon="sliders-horizontal">
-    Project name, description, default Evaluator pool, evaluation defaults, and the snapshot/restore configuration covered below.
+    Project name and description, runtime connections, member access, and — when a Project has served its purpose — permanent deletion.
   </Card>
 </CardGroup>
 
 ## Who creates Projects, and when
 
-The two personas who reach for "+ New Project" most:
+The two personas who reach for **Create new project** most:
 
-- **SI Consultant** — setting up Trust AI for a new customer engagement. The Consultant creates one Project per agent the customer cares about evaluating. Their first hour in the product is: create Project → connect runtime → import the first Sessions.
+- **SI Consultant** — setting up Trust AI for a new customer engagement. The Consultant creates one Project per agent the customer cares about evaluating. Their first hour in the product is: create the Project, connect the agent — the Trust Agent can walk you through it — and sync the first Sessions.
 - **Agent Owner** — adding a new agent to an existing customer's Trust AI workspace. Same shape, narrower scope: they know what they're evaluating and just need the workspace to put it in.
 
 In both cases, you're answering the question: "Do these things deserve to share an Evaluator pool, an annotation queue, and an Agent Version timeline?" If yes, one Project. If no, two.
@@ -38,29 +38,28 @@ In both cases, you're answering the question: "Do these things deserve to share 
 
 Practical guidance:
 
-- **Different production agents** → different Projects. Even if they share an underlying model, the Scenario sets and Evaluators that judge them are different. Don't conflate.
-- **Multiple environments of the same agent** (staging vs prod) → **one Project**, two Agent Versions. The Scenario sets and Evaluators want to be shared across environments; what differs is the version under test.
+- **Different production agents** → different Projects. Even if they share an underlying model, the Scenarios and Evaluators that judge them are different. Don't conflate.
+- **Multiple environments of the same agent** (staging vs prod) → **one Project**, two Agent Versions. The Scenarios and Evaluators want to be shared across environments; what differs is the version under test.
 - **A fleet of similar agents** (one per customer, one per region) → judgment call. If the evaluator criteria are identical, consider sharing. If they diverge, split.
 
-## Runtime connection config
+## Runtime connections
 
-A Project knows how to reach one or more agent runtimes. The connection is configured once per Project; from then on, ingestion, evaluation-time invocation, and version discovery all flow through it.
+A Project can hold multiple runtime connections at once. In **Project Settings → Connection**, the **Add connection** picker offers three platforms:
 
-Trust AI ships **AWS Bedrock AgentCore** as the supported connector today. For setup, see [Connect an AWS Bedrock AgentCore agent](/how-to/connect-agentcore).
+- **AWS Bedrock AgentCore** — a guided setup wizard built around an admin handoff: your AWS admin provisions a cross-account role, and you paste back the role ARN. For the full walkthrough, see [Connect an AWS Bedrock AgentCore agent](/how-to/connect-agentcore).
+- **Salesforce Agentforce** — a credential form: your Salesforce instance URL plus a sign-in method (JWT via an External Client App is recommended; username + password is the legacy fallback).
+- **Claude Managed Agent** — a credential form for an Anthropic managed agent on AWS: API key, region, and workspace, agent, and environment IDs.
 
-Salesforce Agentforce and Microsoft Copilot Studio connectors are on the roadmap; the Project model is intentionally pluggable.
+Connections are peers, not alternatives — each connected agent gets its own **Sync now** entry on the Sessions page, and ingestion, evaluation-time invocation, and version discovery all flow through its connection. Connection secrets are write-only: once saved, Trust AI masks them and never displays them again.
 
-## Project Snapshots
+## Members and access
 
-A Project is the unit of restore. The snapshot system captures the full state of a Project at a moment in time — its Sessions, Annotations, Scenario sets, Evaluators, Evaluations, and Agent Versions — so it can be restored or audited later.
+Access to a Project has two layers:
 
-Snapshots are useful for:
+- **Workspace membership** — people join your workspace through **Workspace settings → Members**, where invitations are sent and managed. Identity is federated via WorkOS — your organization's SSO is the source of truth.
+- **Per-Project grants** — a Project's **Settings → Members** tab shows the **Project access** panel: who can reach this Project, and whether each grant is direct or inherited from a team. **Grant access** gives an existing workspace member or team **Viewer** or **Editor** access, and you change a grant's role inline from the same list.
 
-- **Audit trails** — proving what a Project looked like at the time a regression-test run "passed"
-- **Disaster recovery** — restoring a Project after accidental destructive edits
-- **Forking** — branching an Evaluator pool to experiment without affecting the live Project
-
-Snapshots are immutable and named. Restoring a snapshot creates a new Project rather than overwriting the original.
+The Project boundary holds even for administrators: a workspace admin who isn't a member of a Project doesn't automatically see its contents — content access resolves against the Project's own grants.
 
 ## Where this fits in the evaluation loop
 
@@ -70,13 +69,15 @@ Snapshots are immutable and named. Restoring a snapshot creates a new Project ra
 
 ## Working with Projects
 
-You create and manage Projects from the UI: "+ New Project" spins one up, and a Project's Settings page is where you invite members, connect a runtime, and take or restore Snapshots. You can also ask the Trust Agent to do any of these — for example, "create a new Project for the support bot" or "snapshot this Project before I edit the Evaluators."
+You create and manage Projects from the UI. **Create new project** in the project switcher spins one up from a name and an optional description. Project names are unique within your workspace — if a name is taken, Trust AI asks you to choose a different one. A Project's **Settings** page is where you rename it, manage its connections and access, and — from the **Danger zone** on the **General** tab — delete it permanently.
 
-Developers who want the underlying endpoints — creating Projects, inviting members, snapshotting, and restoring — can find the full request/response shapes in the [API Reference](/api-reference).
+You can also ask the Trust Agent to help make a new Project productive — for example, "help me connect my agent." It checks whether an agent build is already connected and, for Claude-managed and Salesforce Agentforce agents, walks you through a plain-English checklist before you touch the connection form.
+
+Developers who want the underlying endpoints can find the full request/response shapes in the [API Reference](/api-reference).
 
 ## Related concepts
 
-- **[Sessions](/concepts/sessions)** — the raw material every Project ingests from its connected runtime
+- **[Sessions](/concepts/sessions)** — the raw material every Project ingests from its connected runtimes
 - **[Scenarios](/concepts/scenarios)** — curated test beds, scoped to one Project
 - **[Evaluators](/concepts/evaluators)** — reusable judgment functions, scoped to one Project
 - **[The evaluation loop](/concepts/evaluation-loop)** — the workflow that happens inside a Project
