@@ -31,7 +31,6 @@ However you arrive, the launcher shows a **fan-out preview** — exactly what wi
 
 Two launcher details worth knowing:
 
-- **Repeat each test case** — a 1–4 selector that runs every test case multiple times. New runs default to 2, so your results measure reliability, not just a single lucky attempt. See "Pass^K reliability" below.
 - **Re-run** — on any finished run, **Re-run** reopens the launcher pre-seeded with the original run's full configuration: same targets, same Evaluators, same Agent Version. Change one variable (usually the Agent Version) and launch.
 
 ## One-off evaluation in place
@@ -57,7 +56,7 @@ A high pass rate means little if evaluator accuracy is low: you'd be trusting ju
 
 ### Pass^K reliability
 
-When a run repeats each test case (the default is 2), the headline becomes a **Pass^K** rate — the share of test cases that passed *every* attempt, rendered literally as `Pass^2`. Hover the headline for the full curve from pass-once to pass-every-time. This is the honest number for non-deterministic agents: an agent that passes 87% of cases on one attempt can pass far fewer on all four.
+A run whose test cases were attempted more than once leads with a **Pass^K** rate instead of a plain pass rate — the share of test cases that passed *every* attempt, rendered literally as `Pass^2`. Hover the headline for the full curve from pass-once to pass-every-time. This is the honest number for non-deterministic agents: an agent that passes 87% of cases on one attempt can pass far fewer on all four. At this release the launcher runs each test case once — repeated-trial runs render Pass^K when present, but the repeat selector isn't exposed on the launcher.
 
 ### Per-persona results
 
