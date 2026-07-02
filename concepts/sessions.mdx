@@ -1,6 +1,6 @@
 ---
 title: "Sessions"
-icon: "message-square"
+icon: "database"
 description: "Captured agent conversations — synced from a connected runtime or created by scenario runs and Playground saves — that you review, annotate, and evaluate."
 ---
 
@@ -24,7 +24,7 @@ Sessions have three origins, and every session wears a **Source** chip that tell
 | Source | How the session was created |
 |---|---|
 | **Scenario** | Simulated from a scenario — by running it, generating sessions from it, or evaluating it. The session links back to the scenario it came from. |
-| **Playground** | Captured from a [Playground](/concepts/playground) conversation. |
+| **Playground** | A [Playground](/concepts/playground) conversation you didn't save as a scenario — saving one flips its Source to **Scenario**. |
 | **External** | Synced from a connected agent runtime — a real conversation your agent already had. |
 
 A session linked to a scenario always shows **Scenario**, and its **Details** tab carries a **Simulated from** card naming the scenario and persona behind it.
@@ -39,7 +39,7 @@ External sessions sync from the agent platforms connected in your [Project](/con
 
 ## In the app
 
-The Sessions list is where you review, grade, and evaluate captured conversations.
+The Sessions list is where you review, grade, and evaluate captured conversations. The table and panel behaviors shared across list surfaces — sorting, the column menu, range selection, the keyboard contract — are described in [Tables and panels](/concepts/tables-and-panels); here is what the surface offers:
 
 - **Sortable, filterable table** — the ID column shows the readable `RUN-` / `SES-` id, **Source** shows the origin chip, **Routed To** shows where the agent routed the conversation, and annotation columns (starting with a default **Verdict**) sit alongside the session data. Filter configurations persist as [saved views](/concepts/saved-views) your team can share.
 - **Typed annotation columns** — a default **Verdict** (pass / fail) column ships on every project, and **+ New annotation column** adds custom columns typed **Pass / Fail**, **Score**, **Category**, **Tags**, or **Comment**. Verdict and severity cells edit inline, right in the table.
@@ -97,7 +97,7 @@ Custom metadata your agent emits also surfaces — anything in an AgentCore invo
 
 ## Working with Sessions
 
-Everything you do with a Session happens from the Sessions list or by asking the Trust Agent. You filter the table, open a session to read its transcript, set a Verdict inline, tag it, or evaluate it — all without leaving the surface. You can also ask the Trust Agent to find and read sessions for you — "show me failed sessions from yesterday" — and evaluating them is launcher-driven from the list or the panel (see [Evaluate sessions](/how-to/evaluate-sessions)).
+Everything you do with a Session happens from the Sessions list or by asking the [Trust Agent](/concepts/trust-agent). You filter the table, open a session to read its transcript, set a Verdict inline, tag it, or evaluate it — all without leaving the surface. You can also ask the Trust Agent to find and read sessions for you — "show me failed sessions from yesterday" — and evaluating them is launcher-driven from the list or the panel (see [Evaluate sessions](/how-to/evaluate-sessions)).
 
 Developers who want the underlying endpoints can find full request and response shapes in the [API Reference](/api-reference).
 

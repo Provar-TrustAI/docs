@@ -64,16 +64,16 @@ At run time, an [Evaluation](/concepts/evaluations) applies each scenario's atta
 
 ## Calibration — the loop that makes LLM Judges trustworthy
 
-An LLM Judge is useful only if it agrees with informed humans. Trust AI measures this in two places, and in both the ground truth is **your verdicts**: a human verdict grades the judges — it never overrides the automated verdict.
+An LLM Judge is useful only if it agrees with informed humans. Trust AI measures this in two places — the **Calibrate** tab checks the judge against the pass/fail verdicts you recorded on scenarios, and **evaluator accuracy** on run results measures agreement with the human **Verdict** annotations on sessions. In both, the ground truth is **your verdicts**: a human verdict grades the judges — it never overrides the automated verdict.
 
 ### The Calibrate tab
 
 Every LLM Judge's side panel has a **Calibrate** tab (Structured Match evaluators don't — they're deterministic, so there's nothing to calibrate):
 
-1. Pick the scenarios where you've already recorded your own pass/fail verdicts.
-2. Click **Check agreement**. Calibration never runs automatically — it costs judge calls — and each check samples up to 20 items.
+1. In the **Check agreement** section, pick the scenarios that carry your own pass/fail verdicts — calibration reads a pass/fail verdict column on your scenario data, and the picker shows how many scenarios carry a verdict.
+2. Click **Calibrate**. Calibration never runs automatically — it costs judge calls — and each check samples up to 20 annotated scenarios.
 3. Read the results: a plain-language agreement headline with a verdict breakdown, and a **Row by row — disagreements first** table so the mismatches are the first thing you see.
-4. Refine your grading rules where the judge and you disagree, then re-check. **Calibration history** keeps every run, newest first, so you can watch agreement climb.
+4. Refine your grading rules where the judge and you disagree, then check again — the button reads **Re-calibrate** once a result exists. **Calibration history** keeps every run, newest first, so you can watch agreement climb.
 
 Calibration runs the exact production judge — same model, same assembled prompt, same parser — so the agreement you measure is the agreement you'll get in real Evaluations. If you edit the grading rules after a check, the tab warns you that the last result is stale.
 
@@ -124,5 +124,5 @@ Developers who want the underlying endpoints and request/response shapes can fin
 - **[Annotations](/concepts/annotations)** — the human verdicts that calibrate LLM Judges
 - **[Scenarios](/concepts/scenarios)** — where Evaluators attach, via Expected Output
 - **[Evaluations](/concepts/evaluations)** — the runs that apply Evaluators to scenarios and sessions
-- **[The evaluation loop](/concepts/evaluation-loop)** — Evaluators are the "define" step
+- **[The evaluation loop](/concepts/evaluation-loop)** — Evaluators drive step 7, calibrate and tighten
 - **[Write an effective LLM-judge prompt](/how-to/write-llm-judge-prompt)** — practical rule-writing guide
