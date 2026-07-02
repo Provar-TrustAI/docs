@@ -1,110 +1,128 @@
 ---
 title: "Evaluators"
-icon: "wand-sparkles"
-description: "Reusable judgment functions — LLM Judge or Structured Match — that score Sessions and Turns against criteria."
+icon: "ruler"
+description: "Reusable AI judges that score sessions against plain-language grading rules — adopted from the recommended library or written from scratch, then calibrated against your own verdicts."
 ---
 
-An Evaluator is a reusable judgment function. You define it once in a [Project](/concepts/projects), and it gets reused across many [Evaluations](/concepts/evaluations) — applied to whatever [Scenario set](/concepts/scenarios) you point it at, against whatever [Agent Version](/concepts/agent-versions) you're testing. The same Evaluator scoring the same Scenario set across two Agent Versions is **the apples-to-apples comparison** Trust AI is built around.
+An Evaluator is a reusable judgment function. You define it once in a [Project](/concepts/projects), attach it to the [Scenarios](/concepts/scenarios) it should grade, and it gets reused across many [Evaluations](/concepts/evaluations) — against whatever [Agent Version](/concepts/agent-versions) you're testing. The same Evaluators scoring the same scenarios across two Agent Versions is **the apples-to-apples comparison** Trust AI is built around.
 
 ## The two families
 
-Trust AI ships two kinds of Evaluators. Pick based on what you're judging:
+Trust AI has two kinds of Evaluators:
 
 <CardGroup cols={2}>
   <Card title="LLM Judge" icon="brain">
-    A plain-English rubric sent to a strong LLM (Claude, GPT-4) at evaluation time. Good for **qualitative judgment** — politeness, completeness, helpfulness, accuracy of unstructured text.
+    Plain-language grading rules applied by an AI judge at evaluation time. Good for **qualitative judgment** — politeness, completeness, helpfulness, staying in scope. This is the kind you create today, from scratch or from the recommended library.
   </Card>
   <Card title="Structured Match" icon="check-square">
-    A deterministic check on agent output metadata. Good for **structured judgment** — did the agent call the right tool, return the right intent code, hit the right schema shape.
+    A deterministic check of what the agent actually did — which skill or intent it routed to, or which tools it called and with what parameters — compared against the scenario's expected turn.
   </Card>
 </CardGroup>
 
-**When you don't know which:** start with LLM Judge if the judgment is something a careful human would describe in words. Switch to Structured Match if the judgment is something a careful human would write as a regex or a JSON path assertion.
+New evaluators you create are LLM Judges. You no longer create standalone Structured Match evaluators — structural expectations (**Expected routes**, required or disallowed actions, parameter checks) are authored directly in a scenario's **Expected Output** editor, where they belong to the scenario being graded. Existing Structured Match evaluators keep working and stay editable; each one is either a **Routing match** (which skill or intent the agent routed to) or a **Tool match** (which tools it invoked, including their parameters).
+
+## Start from the recommended library
+
+A new project doesn't start from a blank slate. Trust AI ships a curated library of recommended defaults — the Trust Library — including 12 recommended evaluators — six **Quality** and six **Safety** presets, each a plain-language pass/fail judge:
+
+- Click **Add recommended** in the Evaluators header (or the **Add recommended evaluators** call-to-action on an empty project) to open the adopt modal.
+- Each preset shows a provenance chip — a friendly category like **Answer quality** or **Safety & security** — with the underlying method cited in its tooltip. Presets already in your project show a muted **In your project** label, so adopting twice never creates a duplicate.
+- Check the ones you want and confirm with **Add N evaluators**.
+
+Three things to know about adopted presets:
+
+1. **They're ordinary evaluators.** Fully editable, no special status — they just keep a friendly **Recommended** chip on the list and detail header so their origin stays clear.
+2. **Some are marked "Tailor first."** The presets that judge goal completion, scope, or unauthorized commitments are written against a generic agent. The **Tailor first** badge is a nudge — add a rule about what *your* agent is allowed to do before relying on the check. It never blocks adoption.
+3. **They pair with scenarios.** A matching catalog of recommended starter safety scenarios exists on the Scenarios surface, and each is paired with the evaluators that score it well — surfaced as guidance when you attach evaluators, not auto-attached.
 
 ## Anatomy of an LLM Judge
 
-An LLM Judge has four parts:
+You never write a judge prompt. An LLM Judge is defined by:
 
-1. **System prompt** — describes the role ("you are a customer-support quality reviewer"). Sets the tone of judgment.
-2. **Criteria** — what specifically you're judging. Phrased as a rubric, not as "is this good?". Example: *"Did the agent (a) acknowledge the user's specific order ID, (b) provide the correct order status, (c) explain what the status means, in that order?"*
-3. **Scoring scale** — pass/fail or 1–5 scale (the two score types available in the app). Pass/fail is the easiest to calibrate; 1–5 is more nuanced but harder to get reviewer agreement on. A freeform-with-extraction option also exists, though it's less common.
-4. **Output format** — JSON with a structured score field, so the result is machine-readable.
+1. **A name and description** — what the check is, in your team's words.
+2. **A score type** — **pass/fail**, or a **1–5 scale** with a passing threshold you pick from **≥2 ≥3 ≥4 ≥5** (default ≥3).
+3. **Grading rules** — short plain-language sentences. Pass/fail judges take two lists, **Passes when…** and **Fails when…**; 1–5 judges take three anchors, **Rate 5 when…**, **Rate 3 when…**, and **Rate 1 when…**.
 
-The create/edit flow in the app walks you through these four parts — you pick the evaluator kind (LLM Judge or Structured Match), choose a score type (pass/fail or 1–5 scale), and author the criteria in a dedicated editor. The rubric gets stored as a template that re-runs against every scenario at Evaluation time.
+The app assembles your rules into the exact criteria the live judge uses. If you want to see the result, it's read-only behind **Advanced — view the prompt this produces**. A **Reason step by step** toggle asks the judge to reason before scoring.
 
-For how to author rubrics that actually work, see [Write an effective LLM-judge prompt](/how-to/write-llm-judge-prompt).
+Two properties make the judges dependable:
 
-## Anatomy of a Structured Match
+- **Deterministic scoring.** Judges run at temperature 0 — the same transcript and the same rules produce the same verdict. This is pinned by the product, not a setting.
+- **Environment problems don't count against the agent.** If a judge call fails for infrastructure reasons, the result is excluded from the score as an environment problem rather than recorded as a failure.
 
-A Structured Match assertion has three parts:
+### Tailor with AI
 
-1. **Path** — a JSONPath or dotted-key reference into the agent's structured output. Example: `output.intent`, `tool_calls[0].name`, `metadata.confidence`.
-2. **Operator** — equals, not-equals, contains, regex, exists, schema-validates.
-3. **Expected** — the value or pattern the path should resolve to.
+On the create form, the **Tailor with AI** box drafts the rules for you: describe what the evaluator should check in one sentence, click **Draft for my agent**, and draft pass/fail rules prefill the editor. You review and edit them — nothing is saved until you save.
 
-Structured Match is exact-match by default — useful when the agent emits structured metadata you can pin to (intent classification, skill activation, tool call shape). It's the right choice when "good" is defined precisely and exhaustively. It's the wrong choice when "good" is judgment-laden.
+For how to write rules that hold up, see [Write an effective LLM-judge prompt](/how-to/write-llm-judge-prompt).
 
-## In the app
+## Attaching Evaluators to Scenarios
 
-<Frame caption="The evaluator create flow — select LLM Judge or Structured Match, choose pass/fail or 1–5 scale, and author the criteria.">
-  <img src="/images/evaluators-create-demo.gif" alt="Animated demo: the evaluator creation form with kind selection, score type picker, and criteria editor" />
-</Frame>
+Evaluators meet scenarios in the scenario's **Expected Output** editor. The **+ Add evaluator** picker leads with a **Recommended for this scenario** group — the evaluators paired with that scenario's kind of failure — ahead of the full Quality/Safety catalog, and a recommended preset can be adopted and attached in one step from inside the picker. Removing an evaluator from a scenario is clean, and re-adding it is a plain attach.
 
-- **Evaluator list view** — The Evaluators surface shows every evaluator in the project. Create a new evaluator or click an existing one to edit.
-- **Create/edit flow** — Select the evaluator kind (LLM Judge or Structured Match), choose a score type (pass/fail or 1–5 scale), and author the criteria in a dedicated editor.
-- **Side panel** — Click any evaluator to open a side panel showing the recent trend sparkline and run history.
-- **Inline delete** — Delete an evaluator from the side panel. Before removing one, ask the Trust Agent which Scenario sets and Evaluations still reference it — or check the references shown in the side panel — so you don't break a comparison that depends on it.
+At run time, an [Evaluation](/concepts/evaluations) applies each scenario's attached evaluators; you can also grade a single scenario or session in place, without creating a run in the Evaluations list.
 
 ## Calibration — the loop that makes LLM Judges trustworthy
 
-LLM Judges are useful only if their scores agree with informed humans. Calibration is the loop:
+An LLM Judge is useful only if it agrees with informed humans. Trust AI measures this in two places, and in both the ground truth is **your verdicts**: a human verdict grades the judges — it never overrides the automated verdict.
 
-1. **Write a draft rubric** (the first pass — often too vague or too strict)
-2. **Score it against 10 annotated rows** from a Scenario set (rows that already have human Annotations)
-3. **Compare** Evaluator pass/fail vs Annotation pass/fail
-4. **Refine** the rubric where they disagree — usually by tightening criteria
-5. **Repeat** until agreement is high (90%+ for binary scales)
+### The Calibrate tab
 
-A well-calibrated LLM Judge agrees with a thoughtful human reviewer most of the time. An uncalibrated one is theater — it produces scores that look authoritative but don't track reality.
+Every LLM Judge's side panel has a **Calibrate** tab (Structured Match evaluators don't — they're deterministic, so there's nothing to calibrate):
 
-Trust AI's Evaluator builder shows the calibration agreement rate live as you edit the rubric, which is why getting a usable Evaluator is mostly an iterative authoring task, not a "spec it once and forget" task.
+1. Pick the scenarios where you've already recorded your own pass/fail verdicts.
+2. Click **Check agreement**. Calibration never runs automatically — it costs judge calls — and each check samples up to 20 items.
+3. Read the results: a plain-language agreement headline with a verdict breakdown, and a **Row by row — disagreements first** table so the mismatches are the first thing you see.
+4. Refine your grading rules where the judge and you disagree, then re-check. **Calibration history** keeps every run, newest first, so you can watch agreement climb.
 
-## Reusing Evaluators across Scenario sets, Agent Versions, time
+Calibration runs the exact production judge — same model, same assembled prompt, same parser — so the agreement you measure is the agreement you'll get in real Evaluations. If you edit the grading rules after a check, the tab warns you that the last result is stale.
 
-A defined Evaluator is reusable; that's the whole point. You point it at:
+### Evaluator accuracy on run results
 
-- **Different Scenario sets** — apply the same judgment criteria to different test beds
-- **Different Agent Versions** — same Scenario set, same criteria, different agent under test = **regression signal**
-- **Different time horizons** — re-running the same Evaluator on the same Scenario set two months later tells you about drift
+Evaluation run results lead with a dual headline: the **Pass rate** grades the agent, and evaluator accuracy grades the judges — how often the automated verdicts agreed with a human's session verdicts. Calibrate before you trust; an uncalibrated judge produces scores that look authoritative but may not track reality.
 
-Evaluators are versioned (lightly) — major rubric edits create a new revision. This matters mostly for audit ("which version of the rubric scored this Evaluation?"); minor wording tweaks don't bump.
+## In the app
+
+- **Evaluators list** — every evaluator in the project, with kind, score type, and any **Recommended** provenance chips. **Add recommended** and **New evaluator** live in the header.
+- **Create flow** — name and describe the evaluator, pick the score type, then author the grading rules by hand or with **Tailor with AI**. The kind is fixed once created.
+- **Side panel** — click any evaluator to open its panel: **Overview** (recent trend), **Criteria** (the grading rules, committed with **Save grading rules**; for Structured Match, what it checks), **Runs** (run history), and **Calibrate** on LLM Judges.
+- **Safe delete** — the app checks references before deleting. If active evaluation runs still depend on the evaluator, the delete is refused (**Can't delete**), so you can't silently break a comparison.
+
+## Reusing Evaluators across scenarios, Agent Versions, time
+
+A defined Evaluator is reusable; that's the whole point. You apply it:
+
+- **Across scenarios** — attach the same judgment criteria to every scenario where it's relevant
+- **Across Agent Versions** — same scenarios, same criteria, different agent under test = **regression signal**
+- **Across time** — re-running the same Evaluator on the same scenarios two months later tells you about drift
+
+Each calibration run snapshots the rules it tested along with its agreement metrics, so **Calibration history** answers "which version of the rules earned this agreement score?" — and the app tracks when the criteria were last edited, so a rename doesn't falsely mark a calibration stale.
 
 ## Why we explicitly reject other framings
 
 Trust AI's Evaluator vocabulary deliberately differs from some adjacent ecosystems:
 
-- **Not "metric."** Metrics are continuous scalars (latency, token count). Evaluators produce judgments — pass/fail or scored — which are categorical or rubric-bound. The product distinguishes these.
-- **Not "test."** Tests pass or fail without nuance. Evaluators carry reasoning — when an LLM Judge fails a row, the reasoning is part of the result, which is how you debug agent regressions.
-- **Not "guardrail."** Guardrails are runtime controls (block this output before it reaches a customer). Evaluators are post-hoc judgment. Different system, different stage.
-
-The product DESIGN.md (in `trust-ai-app/docs/`) explicitly rejects `Gauge` and `Ruler` icons for Evaluators in favor of `Wand2` — the rationale is the same: Evaluators are judgments, not measurements.
+- **Not "metric."** Metrics are continuous scalars (latency, token count). Evaluators produce judgments — pass/fail or rubric-anchored — and the product distinguishes these.
+- **Not "test."** Tests pass or fail without nuance. Evaluators carry reasoning — when an LLM Judge fails a result, the reasoning is part of it, which is how you debug agent regressions.
+- **Not "guardrail."** Guardrails are runtime controls (block this output before it reaches a customer). Evaluators are post-hoc judgment. The two even meet cleanly in results: a response blocked by a runtime guardrail shows as **Guardrail blocked** and is excluded from the score rather than counted as a failure.
 
 ## Working with Evaluators
 
 Everything you'd want to do with an Evaluator is available through the Trust Agent and the app:
 
-- **Define** an Evaluator (LLM Judge or Structured Match) — ask the Trust Agent to create one, or use the create flow in the Evaluators surface.
-- **List** the Evaluators in a Project, or open one to review its rubric or assertion definition, from the Evaluator list view.
-- **Calibrate** an LLM Judge against your annotated rows — the builder runs this as you edit and shows the agreement rate live.
-- **Edit** a rubric — major edits create a new revision (see [Reusing Evaluators](#reusing-evaluators-across-scenario-sets-agent-versions-time) above).
-- **Check references** before archiving or making rubric-breaking edits — ask the Trust Agent, or read the references shown in the side panel.
+- **Adopt** recommended evaluators — ask the Trust Agent, or click **Add recommended** on the Evaluators surface.
+- **Define** one from scratch — ask the Trust Agent to create it, or use the create flow and author the **Passes when… / Fails when…** rules.
+- **Tailor** a preset — heed the **Tailor first** badge and add a rule about what your agent is allowed to do.
+- **Attach** evaluators to scenarios from the scenario's **Expected Output** editor.
+- **Calibrate** an LLM Judge on the **Calibrate** tab — **Check agreement**, work the disagreements, re-check.
+- **Check references** before deleting — the app blocks a delete that would break active evaluation runs.
 
-Developers who want the underlying endpoints, request/response shapes, and version notes (such as the `v2026.05.19` body-shape rename and the reference-check addition) can find them in the [API Reference](/api-reference).
+Developers who want the underlying endpoints and request/response shapes can find them in the [API Reference](/api-reference).
 
 ## Related concepts
 
-- **[Annotations](/concepts/annotations)** — the human signal that calibrates LLM Judges
-- **[Scenarios](/concepts/scenarios)** — the Scenario sets Evaluators score
-- **[Evaluations](/concepts/evaluations)** — the runs that apply Evaluators to Scenario sets
+- **[Annotations](/concepts/annotations)** — the human verdicts that calibrate LLM Judges
+- **[Scenarios](/concepts/scenarios)** — where Evaluators attach, via Expected Output
+- **[Evaluations](/concepts/evaluations)** — the runs that apply Evaluators to scenarios and sessions
 - **[The evaluation loop](/concepts/evaluation-loop)** — Evaluators are the "define" step
-- **[Write an effective LLM-judge prompt](/how-to/write-llm-judge-prompt)** — practical authoring guide
+- **[Write an effective LLM-judge prompt](/how-to/write-llm-judge-prompt)** — practical rule-writing guide
