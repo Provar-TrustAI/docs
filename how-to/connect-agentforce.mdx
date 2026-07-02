@@ -1,0 +1,119 @@
+---
+title: "Connect a Salesforce Agentforce agent"
+icon: "plug"
+description: "Connect a live Agentforce agent in your Salesforce org to a Trust AI Project — JWT sign-in via an External Client App, agent discovery, and your first live run."
+---
+
+This how-to connects a **Salesforce Agentforce** agent to a Trust AI [Project](/concepts/projects). When you're done:
+
+- Trust AI can drive your live Agentforce agent — simulations and evaluation runs invoke it in your org, and those conversations land in the Project as [Sessions](/concepts/sessions)
+- The connected agent appears as an agent build you can pick when you launch an Evaluation, and on each session's Details
+
+Agentforce is one of three platforms in the **Add connection** picker, alongside **AWS Bedrock AgentCore** and **Claude Managed Agent** — see [Connect an AWS Bedrock AgentCore agent](/how-to/connect-agentcore) for the AgentCore wizard; Claude Managed Agent gets its own setup guide. This page covers Agentforce only.
+
+The fastest way to start is to ask the [Trust Agent](/concepts/trust-agent) — try *"Connect my agent."* It first checks whether an agent build is already connected (so you don't reconnect something that works), asks whether your agent is Claude-managed or Salesforce Agentforce, hands you a plain-English checklist of the values you'll need, and then points you to the connection form in Project Settings. The connection itself — including every secret — is entered in the form, described below.
+
+<Note>
+  The Agentforce connector is live and drives agents end to end — invoking the agent for evaluations is proven against a live Salesforce org. It is a newer connector than AgentCore, with less mileage on the full setup path, so expect rough edges rather than gaps.
+</Note>
+
+## Prerequisites
+
+The recommended sign-in is **JWT via an External Client App**, running as a dedicated integration user — the path that works even when Connected App creation or the password grant is disabled in your org. Have these ready:
+
+- A **Salesforce org** with an Agentforce agent already live.
+- An **External Client App** set up for Trust AI in that org, with a certificate. From it you need the **consumer key** and the **RSA private key** (PEM) paired with the certificate. Your Salesforce admin may own this step.
+- An **integration user** — the Salesforce user the agent runs as. It must be authorized to use the External Client App.
+- Your org's **instance URL** and **My Domain URL** (often the same base URL, like `https://myorg.my.salesforce.com`).
+- A **Trust AI Project**. If you don't have one yet, start with [Your first 10 minutes in Trust AI](/tutorials/quickstart).
+
+If your org still uses the legacy username + password grant instead, see [The legacy sign-in method](#the-legacy-sign-in-method) below.
+
+## Connect the agent
+
+<Steps>
+  <Step title="Open the connection form">
+    In your Project, open **Project Settings**, select the **Connection** tab, and click **Add connection**. On the "Add a connection" picker, choose **Salesforce Agentforce**.
+
+    **You should see:** the connection form with **Salesforce Agentforce** pre-selected as the **Platform Type**. Give the connection a **Connection Name** you'll recognize later, like `Production Agentforce`.
+  </Step>
+
+  <Step title="Enter your org URL">
+    In **Salesforce instance URL**, enter your org URL (like `https://myorg.my.salesforce.com`). Trust AI uses it to discover the Agentforce agents in your org.
+  </Step>
+
+  <Step title="Fill in the JWT sign-in details">
+    Leave **Sign-in method** on **JWT via External Client App (recommended)** — it's the default — and fill in the four fields it asks for:
+
+    - **Consumer key** — the External Client App consumer key
+    - **Integration user** — the Salesforce user the agent runs as (like `integration@example.com`)
+    - **My Domain URL** — used to sign in and to scope the agent session
+    - **Private key (PEM)** — the RSA private key paired with your External Client App certificate, pasted in full including the `-----BEGIN` and `-----END` lines
+
+    The private key is write-only: once saved, it's never shown back — in the API and on the edit form it appears only as a masked value. To rotate it, edit the connection and paste a new key.
+
+    **Default agent ID** is optional — leave it blank unless agent discovery is unavailable in your org (see [Troubleshooting](#troubleshooting)).
+  </Step>
+
+  <Step title="Test the connection">
+    Click **Test Connection**. Trust AI performs a real sign-in to your org with the method you chose — a successful test means every sign-in detail resolves. You'll see **Connection verified**, or the error Salesforce returned so you can fix the right field.
+  </Step>
+
+  <Step title="Save and confirm">
+    Click **Save connection**. On save, Trust AI looks up the Agentforce agents in your org and records them against the connection — the connection appears in the **Connections** list on the Connection tab, and the discovered agent shows up as an agent build.
+
+    To confirm end to end, ask the Trust Agent — *"Is an agent connected to this project?"* — and it will report the newly connected build. From here, pick the agent when you launch an Evaluation or simulate your [Scenarios](/concepts/scenarios) against it; every conversation Trust AI drives lands in **Sessions**.
+  </Step>
+</Steps>
+
+## Where Agentforce sessions come from
+
+Agentforce sessions in Trust AI are the conversations Trust AI drives — simulations and evaluation runs against the live agent. Historical session import is different: the **Sync now** dropdown on the Sessions page lists your Agentforce agent (grouped under **Salesforce Agentforce**), but picking it reports that sync isn't supported for the platform — importing past production conversations is available for AWS Bedrock AgentCore connections only today.
+
+## The legacy sign-in method
+
+If your org signs in with a username and password instead of an External Client App, set **Sign-in method** to **Username + password (legacy)**. The form swaps to these fields:
+
+- **Login URL** — defaults to `https://login.salesforce.com`; use `https://test.salesforce.com` for sandboxes
+- **Consumer key** and **Consumer secret** — from the Connected App
+- **Username** — the service account username
+- **Password + security token** — the account password, with the security token appended if your org requires one
+
+The consumer secret and password are write-only, same as the private key: saved values are masked and never displayed back. This path is kept for orgs that already use it — new connections should prefer the JWT method.
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Test Connection fails on the JWT method">
+    The test performs a real JWT sign-in, so a failure means one of the four JWT values doesn't resolve. Check, in order:
+
+    1. The **Consumer key** matches the External Client App you set up for Trust AI — not another app in the org.
+    2. The **Integration user** is spelled exactly (it's a username, like `integration@example.com`) and, on the Salesforce side, is authorized to use the External Client App. {/* ACCURACY-AUDIT-PENDING */}
+    3. The **Private key (PEM)** is the full key paired with the app's certificate, including the `BEGIN`/`END` lines — a truncated paste or the wrong key fails the signature.
+    4. The **My Domain URL** is your org's My Domain base URL — the token sign-in runs against it.
+
+    The error message under the button is the one Salesforce returned, which usually names the failing piece.
+  </Accordion>
+
+  <Accordion title="The connection saves, but no agent is discovered">
+    Trust AI discovers agents through your org using the **Salesforce instance URL**. If the connected agent doesn't appear:
+
+    1. Confirm the **instance URL** is your org's URL and the Agentforce agent is live in that org.
+    2. If discovery is unavailable in your org, edit the connection and set **Default agent ID** to the agent's ID — Trust AI uses it as the fallback when it can't list agents.
+  </Accordion>
+
+  <Accordion title="Sync now reports sync isn't supported">
+    Expected. Historical session import is available for AWS Bedrock AgentCore connections only today — see [Where Agentforce sessions come from](#where-agentforce-sessions-come-from). Your Agentforce sessions are the ones Trust AI creates by driving the agent in simulations and evaluation runs.
+  </Accordion>
+
+  <Accordion title="Connecting a sandbox org">
+    On the JWT method, the sign-in runs against your **My Domain URL**, so enter the sandbox's My Domain (sandbox domains look like `https://myorg--dev.sandbox.my.salesforce.com`). On the legacy method, also set **Login URL** to `https://test.salesforce.com`.
+  </Accordion>
+</AccordionGroup>
+
+## Related reading
+
+- **[Projects](/concepts/projects)** — the workspace that owns the connection
+- **[Sessions](/concepts/sessions)** — what the driven conversations become
+- **[Agent Versions](/concepts/agent-versions)** — how connected agent builds are tracked
+- **[Connect an AWS Bedrock AgentCore agent](/how-to/connect-agentcore)** — the AgentCore peer of this guide, including historical session sync
