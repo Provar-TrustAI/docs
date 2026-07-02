@@ -7,8 +7,8 @@ description: "How to open the Trust Agent, send a request, read its streaming re
 This how-to walks you through a working session with the **Trust Agent** — the in-app assistant that helps you do evaluation work on a [Project](/concepts/projects), live at `/projects/:id/agent`. After you've worked through it:
 
 - You can open the agent, recognize its three shells, and find your recent chats
-- You can send a request through the composer and pick how the agent works with **Ask / Plan / Act**
-- You can read a streaming reply — the reasoning rail, tool-call cards, the clickable object table, and the side rail
+- You can send a request through the composer, attach a document for the agent to read, and pick how the agent works with **Ask / Plan / Act**
+- You can read a streaming reply — the reasoning rail, tool-call cards, the clickable object table, the side rail, and the next-step chips
 - You can answer a clarifying question when the agent asks one before it acts
 
 <Note>
@@ -24,25 +24,23 @@ This how-to walks you through a working session with the **Trust Agent** — the
 
 <Steps>
   <Step title="Open the Trust Agent">
-    Go to `/projects/:id/agent` for your Project. The Trust Agent is the **default, flag-free experience** on every Project — there is no `?v2`, `?agui`, or `?legacy` flag to set, and the legacy assistant no longer exists.
-    {/* ACCURACY-AUDIT-PENDING: opening /projects/:id/agent with no query params renders the Trust Agent; ?legacy=1 / ?agui=1 / ?v2 are inert/removed — verify against the app on the release tag */}
+    Go to `/projects/:id/agent` for your Project, or click **New chat** at the top of the Project's left nav. The Trust Agent is the **default, flag-free experience** on every Project — there is no `?v2`, `?agui`, or `?legacy` flag to set, and the legacy assistant no longer exists.
 
-    Starting a new chat opens a **Welcome** page, and the welcome prompt is sent for you as the first turn — so a new chat opens already streaming its first message, not as an empty transcript.
+    Starting a new chat opens a **Welcome** page with four starter-prompt pills, tuned to where your Project is: a brand-new Project offers a cold-start set (**Connect agent**, **Explore behaviour**, **Create scenarios**, **Run evaluation**), while a Project that already has data offers a curated set (**Curate data**, **Annotate data**, **Evaluate agent**, **Analyze failures**). Clicking a pill **pre-fills the composer** — nothing streams unprompted. The prompt you submit is what sends as turn one and starts the first streaming reply.
 
-    {/* CAPTURE-PENDING: the Trust Agent Welcome surface with the first turn streaming — capture from the release tag (the old welcome-surface.png predates the Trust Agent and shows the wrong nav) */}
+    {/* CAPTURE-PENDING: the Trust Agent Welcome surface with the starter-prompt pills — capture from the release tag (the old welcome-surface.png predates the Trust Agent and shows the wrong nav) */}
 
-    **You should see:** the agent surface — a composer and a streaming transcript — render at `/projects/:id/agent` with no flag set, opening on the Welcome message as turn one.
+    **You should see:** the agent surface — a composer and a streaming transcript — render at `/projects/:id/agent` with no flag set, opening on the Welcome page's starter pills, with your submitted prompt as turn one.
   </Step>
 
   <Step title="Recognize the three shells">
     The agent runs from **one instance** that presents in three shells, and your chat state is preserved as you move between them:
 
-    - **Full page** — the agent seated in the Project content pane, with the core left nav (**Scenarios**, **Evaluators**, **Evaluations**, **Settings**) visible to its left and the composer anchored to the bottom.
+    - **Full page** — the agent seated in the Project content pane, with the Project's left nav (**New chat**, **Playground**, **Scenarios**, **Sessions**, **Evaluators**, **Evaluations**, **Project Settings**) visible to its left and the composer anchored to the bottom.
     - **Docked panel** — a panel docked in the corner so you can keep working elsewhere in the app.
     - **Pill** — a collapsed pill. When a Project has no active agent task, the agent resolves to this minimized pill.
-    {/* ACCURACY-AUDIT-PENDING: full/docked/pill shell appearance, the exact left-nav labels (Scenarios/Evaluators/Evaluations/Settings), and bottom-anchored composer — verify against the app on the release tag */}
 
-    Your chat survives navigation: move to **Evaluations** or **Scenarios** and back, and the same chat is intact — there is one agent mount at the app root, not a fresh remount per page. A **floating chat selector** lists your recent chats, most-recent first, each with a status and an unread-indicator dot only when that chat has unread messages. Those recent chats are the Project's canonical task list. Reopening any chat shows its **real prior history** — transcripts are persisted, not reset to empty.
+    Your chat survives navigation: move to **Evaluations** or **Scenarios** and back, and the same chat is intact — there is one agent mount at the app root, not a fresh remount per page. Even an **unsent draft survives**: text you left in the composer is still there when you come back, including after a full page reload. A **floating chat selector** lists your recent chats, most-recent first, each with a status and an unread-indicator dot only when that chat has unread messages. Those recent chats are the Project's canonical task list. Reopening any chat shows its **real prior history** — streamed turns and approval cards are persisted in the order they happened, so a reloaded chat matches what you saw live.
 
     <Note>
       The three shells are covered in depth on the [Trust Agent concept page](/concepts/trust-agent). This recipe assumes the **full page** shell.
@@ -60,6 +58,7 @@ This how-to walks you through a working session with the **Trust Agent** — the
     - A **/ palette** for slash commands and skills.
     - An inline **model selector** chip.
     - An **Ask / Plan / Act** toggle that picks how the agent works.
+    - An **Attach files** button for handing the agent a document to read — PDF, Word, Markdown, text, CSV, or JSON. Attaching is document-and-text only (no images), and the button is disabled until the chat has a first message — its tooltip reads **Send a message first to attach files**. Attached files persist in the side rail's **Attachments** section and open a readable preview in place, no download needed.
 
     Choose the mode for the job:
 
@@ -68,20 +67,22 @@ This how-to walks you through a working session with the **Trust Agent** — the
     | **Ask** | Clarifies and pauses before each action |
     | **Plan** | Proposes a task list for you to confirm before it changes anything |
     | **Act** | Plans and executes end to end |
-    {/* ACCURACY-AUDIT-PENDING: the @ picker, / palette, inline model-selector chip, and the Ask/Plan/Act toggle (labels + per-mode behavior) — verify against the app on the release tag */}
 
-    **You should see:** typing `@` open the mention picker and `/` open the slash/skill palette, the model-selector chip and **Ask / Plan / Act** toggle present in the composer, and your sent message anchored at the top of the transcript.
+    Two composer behaviors worth knowing: a message you send **while the agent is still replying is queued**, not lost — it dispatches when the current turn settles. And a long message collapses in the transcript behind a **Show more** / **Show less** toggle so it doesn't push the conversation off-screen.
+
+    **You should see:** typing `@` open the mention picker and `/` open the slash/skill palette, the model-selector chip, **Attach files** button, and **Ask / Plan / Act** toggle present in the composer, and your sent message anchored at the top of the transcript.
   </Step>
 
   <Step title="Read the streaming reply, tool-call cards, and side rail">
     The agent's reply **streams in live**, token by token — text appears incrementally as formatted markdown prose, with a typing-dots indicator and an accent caret while it streams, rather than arriving all at once when the turn finishes.
 
     The wait before the first tokens is the **model's own thinking time**, not a fixed delay in the agent. A collapsible reasoning rail shows a live **Thinking… Ns** timer that fills the wait and collapses to **Thought for Xs** when done. There is no fixed duration or SLA — the timer surfaces however long the model takes.
-    {/* ACCURACY-AUDIT-PENDING: streaming markdown + typing dots + accent caret, and the "Thinking… Ns" → "Thought for Xs" reasoning rail labels — verify against the app on the release tag */}
+    {/* ACCURACY-AUDIT-PENDING: streaming markdown with typing dots and an accent caret while tokens arrive — verify the exact streaming indicators against the app on the release tag */}
 
-    As the agent works, it renders tool output as structured, clickable elements:
+    As the agent works, it renders its work as structured, clickable elements:
 
     - **Tool-call cards** — when the agent calls a tool, the call appears as a card with a plain-language verb-and-object summary (for example, the records it is looking up), never raw arguments.
+    - **Thinking and model-call steps** — the transcript also shows plain-language **Thinking** steps and **Model call** rows (with a friendly model name and token counts in and out); the raw payload stays behind an opt-in disclosure.
     - **A clickable object table** — when the agent returns multiple records, they render as a table of real rows with human-readable labels, not bare IDs. Click a row to open that record's fly-in in context.
     - **A single-record card** — a one-record reference renders as a card with a label and description (no bare ID); click it to open the real record's fly-in.
 
@@ -89,25 +90,26 @@ This how-to walks you through a working session with the **Trust Agent** — the
 
     {/* CAPTURE-PENDING: trust-agent tool-call card + clickable object table still — capture from the release tag and replace this placeholder */}
 
-    Alongside the transcript, a **side rail** tracks the task in three sections, in order:
+    Alongside the transcript, a **side rail** tracks the task in four sections, in order:
 
     1. **Progress** — the plan and live step counts.
     2. **Context** — the entities the task is working with.
     3. **Outputs** — per-entity rows of what the agent created, updated, or ran, each deep-linking to a fly-in.
+    4. **Attachments** — the files you attached, each opening its in-place preview.
 
-    The side rail is hidden when the active task has no referenced entities.
-    {/* ACCURACY-AUDIT-PENDING: side-rail section order Progress → Context → Outputs, Outputs rows deep-linking to fly-ins, and the rail hidden when no entities are referenced — verify against the app on the release tag */}
+    The rail appears whenever any of its sections has content — even a plan-only or single-lookup turn shows it — and it stays put across the whole conversation. Only a purely conversational exchange, where the agent touched nothing, shows no rail.
 
-    {/* CAPTURE-PENDING: trust-agent side-rail still (Progress, Context, Outputs sections) — capture from the release tag and replace this placeholder */}
+    {/* CAPTURE-PENDING: trust-agent side-rail still (Progress, Context, Outputs, Attachments sections) — capture from the release tag and replace this placeholder */}
 
-    **You should see:** the reply stream in as markdown, a **Thinking… Ns** timer fill the wait, tool calls render as readable cards, multiple records render as a clickable table, and a **Progress** / **Context** / **Outputs** side rail track the task.
+    When a turn finishes, the agent may offer up to three **next-step chips** — one-tap suggestions for what to do next. Clicking a chip **pre-fills the composer** with a ready-to-send prompt; a chip never sends anything on its own.
+
+    **You should see:** the reply stream in as markdown, a **Thinking… Ns** timer fill the wait, tool calls render as readable cards, multiple records render as a clickable table, a **Progress** / **Context** / **Outputs** / **Attachments** side rail track the task, and next-step chips waiting under the finished reply.
   </Step>
 
   <Step title="Answer a clarifying question">
     For an open-ended or ambiguous request, the agent's first move is to **ask a clarifying question rather than act**. A question card appears in the composer slot — it replaces the composer while it is open — and nothing runs until you answer.
 
     Single- and multi-question cards offer drafted choices plus a write-in **Other** option, and the card can be dismissed. A multi-question flow lets you move back and forth between questions before you submit; on submit, the agent resumes with your answers.
-    {/* ACCURACY-AUDIT-PENDING: clarify-question card replaces the composer, offers a write-in "Other" option, supports back/forward navigation across questions, and can be dismissed — verify against the app on the release tag */}
 
     The prototype below is the multi-question clarify flow: move between questions, type a write-in answer, and submit to see the answers echoed back as a resolved card.
 
@@ -124,8 +126,8 @@ This how-to walks you through a working session with the **Trust Agent** — the
   </Step>
 
   <Step title="Know that writes pause for your approval">
-    When the agent proposes a **write** — creating, updating, or deleting a record — it pauses for your approval before doing anything. A permission card appears and the run waits until you decide; only an approved write executes. The agent only ever sees and acts on your **current organization's** Project data, so its work is scoped to your tenant.
-    {/* ACCURACY-AUDIT-PENDING: a proposed write surfaces a permission card and the run pauses until approved; the agent acts only on the current org's project data — verify against the app on the release tag */}
+    When the agent proposes a **write** — creating, updating, or deleting a record — it pauses for your approval before doing anything. A permission card appears and the run waits until you decide; only an approved write executes. The agent is expected to see and act only on your **current organization's** Project data.
+    {/* ACCURACY-AUDIT-PENDING: the agent acts only on the current org's project data — verify the tenant-scoping claim against the app on the release tag */}
 
     The full approval flow — the permission card, the rich write preview, approve-and-execute, and the audit echo — is its own recipe.
 
@@ -148,8 +150,20 @@ This how-to walks you through a working session with the **Trust Agent** — the
     Writes pause for approval. The agent surfaces a permission card describing the change and waits — nothing is created, updated, or deleted until you approve. See [Approve agent writes](/how-to/approve-agent-writes).
   </Accordion>
 
+  <Accordion title="I sent a message while the agent was still replying">
+    It isn't lost. A message sent mid-reply is **queued** and dispatches once the current turn settles — you'll see it held in the composer area until then. Pressing Enter again while one message is queued merges the new text onto the queued message.
+  </Accordion>
+
+  <Accordion title="I came back and the reply was cut off">
+    If you leave (or lose connection) while a reply is streaming, reopening the chat shows a quiet **This reply was interrupted.** note with a one-tap **Continue**. Continue resumes the reply from the agent's saved context — it doesn't reattach to the original live stream, so the resumed reply picks up from what was already saved.
+  </Accordion>
+
   <Accordion title="The side rail isn't showing">
-    The side rail is hidden when the active task has no referenced entities. Send a request that touches real records (for example, asking the agent to find Sessions) and the **Progress** / **Context** / **Outputs** rail appears.
+    The side rail only appears once one of its sections has content — a plan, records the agent read or changed, or attached files. A purely conversational exchange shows no rail. Send a request that touches real records (for example, asking the agent to find Sessions) and the **Progress** / **Context** / **Outputs** / **Attachments** rail appears and stays for the rest of the conversation.
+  </Accordion>
+
+  <Accordion title="The Attach files button is disabled">
+    Attaching needs an open chat to attach *to*: the button stays disabled until the chat has a first message, with the tooltip **Send a message first to attach files**. Send your request, then attach. Also note the supported types — PDF, Word, Markdown, text, CSV, and JSON; images aren't supported.
   </Accordion>
 </AccordionGroup>
 
