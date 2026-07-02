@@ -1,12 +1,14 @@
 ---
 title: "Agent Versions"
 icon: "git-branch"
-description: "A pinned, immutable snapshot of the agent under test. Each Evaluation runs against one Agent Version; regression tracking diffs two."
+description: "A pinned, immutable snapshot of the agent under test. Scenario-driven Evaluations pin exactly one; regression tracking reads two runs side by side."
 ---
 
-An Agent Version is a **pinned snapshot of the agent under test** — its prompt, model, tool set, retrieval config, and deployment target captured as a single, named, immutable reference. Every [Evaluation](/concepts/evaluations) runs against exactly one Agent Version, and every regression-tracking workflow is a diff between two.
+An Agent Version is a **pinned snapshot of the agent under test** — its prompt, model, tool set, retrieval config, and deployment target captured as a single, named, immutable reference. Every scenario-driven [Evaluation](/concepts/evaluations) runs against exactly one Agent Version, and every regression-tracking workflow is a diff between two.
 
-If [Sessions](/concepts/sessions) are the raw material, [Scenario sets](/concepts/scenarios) the test bed, and [Evaluators](/concepts/evaluators) the rubric, then Agent Versions are **what's being judged**.
+One exception up front: an Evaluation can also grade [Sessions](/concepts/sessions) that already happened. Those runs judge recorded transcripts and never invoke your agent, so they carry no pinned Agent Version.
+
+If Sessions are the raw material, [Scenarios](/concepts/scenarios) the test bed, and [Evaluators](/concepts/evaluators) the rubric, then Agent Versions are **what's being judged**. In UI copy you'll often see a version called an *agent build* — same thing.
 
 <Note>
   **An Agent Version is not the Trust Agent.** They share the word "agent," but they are opposite ends of the evaluation:
@@ -21,19 +23,23 @@ If [Sessions](/concepts/sessions) are the raw material, [Scenario sets](/concept
 
 The core regression-tracking pattern:
 
-1. Pick a stable **Scenario set**.
+1. Pick a stable selection of **Scenarios**.
 2. Pick the same set of **Evaluators**.
 3. Pick **two Agent Versions** — the production one and a candidate replacement.
 4. Run an Evaluation against each.
-5. Compare per-row deltas.
+5. Read the two finished runs side by side and compare per-scenario results.
 
-When the same Scenario set and the same Evaluators are held constant, **the only variable left is the agent itself**. Whatever changes in the Evaluation results between the two runs is attributable to the version change. That's the loop the Agent Version concept exists to make legible.
+When the same Scenarios and the same Evaluators are held constant, **the only variable left is the agent itself**. Whatever changes in the Evaluation results between the two runs is attributable to the version change. That's the loop the Agent Version concept exists to make legible.
+
+<Note>
+  There is no dedicated run-vs-run comparison view in the product yet — you compare by opening the two run details. **Re-run** on a finished run restores its full configuration, including the pinned agent and judges, so repeating the same setup against a different version is a one-field change.
+</Note>
 
 Hold any of those three constants and you get a different signal:
 
-- **Hold Agent Version, vary Scenario set** → "does this version regress on a different slice?"
-- **Hold Agent Version, vary Evaluator** → "does the new rubric judge this version differently?"
-- **Hold both, vary Agent Version** → **the regression diff**, the daily workflow
+- **Hold the Agent Version, vary the Scenarios** → "does this version regress on a different slice?"
+- **Hold the Agent Version, vary the Evaluators** → "does the new rubric judge this version differently?"
+- **Hold both, vary the Agent Version** → **the regression diff**, the daily workflow
 
 ## What's in an Agent Version
 
@@ -43,69 +49,70 @@ An Agent Version captures everything that influences agent behavior at runtime:
 - **Model** — Claude Opus 4.7, GPT-4o, etc., with model-side config (temperature, max tokens)
 - **Tool set** — which functions the agent can call, with their schemas
 - **Retrieval config** — knowledge base, RAG sources, search parameters (if applicable)
-- **Deployment target** — the runtime the version is deployed to (AgentCore alias, Agentforce environment, etc.)
+- **Deployment target** — the runtime the version is deployed to (an AgentCore runtime, a Salesforce Agentforce org, a Claude managed agent)
 - **Metadata** — version name, description, owner, creation time, tags
 
-Two Agent Versions that differ only in metadata are functionally identical; two that differ in any runtime input are not. The schema makes this distinction explicit.
+Two Agent Versions that differ only in metadata are functionally identical; two that differ in any runtime input are not.
 
-## Version discovery
+## Where Agent Versions come from
 
-For platforms Trust AI has a connector for, **versions are discovered automatically**:
+Agent Versions arrive through **connectors**. Three platforms connect today, as peers, from **Project Settings → Connection → Add connection**:
 
-- **AWS Bedrock AgentCore** — Trust AI reads the AgentCore alias and runtime version. Each new deployment becomes a new Agent Version row in the Project, with the AgentCore version ID pinned to the metadata.
-- **Salesforce Agentforce** *(roadmap)* — analogous: discovery via the Agentforce metadata API.
-- **Manual entry** — for agents on platforms without a connector, you create the Agent Version row manually and attach the relevant config. The Project then knows how to invoke it for evaluation-time runs.
+- **AWS Bedrock AgentCore** — a guided setup flow connects the runtime, and its builds sync into the Project automatically. Discovery stays reconciled with what's deployed: a build that no longer matches the connected runtime is archived, and pointing the connection back at it revives the record.
+- **Salesforce Agentforce** — connect your Salesforce org with JWT-based credentials, and Trust AI drives the live agent through evaluations.
+- **Claude Managed Agent** — connect an Anthropic managed agent on the Claude Platform. Trust AI observes the agent and relays its responses; the agent runs its own tools.
 
-Discovery is read-only — Trust AI never modifies the source platform. Discovered Agent Versions stay in sync with what's deployed; archiving an Agent Version in Trust AI does not affect the source runtime.
+The fastest path is to ask the **Trust Agent** to connect your agent: its guided connect flow covers Claude-managed and Salesforce Agentforce agents today, and it hands you a plain-English checklist before the connection form. For a platform without a connector, you can register an agent build directly through the API.
 
-## The VersionPill — what users see in the app
+Two things hold across every connector:
 
-In the Trust AI app, an Agent Version surfaces as a compact pill on every Session, Evaluation, and comparison view: a colored badge showing the version name (and sometimes its short SHA-equivalent). Two Agent Versions next to each other in a comparison view show as two pills side by side, color-keyed so the eye can track them.
+- **Sync is on demand and per agent.** The **Sync now** button in the Sessions page header opens a picker grouped by connected system, so you refresh exactly the agent you care about.
+- **Connection secrets stay secret.** Private keys, access keys, and API keys are write-only — once saved, they are never shown back.
 
-The pill is the **anchor** users orient around. Reviewing a regression report, you'll see something like:
+Archiving an Agent Version in Trust AI does not affect the source runtime.
 
-```
-[v2026.05.11]  →  [v2026.05.19]    pass rate: 87.2% → 84.8%  (−2.4)
-```
+## Pinned at run time
 
-Two pills, one delta, immediately legible. The pill UI is intentionally minimal: it's the most-clicked element in a comparison view, and every detail of the Agent Version is one hop away.
+When you launch a scenario-driven Evaluation, the launcher's **Agent** section asks which connected agent simulates each scenario — the run pins that build, and its results carry the pin. When you drive the run through the Trust Agent instead, it confirms which agent build it will run against before simulating, and tells you plainly if none is connected. **Re-run** on a finished run restores the original run's full configuration, including its pinned agent and judges.
+
+Evaluations launched from Sessions skip this step entirely: grading a recorded transcript needs no agent, so no version is pinned.
+
+You can also see the pin after the fact: a session's **Details** tab shows its **Model** — resolved from the pinned agent version — alongside its "Simulated from" provenance.
 
 ## Lifecycle
 
-An Agent Version is **created** on discovery (or manual entry), **active** while it's the target of new Evaluations, and **archived** when superseded. Archiving doesn't delete:
+An Agent Version is **created** on discovery (or registration), **active** while it's the target of new Evaluations, and **archived** when superseded. Archiving doesn't delete:
 
-- Historical Evaluations against the archived version remain readable and re-runnable
-- The version stays comparable from any new Evaluation
-- Snapshot exports include archived versions
+- Historical Evaluations against the archived version remain readable, and **Re-run** can restore any finished run's configuration
+- The version's results stay comparable against any newer run
 
-Versions don't expire on their own; archive is a manual or policy-driven action. A team that ships weekly might keep the last six versions hot and archive everything older; a team that ships quarterly might keep every version forever.
+Archiving follows discovery: reconciling against the connected runtime archives builds that are no longer deployed, and re-registering the same build revives the record. Versions don't expire on their own — a version stays active until the runtime it points at moves on.
 
-## Comparison semantics across more than two versions
+## Comparing more than two versions
 
 The common pattern is a two-version comparison, but the underlying primitive supports more:
 
-- **A vs B vs C** — same Scenario set, three versions. Useful for evaluating prompt-A vs prompt-B vs prompt-C in parallel. The comparison view surfaces each version's row-level score; rows where one stands out localize where each version excels or fails.
-- **A baseline + N candidates** — useful when iterating on a candidate replacement; the baseline stays pinned, candidates rotate.
+- **A vs B vs C** — the same Scenarios, three versions, three runs. Useful for evaluating prompt-A vs prompt-B vs prompt-C in parallel; reading each run's per-scenario results localizes where each version excels or fails.
+- **A baseline + N candidates** — useful when iterating on a candidate replacement; the baseline run stays pinned, candidates rotate.
 - **A vs A across time** — re-running the same Evaluation on the same Agent Version weeks apart. Surfaces non-determinism in the Evaluator (a calibration smell) and any drift in the agent's runtime behavior between the two runs.
 
-All three patterns reduce to the same Evaluation diff primitive; the UI just shows more pills.
+All three reduce to the same primitive: Evaluation runs that held the Scenarios and Evaluators constant, read against each other.
 
 ## Working with Agent Versions
 
 You do everything around Agent Versions from the app, usually by asking the Trust Agent:
 
-- **Browse them** — open a Project to see its Agent Versions, or ask the Trust Agent to list the versions in a Project.
-- **Inspect one** — click a VersionPill to open the full config snapshot, or ask the Trust Agent what's in a given version.
-- **Create one manually** — for a platform without a connector, ask the Trust Agent to create an Agent Version and attach its config (or add the row from the Project view).
-- **Archive one** — archive a superseded version from its detail view, or ask the Trust Agent to archive it.
-- **Refresh discovery** — trigger a discovery refresh against connected runtimes from the Project view, or ask the Trust Agent to re-check what's deployed.
-- **Check run options** — the available runtime invocation options for connected platforms surface in the run setup UI *(v2026.05.19+)*.
+- **See what's connected** — ask the Trust Agent which agent builds are connected in the Project; the manual view is **Project Settings → Connection**.
+- **Connect a new platform** — ask the Trust Agent to connect your agent, or add it yourself from **Connection → Add connection**.
+- **Sync on demand** — click **Sync now** in the Sessions page header and pick the connected agent to refresh.
+- **Pin one at run time** — pick the build in the launcher's **Agent** section, or tell the Trust Agent which build to evaluate.
+- **Check what a session ran on** — open the session's **Details** tab for its Model and "Simulated from" provenance.
 
-If you need the underlying endpoints and their full request/response shapes, the [API Reference](/api-reference) is the authoritative source.
+If you need the underlying endpoints — including registering a build for a platform without a connector — the [API Reference](/api-reference) is the authoritative source.
 
 ## Related concepts
 
-- **[Projects](/concepts/projects)** — the workspace that owns the runtime connection Agent Versions are discovered through
-- **[Evaluations](/concepts/evaluations)** — every Evaluation is scoped to one Agent Version
+- **[Projects](/concepts/projects)** — the workspace that owns the connections Agent Versions are discovered through
+- **[Evaluations](/concepts/evaluations)** — every scenario-driven Evaluation is scoped to one Agent Version
 - **[The evaluation loop](/concepts/evaluation-loop)** — Agent Versions are step 6 (compare)
-- **[Compare two Agent Versions](/how-to/compare-agent-versions)** — the practical how-to *(coming soon)*
+- **[Compare two Agent Versions](/how-to/compare-agent-versions)** — the regression-tracking how-to
