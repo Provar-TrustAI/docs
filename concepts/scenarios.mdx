@@ -1,233 +1,152 @@
 ---
 title: "Scenarios"
-icon: "users"
-description: "Test sets of scenarios — curated from sessions, uploaded, generated, or simulated — the versioned collections every Evaluation scores an agent against."
+icon: "list-checks"
+description: "Flat, first-class test cases — a name, a user goal, personas, and an authored expected output — that evaluations score an agent against."
 ---
 
-A **scenario** is one test case worth scoring an agent on — a curated [Session](/concepts/sessions), a hand-written prompt, a CSV-imported example, or a persona-and-goal pair: an actor with a system prompt and a goal it is trying to accomplish. A **Scenario set** is the curated, versioned collection of those rows — the stable test bed every [Evaluation](/concepts/evaluations) runs against. You build scenario sets by curating sessions, writing rows by hand, importing a CSV, generating rows from scratch with a wizard, or capturing them from a live [Playground](/concepts/playground) run, then score an agent against them.
+A **scenario** is one test case worth scoring your agent on: a name, the goal a simulated user is trying to accomplish, the personas who pursue it, and an authored **expected output** — the grading contract that says what a passing conversation looks like. Every project has one flat **Scenarios** list, and each scenario carries a stable, reader-visible id like `SCN-000123`. You define a scenario cheaply, run it to simulate real conversations, and learn its expected output from a session you like — that loop is the heart of evaluating an agent in Trust AI.
 
 <Note>
-  **Formerly Datasets.** The surface and its collections were renamed to Scenarios — the left-nav row reads **Scenarios** and a collection is a **Scenario set** — but the route and the API did not move: you open the surface at `/projects/:id/datasets`, list calls hit `/v1/datasets`, wire fields keep names like `dataset_id`, and **there is no scenarios endpoint**. This page uses **scenario** and **scenario set** in prose, because that is what the UI says; where a route or field name matters, it is shown in code as its real `datasets` token.
-  {/* ACCURACY-AUDIT-PENDING: nav label reads "Scenarios", route is /projects/:id/datasets, list calls hit /v1/datasets, and no /v1/scenarios endpoint exists — verify by driving the route + network tab on the release tag */}
+  **Formerly Datasets.** Earlier releases organized test cases as rows inside collections. As of v2026.06.30.1 those collections are gone: there is one flat Scenarios list per project, each scenario is a first-class entity, and the conversations it produces are real [Sessions](/concepts/sessions) linked back to it. The surface lives at `/projects/:id/scenarios`; the old `/projects/:id/datasets` address redirects there, so stale bookmarks still land in the right place.
 </Note>
 
 <Note>
   **Scenarios is not the Trust Agent, and not an Agent Version.** All three use the word "agent" nearby, so it is worth pinning them apart:
 
-  - **Scenarios** (this page) are the *test cases* you score an agent against — curated sessions, hand-written prompts, persona-and-goal rows. A curation surface — a table of rows.
-  - The **[Trust Agent](/concepts/trust-agent)** is your in-app *assistant* — the thing that helps you build sets, draft evaluators, and run evaluations. It lives at `/projects/:id/agent`.
+  - **Scenarios** (this page) are the *test cases* you score an agent against.
+  - The **[Trust Agent](/concepts/trust-agent)** is your in-app *assistant* — the thing that helps you create scenarios, draft evaluators, and run evaluations.
   - An **[Agent Version](/concepts/agent-versions)** is the *agent under test* — an immutable snapshot of the customer's agent whose behavior you are judging.
 
-  You score an Agent Version against a scenario set, and the Trust Agent can help you do it. None of the three is the same thing.
+  You score an Agent Version against your scenarios, and the Trust Agent can help you do it. None of the three is the same thing.
 </Note>
 
-## What's in a scenario set
+## What's in a scenario
 
-A scenario set is a named, versioned collection of rows, with persona-and-goal columns layered onto the test-case content:
+- **A name and a stable id** — the id renders as `SCN-000123` everywhere, so a scenario keeps the same handle in results, links, and conversations with teammates.
+- **A user goal** — what the simulated user is trying to accomplish ("Get a refund for a duplicate charge"). The goal drives the simulation; a scenario with a goal and no persona still simulates.
+- **Personas** (optional) — reusable, project-scoped actors that role-play the user. Attach more than one and a run produces one session per persona (see [Personas](#personas)).
+- **Expected output** — the authored grading contract: expected behavior, expected actions, and expected routes (see [Expected output](#expected-output-the-grading-contract)).
+- **Tags** — drawn from one shared project vocabulary, so the same tag autocompletes on Scenarios and Sessions alike.
+- **Linked sessions** — the real conversations this scenario has produced, listed on the scenario itself.
 
-- **A name + description** — what this set is for ("Refund-flow personas," "Onboarding edge cases").
-- **Rows** — the scenarios themselves. Each row is one test case.
-- **Version** — every set is implicitly versioned; edits create a new revision, and Evaluations pin to a revision (see [Snapshots and reproducibility](#snapshots-and-reproducibility)).
-- **Tags** — for filtering and organization.
-- **Annotations baked in** — when rows are curated from annotated [Sessions](/concepts/sessions), the human judgment travels with them.
+## The Scenarios list
 
-Each row in the detail view carries:
+Open **Scenarios** in the left nav to get the flat table: an **ID** column with the `SCN` handle, the scenario name, the **User Goal**, **Personas** as removable pills, **Expected routes** and **Expected actions** chips, attached **Evaluators**, and a **Sessions** count. Name, goal, personas, and evaluators are editable inline — click the cell, change it, done.
 
-- **Persona** — the actor that role-plays the user for this scenario (shown by name as a chip). Rows curated from sessions may have no persona — they replay instead of simulate (see [Which rows are simulatable](#which-rows-are-simulatable)).
-- **Goal** — what that persona is trying to accomplish.
-- **Source** — the row's origin: `uploaded`, `generated`, or `simulated` (see [Where scenarios come from](#where-scenarios-come-from)).
-- **Input** — the prompt or snapshotted Session content that gets sent to the agent at evaluation time.
-- **Reference output** (optional) — what "good" looks like for this row, used by some Evaluator types.
-- **Reference annotations** (optional) — the human signal that was attached to the source Session.
-- **Row-level tags** — for slicing results ("regression," "high-priority," "happy-path").
+{/* CAPTURE-PENDING: scenarios-list.png — the flat Scenarios table at /projects/:id/scenarios with SCN ids, persona pills, and Expected routes chips */}
 
-{/* CAPTURE-PENDING: scenarios-list-overview.png — the Scenarios list at /projects/:id/datasets with the nav row reading "Scenarios" */}
+The page ships with two built-in [saved views](/concepts/saved-views): **All scenarios** and **Missing expected output** — the second is your worklist of scenarios that can simulate but don't yet say what "good" means. The header carries the page's four actions: **Manage personas**, **Add recommended scenarios**, a **Run** split-button, and **New scenario**.
 
-### The Persona, Goal, and Source columns
+During a bulk run you stay on the list: each scenario shows a live in-flight badge that settles as it finishes. Runs ride out model-capacity throttling with automatic retry, and a capacity hiccup is excluded from quality metrics — it never masquerades as a drop in agent quality.
 
-Open a scenario set and you get the row table. Alongside the per-row content, the detail view renders a **Persona** column, a **Goal** column, and a **Source** column.
+## The scenario fly-in
 
-{/* CAPTURE-PENDING: scenarios-detail-view.png — scenario-set detail showing Persona + Goal + Source columns */}
-{/* ACCURACY-AUDIT-PENDING: the scenario-set detail view renders a Persona column, a Goal column, and a Source/origin column — verify by opening /projects/:id/datasets/:datasetId on the release tag */}
+Click a scenario to open a two-level fly-in over the list. The first level is the scenario itself, with workflow-ordered tabs:
 
-Click any row to open a **fly-in detail panel** on top of the list — the same fly-in interaction the rest of Trust AI uses, so you never lose your place. The panel has a **Personas and Goals** tab for editing the row's actors and objective. For rows that carry a conversation, it also renders the full transcript — with an `io_split` divider separating the input turns from the output being scored — plus a tag picker and an action for adding the row to another scenario set.
+- **Personas & Goals** — edit who pursues the goal and what the goal is.
+- **Expected Output** — the grading contract editor (next section).
+- **Sessions** — every conversation this scenario has produced, with a live count in the tab label. Click a session to stack a second-level panel over the first with that session's transcript, annotations, and evaluations — you drill in without ever losing your place in the list.
 
-{/* CAPTURE-PENDING: scenarios-row-flyin.png — a scenario row fly-in with the Personas and Goals tab */}
-{/* CAPTURE-PENDING: scenarios-flyin-demo.gif — clicking a row opens the fly-in with the transcript, io_split divider, and tag picker (replaces the retired pre-rename capture datasets-flyin-demo.gif) */}
-{/* ACCURACY-AUDIT-PENDING: clicking a row opens a fly-in panel over the list with a "Personas and Goals" tab — verify the exact tab label by driving a row on the release tag */}
-{/* ACCURACY-AUDIT-PENDING: the row fly-in includes a transcript viewer with an io_split input/output divider, a tag picker, and an add-to-scenario-set action (label formerly "Add to Dataset") — verify the panel contents and the exact action label on the release tag */}
+The panel's **More** menu carries **Run & evaluate**, **Run only**, and **Delete scenario**.
 
-## Personas
-
-A **persona** is a reusable, project-scoped actor that role-plays the user in a scenario — a system prompt plus the goals and constraints that shape how it behaves. Personas are shared across the project, so the same actor can drive many scenarios.
-
-### Manage Personas
-
-You manage personas in a **Manage Personas** modal, opened from the **Persona** cell's **Manage personas** popover footer on a scenario-set detail. It is a modal that opens in place — the page does not navigate to a separate Settings screen.
+{/* CAPTURE-PENDING: scenario-flyin.png — the two-level fly-in: L1 scenario panel on the Expected Output tab, with the nested session panel stacked over it */}
 
 <Note>
-  An older bookmark at `/projects/:id/settings/personas` redirects into the simulator's personas view rather than rendering a standalone settings page — it exists only for URL compatibility. The recommended path is the **Manage Personas** modal described here.
-  {/* ACCURACY-AUDIT-PENDING: Manage Personas opens as a page-root modal from the Persona cell "Manage personas" popover footer (no standalone Settings page), and the legacy /settings/personas URL redirects into the simulator personas view — verify by driving the popover + the legacy URL on the release tag */}
+  Projects piloting the **Test Data Management preview** see one more tab here — **Test Data**, for describing the records a run should start from and the end state it should reach. It is a preview feature behind a feature flag that is off by default in production.
 </Note>
 
-{/* CAPTURE-PENDING: scenarios-persona-editor.png — Manage Personas modal + Persona editor showing usage count and the default persona */}
+## Expected output — the grading contract
 
-In the modal, each persona carries:
+The keystone of a scenario is its **Expected Output** tab: the place you author what a passing conversation looks like. The editor has three sections:
 
-- **A usage count** — how many scenarios reference it. The count also shows inside the **Persona editor** when you open a persona to edit it.
-  {/* ACCURACY-AUDIT-PENDING: Manage Personas shows a per-persona usage count, and the same count appears in the Persona editor — verify by opening the modal + editor on the release tag */}
-- **A default marker** — exactly **one persona per project can be the default**. Setting a new default clears the previous one, so there is always at most one default.
-  {/* ACCURACY-AUDIT-PENDING: setting a default persona clears the prior default (at-most-one-default invariant) — verify by setting a default in Manage Personas on the release tag */}
-- **Default protection** — the default persona's selection checkbox is **disabled**, so it cannot be bulk-selected or deleted alongside the others. The default always survives.
-  {/* ACCURACY-AUDIT-PENDING: the default persona's selection checkbox is disabled and it cannot be multi-selected for deletion — verify by locating the default row in Manage Personas on the release tag */}
+- **Expected behavior** — LLM-judge [evaluator](/concepts/evaluators) cards that grade qualities like tone, scope, or safety. The picker surfaces the evaluators best suited to this scenario first, under **Recommended for this scenario**, ahead of the full catalog.
+- **Expected actions** — the tools the agent must (or must not) use, with per-action parameter checks. Add one with **Add action**.
+- **Expected routes** — where the conversation should be routed. Add one with **Add route**.
 
-Personas always render **by name** — in chips, in the Persona column, and in every picker. You never see a raw ID in the UI; the persona name is the display value everywhere.
-{/* ACCURACY-AUDIT-PENDING: personas render by name in chips/columns/pickers with no bare UUID in rendered UI — verify by creating a persona and checking each surface on the release tag */}
+You don't type action and route names by hand. The options come from **vocabulary the product learned from your real sessions** — the actions and routes your agent has actually used — so the contract is grounded in observed behavior rather than guesses.
 
-## Where scenarios come from
+This is why the recommended order is to define the scenario cheaply first and author expected output *after* you have sessions: run the scenario, read the conversations, find one that went the way you want, and write the contract from what you see. The **Missing expected output** saved view keeps track of the scenarios still waiting for that step.
 
-Every row carries a **Source** that records how it got into the set — one of three origins:
+{/* CAPTURE-PENDING: expected-output-editor.png — the Expected Output tab with the Expected behavior, Expected actions, and Expected routes sections */}
 
-<CardGroup cols={3}>
-  <Card title="Uploaded" icon="upload">
-    `uploaded` — a row you curated from a [Session](/concepts/sessions), wrote by hand, or imported by CSV. The curation path, including the edge cases you anticipate before you see them in production.
-  </Card>
-  <Card title="Generated" icon="wand-magic-sparkles">
-    `generated` — a row built by the [generate wizard](#the-generate-from-scratch-wizard), or by a goal-only [Playground](/concepts/playground) chat. The synthetic-from-personas path.
-  </Card>
-  <Card title="Simulated" icon="messages-square">
-    `simulated` — a row captured from a persona-driven Playground run. The full conversation a persona had with an agent, turned into a scenario.
-  </Card>
-</CardGroup>
+## Running a scenario
 
-The **Source** column on the detail view reflects each row's origin, so you can always tell a hand-written case from a generated or captured one.
-{/* ACCURACY-AUDIT-PENDING: row origin is one of uploaded / generated / simulated and the Source column reflects it; wizard rows read Generated, persona-driven Playground captures read Simulated, manual/CSV rows read Uploaded — verify by producing each origin on the release tag */}
+Running a scenario simulates one session per attached persona — each persona genuinely pursues the goal against the agent under test. There are two run modes, both available from the list's **Run** split-button, the fly-in's **More** menu, and the empty Sessions tab:
 
-<Note>
-  Turning a Playground session into a scenario row is a Playground task, not a Scenarios one — this page only notes that it happens (origin `simulated` or `generated`). For the step-by-step capture flow, see [Simulate with scenarios](/how-to/simulate-with-scenarios).
-</Note>
+- **Run & evaluate** — simulate and grade. Creates an evaluation whose results land in [Evaluations](/concepts/evaluations), scored per persona with a dual headline: how often the agent passed, and how often the automated judges agreed with a human verdict.
+- **Run only** — simulate without grading. You get the sessions to read, and no run appears in the Evaluations list. This is the cheap way to produce the raw material for expected output.
 
-### Curating sessions into a scenario set
+The split-button's primary **Run** action is the default graded run; the chevron offers the explicit choice.
 
-The richest `uploaded` path starts in [Sessions](/concepts/sessions). You could imagine running Evaluators directly against all Sessions, but that breaks down quickly: the Sessions list changes every minute as new ones get ingested, comparing results across runs is meaningless if the input set keeps shifting, and you want to evaluate against the hard cases specifically — not the firehose. Some test cases never come from real Sessions at all. A scenario set is the **stable, curated, deliberately-selected test bed** — think of it like an integration test suite for agent behavior.
+Every conversation a run produces is a **real Session**, linked back to its scenario. It appears on the scenario's Sessions tab and on the [Sessions](/concepts/sessions) surface, carrying a **Source** chip that reads **Scenario** and a **Simulated from** provenance card pointing back at the scenario that produced it. Nothing is throwaway: you can read, annotate, and re-grade these sessions like any other.
 
-The common flow: annotate Sessions, filter the Sessions list down to the ones worth testing against, and bulk-add them to a scenario set — either from the list itself or by asking the [Trust Agent](/concepts/trust-agent) to curate for you ("add the failing refund sessions to my regression set"). The human judgment travels with each row as reference annotations, and the row lands with an `uploaded` origin.
-{/* ACCURACY-AUDIT-PENDING: sessions can be bulk-added to a scenario set from the Sessions list and via the Trust Agent, and session-curated rows land with an uploaded origin — verify the bulk-add affordance and the resulting Source value on the release tag */}
+### The define → run → learn loop
 
-### CSV import and export
-
-The other `uploaded` path is a spreadsheet. Drop in a CSV with columns that map to input, reference output, and tags — useful for migrating existing test suites from spreadsheets or other tools. The same toolbar takes rows back out: select rows (or the whole set) and export to CSV for offline analysis or sharing.
-{/* ACCURACY-AUDIT-PENDING: CSV upload maps columns to input / reference output / tags, and CSV export is available from the bulk actions toolbar — pre-rename behaviors; verify both survived the Scenarios rename on the release tag */}
-
-### The generate-from-scratch wizard
-
-The **Generate scenarios from scratch** wizard builds a whole scenario set from your personas and goals. It runs in four logical steps, but the progress track shows **three pips** — generate and review share the last pip.
+Putting the pieces together, the opinionated workflow is:
 
 <Steps>
-  <Step title="Select personas">
-    A multi-select persona table (with an add-persona sub-view, so you can create a new actor without leaving the wizard). Pick the personas that will drive the set. **Pip 1 of 3.**
+  <Step title="Define cheap">
+    Create the scenario with just a name, a goal, and personas. Skip expected output — the create modal tells you so: you'll set it later, usually from a session you like.
   </Step>
-  <Step title="Define goals">
-    A numbered goal list, plus a connected-agent picker — you choose the goals each persona will pursue and the agent they will be generated against. **Pip 2 of 3.**
+  <Step title="Run">
+    **Run only** to simulate one session per persona without grading.
   </Step>
-  <Step title="Generate &amp; review">
-    The wizard generates one scenario per persona × goal pair, then drops you into a **selectable review table**. You keep the rows you want — it is not all-or-nothing — and the chosen rows land in the set with a **Generated** origin. Generate and review share **pip 3 of 3.**
+  <Step title="Learn from a good session">
+    Read the sessions on the scenario's Sessions tab. When one goes the way you want, open **Expected Output** and author the contract from the actions and routes you just watched.
+  </Step>
+  <Step title="Run &amp; evaluate">
+    From now on, graded runs score the agent against the contract — and every [Agent Version](/concepts/agent-versions) can be held to the same standard.
   </Step>
 </Steps>
 
-{/* ACCURACY-AUDIT-PENDING: the wizard is labeled "Generate scenarios from scratch", step 1 is a multi-select persona table with an add-persona sub-view, step 2 is a numbered goal list with a connected-agent picker, step 3 generates per persona×goal, step 4 is a selectable review table, the progress track shows THREE pips (Select personas / Define goals / Generate & review), and kept rows land with a Generated origin — verify by driving the wizard on the release tag */}
+For the step-by-step recipe, see [Simulate with scenarios](/how-to/simulate-with-scenarios).
 
-{/* CAPTURE-PENDING: scenarios-generate-wizard.png — the wizard on step 1 with the three-pip track */}
+## Where scenarios come from
 
-{/* CAPTURE-PENDING: scenarios-generate-wizard.gif — animated end-to-end walkthrough of the generate wizard, to be re-wrapped in an Accordion ("Watch the generate wizard end to end") in the capture pass */}
+- **New scenario** — the header button opens a short form: name, goal, personas. Expected output is deliberately deferred.
+- **Save as a scenario** from the [Playground](/concepts/playground) — an exploratory conversation you liked becomes a scenario with that conversation attached as its first linked session.
+- **Add recommended scenarios** — a starter catalog of ten safety scenarios mapped to the OWASP Agentic AI Top 10, adoptable in one move. Each comes paired with the recommended evaluators that score it well, surfaced as guidance in the Expected Output picker.
+- **Ask the [Trust Agent](/concepts/trust-agent)** — describe the behavior you want covered and let the assistant draft scenarios for you; it pauses for your approval before it writes anything.
 
-## Snapshots and reproducibility
+Note that **Source** on a session is a different idea from where a *scenario* came from: a session's Source chip is exactly one of **Scenario**, **Playground**, or **External**, and records how that conversation entered the system.
 
-Scenario-set rows are **snapshots, not deep-links**. Adding a Session to a set captures its content into the row rather than holding a pointer to the original, which buys three guarantees:
+## Personas
 
-- **Edits upstream don't change historical results.** If a Session is re-ingested or its Annotation changes, prior Evaluations are unaffected — the row is what was scored.
-- **Sets stay reproducible across time.** An Evaluation from two months ago can be re-run with confidence today.
-- **You can edit a row** without affecting the source Session — useful for prompt tweaks specific to a test case.
+A **persona** is a reusable, project-scoped actor that role-plays the user — a character with the traits and constraints that shape how it pursues a goal. Personas are shared across the project, so the same actor can drive many scenarios, and they always render by name.
 
-The cost: a scenario set and its source Sessions can diverge. If a Session is corrected upstream, the set doesn't auto-update — that's a deliberate curation choice ("does this test case still represent what I want to test?").
+Open **Manage personas** in the Scenarios page header to list, create, edit, and delete them in place. Personas live at the project level; the project's default persona is protected and can't be deleted.
 
-Versioning completes the guarantee. Every edit to a set is a new revision, and Evaluations always pin to a specific revision, so:
+Attach several personas to one scenario to test the same goal from different angles — an impatient customer, a confused first-timer, an adversarial probe. Each run scores every persona on its own, so the results tell you *which kind of user* your agent fails, not just whether it fails.
 
-- An Evaluation run yesterday is reproducible today (same revision → same input rows)
-- You can compare the same Agent Version across two revisions of a set — useful when you've expanded the set and want to know if the new rows surface anything
-- You can compare two Agent Versions across the same revision — the **core regression-tracking workflow**
+## Deleting a scenario
 
-The combination — rows are snapshots, sets are versioned, Evaluations pin to a version — is what makes Trust AI evaluations trustworthy as a regression signal.
+Delete is safe by design, with three outcomes:
 
-(For the full architectural rationale, see ADR 0004 in the trust-ai-app repo.)
-{/* ACCURACY-AUDIT-PENDING: scenario-set rows hold snapshotted content (editing a row does not mutate a source Session) and Evaluations pin to a revision — inherited datasets-domain property per ADR 0004; verify indirectly by editing a row and confirming the source is untouched on the release tag */}
+- **Blocked** — a scenario referenced by evaluations can't be deleted; you'll see "Can't delete: used in N evaluations." instead of a confirm.
+- **Confirm with disclosure** — if the scenario has produced sessions, the confirm tells you the sessions are **kept** (they are frozen records of what happened; only the link to the scenario is removed) while the scenario's expected-output contract goes with it.
+- **Instant** — a scenario with no evaluations and no sessions deletes immediately.
 
-## Simulation at evaluation time
-
-Normally an Evaluation **replays** each row — it sends the row's stored input turns to the agent under test. Scenario sets unlock a second mode: instead of replaying stored turns, an Evaluation can run a **fresh persona-and-goal simulation** for each row, generating a brand-new conversation between the persona and the agent at evaluation time.
-
-You turn this on per run with the **Simulate at eval time** toggle on the new-evaluation-run form.
-{/* ACCURACY-AUDIT-PENDING: a "Simulate at eval time" toggle on the new-run form switches each row from replaying stored turns to a fresh persona+goal simulation — verify by starting a run against a persona+goal set on the release tag */}
-
-### Which rows are simulatable
-
-A row is **simulatable** only if it has **both** at least one persona **and** a non-empty goal. Rows missing either are replayed, not simulated — so a mixed set degrades gracefully, simulating the rows it can and replaying the rest.
-
-The toggle reflects a **server-computed count of simulatable rows** in the selected set. A replay-only set — rows with no persona or goal — shows the toggle as unavailable or with a zero simulatable-row count, so you are never offered a simulation that can't run.
-{/* ACCURACY-AUDIT-PENDING: a row is simulatable only with both a persona and a non-empty goal; the toggle reflects a server-computed simulatable-row count; a replay-only set shows the toggle unavailable / zero — verify by selecting a replay-only set and a persona+goal set on the new-run form on the release tag */}
-
-### The simulated transcript
-
-When a simulate-at-eval-time run finishes, the **full persona-to-agent conversation** captured for each row is persisted onto the result and rendered inside the **evaluation result detail fly-in** — turns tagged with role and persona, not just a score. You can read exactly what the persona said, how the agent responded, and judge the behavior in context.
-{/* ACCURACY-AUDIT-PENDING: the simulated conversation transcript is persisted onto the result row and renders inside the evaluation result detail fly-in with role/persona-tagged turns — verify by opening a result fly-in after a simulate-at-eval-time run on the release tag */}
-
-## In the app
-
-The Scenarios surface is the curation home in a Project — the list of scenario sets, the detail view with Persona, Goal, and Source columns, the per-row fly-in, and the Manage Personas modal. Open it from the **Scenarios** row in the left nav.
-
-<Tabs>
-  <Tab title="The list">
-    The list of scenario sets in the project, with create, rename, and delete actions. A new set defaults to the name **Untitled** until you rename it.
-    {/* ACCURACY-AUDIT-PENDING: the Scenarios list supports create/rename/delete and a new set defaults to "Untitled" — verify by creating a set on the release tag */}
-  </Tab>
-  <Tab title="Persona &amp; Goal columns">
-    The detail view's row table renders a **Persona** column, a **Goal** column, and a **Source** column alongside the row content. Click a row for the fly-in with its **Personas and Goals** tab.
-  </Tab>
-  <Tab title="Working with rows">
-    Select one or more rows to reveal the **bulk actions toolbar** — CSV export, CSV upload, and row removal. Annotations are editable inline on rows (toggle pass/fail, pick a 1–5 score, apply tags) without a round-trip to Sessions. You can also filter rows by tag, source, annotation status, or content; bulk-tag subsets ("regression," "smoke-test"); configure which columns the table shows; and duplicate a set to experiment with variants without touching the original. The detail header's aggregate stats (row count, annotation coverage) update in real time as rows are added or removed.
-    {/* ACCURACY-AUDIT-PENDING: bulk actions toolbar (CSV export / CSV upload / remove rows), inline annotation editing, row filtering, bulk tagging, column configuration, set duplication, and live header stats — pre-rename behaviors; verify each survived the Scenarios rename, plus the exact toolbar button labels, on the release tag */}
-    {/* CAPTURE-PENDING: scenarios-detail-rows.png — scenario-set detail with annotation columns, inline pass/fail editing, and the bulk actions toolbar (replaces the retired pre-rename capture datasets-detail-view.png) */}
-  </Tab>
-  <Tab title="Personas">
-    The **Manage Personas** modal — opened from the **Persona** cell's **Manage personas** popover footer — lists personas with usage counts and a single protected default, and the **Persona editor** lets you edit one in place.
-  </Tab>
-  <Tab title="Generate wizard">
-    **Generate scenarios from scratch** opens the four-step / three-pip wizard: **Select personas**, **Define goals**, **Generate &amp; review**. Kept rows land with a **Generated** origin.
-  </Tab>
-</Tabs>
-
-Everything above — creating a set, curating rows, importing and exporting CSV, duplicating — you can also drive by asking the [Trust Agent](/concepts/trust-agent), which pauses for your approval before any write.
+Because sessions are frozen snapshots and evaluations pin what they scored, deleting or editing a scenario never rewrites history: past results stay exactly as they were recorded.
 
 ## API surface
 
-The rename is UI-layer only: scenario sets are served by the same endpoint family as before, under the pre-rename route names spelled out in the note at the top of this page — and **there is no scenarios endpoint**. The persona-and-goal additions surface as fields on the existing wire shapes: a row's `origin` (`uploaded` / `generated` / `simulated`), a set's `simulatable_row_count`, and an evaluation run's `simulate_at_eval_time` flag. The earlier `v2026.05.19` additions — duplicate, CSV export, and the tag vocabulary — live in the same family.
-
-Full request/response shapes live in the [API Reference](/api-reference).
+Scenario reads and edits go through the `/v1/scenarios` family — list, get, update, delete (with a pre-delete check), the recommended starter catalog, and each scenario's expected output. The legacy `/v1/datasets` family remains on the wire underneath as the storage the re-design was built over, so you may still see `dataset_id` fields in older payloads. Full request and response shapes live in the [API Reference](/api-reference).
 
 ## Next step
 
 <Card title="Simulate with scenarios" icon="messages-square" href="/how-to/simulate-with-scenarios">
-  The task recipe: build a persona-and-goal set, run a persona-driven simulation in the Playground, capture it as a scenario, and drive simulation at evaluation time — end to end.
+  The task recipe: create a scenario, generate sessions from it, author expected output from a good one, and run a graded evaluation — end to end.
 </Card>
 
 ## Related concepts
 
-- **[Sessions](/concepts/sessions)** — the most common source of curated scenario rows
-- **[Annotations](/concepts/annotations)** — the human judgment that travels with curated rows
-- **[Playground](/concepts/playground)** — the chat-and-simulate surface where persona runs become `simulated` scenario rows
-- **[Evaluators](/concepts/evaluators)** — what scores scenario rows
-- **[Evaluations](/concepts/evaluations)** — the runs that score an Agent Version against a scenario set, with optional eval-time simulation
-- **[The evaluation loop](/concepts/evaluation-loop)** — the workflow scenario curation is a step in
-- **[Agent Versions](/concepts/agent-versions)** — the agent under test you score against a scenario set; *not* this surface
-- **[Trust Agent](/concepts/trust-agent)** — the in-app assistant that helps you build and run sets; *not* this surface and *not* an Agent Version
-- **[Projects](/concepts/projects)** — the workspace boundary a scenario set belongs to
+- **[Sessions](/concepts/sessions)** — the real conversations scenarios produce and link back to
+- **[Evaluators](/concepts/evaluators)** — the judges the Expected behavior section attaches
+- **[Evaluations](/concepts/evaluations)** — the graded runs, with per-persona results and the dual headline
+- **[Playground](/concepts/playground)** — the exploratory surface whose conversations you can save as scenarios
+- **[Annotations](/concepts/annotations)** — the human verdicts that judge accuracy is measured against
+- **[The evaluation loop](/concepts/evaluation-loop)** — the workflow scenario authoring is a step in
+- **[Saved views](/concepts/saved-views)** — how the built-in **All scenarios** and **Missing expected output** views work
+- **[Agent Versions](/concepts/agent-versions)** — the agent under test you score against your scenarios; *not* this surface
+- **[Trust Agent](/concepts/trust-agent)** — the in-app assistant that helps you create and run scenarios; *not* this surface and *not* an Agent Version
+- **[Projects](/concepts/projects)** — the workspace boundary your scenarios belong to
