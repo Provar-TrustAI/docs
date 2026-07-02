@@ -32,6 +32,10 @@
 - A session's **Source** is exactly one of **Scenario / Playground / External** — never
   "uploaded", "generated", "simulated", or "synced" reader-visible. Route wording: Scenarios
   surfaces say **Expected routes**; Sessions say **Routed To**.
+- Two distinct human-verdict surfaces — never conflate them: session-level **Verdict**
+  annotations ground **evaluator accuracy** on runs; pass/fail **verdict columns on scenarios**
+  are what the evaluator **Calibrate** tab samples (its "Check agreement" section, **Calibrate**/
+  **Re-calibrate** button, 20-scenario cap). A human verdict never overrides an automated one.
 - The Playground's segmented toggle is **Chat / Simulate** (there is no "Ask mode"). The side
   rail's first section label is **Progress** (reserve "plan" for the planning phase).
 
