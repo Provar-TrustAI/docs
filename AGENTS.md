@@ -19,11 +19,19 @@
 - An **Agent Version** is the *customer's agent under test* — a pinned snapshot being evaluated.
   It is a different concept from the Trust Agent; never conflate them, and disambiguate on any
   page that uses both.
-- The product noun is the **Scenario set** everywhere reader-visible: the surface/nav is
-  **Scenarios**, a row is a **scenario**, and the collection is a **Scenario set** (lowercase
-  "set" mid-sentence). "Dataset" is the legacy name and survives only in the API — the wire
-  still serves `/v1/datasets` with `dataset_id` fields. Never invent a `/v1/scenarios`
-  endpoint, a scenarios route, or scenario-named wire fields.
+- A **Scenario** is a first-class, flat entity — name, goal, personas, expected output, linked
+  sessions — with a stable reader-visible id (`SCN-000123`). **Scenario sets are gone** as of
+  v2026.06.30.1: every project has one flat **Scenarios** list. Never write "Scenario set"
+  except as history (a few vestigial in-app strings still say it — do not follow them). The
+  collection is "your scenarios" / "the Scenarios list". Never call a scenario a "row".
+- Wire surface: scenario reads and edits go through **`/v1/scenarios`** (list, get/patch/delete,
+  `/recommended`, `/{id}/expected-output`, `/{id}/delete-check`; there is no `POST /v1/scenarios`).
+  **`/v1/datasets` survives as the legacy container API** underneath (create, rows, columns are
+  still on the wire) — the re-root is a rename over existing storage. The UI route is
+  `/projects/:id/scenarios`; `/projects/:id/datasets` redirects to it.
+- A session's **Source** is exactly one of **Scenario / Playground / External** — never
+  "uploaded", "generated", "simulated", or "synced" reader-visible. Route wording: Scenarios
+  surfaces say **Expected routes**; Sessions say **Routed To**.
 - The Playground's segmented toggle is **Chat / Simulate** (there is no "Ask mode"). The side
   rail's first section label is **Progress** (reserve "plan" for the planning phase).
 
@@ -51,6 +59,10 @@
 - Unverified claims read as unverified: behavior the running app hasn't confirmed carries an
   `{/* ACCURACY-AUDIT-PENDING */}` marker and is written at behavior level, hedged, never asserted
   with mechanics. Never vouch for an unverified security property.
+- Preview features are labeled preview, never GA. Test Data Management (v2026.06.30.1) is
+  flag-gated and **off by default** (frontend `VITE_TDM_PREVIEW`, backend `ENABLE_TDM`; both kept
+  off in production and FedRAMP builds) — describe it as a preview with the flag caveat, or not
+  at all. When release notes and the tagged code disagree on a flag default, the code wins.
 - Interactive demos are sanitized, self-contained design prototypes with synthetic data, always
   captioned "Interactive prototype — … Design reference." The surrounding prose, never the
   prototype, is the authority on shipped behavior.
