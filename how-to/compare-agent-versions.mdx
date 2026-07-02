@@ -32,13 +32,13 @@ If you find yourself wanting to compare two runs that **don't share their scenar
 
     The Trust Agent proposes the run — confirming which scenarios, Evaluators, and agent build it will use — and you approve it before anything launches (see [Approve agent writes](/how-to/approve-agent-writes)).
 
-    To do it by hand: from the Project's **Evaluations** list, click **+ New evaluation**. The evaluation launcher opens; choose your scenarios, keep their attached Evaluators, and pick the first build in the **Agent** section — that's the connected agent that simulates each scenario. The launcher previews the fan-out (every persona on every scenario gets its own conversation) before you confirm.
+    To do it by hand: from the Project's **Evaluations** list, click **New evaluation**. The evaluation launcher opens; choose your scenarios — their attached Evaluators are inherited automatically — and pick the first build in the **Agent** section — that's the connected agent that simulates each scenario. The launcher previews the fan-out (every persona on every scenario gets its own conversation) before you confirm.
 
     **You should see:** the run appear on the Evaluations list, with the Agent Version's label shown under the run name.
   </Step>
 
   <Step title="Re-run the same configuration against the candidate">
-    This is the step that makes the comparison trustworthy. Open the finished baseline run and click **Re-run**. The launcher reopens pre-filled with the original run's configuration — the same scenarios, the same Evaluators, and the original agent — all still editable. Change **only the Agent** to the candidate build, then launch.
+    This is the step that makes the comparison trustworthy. Open the finished baseline run and click **Re-run**. The launcher reopens with the same scenarios — their Evaluators inherited with them — and the original agent. Change **only the Agent** to the candidate build, then launch.
 
     <Note>
     *Ask the Trust Agent:* "Run the same evaluation again, but against the new candidate build."
@@ -47,7 +47,7 @@ If you find yourself wanting to compare two runs that **don't share their scenar
     Because everything except the Agent Version is held constant, any difference between the two runs is attributable to the build — not to a drifted scenario list or a different judge.
 
     <Warning>
-    If your baseline repeated each test case (its headline reads **Pass^K**, for example `Pass^2`), make sure the candidate run repeats the same number of times. A Pass^2 reliability rate and a single-attempt pass rate are different metrics and can't be compared directly.
+    If your baseline is a repeated-trial run — its headline reads **Pass^K**, for example `Pass^2` — you can't reproduce it from the launcher at this release: launcher runs attempt each case once. A Pass^K reliability rate and a single-attempt pass rate are different metrics and can't be compared directly, so establish a single-attempt baseline instead.
     </Warning>
   </Step>
 
