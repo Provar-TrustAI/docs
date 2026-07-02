@@ -1,135 +1,144 @@
 ---
 title: "Concepts"
 icon: "shapes"
-description: "The seven nouns of the evaluation loop, plus the three surfaces — Trust Agent, Scenarios, Playground — layered on top."
+description: "The seven nouns of the evaluation loop, plus the surfaces that drive it — the Trust Agent, Scenarios, Sessions, and the Playground."
 ---
 
-Trust AI is built around seven core nouns. Every workflow, every API call, every screen in the product traces back to one of them. The `v2026.06.09.1` release layers **three new surfaces** on top of those nouns — the **Trust Agent**, **Scenarios**, and the **Playground** — without changing the loop underneath. Read this page first to see how they all fit together, then dig into each one's dedicated page from the cards below.
+Trust AI is built around seven core nouns. Every workflow and every screen in the product traces back to one of them. Read this page first to see how they fit together, then dig into each one's dedicated page from the cards below.
+
+<Note>
+  **Coming from an earlier release?** Scenario sets are gone. Every project now has one flat **Scenarios** list, and the scenario itself — persona, goal, expected output — is the first-class noun.
+</Note>
 
 ## The seven nouns
 
 <CardGroup cols={2}>
   <Card title="Project" icon="sliders-horizontal" href="/concepts/projects">
-    The workspace container — owns members, runtime connection config, and every Session, Scenario set, Evaluator, Evaluation, and Agent Version under it.
+    The workspace container — owns members, connection config, and every Session, Scenario, Evaluator, Evaluation, and Agent Version under it.
   </Card>
   <Card title="Session" icon="message-square" href="/concepts/sessions">
-    One real interaction between a user and an agent — a sequence of Turns and Tool Calls. The raw material every Scenario set and Evaluation builds on.
+    One real conversation between a user and an agent — a sequence of turns and tool calls. Every session carries a Source — Scenario, Playground, or External — and can be evaluated directly.
   </Card>
   <Card title="Annotation" icon="tag" href="/concepts/annotations">
-    A human-authored pass/fail, rubric score, or freeform comment on a Turn or Session. How reviewer judgment becomes data that Evaluators can calibrate against.
+    Human judgment recorded in typed columns on a session — a pass/fail Verdict, a Severity, reviewer notes, and custom columns. The ground truth evaluator accuracy is measured against.
   </Card>
-  <Card title="Scenario set" icon="users-round" href="/concepts/scenarios">
-    A curated, versioned collection of scenarios — test-case rows curated from Sessions or Turns. The stable test bed every Evaluation runs against, snapshotted so historical results stay reproducible.
+  <Card title="Scenario" icon="users" href="/concepts/scenarios">
+    A first-class test case — name, goal, personas, expected output, and linked sessions, with a stable id like `SCN-000123`. Every project keeps them in one flat Scenarios list.
   </Card>
   <Card title="Evaluator" icon="wand-sparkles" href="/concepts/evaluators">
-    A reusable judgment function — LLM Judge (plain-English criteria) or Structured Match (deterministic checks). Defined once, reused across many Evaluations.
+    A reusable judgment function — LLM Judge (plain-English rules) or Structured Match (routing and tool checks). Adopt one from the Trust Library or write your own, then calibrate it against human verdicts.
   </Card>
   <Card title="Evaluation" icon="chart-line" href="/concepts/evaluations">
-    A single run of one or more Evaluators across a Scenario set, scoped to an Agent Version. Scored, comparable, reviewable — the artifact regressions get caught in.
+    A scored run of one or more Evaluators — simulating scenarios against an agent, or grading sessions that already happened — scoped to an Agent Version.
   </Card>
   <Card title="Agent Version" icon="git-branch" href="/concepts/agent-versions">
-    A snapshot of the agent under test — prompt, model, tool set, deployment. Comparing two Agent Versions on the same Scenario set is the core regression-testing loop.
+    A snapshot of the agent under test, connected through AgentCore, Claude Managed Agent, or Salesforce Agentforce. Running the same scenarios against two versions is how regressions get caught.
   </Card>
 </CardGroup>
 
 ## How they connect
 
-The loop is unchanged: a **Session** is reviewed into **Annotations**, curated into a **Scenario set**, scored by **Evaluators** in an **Evaluation**, and the results compared across two **Agent Versions**. The three new surfaces sit *on* that loop rather than replacing any noun:
+An **Evaluation** grades an agent along one of two paths. **Scenarios** are simulated: each scenario fans out one fresh conversation per attached persona against the **Agent Version** under test. **Sessions** are graded as they are: conversations that already happened — captured from your live agent, the Playground, or a simulation — are scored read-only by **Evaluators**. **Annotations** close the loop in the other direction: a human verdict on a session is the ground truth that measures how often the automated judges agree with a person.
 
 ```mermaid
 flowchart LR
     subgraph loop["The evaluation loop"]
         direction LR
-        S["<b>Session</b><br/>Turns + Tool Calls<br/><i>raw material</i>"]
-        A["<b>Annotation</b><br/>human signal<br/><i>reviewer judgment</i>"]
-        D["<b>Scenario set</b><br/>curated scenarios<br/><i>test bed</i>"]
+        C["<b>Scenario</b><br/>persona + goal +<br/>expected output<br/><i>test case</i>"]
+        S["<b>Session</b><br/>turns + tool calls<br/><i>real conversation</i>"]
+        A["<b>Annotation</b><br/>human verdict<br/><i>ground truth</i>"]
         E["<b>Evaluator</b><br/>LLM Judge or<br/>Structured Match<br/><i>judgment rule</i>"]
-        R["<b>Evaluation</b><br/>scored results<br/><i>per-row record</i>"]
-        V["<b>Comparison</b><br/>two Agent Versions<br/><i>regression delta</i>"]
+        R["<b>Evaluation</b><br/>scored run<br/><i>pass rate + evaluator accuracy</i>"]
+        V["<b>Agent Version</b><br/>pinned snapshot<br/><i>agent under test</i>"]
 
+        C -->|simulate per persona| R
+        S -->|evaluate directly| R
+        E -->|scores| R
+        R -->|scoped to| V
         S -->|review| A
-        A -->|curate| D
-        D -->|score with| E
-        E -->|produce| R
-        R -->|compare| V
+        A -.->|measures the judges| R
+        R -.->|simulations become sessions| S
     end
 
-    P["<b>Playground</b><br/>chat + simulate<br/><i>persona × goal runs</i>"]
+    P["<b>Playground</b><br/>Chat / Simulate<br/><i>drive the agent live</i>"]
     TA["<b>Trust Agent</b><br/>in-app assistant<br/><i>helps you run the loop</i>"]
 
-    P -.->|capture as rows| D
-    D -.->|simulate at eval time| R
+    P -.->|save as a scenario| C
     TA -.->|drives every step| loop
 ```
 
 Read the diagram in three layers:
 
-- **The loop** is the seven nouns, end to end, exactly as before. The **Scenario set** is still the curated test bed every Evaluation runs against — it lives on the **Scenarios** surface (more on that below).
-- **Scenarios and the Playground feed and drive the loop.** A Playground run can be captured back into a Scenario set as a row, and a scenario that carries a persona and a goal can be simulated fresh at evaluation time instead of replaying stored turns.
-- **The Trust Agent helps you run the whole loop.** It is the in-app assistant — it finds Sessions, builds Scenario sets, drafts Evaluators, and kicks off Evaluations on your behalf, pausing for your approval before it writes.
+- **Two paths lead into an Evaluation.** A scenario is simulated fresh at run time — one conversation per attached persona, each scored on its own. A session is graded exactly as it happened, without being modified.
+- **Annotations point at the judges, not the agent.** A human pass/fail verdict grades evaluator accuracy; it never overrides the session's automated verdict.
+- **The loop feeds itself.** Simulated and Playground conversations are saved as real sessions linked to their scenario, so every run leaves reviewable raw material behind — and the vocabulary learned from real sessions is what expected outputs are authored from.
 
-All of this happens **inside a Project**. The Project is the boundary around the loop — members, runtime credentials, and every artifact above belong to one specific Project. A Trust AI organization may have many Projects (one per agent or agent fleet under evaluation), but a single workflow always stays inside one. Every artifact is **tenant-scoped**: `organization_id` is enforced across the data model behind a shared tenant guard, so a Session, a Scenario set, or a simulation you can see always belongs to your own organization and project — never another tenant's. See [Multi-tenancy](/concepts/multi-tenancy) for the security-shaped detail.
-{/* ACCURACY-AUDIT-PENDING: organization_id is enforced NOT NULL across project-scoped + agent-core anchor tables behind a shared tenant guard — verify the cross-tenant isolation property on the release tag (claim 8) */}
+All of this happens **inside a Project**. The Project is the boundary around the loop — members, connection config, and every artifact above belong to one specific Project, and every artifact is scoped to your own organization. Access is decided by a fail-closed authorization engine, every access decision and permission change lands in an append-only audit trail, and members, teams, and per-project Viewer and Editor roles are managed from the app's Access Center. See [Multi-tenancy](/concepts/multi-tenancy) for the security-shaped detail.
 
 <Tip>
   **Next:** read [The evaluation loop](/concepts/evaluation-loop) for the workflow narrative in depth, or dig into any individual noun from the cards above.
 </Tip>
 
-## The three surfaces layered on the loop
+## The surfaces layered on the loop
 
-The `v2026.06.09.1` release adds three surfaces that make the loop faster to drive, without adding an eighth noun to the model.
+The nouns live on a handful of surfaces, each with a dedicated page. Here is what each one is for.
 
 ### The Trust Agent
 
-The **Trust Agent** is the default, flag-free in-app assistant on every project, reached at `/projects/:id/agent`. You ask it to find Sessions, build a Scenario set, draft an Evaluator, run an Evaluation, or analyze a regression — and it works in the open: it streams a transcript, renders the records it touches as clickable objects you can open in context, and gates every write behind a human-in-the-loop approval before it changes anything. It helps you run the loop; it does not replace any step of it.
-{/* ACCURACY-AUDIT-PENDING: the Trust Agent renders by default at /projects/:id/agent with no ?v2/?agui/?legacy flag, streams a transcript, renders clickable objects, and gates writes behind HITL approval — verify by driving the route on the release tag (claims 3, 10) */}
+The **Trust Agent** is the in-app assistant on every project — the **New chat** entry in the left nav, at `/projects/:id/agent`. Ask it to find sessions, create scenarios, draft evaluators, run an evaluation, or analyze a regression, and it works in the open: it streams a transcript, renders the records it touches as clickable objects you can open in context, and pauses for your approval before it writes anything. The chat is durable — streamed turns and pending approvals survive reload and disconnect and pick up where they left off.
+
+On a brand-new project it runs a guided cold start: connect your agent, watch an observe-only exploration of how it actually behaves, author behavior and security coverage — including adversarial scenarios it proposes from the OWASP Agentic AI Top 10 — and get to a first scored evaluation, all in one conversation. The [Trust Agent](/concepts/trust-agent) page covers it in depth.
 
 <Warning>
   **"Trust Agent" and "Agent Version" are two different things that share the word "agent."** Do not conflate them:
 
-  - The **[Trust Agent](/concepts/trust-agent)** is *your* assistant inside Trust AI — the thing that helps you build and run evaluations, at `/projects/:id/agent`. It operates *on* your project.
-  - An **[Agent Version](/concepts/agent-versions)** is the *customer's agent under test* — a pinned, immutable snapshot every Evaluation is scoped to. Comparing two Agent Versions is the core regression loop.
+  - The **[Trust Agent](/concepts/trust-agent)** is *your* assistant inside Trust AI — the thing that helps you build and run evaluations. It operates *on* your project.
+  - An **[Agent Version](/concepts/agent-versions)** is the *customer's agent under test* — a pinned snapshot every Evaluation is scoped to.
 
   The Trust Agent helps you evaluate Agent Versions. It is never itself "a version." Everywhere this page says "the agent" loosely, the surrounding sentence makes clear which one is meant.
 </Warning>
 
 ### Scenarios
 
-**Scenarios** is the surface where your Scenario sets live — the persona-and-goal-shaped home of the loop's test beds. The list shows **Persona** and **Goal** columns, and each row is a **scenario**: one test case. The rename is reader-facing only — the API kept its legacy paths, and there is no scenarios endpoint; the precise mapping lives in the API note on the [Scenarios](/concepts/scenarios) page.
-{/* ACCURACY-AUDIT-PENDING: the surface labelled "Scenarios" in the nav opens at /projects/:id/datasets (NOT /scenarios), shows Persona + Goal columns, and calls /v1/datasets with no /v1/scenarios endpoint — verify by driving the route + network tab on the release tag (claim 4) */}
+**Scenarios** is the project's flat list of test cases, at `/projects/:id/scenarios` (old `/datasets` links redirect there). Each scenario opens a fly-in panel: its personas and goals, its expected output, and the sessions linked to it. The **Expected output** editor is the scenario's grading contract — expected behavior (LLM-judge cards), expected actions, and expected routes, chosen from vocabulary the product learned from real sessions rather than typed by hand.
 
-A **persona** is a reusable, project-scoped role-play profile (one of them can be the project default); a **goal** is what the synthetic user is trying to achieve. A scenario that carries *both* a persona and a goal can be driven as a live simulation — the input that makes a row "simulatable." A row missing either is replayed instead of simulated. Personas and goals are first-class supporting terms; their full treatment lives on the [Scenarios](/concepts/scenarios) page.
-{/* ACCURACY-AUDIT-PENDING: a Scenario row is simulatable only when it carries both a persona and a goal; personas are project-scoped with one optional default — verify against Manage Personas + the new-eval form on the release tag (claim 6) */}
+A **persona** is a reusable, project-scoped role-play profile (one can be the project default); a **goal** is what the synthetic user is trying to achieve. At run time every attached persona is simulated and scored on its own, and a goal-only scenario with no persona still simulates. On the wire, scenario reads and edits go through `/v1/scenarios`, with the legacy `/v1/datasets` endpoints still served underneath — the API Reference tab has the full surface. The [Scenarios](/concepts/scenarios) page covers the rest.
+
+### Sessions
+
+A **Session** is both raw material and evaluation target. The Sessions list shows every conversation your agent has had — each with a **Source** chip (**Scenario**, **Playground**, or **External**) and a **Routed To** column — and its primary **Evaluate** action grades real conversations, in bulk or one at a time, using LLM-judge evaluators. Typed annotation columns — **Verdict**, **Severity**, **Reviewer note**, plus custom columns — edit inline in the table or in the session fly-in, and the human verdict they capture is what evaluator accuracy is measured against. See [Sessions](/concepts/sessions) and [Annotations](/concepts/annotations).
 
 ### The Playground
 
-The **Playground** is a per-project surface at `/projects/:id/playground` for driving a connected agent live. A **Chat** / **Simulate** toggle lets you either chat with the agent yourself (Chat mode) or auto-drive a persona ↔ agent conversation (Simulate mode), and you can capture the result back into a Scenario set as a row. It is where scenarios get exercised before they ever reach an Evaluation. The full surface is the subject of the [Playground](/concepts/playground) page.
-{/* ACCURACY-AUDIT-PENDING: the Playground is at /projects/:id/playground with an agent picker and a Chat / Simulate toggle; Chat streams a live reply and a run can be captured as a Scenario — verify by driving the route on the release tag (claim 5) */}
+The **Playground** at `/projects/:id/playground` drives a connected agent live. A **Chat** / **Simulate** toggle lets you chat with the agent yourself or auto-drive a persona-agent conversation, and **Save as a scenario** turns a run you like into a scenario with the conversation attached as its session. The full surface is the subject of the [Playground](/concepts/playground) page.
 
-### Simulation at evaluation time
+### The Trust Library
 
-These surfaces connect back into the evaluation loop at one specific seam. An **Evaluation** run can simulate a fresh persona ↔ agent conversation per simulatable scenario *at evaluation time* — a per-run **Simulate at eval time** opt-in — instead of replaying the row's stored input turns. That is the boundary where Scenarios and the Playground rejoin the existing loop; the toggle mechanics and the persisted simulated transcript are covered in [Simulate with Scenarios](/how-to/simulate-with-scenarios) and on the [Evaluations](/concepts/evaluations) page.
-{/* ACCURACY-AUDIT-PENDING: a per-run "Simulate at eval time" toggle on the new-run form runs persona+goal simulation per simulatable row instead of replaying stored turns — verify by driving the new-eval form on the release tag (claim 7) */}
+A new project doesn't start from a blank slate. **Add recommended evaluators** offers 12 curated LLM-judge presets, grouped quality then safety, that become ordinary fully editable evaluators once adopted; **Add recommended scenarios** offers 10 starter safety scenarios mapped to the OWASP Agentic AI Top 10, each paired with the evaluators that score it well. A no-code rubric editor defines what pass and fail mean in plain language — "Passes when… / Fails when…" — and **Tailor with AI** drafts the rules from one sentence about your agent. Once a judge is in use, its **Calibrate** tab measures how often it agrees with sessions a person already marked pass or fail. See [Evaluators](/concepts/evaluators).
 
-## The new surfaces
+### The Evaluation Launcher
+
+A single **Evaluation Launcher** starts every run — from the Scenarios list, a single scenario, the Sessions list, a single session, or the Evaluations page's **+ New evaluation** button, where you pick a source and a saved view. It previews the fan-out before you launch, and **Re-run** on a finished run restores its full configuration — same agent, same judges. Results lead with a dual headline: **Pass rate** (how the agent did) and **Evaluator accuracy** (how often the automated judges agreed with a human's verdict), with a per-persona matrix underneath. See [Evaluations](/concepts/evaluations) and [Saved views](/concepts/saved-views).
+
+## Go deeper
 
 <CardGroup cols={2}>
   <Card title="Trust Agent" icon="sparkles" href="/concepts/trust-agent">
-    The in-app assistant that does evaluation work alongside you — streaming transcript, clickable records, and human-in-the-loop approvals before it writes. *Not* an Agent Version.
+    The in-app assistant that does evaluation work alongside you — streaming transcript, clickable records, human-in-the-loop approvals, and a guided cold start. *Not* an Agent Version.
   </Card>
   <Card title="Scenarios" icon="users" href="/concepts/scenarios">
-    Persona-and-goal test sets. Build, generate, and curate Scenario sets, then simulate agents against them.
+    Flat, persona-and-goal test cases with an authored grading contract. Create, generate, or adopt them, then run them against your agent.
   </Card>
   <Card title="Playground" icon="joystick" href="/concepts/playground">
-    Chat with or simulate against a connected agent live, then capture the result as a scenario. The Chat / Simulate surface that pairs with Scenarios.
+    Chat with or simulate against a connected agent live, then save the result as a scenario.
   </Card>
   <Card title="Multi-tenancy" icon="building-2" href="/concepts/multi-tenancy">
-    The organization boundary every artifact is scoped to — `organization_id` enforced across the data model behind a shared tenant guard.
+    The organization boundary every artifact is scoped to — fail-closed authorization, per-project roles, and an append-only audit trail.
   </Card>
 </CardGroup>
 
 <Card title="Evaluate with the Trust Agent" icon="graduation-cap" href="/tutorials/evaluate-with-the-trust-agent">
-  An end-to-end walkthrough: drive a real evaluation with the Trust Agent — find Sessions, build a Scenario set, run an Evaluation, and read the result.
+  An end-to-end walkthrough: drive a real evaluation with the Trust Agent — find sessions, create scenarios, run an Evaluation, and read the result.
 </Card>
 
 ## Vocabulary at a glance
