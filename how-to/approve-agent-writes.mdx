@@ -21,10 +21,8 @@ After this, you'll be able to review a proposed change, approve it (and watch it
 ## How the approval gate works
 
 When the agent decides to perform a write, it does not act silently. It surfaces a **permission card** in the place where the composer normally sits — the text input disappears and the card takes its slot. At that point the agent run **halts** at the tool call and waits: no further turns run until you decide.
-{/* ACCURACY-AUDIT-PENDING: the permission card replaces the composer (occupies the composer slot) and the run halts at the tool call awaiting your decision — verify against the app on the release tag */}
 
 Permission cards gate **writes specifically**. A read-only request — "list my sessions," "what failed in this evaluation" — streams its result straight back (often as a [clickable object table](/concepts/trust-agent)), with no card and no approval needed. The gate only appears when the agent proposes to change something.
-{/* ACCURACY-AUDIT-PENDING: read-only requests stream results with no permission card; only writes raise the gate — verify by contrasting a read prompt vs a write prompt against the app on the release tag */}
 
 <Warning>
   Approving a write **executes it for real**. The Trust Agent runs the approved change on the live agent run path — the mutation persists in your project; it is not a preview or a dry run. Treat every approval as a real edit to your data.
@@ -53,8 +51,9 @@ The interactive prototype below lets you click through the permission card to fe
           loading="lazy" allow="fullscreen" title="Permission card prototype" />
 </Frame>
 
-The write preview always speaks in human terms — a delete shows the record by its label and lists what depends on it, so you can see the blast radius before you commit to it.
-{/* ACCURACY-AUDIT-PENDING: the write preview renders the diff, the dependency list, and the proposed end state in human-readable terms (no bare UUID) — verify against the app on the release tag, ideally on a delete with dependents */}
+The write preview always speaks in human terms — a delete shows the record by its label and lists what depends on it, so you can see the blast radius before you commit to it. To inspect the full proposed end state, choose the card's **View proposal** link: it opens a right-side panel showing the record as it would look after the change.
+
+The preview also keeps proposing tense. Until you approve, nothing has happened — a pending delete is badged **Pending delete** (and other writes **Pending approval**), never a false "Deleted." If the panel says a record is gone but you haven't approved anything, that's a bug, not the design.
 
 ## Approve, dismiss, or reject
 
@@ -62,29 +61,28 @@ Once you've read the preview, you have three ways to resolve a permission card.
 
 <Steps>
   <Step title="Approve to execute">
-    Choose **Approve** on the card. The agent run resumes from where it halted and performs the write — the change lands in your project. Watch the [side rail](/concepts/trust-agent) **Outputs** section: the record the agent created, updated, or ran shows up there as a row you can open in a fly-in.
+    Pick an approval scope, then confirm. Every card offers a **one-time approval** — approve this write, and only this write. When the agent expects to repeat the same kind of write, the card can also offer a **for-this-chat** option, worded specifically for what it would keep doing, so approving it grants a standing pass for the rest of the conversation. Delete requests never offer the chat-wide option — every delete is approved one at a time. The confirm button's label follows the scope you've selected, so read it before you click.
+
+    Once you confirm, the agent run resumes from where it halted and performs the write — the change lands in your project. Watch the [side rail](/concepts/trust-agent) **Outputs** section: the record the agent created, updated, or ran shows up there as a row you can open in a fly-in.
 
     **You should see:** the card resolve, the run continue, and the affected record reflect the change when you re-open it. The write is real — re-query the record and the mutation is there.
-    {/* ACCURACY-AUDIT-PENDING: Approve resumes the run and executes the write; the resulting entity appears in the side-rail Outputs section and persists on re-query — verify against the app on the release tag */}
   </Step>
 
   <Step title="Dismiss to decline">
-    If you don't want the change, **dismiss** the card. The write does not run, and the agent waits for your next message instead of acting. A resolved row still lands in the transcript so the declined decision is on the record.
+    If you don't want the change, **dismiss** the card. The write does not run, and the agent waits for your next message instead of acting. A resolved row still lands in the transcript — it reads "You dismissed the request" — so the declined decision is on the record.
 
     **You should see:** no change to the record, and the composer return so you can redirect the agent.
-    {/* ACCURACY-AUDIT-PENDING: dismissing the permission card (× affordance) declines the write — nothing executes — and the agent pauses for your next message; a resolved/dismissed row is written to the transcript — verify against the app on the release tag */}
   </Step>
 
   <Step title="Reject and tell the agent why">
-    If the proposed write is close but wrong, the card offers a way to reject it and tell the agent why. Your reason goes back to the agent, so it can adjust rather than guess.
+    If the proposed write is close but wrong, choose **Reject — and tell me why (optional)**. An inline note field opens on the card; type your reason (or leave it blank) and choose **Send rejection**. Your reason goes back to the agent, so it can adjust rather than guess.
 
     **You should see:** your rejection and your reason echoed into the transcript, and the agent respond to your reasoning on its next turn.
-    {/* ACCURACY-AUDIT-PENDING: the permission card offers a reject-with-note path (an inline note field → send) whose note is passed back to the agent — verify the exact label/affordance against the app on the release tag; do not assert prototype-only scope copy as shipped */}
   </Step>
 </Steps>
 
 <Note>
-  A permission card is not the same as a plan confirmation. In Plan mode the agent proposes a task list and waits for a *typed* confirmation before it starts working — that's a different gate. A permission card is the per-write checkpoint, and it's what executes the change. See [Work with the Trust Agent](/how-to/work-with-the-trust-agent) for Plan mode.
+  A permission card is not the same as a plan confirmation. In Plan mode the agent proposes a task list and waits at a plan-confirm bar — one tap on **Approve & run** starts the work, or you can type a go-ahead in the composer and it does the same thing. That's a different gate: it approves a plan, not a write. A permission card is the per-write checkpoint, and it's what executes the change. See [Work with the Trust Agent](/how-to/work-with-the-trust-agent) for Plan mode.
 </Note>
 
 ## Answer a question card
@@ -93,39 +91,40 @@ Sometimes the agent doesn't have enough to act yet. Instead of a permission card
 
 ### A single-question card
 
-For one open-ended clarification, you get a single-question card. It offers the **drafted choices** the agent thinks are likely, plus a write-in **Other** field so you're never boxed into the offered answers. The card is dismissible if you'd rather steer the agent a different way.
+For one open-ended clarification, you get a single-question card. It offers the **drafted choices** the agent thinks are likely, plus a write-in field ("Or type your own answer…") so you're never boxed into the offered answers. The card is dismissible if you'd rather steer the agent a different way.
 
 {/* CAPTURE-PENDING: shipped single-question card with drafted choices + write-in Other #1393 #1431 */}
-{/* ACCURACY-AUDIT-PENDING: single-question card presents drafted choices plus a write-in Other option and is dismissible — verify against the app on the release tag */}
 
 ### A multi-question flow card
 
-When the agent needs several inputs, it raises a **multi-question flow card**. It's stepped: questions come one at a time with a **progress row**, and you can go **back** to a previous question to change an earlier answer before submitting. Nothing is sent until you submit the batch — then all your answers go to the agent together. Each question carries the same drafted choices and write-in **Other** option as the single-question card.
+When the agent needs several inputs, it raises a **multi-question flow card**. It's stepped: questions come one at a time with a progress row ("Question N of M"), and you can go **back** to a previous question to change an earlier answer before submitting. Nothing is sent until you submit the batch — then all your answers go to the agent together. Each question carries the same drafted choices and write-in option as the single-question card.
 
 {/* CAPTURE-PENDING: shipped multi-question flow card with progress row + back navigation #1397 #1408 #1435 */}
-{/* ACCURACY-AUDIT-PENDING: multi-question flow card is stepped with a progress row and back navigation, batches answers on submit, and each question has drafted choices + write-in Other — verify against the app on the release tag */}
 
 For a clickable walkthrough of the multi-question flow end to end, see the live demo in [Work with the Trust Agent](/how-to/work-with-the-trust-agent).
 
 ## Find the decision in the transcript
 
-Every resolution — an approval, an answer, or a dismissal — is recorded back into the transcript as a **resolved row** that echoes what you chose. For a multi-question flow, the resolved row echoes each per-question answer. This is your audit trail: it persists after the turn completes, so reopening the chat later still shows what was asked and what you decided.
-{/* ACCURACY-AUDIT-PENDING: resolving a card writes a resolved row into the transcript echoing the chosen answer(s) (per-question for multi-question flows), persisting across reload/reopen — verify against the app on the release tag */}
+Every resolution — an approval, an answer, or a dismissal — is recorded back into the transcript as a **resolved row** that echoes what you chose. An approval's resolved row names the scope you granted, so a chat-wide grant is distinguishable from a one-time approval later. For a multi-question flow, the resolved row echoes each per-question answer. This is your audit trail: it persists after the turn completes, so reopening the chat later still shows what was asked and what you decided.
+
+## A pending approval survives a reload
+
+You don't lose the gate if your connection drops, you reload, or you close the tab before deciding. When you reopen the chat, a card that was still awaiting your answer **rehydrates as a live, answerable card** — back in the composer slot, with the composer still gated — and resolving it resumes the halted run exactly as if you had never left. Already-resolved approvals rehydrate too, in the order they happened, so a reopened chat reads the same as it did live.
+
+**You should see:** after a mid-decision reload, the same permission or question card waiting in the composer slot; answer it and the run picks up where it halted.
 
 ## When the agent is minimized
 
-You don't have to keep the full agent open to catch an approval. If you've collapsed the agent to its **docked panel** or **pill** when a write needs your sign-off, a **backgrounded-approval indicator** appears on the shell so you know a decision is pending — and the **docked view auto-expands** to surface the permission card, so you can act without manually reopening the agent.
-{/* ACCURACY-AUDIT-PENDING: when minimized to dock/pill, a backgrounded-approval indicator surfaces on the shell and the docked view auto-expands to the permission card — verify against the app on the release tag */}
+You don't have to keep the full agent open to catch an approval. If you've collapsed the agent to its **docked panel** or **pill** when a write needs your sign-off, a pulsing **needs-you badge** appears on the shell so you know a decision is pending — and the docked view auto-expands to surface the permission card, so you can act without manually reopening the agent.
 
 <Note>
   There may be a brief wait before a card appears. That's the model thinking — its time-to-first-token — not a hang. The agent fills the wait with a live **Thinking** timer and a working indicator rather than a dead gap, and the card paints as soon as the model reaches the write. There's no fixed timing; it depends on the model in use.
 </Note>
-{/* ACCURACY-AUDIT-PENDING: any pre-card wait is upstream model thinking time (TTFT) surfaced by a Thinking timer / working indicator, and the card can paint mid-turn at the tool call — verify against the app on the release tag; publish no fixed duration */}
 
 ## Accessibility
 
-The approval flow is keyboard- and screen-reader-friendly. When a card appears, focus moves into it automatically; when you resolve or dismiss it, focus returns to where it was. The interrupt is announced to assistive technology, and the whole surface is designed to meet WCAG AA contrast.
-{/* ACCURACY-AUDIT-PENDING: card appearance moves focus into the card and restores it on resolve/dismiss; the interrupt is announced to assistive technology — verify the focus slice against the app on the release tag */}
+The approval flow is keyboard- and screen-reader-friendly. When a card appears, focus moves into it automatically. Resolving or dismissing a card should return focus to where it was, and the interrupt is designed to be announced to assistive technology and to meet WCAG AA contrast.
+{/* ACCURACY-AUDIT-PENDING: focus restoration on resolve/dismiss and the assistive-technology announcement — verify against the app on the release tag (auto-focus into the card is verified) */}
 
 ## Related reading
 
