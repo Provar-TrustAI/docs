@@ -10,29 +10,27 @@ The vocabulary of Trust AI. Icons match the Trust AI app's navigation, so the co
 
 <CardGroup cols={2}>
   <Card title="Project" icon="sliders-horizontal" href="/concepts/projects">
-    The top-level workspace container. Owns members, runtime connection config (AgentCore, Salesforce Agentforce, and similar), and every Session, Scenario set, Evaluator, Evaluation, and Agent Version under it.
+    The top-level workspace container. Owns members, runtime connection config (AgentCore, Salesforce Agentforce, and similar), and every Session, Scenario, Evaluator, Evaluation, and Agent Version under it.
   </Card>
-  <Card title="Session" icon="message-square" href="/concepts/sessions">
-    One real interaction between a user and an agent — a sequence of Turns and Tool Calls captured from production or staging. The raw material every downstream Scenario set and Evaluation builds on.
+  <Card title="Session" icon="database" href="/concepts/sessions">
+    One conversation between a user and an agent — a sequence of Turns and Tool Calls. Sessions arrive from three places, shown as a [Source](#session-internals) chip: synced from your connected runtime, saved from the Playground, or created from a Scenario. Each carries a readable id (`SES-` for synced sessions, `RUN-` for sessions created in-product) and is a first-class evaluation target in its own right.
   </Card>
   <Card title="Annotation" icon="tag" href="/concepts/annotations">
-    A human-authored signal attached to a Turn or Session — a pass/fail label, rubric score, or freeform note. Encodes reviewer judgment into data that Evaluators can be calibrated against.
+    A human-authored signal recorded on a Session through typed annotation columns. Every project starts with three — **Verdict** (pass/fail), **Severity** (minor / major / blocker), and **Reviewer note** — and you can add your own (pass/fail, 1–5 score, category, tags, or comment). The human Verdict is the ground truth that grades your automated judges: it feeds [evaluator accuracy](#running-and-scoring-evaluations) and never overrides the automated verdict.
   </Card>
-  <Card title="Scenario set" icon="users-round" href="/concepts/scenarios">
-    A curated, versioned collection of **scenarios** — persona-and-goal test cases. Rows are curated from ingested Sessions, added manually, uploaded via CSV, generated, or captured from simulation runs; a scenario carrying both a persona and a goal is simulatable. The stable substrate every Evaluation runs against. Only the API keeps the pre-rename names — see the API note on the [Scenarios](/concepts/scenarios) concept page for the exact mapping.
+  <Card title="Scenario" icon="flask-conical" href="/concepts/scenarios">
+    A first-class test case — name, goal, personas, expected output, and linked sessions — with a stable id like `SCN-000022`. Every project keeps one flat **Scenarios** list; there are no scenario sets to manage. Curate scenarios from real Sessions, save them from the Playground, or adopt starter safety scenarios from the [Trust Library](#running-and-scoring-evaluations). The API serves scenarios at `/v1/scenarios`, with the legacy `/v1/datasets` naming still on the wire underneath — see the API note on the [Scenarios](/concepts/scenarios) concept page for the mapping.
   </Card>
-  <Card title="Evaluator" icon="wand-sparkles" href="/concepts/evaluators">
-    A reusable judgment function — LLM Judge (plain-English criteria sent to Claude or GPT) or Structured Match (deterministic checks on agent output metadata) — that scores a Turn or Session against criteria.
+  <Card title="Evaluator" icon="ruler" href="/concepts/evaluators">
+    A reusable judgment function that measures a session against your criteria — an **LLM Judge** (a no-code rubric of "Passes when… / Fails when…" rules, or fixed anchors for a 1–5 scale) or a **Structured Match** (a deterministic **Routing match** or **Tool match** check on what the agent actually did).
   </Card>
   <Card title="Evaluation" icon="chart-line" href="/concepts/evaluations">
-    A single run of one or more Evaluators across a Scenario set, scoped to a specific Agent Version. The output is a scored, comparable, reviewable record per scenario.
+    A single run of one or more Evaluators, scoped to a specific Agent Version and launched from the [Evaluation Launcher](#running-and-scoring-evaluations) — against the scenarios you selected (simulated live) or against already-captured Sessions (graded as they are). The output is a scored, reviewable result per persona per scenario, or per session.
   </Card>
   <Card title="Agent Version" icon="git-branch" href="/concepts/agent-versions">
-    A pinned, immutable snapshot of the agent **under test** — prompt, model, tool set, deployment. Comparing two Agent Versions on the same Scenario set under the same Evaluators is the core regression-testing loop. Not to be confused with the [Trust Agent](#the-trust-agent), which is your assistant inside Trust AI.
+    A pinned, immutable snapshot of the agent **under test** — prompt, model, tool set, deployment. Comparing two Agent Versions on the same scenarios under the same Evaluators is the core regression-testing loop. Not to be confused with the [Trust Agent](#the-trust-agent), which is your assistant inside Trust AI.
   </Card>
 </CardGroup>
-
-{/* ACCURACY-AUDIT-PENDING: the Scenario set card uses the users-round icon (the nav icon was database when the surface was named Datasets) — verify the Scenarios nav icon on the release tag */}
 
 ## Session internals
 
@@ -43,6 +41,9 @@ The vocabulary of Trust AI. Icons match the Trust AI app's navigation, so the co
   <Card title="Tool Call" icon="terminal">
     An invocation of an agent tool inside a Turn — function name, arguments, and the returned value. Structured Match Evaluators commonly assert on these.
   </Card>
+  <Card title="Source" icon="signpost">
+    Where a session came from — exactly one of **Scenario** (created by simulating or generating from a scenario), **Playground** (saved from a Playground conversation), or **External** (synced from your connected agent runtime). Every session shows its source as a chip on the Sessions list, and scenario-born sessions add a **Simulated from** provenance card.
+  </Card>
 </CardGroup>
 
 ## The Trust Agent
@@ -50,7 +51,7 @@ The vocabulary of Trust AI. Icons match the Trust AI app's navigation, so the co
 The in-app assistant that does evaluation work alongside you. Everything in this section is the **Trust Agent** — your assistant inside Trust AI. It is *not* an [Agent Version](#core-entities), which is the customer's agent under test. The two share the word "agent" and nothing else.
 
 <Note>
-  **Trust Agent vs Agent Version.** The **Trust Agent** is the assistant that operates *on* your project — it finds Sessions, builds Scenario sets, and runs Evaluations for you. An **[Agent Version](/concepts/agent-versions)** is the agent *under test* — a pinned snapshot every Evaluation is scoped to. The Trust Agent helps you evaluate Agent Versions; it is never itself "a version."
+  **Trust Agent vs Agent Version.** The **Trust Agent** is the assistant that operates *on* your project — it finds Sessions, builds scenarios, and runs Evaluations for you. An **[Agent Version](/concepts/agent-versions)** is the agent *under test* — a pinned snapshot every Evaluation is scoped to. The Trust Agent helps you evaluate Agent Versions; it is never itself "a version."
 </Note>
 
 <CardGroup cols={2}>
@@ -64,7 +65,7 @@ The in-app assistant that does evaluation work alongside you. Everything in this
     The running record of a Trust Agent conversation. Markdown-formatted turns stream token by token with a typing indicator and an accent caret, alongside a collapsible reasoning rail, tool-call cards, and a history-compaction marker. Transcripts are persisted, so reopening a chat shows its real prior history.
   </Card>
   <Card title="Side rail" icon="panel-right-open" href="/concepts/trust-agent">
-    The Trust Agent's contextual panel, in three sections in order: **Progress** (the live plan and step counts), **Context** (referenced entities), and **Outputs** (per-entity rows of what the agent created, updated, or ran, each deep-linking to a real record fly-in). Hidden when the active task references no entities.
+    The Trust Agent's contextual panel, in four sections: **Progress** (the live plan and step counts), **Context** (referenced entities), **Outputs** (per-entity rows of what the agent created, updated, or ran, each deep-linking to a real record fly-in), and **Attachments** (files on the task). The rail stays up for the whole conversation; each section hides itself when it has nothing to show.
   </Card>
   <Card title="HITL approval" icon="hand" href="/concepts/trust-agent">
     A human-in-the-loop approval — an interrupt card that replaces the composer and pauses the agent run until you decide. **Permission cards** gate writes; **single-** and **multi-question cards** gather clarification. Approving a write executes it on the real run path, and the resolved decision is recorded in the transcript as an audit trail.
@@ -82,20 +83,46 @@ The in-app assistant that does evaluation work alongside you. Everything in this
 
 ## Scenarios and simulation
 
-A **scenario** — one persona-and-goal test case — and the **Scenario set** that collects them are defined under [Core entities](#core-entities). The supporting terms live here.
+A **scenario** — one goal-driven test case — is defined under [Core entities](#core-entities). The supporting terms live here.
 
 <CardGroup cols={2}>
   <Card title="Persona" icon="circle-user-round" href="/concepts/scenarios">
-    A reusable synthetic-user profile that role-plays the user side of a scenario or simulation. Personas are managed in a **Manage Personas** modal; at most one persona per project can be the default, and the list shows each persona's usage count.
+    A reusable synthetic-user profile that role-plays the user side of a scenario or simulation. Personas are managed in a **Manage personas** modal; at most one persona per project can be the default, and the list shows each persona's usage count. In an evaluation, every persona attached to a scenario is scored on its own.
   </Card>
   <Card title="Goal" icon="target" href="/concepts/scenarios">
-    The objective the synthetic user (the persona) is trying to accomplish in a scenario or simulation. Paired with a persona, a non-empty goal is what makes a scenario **simulatable** — both are required.
+    The objective the synthetic user is trying to accomplish in a scenario or simulation. A non-empty goal is what makes a scenario simulatable: personas shape who the simulated user is, but a goal-only scenario still simulates when you run it in an evaluation.
   </Card>
-  <Card title="Playground" icon="flask-conical" href="/concepts/playground">
-    A per-project surface at `/projects/:id/playground` for chatting with and simulating against a connected agent. An agent picker and a **Chat / Simulate** mode toggle: **Chat** is live manual conversation; **Simulate** auto-drives a persona-to-agent conversation from one persona and one goal.
+  <Card title="Expected Output" icon="clipboard-check" href="/concepts/scenarios">
+    A scenario's grading contract, edited on the **Expected Output** tab of its fly-in: **Expected behavior** (the LLM Judge evaluators that score it), **Expected actions** (the tool calls the agent should make), and **Expected routes** (where the conversation should land). You pick options from vocabulary the product learned from your real sessions instead of typing free text.
   </Card>
-  <Card title="Simulation" icon="bot-message-square" href="/concepts/playground">
-    An automated persona-to-agent conversation. The same primitive powers the Playground's **Simulate** mode and **Simulate at eval time**, where the evaluation worker drives a fresh persona-and-goal conversation per simulatable scenario instead of replaying stored input turns. The captured transcript renders in the [evaluation](/concepts/evaluations) result detail fly-in.
+  <Card title="Playground" icon="play" href="/concepts/playground">
+    A per-project surface at `/projects/:id/playground` for chatting with and simulating against a connected agent. An agent picker and a **Chat / Simulate** mode toggle: **Chat** is live manual conversation; **Simulate** auto-drives a persona-to-agent conversation from one persona and one goal. **Save as a scenario** turns a conversation you like into a project Scenario, with the conversation attached as its first Session.
+  </Card>
+  <Card title="Simulation" icon="messages-square" href="/concepts/playground">
+    An automated persona-to-agent conversation. The same primitive powers the Playground's **Simulate** mode and every scenario-sourced evaluation — running scenarios always simulates a fresh conversation per scenario. The captured transcript is saved as a real scenario-linked Session and renders in the [evaluation](/concepts/evaluations) result detail fly-in.
+  </Card>
+</CardGroup>
+
+## Running and scoring evaluations
+
+<CardGroup cols={2}>
+  <Card title="Evaluation Launcher" icon="rocket" href="/concepts/evaluations">
+    The one modal every evaluation starts from. It opens from five places — the Sessions list, a session's fly-in, the Scenarios list, a scenario's fly-in, and **New evaluation** on the Evaluations page — and shows a fan-out preview of exactly what will run before you launch. **Re-run** on a finished run restores its full configuration: same agent, same judges.
+  </Card>
+  <Card title="One-off evaluation" icon="check-square" href="/concepts/evaluations">
+    Grading a single scenario or session in place, from its own fly-in. The verdict lands on the item itself, and no throwaway run is added to the Evaluations list.
+  </Card>
+  <Card title="Evaluator accuracy" icon="gauge" href="/concepts/evaluations">
+    How often your automated judges agreed with a person's session-level **Verdict** annotation. Run detail leads with two numbers: **Pass rate** grades the agent; evaluator accuracy grades the judges. A human verdict is the ground truth here — it never overrides the automated verdict.
+  </Card>
+  <Card title="Pass^K" icon="repeat" href="/concepts/evaluations">
+    The reliability headline on a run that repeats its test cases. **Repeat each test case** up to four times (the default is two); Pass^K is the share of test cases the agent passed on every repeat, so a flaky agent that passes once but fails on retry can't hide behind a single lucky run.
+  </Card>
+  <Card title="Calibration" icon="scale" href="/concepts/evaluators">
+    A check of an LLM Judge against sessions you already marked pass or fail, run from the evaluator's **Calibrate** tab. It uses the exact judge that runs in production, reports a plain-language agreement headline with disagreements listed first, and keeps a calibration history so you can see whether rubric edits helped.
+  </Card>
+  <Card title="Trust Library" icon="library" href="/concepts/evaluators">
+    The curated starter catalog, so a new project never begins from a blank slate: 12 recommended evaluators (grouped Quality and Safety) and 10 starter safety scenarios mapped to the OWASP Agentic AI Top 10, adopted through **Add recommended evaluators** and **Add recommended scenarios**. Adopted items become ordinary, fully editable records that keep a **Recommended** provenance chip, and **Tailor with AI** drafts grading rules for your agent from a one-sentence description when you create an evaluator.
   </Card>
 </CardGroup>
 
@@ -103,7 +130,7 @@ A **scenario** — one persona-and-goal test case — and the **Scenario set** t
 
 <CardGroup cols={2}>
   <Card title="Organization (tenant)" icon="building-2" href="/concepts/multi-tenancy">
-    The top-level account boundary every Project belongs to. `organization_id` is enforced **NOT NULL** across the data model behind a shared tenant guard, so a Trust AI session only ever sees and acts on the current organization's data. The org/tenant footer reads **Tenant · Role**.
+    The top-level account boundary every Project belongs to. A single fail-closed authorization engine decides who can see and act on every record, scoped to the current organization, and every access decision is written to a durable, append-only audit trail. The sidebar footer shows your workspace name and role — **Workspace · Role**.
   </Card>
 </CardGroup>
 
@@ -114,13 +141,13 @@ A **scenario** — one persona-and-goal test case — and the **Scenario set** t
     A named, persisted combination of filters, sort order, and column configuration for a list surface. Views can be saved per user and shared with the team.
   </Card>
   <Card title="Fly-in panel" icon="panel-right">
-    A slide-out detail panel that opens from the right when you click a row in Sessions, Scenarios, or Evaluations. Shows the full transcript, metadata, and contextual actions without leaving the list.
+    A slide-out detail panel that opens from the right when you click a record in Sessions, Scenarios, or Evaluations. Shows the full transcript, metadata, and contextual actions without leaving the list. On Scenarios it stacks two levels: the scenario panel (tabs **Personas & Goals**, **Expected Output**, and **Sessions**), with a nested session-detail panel over it for one linked session. **J**/**K** step between records; **Esc** closes the top panel first.
   </Card>
   <Card title="Verdict chip" icon="badge-check">
-    A color-coded pass/fail or score badge on the Evaluation results matrix. Each evaluator applied to a scenario produces one verdict chip. Green = pass, red = fail, numeric = rubric score.
+    A three-state badge on results and sessions: **pass** (green), **fail** (red), or a neutral **Not evaluated** — never blank. Judge or infrastructure failures render as a neutral environment problem that is excluded from the score, never as a red fail.
   </Card>
   <Card title="Results matrix" icon="grid-3x3">
-    The grid view on the Evaluation Run Detail page. Rows are scenarios, columns are evaluators. Each cell is a verdict chip. The matrix is the at-a-glance view of how an agent version performed.
+    The grid view on a run's detail page. Columns are the run's pinned evaluators; rows are scored conversations — one result per attached persona per scenario, plus session-graded results. Each cell is a verdict chip, beneath the run's dual **Pass rate** and **Evaluator accuracy** headline.
   </Card>
 </CardGroup>
 
