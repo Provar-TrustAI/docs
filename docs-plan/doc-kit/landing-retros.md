@@ -2,6 +2,45 @@
 
 Newest first. One entry per release landed on `main` via `/doc-land-release`.
 
+## 2026-07-02 — v2026.06.30.1 alignment (autonomous cron loop, 43 PRs #57–#99, DEV-4720)
+
+**Documented:** three releases at once (v2026.06.15.1 / .22.1 / .30.1 — the docs were three behind).
+All 27 existing pages rewritten (impact audit graded 14 badly-stale, 11 stale); 7 net-new pages
+(tables-and-panels UI-language concept, workspace-access, annotate-sessions, evaluate-sessions,
+calibrate-an-evaluator, connect-agentforce, connect-claude-managed-agent); OpenAPI re-pin 103→135
+paths; changelog ×3; `docs-v2026.06.09.1` archive tag; home What's-new snippet restored.
+
+**Convergence map:** no full Linear ticket loop — a leaner shape, now codified as
+`/doc-release-align`: pinned tag worktree → 38-agent impact map (10 track mappers + 26 page auditors
++ 1 history miner) → foundations first (AGENTS.md → changelog → OpenAPI) → 3 writer waves via
+Workflow (worktree-isolated, one PR/page, writers never merge) → 2 fresh-eyes cross-surface auditors
+post-merge (28 findings) → fix batches. Gates at close: broken-links clean, 35/35 pages render 200,
+**35/35 no horizontal overflow at 375 px**, terminology sweep clean, Mintlify production deploy green.
+
+**Harness events:** a mid-wave session rate limit killed 9 of 17 writers — Workflow
+`resumeFromRunId` replayed the 8 cached successes free and re-ran only the dead ones (4h stall,
+zero rework). Mintlify skipped preview builds under concurrent-branch load; local-merge validation
+(detached worktree + broken-links) substituted. Two ad-hoc fixer agents raced in the shared
+checkout (recovered; lesson propagated).
+
+**Near-misses (what almost shipped wrong, and what caught it):**
+- **"New runs default to Pass^2"** — in three merged pages AND the orchestrator's own wave brief,
+  sourced from v22 release notes; at the tag the launcher hard-codes `trials=1` and the repeat
+  selector is unreachable. Caught by one writer's code-level verification contradicting siblings.
+- **"Ask the Trust Agent to evaluate yesterday's failed sessions"** — two merged concept pages; the
+  tag's tool registry has no session-evaluation tool. Caught the same way.
+- **Calibrate-tab ground truth** — three pages said it reads session annotations; it samples
+  scenario-level verdict columns (verified in `calibrate-tab.tsx`). The two-verdict-surfaces rule is
+  now AGENTS.md law.
+- Release notes vs code on the TDM flag default (notes: on; code: off) — code won, per the new rule.
+
+**Propagated:** `/doc-release-align` (+ operational-lessons section), `/doc-openapi-sanitize` +
+`openapi-sanitize.py` (path-parity smoke-tested), `/doc-terminology-guard`, `/doc-capture-pass`,
+`doc-gardener-agent`, writer-agent restructure checklist + preview-vs-GA rule, playbook reuse rows,
+and **`.claude/agents|skills` now tracked in git** (gitignore carve-out). Capture debt (14 items)
+ledgered in DEV-4720 — blocked on running the app AT the tag (the local stack runs main-tip; do not
+capture it).
+
 ## 2026-06-09 — v2026.06.09.1 docs (worktrunk/docs-v2026-06-09-1 → main, PR #52)
 
 **Documented:** the largest Trust AI release. Trust Agent (concept + *Work with the Trust Agent* +
