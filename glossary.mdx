@@ -116,7 +116,7 @@ A **scenario** — one goal-driven test case — is defined under [Core entities
     How often your automated judges agreed with a person's session-level **Verdict** annotation. Run detail leads with two numbers: **Pass rate** grades the agent; evaluator accuracy grades the judges. A human verdict is the ground truth here — it never overrides the automated verdict.
   </Card>
   <Card title="Pass^K" icon="repeat" href="/concepts/evaluations">
-    The reliability headline on a run that repeats its test cases. **Repeat each test case** up to four times (the default is two); Pass^K is the share of test cases the agent passed on every repeat, so a flaky agent that passes once but fails on retry can't hide behind a single lucky run.
+    The reliability headline on a run whose test cases were attempted more than once: the share of test cases the agent passed on every repeat, so a flaky agent that passes once but fails on retry can't hide behind a single lucky run. The launcher currently runs each case once; Pass^K renders where repeated-trial runs exist.
   </Card>
   <Card title="Calibration" icon="scale" href="/concepts/evaluators">
     A check of an LLM Judge against sessions you already marked pass or fail, run from the evaluator's **Calibrate** tab. It uses the exact judge that runs in production, reports a plain-language agreement headline with disagreements listed first, and keeps a calibration history so you can see whether rubric edits helped.

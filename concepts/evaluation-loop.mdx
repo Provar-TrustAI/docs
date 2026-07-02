@@ -81,7 +81,7 @@ Every run starts from one place: the **Evaluation Launcher**, opened from **+ Ne
 - **Scenarios** — live simulation: each persona enacts its goal against the Agent Version you picked, and the judges plus the scenario's Expected Output grade the result.
 - **Sessions** — grade the conversations that **already happened**. The judges read each captured session and score it; nothing is re-sent to your agent, and the session is never modified.
 
-A **Repeat each test case** control (defaulting to 2) runs every test case multiple times, because an agent that passes once isn't an agent that passes reliably — a finished repeated run leads with a **Pass^K** reliability headline. For quick checks there's also one-off grading: **Evaluate in place** scores a single scenario or session where it lives, with no run added to the Evaluations list.
+A run whose test cases were attempted more than once leads with a **Pass^K** reliability headline, because an agent that passes once isn't an agent that passes reliably. (At this release the launcher runs each case once; Pass^K renders on repeated-trial runs where they exist.) For quick checks there's also one-off grading: **Evaluate in place** scores a single scenario or session where it lives, with no run added to the Evaluations list.
 
 Each run records the version of your scenario data at launch, so editing a scenario later never rewrites historical results.
 
