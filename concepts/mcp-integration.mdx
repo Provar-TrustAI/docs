@@ -6,7 +6,7 @@ description: "How Trust AI exposes the Trust Agent's tools over the Model Contex
 
 Trust AI runs a [Model Context Protocol](https://modelcontextprotocol.io) (MCP) server that exposes a curated subset of the **Trust Agent's** tools — the same read and write operations the agent uses inside the product — so they can be driven over a standard protocol instead of a bespoke integration.
 
-{/* ACCURACY-AUDIT-PENDING: this page describes the MCP server as implemented at the v2026.06.09.2 tag (services/api/src/mcp_server.py — cookie-session auth, the nine exposed tools, the can_use_tool gate). Re-verify against the running app on the release tag. */}
+{/* Verified against the v2026.06.30.1 tag (services/api/src/mcp_server.py — cookie-session auth, the nine exposed tools, the can_use_tool gate). Re-verify at the next release tag. */}
 
 <Note>
   **Today, the MCP server is reached through your authenticated Trust AI session.** That makes it the tool layer behind the in-product Trust Agent and Trust AI's own in-process agent runtime. **Connecting a standalone external client** (Claude Desktop, Cursor, a VS Code MCP extension) over the internet is **on the roadmap** — it needs OAuth-based authentication that is being designed, not the manual token flow earlier drafts of this page described. See [Connect an MCP client](/how-to/connect-mcp-client) for current status.
@@ -23,19 +23,19 @@ The server exposes a **deliberate subset** of the Trust Agent's tool registry �
 **Read tools** — queries against your Trust AI data, executed immediately:
 
 - `get_project_state` — a structured summary of a Project: entity counts, setup flags, and the most recent evaluation run
-- `query_data` — list and filter Sessions, Scenario sets, Evaluators, and Evaluations
+- `query_data` — list and filter Sessions, Scenarios, Evaluators, Evaluations, Personas, and Agent Versions
 - `read_file` — retrieve the extracted text of a task-attached file
 - `analyze` — run a structured failure analysis over a completed evaluation run
 
 **Write tools** — operations that modify Trust AI state, each wrapped with an approval gate:
 
-- Sync Sessions from a connected platform, curate Sessions into a Scenario set, update or delete Scenario rows, and start an Evaluation. These are the Trust Agent's own write operations, surfaced over MCP and held behind the same confirmation step.
+- Sync Sessions from a connected platform, curate Sessions into scenarios, update or delete scenarios, and start an Evaluation. These are the Trust Agent's own write operations, surfaced over MCP and held behind the same confirmation step.
 
-{/* ACCURACY-AUDIT-PENDING: exact exposed tool list + descriptions (get_project_state/query_data/read_file/analyze + sync_sessions/save_dataset/update_items/delete_items/run_evaluation) per _MCP_EXPOSED_TOOLS in mcp_server.py — confirm against the app on the release tag. */}
+{/* Exposed tool list verified at the v2026.06.30.1 tag: get_project_state/query_data/read_file/analyze + sync_sessions/save_dataset/update_items/delete_items/run_evaluation per _MCP_EXPOSED_TOOLS in mcp_server.py. Re-confirm at the next release tag. */}
 
 ## Authentication
 
-The MCP server enforces the **same auth boundary as the rest of the Trust AI API** — there is no separate permission shape for it. A request is authenticated by your Trust AI **WorkOS session**, and access is scoped to your organization: a caller sees only the Projects, Sessions, and Evaluations that belong to your org, exactly as in the UI.
+The MCP server enforces the **same auth boundary as the rest of the Trust AI API** — there is no separate permission shape for it. A request is authenticated by your Trust AI **WorkOS session**, and access is scoped to your organization: a caller sees only the Projects, Sessions, and Evaluations that belong to your org, exactly as in the UI. That tenancy enforcement now rides Trust AI's shared authorization engine — the same fail-closed permission resolver that governs the rest of the product — a behavior-preserving cutover that changes nothing about who can call what.
 
 Because that session is the credential, the server today serves callers that already carry it — the in-product Trust Agent and Trust AI's in-process runtime. A **standalone external client cannot present that session**, so direct third-party connection is gated on a dedicated, OAuth-issued credential that is on the roadmap (see the roadmap note above). There is no anonymous access path.
 
@@ -44,7 +44,7 @@ Because that session is the credential, the server today serves callers that alr
 Write operations pass through a `can_use_tool` confirmation step before they execute:
 
 - **Read tools execute immediately.** Querying data, reading a file, and running analysis need no extra approval beyond a valid session.
-- **Write tools pause for confirmation.** When a caller attempts a write — curating Sessions into a Scenario set, syncing Sessions, starting an Evaluation — Trust AI builds a preview of exactly what would change and holds the operation until it is explicitly approved. Approvals have a short time-to-live; an unanswered request times out rather than executing.
+- **Write tools pause for confirmation.** When a caller attempts a write — curating Sessions into scenarios, syncing Sessions, starting an Evaluation — Trust AI builds a preview of exactly what would change and holds the operation until it is explicitly approved. Approvals have a short time-to-live; an unanswered request times out rather than executing.
 
 This gate exists because a caller — an agent or an IDE — should not silently modify Trust AI data. The same write tools invoked through the Trust Agent inside the product follow the same approval pattern.
 
@@ -63,9 +63,9 @@ Every tool call — including a denied one — is recorded, so MCP activity is a
 The exposed tool surface is **checked against the Trust Agent's tool registry on every build**:
 
 - A conformance test asserts the MCP-exposed allowlist matches the set actually registered on the transport, so the documented surface can't silently drift from what's live
-- Tools deliberately held back (the agent's internal prompt-scaffolding) stay out of the external surface by design
+- Tools deliberately held back stay out of the external surface by design. That includes the agent's internal prompt-scaffolding, and also some of the Trust Agent's newer write operations — generating scenarios, simulating a scenario, and saving an evaluator — which are excluded until their shapes are final. The exposed subset deliberately lags the agent's newest capabilities.
 
-{/* ACCURACY-AUDIT-PENDING: conformance test is tests/mcp_server/test_mcp_surface_conformance.py — confirm it still asserts the allowlist on the release tag. */}
+{/* Verified at the v2026.06.30.1 tag: tests/mcp_server/test_mcp_surface_conformance.py asserts the allowlist matches the registered set, with save_evaluator/generate_scenarios/simulate_scenario in _DOCUMENTED_EXCLUDED_WRITES. Re-confirm at the next release tag. */}
 
 ## Supported clients
 
