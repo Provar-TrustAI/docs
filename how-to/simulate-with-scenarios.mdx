@@ -1,199 +1,183 @@
 ---
 title: "Simulate agents with scenarios"
 icon: "users"
-description: "Build a persona-and-goal scenario set, run an agent simulation in the Playground and capture it as a scenario, and turn on simulation at evaluation time."
+description: "Create a persona-and-goal scenario, run it to simulate one session per persona, save a Playground conversation as a scenario, set expected output from a good session, and read per-persona results."
 ---
 
-This how-to walks you through driving a connected agent against **personas** and **goals** end to end. After you've worked through it:
+This how-to walks you through driving a connected agent against **personas** and **goals** end to end. It follows the loop the **Scenarios** surface is built around: define a scenario cheaply, run it to generate real sessions, set the expected output from a session you like, then run and evaluate. After you've worked through it:
 
-- You can build a scenario set from scratch with the generate wizard
-- You can chat with and **simulate** an agent in the **Playground**, then capture the conversation as a scenario
-- You can turn on **Simulate at eval time** so an evaluation drives a fresh persona-and-agent conversation for each simulatable row instead of replaying stored turns
+- You can create a scenario — name, goal, personas — with the Trust Agent or the **New scenario** modal
+- You can generate real, scenario-linked sessions by running a scenario, and capture a **Playground** conversation with **Save as a scenario**
+- You can author a scenario's **Expected Output** from a good session and read graded, per-persona results
 
 This page is a task recipe. For what scenarios, personas, goals, and the Playground *are*, read the concept pages it links to — [Scenarios](/concepts/scenarios) and [Playground](/concepts/playground) — rather than re-deriving them here.
-
-<Note>
-  **"Scenarios" is the UI name for the surface; the route and the API keep the pre-rename names.** The nav item labeled **Scenarios** opens at the pre-rename browser route and is backed by the pre-rename API family — the rename is UI-layer only, and there is no scenarios endpoint or scenarios route. This page uses the **Scenarios** vocabulary you see in the app throughout; the precise route-and-endpoint mapping lives in the API note on [Scenarios](/concepts/scenarios).
-  {/* ACCURACY-AUDIT-PENDING: the nav item reading "Scenarios" resolves to the browser URL /projects/:id/datasets and list calls hit /v1/datasets with no /v1/scenarios request — verify by driving the route + network tab on the release tag */}
-</Note>
 
 ## Prerequisites
 
 - A **Trust AI account** with access to at least one [Project](/concepts/projects)
-- At least one **connected agent** on the Project (the Playground and the goal step need a real agent to drive)
-- At least one **persona** — the generate wizard and Simulate both select personas, so create one first if your Project has none
+- At least one **connected agent** on the Project (every run in this recipe drives a real agent)
+- **Personas** are optional but recommended — a scenario simulates one session per attached persona, so persona coverage is where the fan-out comes from
 
-## Build a scenario set from scratch
+## Create a scenario
 
-The fastest way to a persona-and-goal set is to let the [Trust Agent](/concepts/trust-agent) build one for you; or drive the **Generate from scratch** wizard yourself from the **Scenarios** list.
+The fastest way to persona-and-goal coverage is to let the [Trust Agent](/concepts/trust-agent) draft it for you; or create scenarios yourself from the **Scenarios** list.
 
 <Note>
-  *Ask the Trust Agent:* "Build me a scenario set covering my churn-risk and new-trial personas against the goals 'check order status' and 'request a refund.'" It selects the personas, defines the goals, generates a row per persona × goal pair, and adds the ones you confirm — then tells you which set it landed in.
+  *Ask the Trust Agent:* "Create scenarios covering my churn-risk and new-trial personas for the goals 'check order status' and 'request a refund.'" It proposes persona-and-goal test cases — no transcripts, just the definitions — and adds the ones you confirm to your Scenarios list.
 </Note>
-
-The steps below mirror that flow so you can watch it happen, or do any part by hand.
 
 <Steps>
   <Step title="Open the Scenarios list">
-    *Ask the Trust Agent:* "Show me my scenario sets." It pulls them up so you can pick one — or open the nav item that reads **Scenarios** on your Project by hand. It opens the scenario-set list (the browser URL keeps the old route name — see the note above). A scenario set's detail view shows **Persona** and **Goal** columns, a **Source** column for where each row came from, and every row opens a fly-in detail panel when you click it. The **Persona** cell's **Manage personas** popover footer opens the **Manage Personas** modal.
-    {/* ACCURACY-AUDIT-PENDING: scenario-set detail shows Persona + Goal + Source columns, rows open a fly-in, and the Persona cell's Manage personas popover footer opens the Manage Personas modal — verify by driving /projects/:id/datasets/:datasetId on the release tag */}
+    *Ask the Trust Agent:* "Show me my scenarios," or open the **Scenarios** nav item on your Project yourself — it lands at `/projects/:id/scenarios` (old dataset links redirect here). Every scenario is one entry in a flat table with a stable **ID** (like `SCN-000123`) plus **Scenario**, **User Goal**, **Personas**, **Expected routes**, **Expected actions**, **Evaluators**, **Sessions**, and **Tags** columns. Clicking a scenario opens its detail fly-in.
+    {/* CAPTURE-PENDING: scenarios-list screenshot — the flat Scenarios table with ID / Personas / Expected routes columns and the header actions */}
 
-    **You should see:** the Scenarios list render, and opening any set show Persona / Goal / Source columns with clickable rows.
+    **You should see:** the Scenarios table render with SCN-prefixed ids, and clicking any scenario open a fly-in panel.
+  </Step>
+
+  <Step title="Create one with New scenario">
+    Click **New scenario**. The modal collects only three things — a **Name** (required), a **Goal** (required — what the simulated user is trying to achieve), and **Personas** (optional; the label reminds you it's one session per persona on each run). It also tells you expected output comes later, usually from a session you like — that deferral is the point of the loop. Click **Create scenario**.
+
+    Two shortcuts worth knowing: **Add recommended scenarios** in the page header adopts curated starter scenarios in one move, and the **Name**, **Goal**, **Personas**, **Evaluators**, and **Tags** cells are all editable inline on the table — no modal round-trip to adjust a scenario later.
+
+    **You should see:** your scenario appear in the table with its own ID, personas attached, and no expected output yet.
   </Step>
 
   <Step title="Manage your personas (once)">
-    *Ask the Trust Agent:* "List my personas and tell me which one is the default." Personas live in the **Manage Personas** modal, opened from the **Persona** cell's **Manage personas** popover footer on a scenario-set detail — it opens in place, without navigating to a separate Settings screen. Open it to review them yourself. Each persona row shows a **usage count** so you can see where it's referenced. At most one persona is the **project default** at a time — setting a new default clears the prior one. The default persona is protected: its selection checkbox is disabled, so it can't be bulk-selected for deletion. Personas are referenced by **name** everywhere they appear — in chips, columns, and pickers — never by a raw identifier.
-    {/* ACCURACY-AUDIT-PENDING: Manage Personas opens as a page-root modal from the Persona cell's Manage personas popover footer; shows a usage count per persona, enforces exactly one project default (setting a new default clears the old), disables the default row's checkbox so it can't be deleted, and renders personas by name everywhere — verify by driving the modal from the scenario-set detail on the release tag */}
+    *Ask the Trust Agent:* "List my personas and tell me which one is the default." To review them yourself, open **Manage personas** from the Scenarios page header (the same modal also opens from any **Personas** cell's popover footer). Each persona shows a **usage count**, at most one persona is the **project default** at a time, and personas are referenced by **name** everywhere — chips, columns, and pickers.
 
-    **You should see:** a persona list with usage counts, exactly one persona marked default, and the default row's checkbox disabled.
-  </Step>
-
-  <Step title="Launch the generate wizard">
-    *Ask the Trust Agent:* "Generate scenarios for these personas against these goals," and it runs the same four-step generation for you. To drive it by hand, start **Generate from scratch** from the **Scenarios** list. The wizard has **four logical steps**, but the progress track shows **three pips** — the generate and review steps share the last pip:
-
-    1. **Select personas** — a multi-select persona table.
-    2. **Define goals** — a numbered goal list plus a connected-agent picker (the agent the generated scenarios target).
-    3. **Generate** — the wizard generates a scenario for each persona × goal pair.
-    4. **Review & add** — a selectable table where you choose which generated rows to keep.
-
-    Steps 3 and 4 sit under one **Generate & review** pip, so the visible track reads **Select personas → Define goals → Generate & review** — three pips, not four.
-    {/* ACCURACY-AUDIT-PENDING: the wizard runs four logical steps (Select personas / Define goals / Generate / Review & add) under a three-pip track labeled Select personas / Define goals / Generate & review — verify pip count and step labels by driving the wizard on the release tag */}
-
-    **You should see:** a three-pip progress track, step 1 selecting personas, step 2 listing numbered goals with an agent picker, step 3 generating one row per persona × goal, and step 4 letting you pick which rows to add.
-  </Step>
-
-  <Step title="Review and add the generated rows">
-    *Ask the Trust Agent:* "Add the generated rows that look realistic to my Q3 scenario set," or do it by hand: on **Review & add**, select the rows you want and add them to the set. The new rows carry a **Generated** source label — a row's source is one of **Uploaded**, **Generated**, or **Simulated**, and the **Source** column in the detail view reflects it.
-    {/* ACCURACY-AUDIT-PENDING: rows added from the wizard show a "Generated" source label in the scenario-set detail Source column — verify by generating + adding rows on the release tag */}
-
-    **You should see:** the rows you kept appear in the scenario set with a **Generated** source label.
+    **You should see:** a persona list with usage counts and exactly one persona marked default.
   </Step>
 </Steps>
 
-## Chat with and simulate an agent in the Playground
+## Generate sessions by running the scenario
 
-The **Playground** is a per-project surface for driving a connected agent by hand (**Chat**) or auto-driving a persona-versus-agent conversation (**Simulate**). Either way, you can capture the result as a scenario. This is a hands-on surface, so you work in the UI directly — the [Trust Agent](/concepts/trust-agent) helps around the edges (opening it, capturing the result, finding past runs).
-
-<Steps>
-  <Step title="Open the Playground and pick an agent">
-    *Ask the Trust Agent:* "Open the Playground with my support agent selected." You'll land at `/projects/:id/playground` with the agent picked — or go there yourself and pick a connected agent from the agent picker. Agents are **grouped by source system**. Choosing an agent shows a subtitle naming the agent and its source system. A segmented **Chat / Simulate** toggle controls the mode.
-    {/* ACCURACY-AUDIT-PENDING: the Playground at /projects/:id/playground has an agent picker grouped by source system, a subtitle naming the selected agent + source, and a segmented Chat / Simulate toggle — verify by driving the surface on the release tag */}
-
-    **You should see:** an agent picker grouped by source system, a subtitle naming your chosen agent, and a **Chat / Simulate** segmented toggle.
-  </Step>
-
-  <Step title="Chat with the agent">
-    Leave the toggle on **Chat** and send a message. The Playground streams a **real, live reply** from the connected agent — not a canned response. Keep sending messages and the conversation continues in the **same session**.
-    {/* ACCURACY-AUDIT-PENDING: Chat mode streams a live reply from the real connected agent and subsequent messages continue the same session — verify by sending two turns on the release tag */}
-
-    **You should see:** your message get a streamed live reply, and a second message continue the same conversation.
-  </Step>
-
-  <Step title="Switch to Simulate and configure the run">
-    Switch the toggle to **Simulate**. A **Simulate** config modal opens. Pick exactly **one persona** (single-select), enter **one goal**, and choose a **run mode**:
-
-    | Run mode | What it does |
-    |---|---|
-    | **Full auto** | Simulates the whole conversation end to end. |
-    | **Stay in the loop** | Suggests each user turn as you go, so you can steer between turns. |
-
-    Press **Simulate** and the persona-versus-agent conversation **auto-drives** — the persona role-plays the user and the agent replies, without you typing any turns.
-    {/* ACCURACY-AUDIT-PENDING: the Simulate config modal takes exactly one persona + one goal + one run mode, the run modes are labeled "Full auto" and "Stay in the loop", and pressing Simulate auto-drives the persona↔agent conversation with no manual typing — verify by driving the modal on the release tag */}
-
-    {/* CAPTURE-PENDING: playground-simulate-modal screenshot — the Simulate config modal (one persona, one goal, run-mode choice) */}
-
-    {/* CAPTURE-PENDING: result-fly-in still — an eval result-detail fly-in showing a captured simulated transcript */}
-
-    {/* CAPTURE-PENDING: playground-simulate.mp4 — Remotion walkthrough captured from the shipped app via captures/scripts/playground-simulate.ts; click-to-play, not autoplay; GIF fallback at playground-simulate.gif */}
-
-    **You should see:** the config modal accept one persona, one goal, and one run mode, and pressing **Simulate** auto-drive the conversation.
-  </Step>
-
-  <Step title="Capture the session as a scenario">
-    *Ask the Trust Agent:* "Save this Playground session as a scenario in my Q3 set, with the churn-risk persona attached." Or do it by hand: after a **Chat** or **Simulate** session, choose **Add as scenario**. Pick an **existing scenario set** or **create a new one**, optionally attach a **persona** and **goal**, and save. The conversation becomes **one new row** in that scenario set:
-
-    - The row's source is **Simulated** when a persona role-played the user.
-    - The row's source is **Generated** for a goal-driven manual chat with no persona.
-    {/* ACCURACY-AUDIT-PENDING: Add as scenario lets you target an existing-or-new set, optionally attach persona + goal, and writes one new row whose source is "Simulated" (with persona) or "Generated" (goal-driven chat, no persona) — verify by capturing both kinds of session on the release tag */}
-
-    **You should see:** a new row appear in the target scenario set carrying the captured conversation and a **Simulated** or **Generated** source label.
-  </Step>
-
-  <Step title="Reopen a past session from History">
-    *Ask the Trust Agent:* "Reopen my last simulation session in the Playground." Or open the Playground **History** menu yourself — it lists the Project's **real** prior chat and simulation sessions, not mock data. Open one and its **real transcript** loads, so you can revisit or re-capture an earlier run.
-    {/* ACCURACY-AUDIT-PENDING: the Playground History menu lists real prior sessions for the project and opening one loads its real transcript — verify by driving History on the release tag */}
-
-    **You should see:** the History menu list your real prior sessions, and opening one load its actual transcript.
-  </Step>
-</Steps>
-
-## Simulate at evaluation time
-
-Beyond the Playground, an [evaluation](/concepts/evaluations) can drive persona-and-goal simulation as it runs — instead of replaying each scenario row's stored input turns, it drives a fresh persona-versus-agent conversation for every simulatable row.
+A scenario generates sessions by being **run**: each run simulates one fresh persona-versus-agent conversation per attached persona, and every conversation persists as a real [Session](/concepts/sessions) linked to the scenario. To review conversations before you care about grades, run without evaluating.
 
 <Note>
-  *Ask the Trust Agent:* "Run an evaluation on my Q3 scenario set with simulate-at-eval-time turned on." It checks the set has simulatable rows, flips the toggle, and kicks off the run — then points you at the results.
+  *Ask the Trust Agent:* "Run my refund-request scenario against my support agent." It launches the persona fan-out for you. To generate sessions without creating a graded run, use **Run only** by hand — the steps below.
 </Note>
 
 <Steps>
-  <Step title="Know which rows can be simulated">
-    *Ask the Trust Agent:* "Which rows in my Q3 set are simulatable?" It checks each row for you. A scenario row is **simulatable** only if it carries **both** at least one persona **and** a non-empty goal. Rows missing either are **replayed** (their stored turns are sent as-is), so a mixed set degrades gracefully — the simulatable rows simulate and the rest replay in the same run.
-    {/* ACCURACY-AUDIT-PENDING: a row is simulatable only when it has ≥1 persona AND a non-empty goal, and rows missing either are replayed in the same run — verify against the simulatable-row rule on the release tag */}
+  <Step title="Start a run">
+    Select your scenario and use the **Run** split-button. The primary **Run** action simulates *and* grades (the menu spells it out: **Run & evaluate** — "Simulate + grade → creates an evaluation"); the chevron also offers **Run only** — "Simulate without grading." The same two actions live on the scenario fly-in's **More** menu, and the fly-in's empty **Sessions** tab leads with them: run the scenario to simulate one session per persona, review them, then set expected output from a good one.
 
-    **You should see:** a set built with persona+goal rows (for example, from the generate wizard or a captured **Simulated** Playground session) qualify as simulatable; a replay-only set does not.
+    **You should see:** a **Run** split-button whose chevron offers **Run only** and **Run & evaluate**.
   </Step>
 
-  <Step title="Start a new evaluation run and turn on the toggle">
-    *Ask the Trust Agent:* "Start a new evaluation on this set and turn on simulate at eval time," and it opens the new-run form with the toggle flipped. To do it by hand, start a **new evaluation run** against your scenario set. The new-run form has a **Simulate at eval time** toggle. It is only **available when the chosen set has at least one simulatable row**, and it reflects the set's simulatable-row count — pick a replay-only set and the toggle is unavailable. Turn it **on**, and the opt-in is persisted on the run.
-    {/* ACCURACY-AUDIT-PENDING: the new-run form's "Simulate at eval time" toggle is only enabled when the chosen set has ≥1 simulatable row, reflects the simulatable-row count, and the opt-in persists on the run — verify by selecting a replay-only set vs a persona+goal set on the release tag */}
+  <Step title="Confirm the fan-out and launch">
+    Choosing **Run only** opens the evaluation launcher titled **Run scenario**. Pick the **connected agent** to drive, and check the **This will run** preview — it counts one simulated conversation per attached persona. A goal-only scenario with no personas still runs one conversation, with the simulated user enacting the goal. The confirm button reads **Run N conversations**.
+    {/* CAPTURE-PENDING: evaluation-launcher screenshot — the Run scenario launcher with the agent picker and the "This will run" fan-out preview */}
 
-    For the rest of authoring and running an evaluation, follow [Run your first evaluation](/tutorials/run-first-evaluation) — this section only adds the simulate-at-eval-time delta.
-
-    **You should see:** the **Simulate at eval time** toggle available (and reflecting a count) for a set with persona+goal rows, and unavailable for a replay-only set.
+    **You should see:** the launcher preview one conversation per persona and the button count match it.
   </Step>
 
-  <Step title="Read the simulated transcript in the result fly-in">
-    *Ask the Trust Agent:* "Show me the simulated transcript for the order-status row from that run." With the toggle on, the run drives a fresh persona-and-agent conversation for each simulatable row. Open a **result row's detail fly-in** yourself and you get the **full simulated transcript** that was captured for that row — every turn, tagged with its **role** and **persona** — rather than the row's stored input.
-    {/* ACCURACY-AUDIT-PENDING: a simulate-at-eval-time result row's detail fly-in renders the full captured simulated transcript with per-turn role/persona tags — verify by opening a result fly-in after such a run on the release tag */}
+  <Step title="Watch the sessions land">
+    You stay on the Scenarios list while the run is in flight — the scenario shows a live **Generating…** badge that settles when it finishes. The finished conversations appear on the scenario's **Sessions** tab (the tab shows a live count), each carrying the **Scenario** source chip. A **Run only** run creates no entry in your Evaluations list — it exists to produce sessions, not grades.
 
-    **You should see:** each simulatable row produce a fresh persona-and-agent conversation, and its result fly-in show that captured transcript with per-turn role and persona tags.
+    **You should see:** a **Generating…** badge during the run, then new sessions under the scenario's **Sessions** tab with Source **Scenario**.
+  </Step>
+</Steps>
+
+## Save a Playground conversation as a scenario
+
+The **Playground** is the hands-on counterpart: drive a connected agent yourself (**Chat**) or auto-drive one persona against it (**Simulate**), then capture a conversation you like as a new scenario. This is a hands-on surface, so you work in the UI directly — the [Trust Agent](/concepts/trust-agent) helps around the edges (opening it, finding past runs).
+
+<Steps>
+  <Step title="Drive a conversation">
+    Open the Playground at `/projects/:id/playground` and pick a connected agent — the picker groups agents by source system. A segmented **Chat / Simulate** toggle controls the mode. On **Chat**, you type each message yourself and the connected agent replies live. On **Simulate**, a config modal takes exactly **one persona**, **one goal**, and a run mode — **Full auto** ("Simulates the whole conversation end-to-end") or **Stay in the loop** ("Suggests each user turn as you go") — and the persona-versus-agent conversation auto-drives. The **History** menu lists your real prior sessions so you can reopen an earlier run.
+    {/* CAPTURE-PENDING: playground-simulate-modal screenshot — the Simulate config modal (one persona, one goal, Full auto / Stay in the loop) */}
+
+    **You should see:** the **Chat / Simulate** toggle, and a Simulate run auto-drive the conversation without you typing turns.
+  </Step>
+
+  <Step title="Save it as a scenario">
+    When a conversation is worth keeping, choose **Save as a scenario** (available once the conversation has at least one exchange). The form is the same lightweight intake as **New scenario** — **Name**, **Goal**, **Personas** — and saving creates a new scenario with the conversation you just ran attached as its session, Source **Scenario**. Expected output is deliberately deferred: the fresh scenario reads as missing expected output until you author it.
+
+    **You should see:** a new scenario on the Scenarios list whose **Sessions** tab already holds the captured conversation.
+  </Step>
+</Steps>
+
+## Set the expected output from a good session
+
+Expected Output is the scenario's grading contract, and the loop is designed so you author it *after* you've seen real sessions — from vocabulary the product learned from them, not from guesswork.
+
+<Steps>
+  <Step title="Review the sessions">
+    Open the scenario's fly-in. Its tabs follow the workflow: **Personas & Goals**, **Expected Output**, then **Sessions**. On the **Sessions** tab, open any session into the nested detail panel to read its full transcript and its evaluations. Find a session that behaved the way you want.
+
+    **You should see:** the scenario fly-in's tabs, and a nested panel showing a single session's transcript.
+  </Step>
+
+  <Step title="Author the Expected Output">
+    On the **Expected Output** tab, define the contract in three sections: **Expected behavior** (LLM-judge evaluator cards, with a **Recommended for this scenario** group surfaced first), **Expected actions** (**Add action**, with parameter checks), and **Expected routes** (**Add route**). The pickers offer options observed in real sessions, so you choose what "good" looked like rather than typing it from memory.
+    {/* CAPTURE-PENDING: expected-output-editor screenshot — the three sections (Expected behavior / Expected actions / Expected routes) with the learned-vocabulary picker open */}
+
+    **You should see:** the three sections, and the action/route pickers offering values seen in your sessions.
+  </Step>
+
+  <Step title="Find the scenarios still missing one">
+    The Scenarios list ships a built-in **Missing expected output** saved view — use it to sweep the scenarios (including freshly saved Playground captures) that can't be graded structurally yet.
+
+    **You should see:** the saved view filter the table down to scenarios without a contract.
+  </Step>
+</Steps>
+
+## Run and evaluate
+
+<Note>
+  *Ask the Trust Agent:* "Run and evaluate my refund-request scenario." It launches the graded run for you; the steps below do the same by hand and read the results.
+</Note>
+
+<Steps>
+  <Step title="Launch a graded run">
+    Use **Run & evaluate** — from the **Run** split-button, the fly-in **More** menu, or the Sessions tab. The launcher opens as **Run & evaluate scenario** (or **scenarios** for a bulk selection): pick the connected agent, check the fan-out preview, and launch. The evaluators come from each scenario's Expected Output — they're inherited into the run, not re-picked. A scenario run **always simulates** fresh conversations; there is no replay opt-in to remember.
+
+    **You should see:** the launcher show your agent, the inherited evaluators, and the persona fan-out before you confirm.
+  </Step>
+
+  <Step title="Read the per-persona results">
+    The finished run leads with a dual headline: **Pass rate** grades the *agent*, and **Evaluator accuracy** grades the *judges* — how often the automated evaluators agreed with a person's session-level verdict. Below it, a per-persona matrix scores every attached persona on its own, with plain-English hints where personas diverge. Each result's **Transcript** tab labels itself **Simulated** or **Replayed**, and **Open session** takes you to the exact session that was graded.
+    {/* CAPTURE-PENDING: run-detail screenshot — the dual headline (Pass rate + Evaluator accuracy) over the per-persona matrix */}
+
+    To grade conversations that *already happened* — synced or captured sessions, with no simulation — use the **Evaluate** action on the [Sessions](/concepts/sessions) surface instead.
+
+    **You should see:** two headline numbers, one result per persona, and a **Simulated** label on the transcripts this run produced.
   </Step>
 </Steps>
 
 <Note>
-  **What runs behind the flow.** Both the Playground and eval-time simulation use the project-scoped simulations backend: a session is created with `POST /v1/projects/:id/simulations` and advanced with `POST /v1/simulations/:id/invoke`, and the gateway streams turns over SSE. These are named only as the observable calls behind the flow, not as a stable public API — request and response shapes live in the [API Reference](/api-reference). All of your simulation data is **scoped to your organization** (see [Multi-tenancy](/concepts/multi-tenancy)).
-  {/* ACCURACY-AUDIT-PENDING: a Playground simulate session issues POST /v1/projects/:id/simulations then POST /v1/simulations/:id/invoke (SSE turns) and all simulation data is organization-scoped — verify by watching the network on the release tag */}
+  **The wire surface behind the flow.** Scenario reads and edits go through the `/v1/scenarios` API family (the legacy `/v1/datasets` container API survives underneath — the re-root is a rename over existing storage). Request and response shapes live in the [API Reference](/api-reference). All of your scenario and simulation data is **scoped to your organization** (see [Multi-tenancy](/concepts/multi-tenancy)).
 </Note>
 
 ## Common stumbles
 
 <AccordionGroup>
-  <Accordion title="The nav says Scenarios but the browser URL doesn't match">
-    That is expected. **Scenarios** is the UI name for the surface; the route and backing API kept their original name, so the rename is UI-layer only. See the note at the top of this page for the exact route and endpoint, and [Scenarios](/concepts/scenarios) for the full mapping.
+  <Accordion title="Where did scenario sets go?">
+    They're gone as of v2026.06.30.1. Every project has one flat **Scenarios** list — there is no set to pick, and old dataset links redirect to `/projects/:id/scenarios`. A few vestigial in-app strings still say "scenario set"; the surface itself has no sets. See [Scenarios](/concepts/scenarios) for the current model.
   </Accordion>
 
-  <Accordion title="The generate wizard only shows three pips but four steps">
-    By design. The wizard runs four logical steps — **Select personas**, **Define goals**, **Generate**, **Review & add** — but the generate and review steps share one **Generate & review** pip, so the visible track shows three pips.
+  <Accordion title="I can't find the Simulate at eval time toggle">
+    It no longer exists on any reachable surface. A scenario run **always simulates** — one fresh conversation per attached persona. Your choice is whether to grade: **Run & evaluate** simulates and grades; **Run only** simulates without grading. To grade existing conversations instead of simulating new ones, use **Evaluate** on the Sessions surface.
   </Accordion>
 
-  <Accordion title="The Simulate at eval time toggle is greyed out">
-    The toggle is only available when the chosen scenario set has at least one **simulatable** row — a row with **both** a persona and a non-empty goal. A replay-only set (rows with no persona or no goal) leaves the toggle unavailable. Add persona+goal rows (from the generate wizard or a captured **Simulated** Playground session) and the toggle becomes available.
+  <Accordion title="Simulate in the Playground only takes one persona and one goal">
+    That is correct — the Playground's **Simulate** modal drives exactly one persona against the agent per run, so you can watch it turn by turn. For persona coverage, attach multiple personas to a scenario and run it: the run fans out one session per persona in a single launch.
   </Accordion>
 
-  <Accordion title="I can only pick one persona and one goal in Simulate">
-    That is correct for a Playground simulation — the **Simulate** config modal takes exactly **one** persona and **one** goal per run. To cover many persona × goal pairs at once, build a scenario set with the generate wizard (which creates a row per pair) and run **Simulate at eval time** against the set instead.
+  <Accordion title="My saved scenario says it's missing expected output">
+    By design. **Save as a scenario** and **New scenario** deliberately defer the grading contract — the loop is define cheap, run, then set expected output from a session you like. Open the scenario's **Expected Output** tab to author it; until then the scenario shows up in the **Missing expected output** saved view.
   </Accordion>
 
-  <Accordion title="My captured scenario shows Generated, not Simulated">
-    The source label reflects how the row was captured. A captured row is **Simulated** when a persona role-played the user, and **Generated** for a goal-driven manual chat with no persona attached. Attach a persona before (or when) you **Add as scenario** to get a **Simulated** row.
+  <Accordion title="I can't delete a scenario">
+    A scenario referenced by evaluations is blocked from deletion, and the app tells you so ("Can't delete: used in N evaluations."). When a delete *is* allowed but the scenario has generated sessions, the confirm discloses what happens: the sessions are **kept** as frozen records (only their link to the scenario is removed), while the scenario's expected-output rubric goes away with it.
   </Accordion>
 </AccordionGroup>
 
 ## Related reading
 
-- **[Scenarios](/concepts/scenarios)** — the concept page: what scenario sets, personas, and goals are, and how the Scenarios name maps onto the underlying route and API
-- **[Playground](/concepts/playground)** — the concept page: Chat vs Simulate, the connected-agent picker, and capture-as-scenario in depth
-- **[Evaluations](/concepts/evaluations)** — the evaluation model that the **Simulate at eval time** toggle plugs into
-- **[Run your first evaluation](/tutorials/run-first-evaluation)** — the end-to-end evaluation flow this page adds the simulate delta to
+- **[Scenarios](/concepts/scenarios)** — the concept page: what a scenario is, the flat list, the fly-in, and the Expected Output contract
+- **[Playground](/concepts/playground)** — the concept page: Chat vs Simulate, the connected-agent picker, and capture in depth
+- **[Evaluations](/concepts/evaluations)** — the evaluation model behind **Run & evaluate** and the dual-headline results
+- **[Run your first evaluation](/tutorials/run-first-evaluation)** — the end-to-end evaluation flow this page feeds scenarios into
+- **[Sessions](/concepts/sessions)** — where generated and captured conversations live, and how to evaluate the ones that already happened
 - **[Work with the Trust Agent](/how-to/work-with-the-trust-agent)** — the *other* in-app agent surface; the Playground's connected-agent chat is not the Trust Agent
-- **[Multi-tenancy](/concepts/multi-tenancy)** — why your simulation data stays scoped to your organization
