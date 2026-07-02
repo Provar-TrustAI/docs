@@ -1,0 +1,127 @@
+---
+title: "Connect a Claude Managed Agent"
+icon: "plug"
+description: "Connect an Anthropic Managed Agent on Claude Platform on AWS to a Trust AI Project — API key, workspace and agent identifiers, test, save, first conversation."
+---
+
+This how-to connects a **Claude Managed Agent** — an Anthropic Managed Agent running on Claude Platform on AWS — to a Trust AI [Project](/concepts/projects). When you're done:
+
+- The agent appears as a connected agent build you can pick when you launch an Evaluation, and the [Trust Agent](/concepts/trust-agent) can see it
+- Trust AI can drive conversations against it — observe-only explorations, simulated scenarios, and scored evaluation runs — and each conversation lands in the Project as a [Session](/concepts/sessions)
+
+Trust AI's role with this connector is deliberately narrow: it observes the agent and relays its responses, while the agent runs its own tools. You are not redeploying or reconfiguring the agent — you're pointing Trust AI at it.
+
+Claude Managed Agent is one of three platforms in the **Add connection** picker, alongside **AWS Bedrock AgentCore** and **Salesforce Agentforce**. AgentCore has [its own setup guide](/how-to/connect-agentcore), and Agentforce gets its own page too — this one covers the Claude Managed Agent form only.
+
+<Note>
+  Two different "agents" meet on this page. The **Claude Managed Agent** you're connecting is *your* agent — the one under test, tracked as an [Agent Version](/concepts/agent-versions). The **Trust Agent** is the in-app assistant that helps you do the connecting. They share a word and nothing else.
+</Note>
+
+## Ask the Trust Agent first
+
+Connecting an agent is a task the Trust Agent genuinely owns. Open **New chat** and ask:
+
+> *"Connect my agent"* — or *"Help me connect my Claude-managed agent."*
+
+The agent runs its built-in connect-agent flow:
+
+1. It **checks what's already connected**. If the Project already has a connected agent build, it names it and asks whether that's the one you want to test — no reconnecting something that already works.
+2. If nothing is connected, it **asks which platform** your agent runs on — Claude-managed and Salesforce Agentforce are the two kinds its guided flow walks today — and never assumes.
+3. It hands you a **plain-English checklist** of the values you'll need (the same five listed under [Prerequisites](#prerequisites) below), then points you at the connection form in Project Settings and waits while you fill it in.
+4. After you save, it **confirms the new agent build shows up**, then offers to run one observe-only exploration conversation so you can watch your agent working before anything is scored.
+
+The rest of this page is the manual path through the same form.
+
+## Prerequisites
+
+Have these five values ready — they all come from the Claude Platform on AWS setup that owns the agent:
+
+- **Anthropic API key** — your Claude Platform on AWS API key. It's kept secret and never shown back to you after saving.
+- **AWS Region** — where the agent runs, for example `us-east-1`.
+- **Workspace ID** — the Anthropic workspace that owns the Managed Agent.
+- **Agent ID** — the identifier of the managed agent itself (it looks like `agent_...`).
+- **Environment ID** — the environment the agent is published to (it looks like `env_...`).
+
+You'll also need a **Trust AI Project**. If you don't have one yet, start with [Your first 10 minutes in Trust AI](/tutorials/quickstart).
+
+## Connect the agent
+
+<Steps>
+  <Step title="Open the connection form">
+    In your Project, open **Project Settings**, select the **Connection** tab, and click **Add connection**. In the "Add a connection" picker, choose **Claude Managed Agent**.
+
+    {/* capture-needed: the Add-a-connection platform picker (three platform cards) */}
+
+    **You should see:** the connection form, with **Platform Type** preset to Claude Managed Agent and the platform's one-line description under it.
+  </Step>
+
+  <Step title="Fill in the connection">
+    Give the connection a **Connection Name** you'll recognize later — it becomes the label of the connected agent build, so "Support agent (staging)" beats "Claude 1".
+
+    Then fill the five platform fields: **Anthropic API key**, **AWS Region**, **Workspace ID**, **Agent ID**, and **Environment ID**.
+
+    The API key input is write-only. Once saved, the key renders only as a masked value — in the connection card, in edit forms, and in API responses — and it is never displayed back. To change it later, you enter a new one.
+
+    {/* capture-needed: the Claude Managed Agent connection form (five fields + Test Connection / Save connection footer) */}
+  </Step>
+
+  <Step title="Test the connection">
+    Click **Test Connection**. Trust AI runs one authenticated probe against the configured agent — confirming the API key, workspace, agent, and environment all resolve together — and shows the result in a success or failure banner above the buttons. Nothing is saved by the test.
+
+    The test is optional, but it turns a typo'd Workspace ID into a ten-second fix instead of a failed first run.
+  </Step>
+
+  <Step title="Save the connection">
+    Click **Save connection**.
+
+    **You should see:** the new connection listed in the Connection tab, with a card showing **Region**, **Workspace ID**, **Agent ID**, **Environment ID**, and the **Anthropic API key** as a masked value. **Edit** reopens the form; the delete button removes the connection.
+
+    Saving also registers the agent as a connected agent build, labeled with your connection name — that's what you'll pick in the evaluation launcher's agent dropdown.
+  </Step>
+
+  <Step title="Confirm it end to end">
+    Ask the Trust Agent — *"Which agent build is connected now?"* — and it will report the newly connected agent. The honest confirmation that the credentials work is a real conversation: ask the agent to run one observe-only exploration against your agent, or open the **Playground** and simulate a conversation, and watch your agent respond.
+
+    Connected agent builds are also readable programmatically via `GET /v1/agent-versions` — see the [API Reference](/api-reference) for the response shape.
+  </Step>
+</Steps>
+
+## Where sessions come from
+
+A Claude Managed Agent connection has no historical session import. The **Sync now** dropdown on the Sessions page lists every connected agent, but historical sync currently supports AWS Bedrock AgentCore only — picking a Claude Managed Agent there reports that sync isn't supported for the platform rather than silently doing nothing.
+
+Instead, sessions for this connector come from Trust AI driving the agent:
+
+- **Observe-only explorations** the Trust Agent runs after connecting
+- **Simulated conversations** — from the Playground, or fanned out per persona when an evaluation runs [scenarios with simulation](/how-to/simulate-with-scenarios)
+- **Evaluation runs** against the connected agent build
+
+Each lands on the [Sessions](/concepts/sessions) surface with its **Source** showing where it came from.
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Test Connection fails">
+    The probe couldn't reach your agent with the values as entered. Check each of the five fields:
+
+    1. The **Anthropic API key** is the Claude Platform on AWS key for the right workspace — and hasn't been rotated since you copied it. The saved key is never displayed back, so if in doubt, paste it again.
+    2. The **AWS Region** matches where the agent actually runs.
+    3. The **Workspace ID**, **Agent ID**, and **Environment ID** belong together — an agent ID from one workspace paired with another workspace's ID won't resolve, and neither will an environment the agent isn't published to.
+  </Accordion>
+
+  <Accordion title="The agent doesn't appear in the evaluation launcher">
+    The launcher's agent dropdown lists connected agent builds. Confirm the connection actually saved — it should be listed in **Project Settings → Connection** — and that you're launching from the same Project the connection belongs to. Asking the Trust Agent *"Which agent build is connected now?"* is the quickest cross-check.
+  </Accordion>
+
+  <Accordion title="Sync now doesn't import my agent's past conversations">
+    That's expected — historical session import isn't available for Claude Managed Agent connections today, and picking one under **Sync now** says so rather than importing nothing silently. Sessions for this connector are created when Trust AI drives the agent: explorations, simulations, and evaluation runs. See [Where sessions come from](#where-sessions-come-from) above.
+  </Accordion>
+</AccordionGroup>
+
+## Related reading
+
+- **[Projects](/concepts/projects)** — the workspace that owns the connection
+- **[Agent Versions](/concepts/agent-versions)** — how connected agent builds are tracked
+- **[Sessions](/concepts/sessions)** — what conversations against the agent become
+- **[Work with the Trust Agent](/how-to/work-with-the-trust-agent)** — driving the assistant that guides this setup
+- **[Connect an AWS Bedrock AgentCore agent](/how-to/connect-agentcore)** — the neighboring connector, with historical session sync
