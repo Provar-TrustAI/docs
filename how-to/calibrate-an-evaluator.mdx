@@ -1,0 +1,107 @@
+---
+title: "Calibrate an evaluator"
+icon: "target"
+description: "Check how often an LLM Judge agrees with your own pass/fail verdicts — run the production judge against a labeled sample, work the disagreements, and watch agreement climb."
+---
+
+An [Evaluator](/concepts/evaluators)'s scores are worth trusting only if the judge agrees with informed humans. This how-to walks the **Calibrate** tab on an LLM Judge: run the judge against scenarios a person has already marked pass or fail, read the agreement, tighten the grading rules where you and the judge disagree, and re-check until the number holds. When you're done:
+
+- You'll have a measured agreement rate between the judge and your own verdicts — the same judge, prompt, and parser your real [Evaluations](/concepts/evaluations) run
+- Every check is kept in **Calibration history**, so you can show your team how agreement moved as the rules improved
+
+Only LLM Judges have a **Calibrate** tab. A Structured Match evaluator is a deterministic check — there is no judge to calibrate — so its panel has no such tab.
+
+The [Trust Agent](/concepts/trust-agent)'s evaluator authoring is calibration-first: ask it to *"tighten the goal-completion evaluator's rules"* and it proposes the edit as an [approval-gated write](/how-to/approve-agent-writes) that can include a calibration check against a labeled sample, so you see how the judge's scores match your own pass/fail judgments before relying on it at scale. Running checks yourself and working the disagreement table happens on the **Calibrate** tab, which is what this page covers.
+
+## Prerequisites
+
+- **An LLM Judge evaluator.** Build one in the create flow (see [Build your first Evaluator](/tutorials/build-first-evaluator)) or adopt one from the recommended library and tailor it.
+- **A labeled sample — scenarios a person has marked pass or fail.** Calibration compares the judge's verdict with a human's on the same items, so your own verdicts are the ground truth (the same principle behind [Annotations](/concepts/annotations): a human verdict grades the judges). Aim for 10–20 labeled scenarios spanning both passes and fails — don't label only the easy cases. Each check samples at most 20 anyway.
+
+The pass/fail labels calibration reads are recorded against your scenarios in a dedicated pass/fail column — a labeling channel that predates the current flat [Scenarios](/concepts/scenarios) list. If your project has no labels yet, the **Calibrate** tab tells you so honestly instead of showing a dead button — see [troubleshooting](#troubleshooting) below. {/* ACCURACY-AUDIT-PENDING: the in-product surface for recording scenario pass/fail labels is mid-transition at v2026.06.30.1 — the legacy grid redirects to the flat Scenarios list, and the Sessions Verdict column is a separate channel. Verify the current labeling click-path against the running app. */}
+
+## Calibrate the evaluator
+
+<Steps>
+  <Step title="Open the Calibrate tab">
+    Open **Evaluators** in your Project and click the LLM Judge you want to check. Its side panel opens with the tabs **Overview**, **Criteria**, **Runs**, and **Calibrate**. Pick **Calibrate**.
+
+    **You should see:** a **Check agreement** section — a one-line explainer, the sample pickers, and a **Calibrate** button. If you see **No verdicts to calibrate against yet** instead, nothing in the project is labeled — the empty state links you to where you can fix that.
+  </Step>
+
+  <Step title="Pick the labeled sample">
+    In the common case there is nothing to pick: when exactly one labeled sample exists, it is selected for you, and a sample with a single pass/fail column auto-picks that column too.
+
+    Otherwise, choose where your labels live in the first dropdown, then pick the pass/fail column that holds your calls under **Your verdicts**. (A couple of strings on this tab still say "scenario set" — an older name from before the flat Scenarios list; the product noun today is simply your scenarios.)
+
+    Once both picks land, a census line under **Your verdicts** confirms the scope — for example, *"Your pass/fail column on Refund checks — 14 of 20 rows have a verdict."* If the sample you picked has a pass/fail column but no verdicts recorded on it yet, the tab says so and links you onward instead of enabling a check that would judge nothing.
+  </Step>
+
+  <Step title="Run the check">
+    Click **Calibrate**. Calibration never runs automatically — each check costs live judge calls, so you own the moment. While it runs the button reads **Calibrating…** and a progress strip appears; the caption next to the button sets expectations up front: *"Checks up to 20 rows — takes about a minute."*
+
+    <Note>
+      Calibration runs the **exact production judge** — the same model, the same assembled prompt, the same verdict parser your evaluation runs use, pinned to deterministic scoring. The agreement you measure here is the agreement you'll get in real runs; there is no separate "preview judge."
+    </Note>
+  </Step>
+
+  <Step title="Read the agreement">
+    The result lands under **Latest check** as an **Agreement** headline — the percentage of sampled scenarios where the judge reached the same verdict you did, captioned *"Compared with your verdicts on N rows."*
+
+    Click **Show details** for the verdict breakdown, **How the verdicts break down** — four counts:
+
+    - **Both said pass** and **Both said fail** — the agreements
+    - **The judge passed it, you failed it** and **The judge failed it, you passed it** — the two directions of disagreement, which need different fixes
+
+    Two plain-language lines below the breakdown give the directional rates — how often you agreed when the judge said pass, and how often the judge agreed when you said pass.
+
+    Aim for roughly **90%+ agreement** on a pass/fail rubric before relying on the judge at scale. Don't chase 100% — as the caption under the readout puts it, perfect agreement on a small set usually means the rubric over-fits those rows.
+  </Step>
+
+  <Step title="Work the disagreements">
+    Below the readout, the **Row by row — disagreements first** table lists every sampled scenario with the judge's verdict (**The judge**), yours (**You**), and an **Agree** / **Disagree** marker — disagreements sorted to the top, because as the table's own footer says, the disagreements are the data: they show exactly where the rubric is wrong.
+
+    For each disagreement, decide who's right:
+
+    - **The judge is wrong** — the rubric is the problem. Switch to the **Criteria** tab and tighten the rules: add a **Passes when…** rule for behavior the judge wrongly failed, or a **Fails when…** rule for behavior it wrongly let through, then commit with **Save grading rules**. [Write an effective LLM-judge prompt](/how-to/write-llm-judge-prompt) covers the craft of rules that calibrate well.
+    - **Your label is wrong** — it happens; correct the label rather than bending the rubric around a bad ground truth.
+    - **Genuinely ambiguous** — a healthy rubric tolerates a small disagreement rate on cases a second human reviewer would also debate. Don't add a rule for every edge.
+  </Step>
+
+  <Step title="Re-check and watch the history">
+    Editing the grading rules after a check raises a quiet warning above the result — **Criteria changed since this check** — because the agreement on screen reflects the old rubric. Click **Re-calibrate** (the button keeps that name once a result exists) to check the current rules; the prior result is kept, not discarded. Renaming the evaluator doesn't trigger the warning — the app tracks rule edits specifically.
+
+    Every check lands in **Calibration history**, newest first with a **Latest** pill: agreement, sample size, the evaluator revision it tested, and the date. Click an older entry to swap the result panel to that run — the history is your audit trail for *"which version of the rules earned this agreement?"*
+
+    Repeat the check → disagreements → rules loop until agreement holds where you want it. Then run your [Evaluations](/concepts/evaluations) — the run detail's evaluator-accuracy headline keeps grading the judges against human verdicts in production.
+  </Step>
+</Steps>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="The tab shows 'No verdicts to calibrate against yet'">
+    No pass/fail labels exist anywhere in the project, so there is nothing to compare the judge against. The empty state explains this and offers a single link that takes you to the **Scenarios** surface to get some verdicts recorded — there's deliberately no picker and no dead **Calibrate** button in this state. Label 10–20 scenarios (passes *and* fails), then come back.
+  </Accordion>
+
+  <Accordion title="The pickers resolve, but the check button stays disabled">
+    A sample can carry a pass/fail column with no verdicts recorded on it yet — the census line will read *"0 of N rows have a verdict"* and the tab shows a link to the picked sample so you can mark some. The **Calibrate** button enables once at least one labeled scenario exists.
+  </Accordion>
+
+  <Accordion title="The check fails with 'Calibration didn't finish'">
+    The check ran into a problem partway through — the banner offers **Try again**, and your last successful result is unchanged (it stays collapsed underneath). Calibration is synchronous and bounded at 20 samples, so a retry is cheap.
+  </Accordion>
+
+  <Accordion title="My evaluator has no Calibrate tab">
+    It's a Structured Match evaluator. Structured Match is a deterministic comparison of what the agent actually did against the scenario's expectations — the same input always produces the same verdict, so there's no judge to calibrate. Only LLM Judges carry the tab.
+  </Accordion>
+</AccordionGroup>
+
+Developers who want the calibration endpoints and the run history's response shape can find them in the [API Reference](/api-reference).
+
+## Related reading
+
+- **[Evaluators](/concepts/evaluators)** — the concept page, including why calibration is the trust loop
+- **[Write an effective LLM-judge prompt](/how-to/write-llm-judge-prompt)** — rules that calibrate well, and the anti-patterns that don't
+- **[Annotations](/concepts/annotations)** — human verdicts as the ground truth that grades every judge
+- **[Build your first Evaluator](/tutorials/build-first-evaluator)** — author the LLM Judge this page calibrates
