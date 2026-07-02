@@ -8,8 +8,11 @@ docs-plan/*.md
 # gstack skill state directory
 .gstack/
 
-# Claude Code session state directory
-.claude/
+# Claude Code session state stays local — but agent profiles and skills are
+# versioned team assets (the doc kit's operational half; see docs-plan/doc-kit/00-playbook.md)
+.claude/*
+!.claude/agents/
+!.claude/skills/
 .env
 
 # Playwright capture scripts

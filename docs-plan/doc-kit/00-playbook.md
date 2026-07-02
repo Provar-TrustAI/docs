@@ -141,3 +141,8 @@ step in for a genuine product-intent ambiguity the release notes don't resolve �
 | Archive tab pattern | the `docs.json` `navigation.tabs[]` + `.mintignore` `v2026.*/` convention |
 | Ticket tracking | the "Doc Driven Development" Linear project + DEV team |
 | Loop discipline | branch `bradyhunt/dev-NNNN-slug`; **never `--delete-branch` on merge** (Mintlify preview race) |
+| Release-notes → impact map + mechanical port | `/doc-release-align` (front half of PLAN; harvested from the v2026.06.30.1 loop) |
+| OpenAPI re-pin + sanitization | `/doc-openapi-sanitize` → `docs-plan/doc-kit/openapi-sanitize.py` |
+| Vocabulary law enforcement | `/doc-terminology-guard` (landing gate + post-rename sweep) |
+| Media/marker debt ledger + burn-down | `/doc-capture-pass` (CAPTURE-PENDING / ACCURACY-AUDIT-PENDING) |
+| Link/anchor/redirect/label hygiene | `doc-gardener-agent` (restructure checklist + standing sweep) |
