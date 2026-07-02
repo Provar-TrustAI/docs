@@ -1,101 +1,121 @@
 ---
 title: "Evaluations"
 icon: "chart-line"
-description: "Single runs of Evaluators across a Scenario set, scoped to a specific Agent Version. Where regressions get caught."
+description: "Runs of Evaluators across your scenarios or captured sessions, scoped to a specific Agent Version. Where regressions get caught."
 ---
 
-An Evaluation is a single run: take one or more [Evaluators](/concepts/evaluators), apply them to every scenario in a [Scenario set](/concepts/scenarios), against a specific [Agent Version](/concepts/agent-versions). The output is a scored, reviewable record per row — pass/fail or rubric score, alongside the reasoning the Evaluator captured.
+An Evaluation is a run: take one or more [Evaluators](/concepts/evaluators), apply them to the [scenarios](/concepts/scenarios) or [Sessions](/concepts/sessions) you select, against a specific [Agent Version](/concepts/agent-versions). The output is a scored, reviewable record per result — a verdict alongside the reasoning the Evaluator captured.
 
-An Evaluation is **the artifact regressions get caught in**. It's also the artifact every other Trust AI surface ultimately serves: Sessions exist to feed Scenario sets, Annotations exist to calibrate Evaluators, Scenario sets and Evaluators exist to produce Evaluations.
+An Evaluation is **the artifact regressions get caught in**. It's also the artifact every other Trust AI surface ultimately serves: Sessions exist to become scenarios and evaluation targets, Annotations exist to grade the judges, scenarios and Evaluators exist to produce Evaluations.
+
+## What an Evaluation can grade
+
+An Evaluation targets one of two sources:
+
+- **Scenarios** — Trust AI simulates each selected scenario live against the Agent Version (via the [Project's runtime connection](/concepts/projects)). Every persona attached to a scenario is simulated and scored on its own, so one scenario with three personas produces three results.
+- **Sessions** — Trust AI grades conversations that already happened. The judges read the captured transcript; no agent is invoked and the session is never modified. Because there's no live conversation to steer, session grading uses LLM Judge evaluators only. The result is homed on the session itself, and an **Open session** button on the result takes you back to the exact session that was graded.
+
+The second source is what makes Evaluations more than a synthetic-test tool: yesterday's real production conversations are as gradeable as your authored test cases.
+
+## Launching a run
+
+One **Evaluation Launcher** drives every run. It opens from five places:
+
+1. **Sessions list** — select sessions and click **Evaluate** (bulk).
+2. **A single session's panel** — **Evaluate** in the header (one-off).
+3. **Scenarios list** — select scenarios and use the **Run** split button (**Run & evaluate**, or **Run only** to simulate without grading).
+4. **A single scenario's fly-in** (one-off).
+5. **Evaluations list** — click **New evaluation** and pick the source yourself.
+
+However you arrive, the launcher shows a **fan-out preview** — exactly what will run, including the per-persona expansion for scenarios — before you commit.
+
+Two launcher details worth knowing:
+
+- **Repeat each test case** — a 1–4 selector that runs every test case multiple times. New runs default to 2, so your results measure reliability, not just a single lucky attempt. See "Pass^K reliability" below.
+- **Re-run** — on any finished run, **Re-run** reopens the launcher pre-seeded with the original run's full configuration: same targets, same Evaluators, same Agent Version. Change one variable (usually the Agent Version) and launch.
+
+## One-off evaluation in place
+
+You don't need a named run to answer "does this one pass?". Evaluating a single scenario or session grades it in place: the verdict lands directly on the item, and no run is added to the Evaluations list. Bulk runs are for measurement; one-off evaluation is for the quick check while you're already looking at the thing.
 
 ## The run lifecycle
 
-Every Evaluation moves through four states:
+- **Launched** — the run records a snapshot of your scenarios as they were at launch, so a finished run stays reproducible even after you edit or delete scenarios later.
+- **In progress** — results fill in as they complete. If you launched a bulk run from the Scenarios list, you stay on the list and watch each scenario's live **Generating…** badge settle as it finishes. You can open the run and watch results arrive, or click **Cancel run** — the run stops at a clean boundary and keeps every result already scored.
+- **Complete** — every result has a verdict, and the aggregate headlines resolve.
 
-1. **Configured** — you've picked the Scenario set, the Evaluator(s), and the Agent Version. Nothing's running yet.
-2. **In progress** — Trust AI is sending each scenario to the live agent (via the [Project's runtime connection](/concepts/projects)), collecting structured responses, scoring them with the Evaluators. Long-running; the app surfaces progress as rows complete.
-3. **Complete** — every row has an Evaluator result. Aggregate stats are available (pass rate, score distribution, common failure patterns).
-4. **Compared** *(optional)* — paired with a prior Evaluation against a different Agent Version. The results matrix highlights per-row deltas (regressions, improvements, unchanged) so you can see exactly which rows moved.
+Finished runs offer **Export** (download the results as CSV) and a primary **Re-run**; the **…** menu offers **Delete run**, which removes the run from your lists without destroying the sessions it produced.
 
-The lifecycle is observable. You can open an in-progress Evaluation and watch rows fill in.
+## Reading the results
 
-## In the app
+Run detail leads with **two headline numbers**, and they answer different questions:
 
-The Evaluations surface in Trust AI maps directly to the lifecycle above:
+- **Pass rate** grades the *agent*: of the results that count, how many passed.
+- **Evaluator accuracy** grades the *judges*: how often the automated Evaluators agreed with a human's verdict on the same sessions. Human Pass / Fail / Not-evaluated verdicts, recorded as [Annotations](/concepts/annotations), are the ground truth here — a human verdict grades the judges, and never overrides the automated verdict.
 
-- **Evaluation run list** — a table showing all runs in the Project with columns for status, scenario set, pass rate, evaluator accuracy, and triggered-by (manual or CI).
-- **New Run flow** — click **New Run** to open the creation flow: pick a scenario set, multi-select evaluators, and choose an agent version. The run enters the *Configured* state and starts immediately.
-- **Run Detail** — click any run to open the results matrix. Each row is a scenario; each column is an evaluator. Cells display verdict chips (pass, fail, or a rubric score).
-- **Result fly-in** — click any verdict chip to open a fly-in panel with the full evaluation card: score, reasoning narrative, and reference comparison (when the scenario has a reference output).
-- **CSV export** — from the Run Detail toolbar, export the full results matrix as CSV for offline analysis or sharing.
-- **Run renaming** — relabel a finished run from the Run Detail header to tag it as a baseline, regression, or experiment variant.
+A high pass rate means little if evaluator accuracy is low: you'd be trusting judges that a human reviewer routinely disagrees with. The two numbers together tell you whether to believe the run.
+
+### Pass^K reliability
+
+When a run repeats each test case (the default is 2), the headline becomes a **Pass^K** rate — the share of test cases that passed *every* attempt, rendered literally as `Pass^2`. Hover the headline for the full curve from pass-once to pass-every-time. This is the honest number for non-deterministic agents: an agent that passes 87% of cases on one attempt can pass far fewer on all four.
+
+### Per-persona results
+
+Because every attached persona is scored separately, run detail includes a per-persona matrix with plain-English divergence hints — when the same scenario passes for one persona and fails for another, the matrix points at it. That divergence is usually the most actionable finding in a run: the agent didn't break everywhere, it broke for a *kind of user*.
+
+### Verdicts are three-state
+
+Every verdict is **Pass**, **Fail**, or **Not evaluated**. The third state is honest bookkeeping — a result that no Evaluator scored is not silently a pass or a fail.
+
+## When it's not the agent's fault
+
+Not every non-pass means the agent got something wrong, and the results no longer pretend otherwise:
+
+- **Guardrail blocked** — the runtime's guardrails blocked the response before the agent's answer could be judged. The result carries an amber **Guardrail blocked** label and is excluded from the pass-rate denominator.
+- **Environment problem** — the runtime, the harness, or a judge call failed for infrastructure reasons. The result renders as a neutral **Environment problem — not the agent · Excluded from the score** state, never a red Fail.
+
+The pipeline also defends itself before classifying anything as an environment problem: model-capacity throttling is retried automatically with backoff, one bad result can't fail the whole run, and judge calls run in parallel within a safe bound. A capacity hiccup at 2 a.m. can no longer masquerade as a drop in agent quality.
 
 ## What's in an Evaluation result
 
-Per scenario, an Evaluation captures:
+Open any result to see:
 
-- **The input** sent to the agent (from the scenario)
-- **The agent's full response** — what it said back, including tool calls and intermediate steps. This **is itself a Session** — see "Evaluation results are Sessions, too" below.
-- **Per-Evaluator scores** — one per Evaluator applied to this run
+- **Transcript** — the full conversation, labeled **Simulated** (the run drove a live conversation) or **Replayed** (the judges graded a captured session).
+- **Final verdict** — the three-state verdict, with per-Evaluator score cards beneath it.
 - **Reasoning** — for LLM Judges, the rubric reasoning that led to the score. For Structured Match, the assertion that fired (or didn't).
-- **Reference comparison** *(optional)* — if the scenario has a reference output, the delta between expected and actual
-
-At the Evaluation level:
-
-- Aggregate pass/fail rate, score distribution, latency stats
-- Failure categories (rows that failed Evaluator A but not Evaluator B, etc.)
-- Comparison to prior Evaluations against the same Scenario set
+- **Open session** — jump to the exact session this result was graded against.
 
 ## Evaluation results are Sessions, too
 
-A subtle but important pattern (ADR 0006 in the trust-ai-app repo): **the agent responses produced during an Evaluation are themselves Sessions**, indistinguishable structurally from production Sessions. They appear in your Sessions list, taggable as "from-eval," and you can re-annotate them, re-evaluate them, or compare them to production Sessions side-by-side.
+The conversations produced when an Evaluation simulates scenarios are themselves Sessions — structurally the same as production Sessions. They appear in your Sessions list with a **Source** chip of **Scenario** (captured production traffic shows **External**; conversations saved from the Playground show **Playground**), and their **Simulated from** provenance shows which scenario and persona produced them.
 
 This is what unlocks:
 
-- **Re-evaluating an Evaluation's outputs with a different Evaluator** without re-running against the live agent
-- **Curating the "evaluation Sessions" into a Scenario set of their own** for higher-resolution regression testing
-- **Treating Evaluation outputs as just another agent invocation** for downstream tooling — no special-case API surface
+- **Re-grading without re-running** — evaluate those sessions again with different Evaluators; the judges read the transcript, no agent invocation needed.
+- **Annotating them** like any other session, which feeds the evaluator-accuracy headline.
+- **No special-case surface** — one Sessions list, filtered by Source when you want only one kind.
 
-The trade: Sessions get noisier (you'll see both production and evaluation Sessions in lists). Tags + filters handle this; the structural simplicity is worth more than the namespace cost.
+## Comparing Agent Versions
 
-## Comparing two Agent Versions
+The regression-tracking pattern is two runs with one variable changed:
 
-The headline workflow Trust AI exists for. The pattern:
+1. Run an Evaluation against **Agent Version A** (say, production).
+2. On the finished run, click **Re-run**, switch the Agent Version to **B** (the candidate), and launch. Everything else — targets, Evaluators, repeat count — carries over faithfully.
+3. Read the two run details side by side: headline deltas first, then the per-persona matrices for where the movement happened.
 
-1. Pick the **same Scenario set** and **same Evaluators**.
-2. Pick **Agent Version A** (e.g., production) and **Agent Version B** (e.g., a candidate replacement).
-3. Run an Evaluation against each.
-4. Open the comparison view.
-
-The comparison view builds a side-by-side results matrix with verdict chips for both runs. It surfaces:
-
-- **Per-row deltas** — rows where A passed and B failed (potential regressions), rows where A failed and B passed (improvements), rows where both passed/failed. Verdict chips are color-coded so regressions stand out immediately.
-- **Flapping rows** — rows where a non-deterministic Evaluator scored them differently (a signal the rubric needs tightening, or the test case is on the edge)
-- **Aggregate-level deltas** — pass rate change, score distribution shift
-- **Per-Evaluator breakdowns** — if one Evaluator regressed harder than others, that often localizes the kind of regression
-
-This is **the regression-tracking primitive**. For the practical how-to, see [Compare two Agent Versions](/how-to/compare-agent-versions).
-
-## Reading an Evaluation
-
-Common failure patterns and what they usually mean:
-
-- **A row that passed yesterday and fails today, same Evaluator, same prompt** → either the agent regressed, or the Evaluator is non-deterministic and needs tightening. Open the reasoning; the Evaluator's narrative usually tells you which.
-- **A row where two Evaluators disagree** → often a calibration gap. The strict Evaluator is over-rejecting or the lenient one is over-accepting. Look at the reasoning side-by-side.
-- **A category of rows that all fail together** → usually a category regression in the agent (a whole intent broke, a tool's not being called, etc.). Filter by row tag to localize.
-- **A row where the agent didn't respond at all** (timeout, error) → infrastructure problem; not a judgment problem. Re-run those rows; if persistent, debug the runtime.
+There is no dedicated run-vs-run comparison view in the app today; the faithful Re-run is what makes the manual comparison trustworthy, because you know the only variable that changed is the agent.
 
 ## Working with Evaluations
 
-You drive Evaluations from the Trust AI app, or by asking the Trust Agent. Kick off a new run by clicking **New Run** (pick a Scenario set, Evaluators, and Agent Version), or by telling the Trust Agent to evaluate a Scenario set against an Agent Version. Open a run from the run list to watch progress, read per-row results, compare it to a prior run, cancel an in-progress run, or rename a finished one — all from the Run Detail surface. The Trust Agent can also pull aggregate stats (pass-rate trends, latency) and slice results by cohort for you.
+You drive Evaluations from the Trust AI app, or by asking the Trust Agent. Tell the Trust Agent to evaluate your scenarios against an Agent Version, or to evaluate yesterday's failed sessions — or click **New evaluation** on the Evaluations list and configure the launcher yourself. Open a run to watch progress, read results, cancel it mid-flight, or re-run it against a different Agent Version. The Trust Agent can also pull aggregate stats and slice results by persona for you.
 
 Developers who want the underlying endpoints and request/response shapes can find them in the [API Reference](/api-reference).
 
 ## Related concepts
 
-- **[Scenarios](/concepts/scenarios)** — the Scenario set an Evaluation runs against
-- **[Evaluators](/concepts/evaluators)** — the judgment functions applied to each row
+- **[Scenarios](/concepts/scenarios)** — the authored test cases an Evaluation simulates
+- **[Sessions](/concepts/sessions)** — both an evaluation target and what scenario runs produce
+- **[Evaluators](/concepts/evaluators)** — the judgment functions applied to each result
 - **[Agent Versions](/concepts/agent-versions)** — what's under test
-- **[Sessions](/concepts/sessions)** — what Evaluation outputs are (structurally)
+- **[Annotations](/concepts/annotations)** — the human verdicts that grade the judges
 - **[The evaluation loop](/concepts/evaluation-loop)** — Evaluations are the "run" step
-- **[Compare two Agent Versions](/how-to/compare-agent-versions)** — the regression-tracking how-to
