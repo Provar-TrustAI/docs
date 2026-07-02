@@ -1,15 +1,15 @@
 ---
 title: "Build your first Evaluator"
-icon: "wand-sparkles"
-description: "Author a plain-English LLM Judge rubric and calibrate it against the Annotation you wrote in the quickstart."
+icon: "ruler"
+description: "Adopt a recommended Evaluator, draft plain-language grading rules with Tailor with AI, and calibrate the judge against your own pass/fail verdicts."
 ---
 
-This tutorial continues directly from [Your first 10 minutes in Trust AI](/tutorials/quickstart). You'll author your first [LLM Judge](/concepts/evaluators) — a plain-English rubric scored by Claude or GPT at evaluation time — and **calibrate** it against the [Annotation](/concepts/annotations) you applied in the quickstart. By the end you'll have an Evaluator that agrees with you on the cases you care about.
+This tutorial continues directly from [Your first 10 minutes in Trust AI](/tutorials/quickstart). You'll set up your first [Evaluators](/concepts/evaluators) — LLM judges that grade sessions against plain-language rules — in two ways: adopting from the recommended catalog, and creating your own with AI-drafted rules. Then you'll **calibrate** the judge against your own pass/fail verdicts. By the end you'll have an Evaluator that agrees with you on the cases you care about.
 
-The whole walkthrough should take about 15 minutes. Most of that time is **iterating on the rubric**, which is also the most important skill you'll develop as an Evaluator author.
+The whole walkthrough should take about 15 minutes. Most of that time is **iterating on the grading rules**, which is also the most important skill you'll develop as an Evaluator author.
 
 <Tip>
-  **Why LLM Judge first?** It's the family that does the work of qualitative judgment — politeness, completeness, accuracy of unstructured text — which is most of what real agents need to be evaluated on. [Structured Match](/concepts/evaluators#anatomy-of-a-structured-match) is the right pick when judgment is exhaustively specified (intent classification, tool-call shape). Most teams need both eventually; start here.
+  **You never write a judge prompt.** You state what a passing and a failing response look like as short plain-language rules; Trust AI assembles those rules into the prompt the judge actually runs. The assembled prompt stays visible — read-only — behind an **Advanced** disclosure, so the rules are always the thing you edit.
 </Tip>
 
 ## Before you start
@@ -17,142 +17,140 @@ The whole walkthrough should take about 15 minutes. Most of that time is **itera
 You should have, from [the quickstart](/tutorials/quickstart):
 
 - A [Project](/concepts/projects) with a connected runtime (or demo data)
-- At least one Session with an [Annotation](/concepts/annotations) on a Turn — ideally a pass/fail with a short freeform note explaining why
-- A starter [Scenario set](/concepts/scenarios) with that annotated Session curated as a scenario
+- A few [scenarios](/concepts/scenarios) in your Scenarios list — the order-status happy path from the quickstart is perfect
+- Your own **pass/fail verdicts** on some of those scenarios: a pass/fail column on the Scenarios list with a few scenarios marked
 
-If you skipped any of that, go back — calibration only works against real Annotations.
+That last one matters most. Calibration compares the judge's verdicts with yours, so it only works against verdicts you actually recorded. If you haven't marked any scenarios yet, open **Scenarios**, add a pass/fail column, and mark a handful before you start.
 
 ## The five steps
 
 <Steps>
-  <Step title="Pick a Scenario set to anchor the Evaluator">
+  <Step title="Adopt the recommended evaluators">
     <Note>
-      *Ask the Trust Agent:* "Open the scenario set I made in the quickstart — the order-status happy path one."
+      *Ask the Trust Agent:* "Add the recommended evaluators to this project."
     </Note>
 
-    You'll see the Scenario set detail view with at least one scenario; or do it by hand: open your Project, navigate to **Scenarios**, and click the Scenario set you created in the quickstart ("Order-status happy path" or similar).
+    Then confirm the result on the Evaluators list; or do it by hand: open **Evaluators** and click **Add recommended** (on a brand-new project, the empty state leads with the same **Add recommended evaluators** call to action).
 
-    The scenarios in this set are what your Evaluator will be calibrated against. You don't need many — even one well-annotated scenario is enough to write a draft rubric. Three to five is the sweet spot for first-pass calibration; you can grow the set later.
+    The catalog offers 12 curated LLM-judge presets — Quality checks first, then Safety — each with a name, a chip showing where its grading method comes from, and a one-line description. Check the ones that fit your agent and click the footer button, which counts your picks (**Add 3 evaluators**).
 
-    **You should see:** the Scenario set detail view with at least one scenario, the scenario showing the original Session content + your Annotation.
+    Two things to notice as you pick:
+
+    - A few presets carry a **Tailor first** badge. They're written against a generic agent — add a rule about *your* agent (what it's allowed to promise, what's in scope) before relying on them. The badge is a nudge, not a blocker.
+    - Presets already in your project show a muted **In your project** label instead of a checkbox, so you can't adopt duplicates.
+
+    Everything you adopt becomes an ordinary, fully editable Evaluator in your project — it just keeps a **Recommended** chip so its origin stays clear.
+
+    **You should see:** the Evaluators list with your adopted presets, each carrying a **Recommended** chip.
   </Step>
 
-  <Step title="Open the Evaluator builder">
+  <Step title="Start your own Evaluator">
     <Note>
-      *Ask the Trust Agent:* "Start a new LLM Judge evaluator with a pass/fail score."
+      *Ask the Trust Agent:* "Start a new pass/fail evaluator for the order-status flow."
     </Note>
 
-    You'll land in the create flow with **LLM Judge** and **pass/fail** preselected; or do it by hand: from the Project home, navigate to **Evaluators → New Evaluator**, select **LLM Judge** as the evaluator kind, then choose **pass/fail** as the score type.
+    {/* ACCURACY-AUDIT-PENDING: exact Trust Agent conversational handling of evaluator-create requests not verified at the tag */}
+    Or do it by hand: from the Project home, open **Evaluators → New evaluator**.
 
-    The create flow walks you through:
+    The form asks for:
 
-    - **Rubric editor** — system prompt, criteria, and output format
-    - **Score type** — pass/fail (binary) or 1–5 scale. Start with pass/fail; it's the easiest to calibrate.
-    - **Calibration** — pick a Scenario set and see live agreement with Annotations as you edit the rubric
+    - **Name** and **Description** — e.g., "Order status — three-part check" with a one-liner on what it's for.
+    - **Score type** — **Pass / fail** (a binary verdict per example) or **1–5 scale** (with a **Pass threshold** control: scores at or above the threshold count as a pass). Start with pass/fail; it's the easiest to calibrate.
 
-    **You should see:** the rubric editor with placeholder text, and a scenario-set selector for calibration.
+    Instead of typing grading criteria from scratch, use the **Tailor with AI** box at the top of the form. Describe what the Evaluator should check in a sentence:
+
+    ```
+    The agent should identify which order the customer is asking about, give
+    that order's actual current status — never a generic "we'll look into it" —
+    and explain the next step if the order isn't delivered yet.
+    ```
+
+    Click **Draft for my agent**. Draft grading rules appear in the form below as **Passes when…** and **Fails when…** lists, prefilled for you to review and edit. Nothing is saved until you create the Evaluator.
+
+    **You should see:** the New evaluator form with drafted rules under **Passes when…** and **Fails when…**, ready to edit.
   </Step>
 
-  <Step title="Write a plain-English rubric">
-    <Note>
-      *Ask the Trust Agent:* "Draft a pass/fail rubric for the order-status flow — it should check that the agent identified the order ID, gave the actual current status, and explained the next step."
-    </Note>
+  <Step title="Review and tighten the grading rules">
+    The rule lists are your rubric. For the order-status flow we curated in the quickstart, a solid set looks like:
 
-    The Trust Agent will populate the rubric editor with a first draft you can refine; or write it by hand in the editor. The rubric has four parts. Here's a working example for the order-status flow we curated in the quickstart:
+    **Passes when…**
 
-    **System prompt:**
+    - The agent identifies the order the customer is asking about
+    - The agent gives that order's actual current status
+    - The agent explains the expected next step when the order isn't delivered yet
 
-    ```
-    You are reviewing a customer-support agent's response to a user asking
-    about order status. You are judging whether the agent's response
-    correctly resolved the user's question.
-    ```
+    **Fails when…**
 
-    **Criteria:**
-
-    ```
-    A passing response must:
-    (a) Correctly identify the order ID from the user's message
-    (b) Provide the actual current status of that order (not a generic
-        "we'll check on it")
-    (c) If the status is anything other than "delivered," explain what
-        the status means and the expected next step
-
-    Mark "fail" if any of (a), (b), or (c) is missing or wrong.
-    Mark "pass" only if all three are present and accurate.
-    ```
-
-    **Scoring scale:** Binary (`pass` / `fail`). Binary is the easiest to calibrate; once it's working, you can revisit Likert if you need nuance.
-
-    **Output format:** JSON with `{ "score": "pass" | "fail", "reasoning": "..." }`. The builder fills this in for you; you don't need to author it from scratch.
+    - The agent answers with a generic "we'll check on it" instead of the real status
+    - The agent states an order number or status that doesn't match the conversation
 
     <Tip>
-      **The most common rubric-writing mistake** is writing criteria as "is this good?" — a vague yes/no. Good criteria are testable: "did the agent (a)... (b)... (c)..." with each clause individually checkable. If a thoughtful human reviewer couldn't apply your rubric and produce the same score twice, the LLM Judge won't either.
+      **The most common rule-writing mistake** is a vague "is this good?" rule. Good rules are testable — each one individually checkable against a single response. If a thoughtful human reviewer couldn't apply your rules and produce the same verdict twice, the LLM judge won't either.
     </Tip>
 
-    Click **Save draft**.
+    You never author the judge prompt itself. Trust AI assembles your rules into the exact criteria the judge runs; on the saved Evaluator you can read the assembled prompt behind **Advanced — view the prompt this produces**, but it's read-only — to change verdicts, you change rules.
+
+    Two options worth knowing before you save:
+
+    - If you picked the **1–5 scale**, the rule lists become three anchors — **Rate 5 when…**, **Rate 3 when…**, **Rate 1 when…** — one sentence each.
+    - **Reason step by step** makes the judge work through each rule before deciding. Slower, but better at catching subtle failures; leave it off for your first pass.
+
+    When the rules read right, click **Create evaluator**.
+
+    **You should see:** an "Evaluator created" confirmation, with the new Evaluator's detail panel open over the Evaluators list.
   </Step>
 
-  <Step title="Calibrate against your Annotations">
+  <Step title="Calibrate against your verdicts">
     <Note>
-      *Ask the Trust Agent:* "Calibrate this rubric against my order-status scenario set and show me where it disagrees with my annotations."
+      *Ask the Trust Agent:* "Check how well my order-status evaluator agrees with my own verdicts."
     </Note>
 
-    Or do it by hand: in the calibration panel on the right, pick the Scenario set from step 1. The Evaluator runs against every scenario in the set and shows you, per scenario:
+    Or do it by hand: open your Evaluator and switch to its **Calibrate** tab (LLM judges only). Calibration runs this judge — the same model, rules, and settings production uses — against scenarios you already marked pass or fail, and reports the **agreement**.
 
-    - The Evaluator's score (pass/fail) + the reasoning it captured
-    - The human Annotation on that scenario
-    - Whether they agree
+    Pick the scenarios to check against and, under **Your verdicts**, the pass/fail column you marked, then click **Calibrate**. The check covers up to 20 marked scenarios and takes about a minute.
 
-    **You should see:** an agreement rate at the top (e.g., 4 of 5 scenarios agreeing — 80%), and per-scenario detail below.
+    **You should see:** an agreement headline for the latest check, and a **Row by row — disagreements first** table comparing the judge's verdict with yours on each scenario.
 
-    Look at the scenarios where they **disagree** — that's where calibration happens. Common patterns:
+    The disagreements are the data — they show exactly where the rules are wrong. Common patterns:
 
-    - The Evaluator passed a scenario a human failed → rubric is too lenient. Add a tightening clause.
-    - The Evaluator failed a scenario a human passed → rubric is too strict. Loosen or remove an over-specified clause.
-    - Both pass or both fail with different reasoning → calibration is roughly aligned; you can move on or refine further.
+    - The judge passed something you failed → the rules are too lenient. Add a **Fails when…** rule naming that failure.
+    - The judge failed something you passed → the rules are too strict. Loosen or remove an over-specified **Passes when…** rule.
 
-    Edit the rubric, click **Re-calibrate**, and watch the agreement rate move. **The goal is ~90% agreement** for a binary rubric on a small set. Don't chase 100% — perfect agreement on a small set often means you've over-fit the rubric to the specific scenarios.
+    To iterate: edit the rules on the Evaluator's **Criteria** tab and click **Save grading rules**. The Calibrate tab then warns that the criteria changed since the last check — click **Re-calibrate** and watch the agreement move. **Calibration history** keeps every check, newest first, so you can see whether your edits are helping.
+
+    **The goal is roughly 90% agreement** on a small set. Don't chase 100% — perfect agreement on a handful of scenarios usually means the rules over-fit those exact cases.
 
     Iterate. This is the work.
   </Step>
 
-  <Step title="Save and reuse">
+  <Step title="Put the Evaluator to work">
     <Note>
-      *Ask the Trust Agent:* "Save this evaluator as 'Order status — three-part rubric'."
+      *Ask the Trust Agent:* "Attach my order-status evaluator to the order-status scenario."
     </Note>
 
-    Or do it by hand: once agreement is high, click **Save Evaluator**, give it a name (e.g., "Order status — three-part rubric"), an optional description, and confirm.
+    Or do it by hand: open the scenario, go to its **Expected output**, and add your Evaluator with the **+ Add evaluator** picker. The picker lists your project's Evaluators alongside the recommended catalog, with the presets best suited to that scenario surfaced first under **Recommended for this scenario** — adopting one from here attaches it in the same step.
 
-    The Evaluator is now in your Project's Evaluator library. Any future [Evaluation](/concepts/evaluations) — against any Scenario set, against any Agent Version — can apply this Evaluator. It's reusable; that's the whole point. If you'd rather create Evaluators programmatically, the endpoint is in the [API Reference](/api-reference).
+    The Evaluator also lives in your project's Evaluators list, ready for any future [Evaluation](/concepts/evaluations) — it grades scenario runs you launch, and AI judges like this one are also what grade already-captured sessions. It's reusable; that's the whole point. If you'd rather manage Evaluators programmatically, the endpoints are in the [API Reference](/api-reference).
 
-    **You should see:** the Evaluators list now shows your new Evaluator, ready to apply.
+    **You should see:** your Evaluator on the scenario's expected output, next to any structural checks defined there.
   </Step>
 </Steps>
 
-## When Structured Match would have been a better pick
+## When you don't need a judge at all
 
-If the judgment you're encoding is **exhaustive and precise** — "did the agent emit `intent: order_status`?" — Structured Match is the right family, not LLM Judge. A Structured Match for that case would be:
-
-```yaml
-path: output.intent
-operator: equals
-expected: order_status
-```
-
-Three lines. No calibration. No LLM cost per evaluation. **If you find yourself trying to encode something exact into a plain-English rubric, switch families.** See [LLM Judge vs Structured Match](/concepts/evaluators#the-two-families) for the full decision heuristic.
+If the judgment you're encoding is **exact** — "did the agent route this to order-status?", "did it call the refund tool?" — don't write judge rules for it. Structural checks like expected routes, required or disallowed actions, and parameter checks are authored directly on a scenario's expected output, picked from vocabulary Trust AI learned from your real sessions rather than typed by hand. They're deterministic, they cost nothing per evaluation, and they need no calibration. **If you find yourself encoding something exact into plain-language rules, move it to the scenario's expected output instead.** See [Scenarios](/concepts/scenarios) for how the expected output defines the grading contract.
 
 ## What's next
 
 <CardGroup cols={2}>
   <Card title="Run your first Evaluation" icon="chart-line" href="/tutorials/run-first-evaluation">
-    Apply the Evaluator you just authored across a Scenario set, against a specific Agent Version. The first scored run.
+    Apply the Evaluator you just authored across your scenarios, against a specific Agent Version. The first scored run.
   </Card>
   <Card title="Write an effective LLM-judge prompt" icon="message-square-text" href="/how-to/write-llm-judge-prompt">
-    The deep how-to on rubric authoring — patterns that calibrate well, anti-patterns to avoid, when to break each rule.
+    The deep how-to on grading rules — patterns that calibrate well, anti-patterns to avoid, when to break each rule.
   </Card>
-  <Card title="Read about Evaluators" icon="wand-sparkles" href="/concepts/evaluators">
-    The full conceptual reference: families, anatomy, calibration loop, reuse semantics, what we explicitly reject.
+  <Card title="Read about Evaluators" icon="ruler" href="/concepts/evaluators">
+    The full conceptual reference: kinds, grading rules, calibration, and reuse semantics.
   </Card>
   <Card title="Compare two Agent Versions" icon="git-branch" href="/how-to/compare-agent-versions">
     The headline workflow Evaluators ultimately serve — regression-tracking across versions.
