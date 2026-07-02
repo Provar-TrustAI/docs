@@ -1,16 +1,16 @@
 ---
 title: "Run your first Evaluation"
 icon: "chart-line"
-description: "Apply the Evaluator you authored across the Scenario set you curated — the first scored run against a live agent."
+description: "Apply the Evaluator you authored across the scenarios you curated — the first scored run against a live agent."
 ---
 
-Finishing this tutorial completes the click-path through the evaluation loop; the agent-led capstone, [Evaluate with the Trust Agent](/tutorials/evaluate-with-the-trust-agent), drives the same loop by conversation. With the [Scenario set](/concepts/scenarios) you curated in [the quickstart](/tutorials/quickstart) and the [Evaluator](/concepts/evaluators) you authored in [Build your first Evaluator](/tutorials/build-first-evaluator), you'll now **run an [Evaluation](/concepts/evaluations)** — the moment Trust AI produces its first piece of evidence about your agent's behavior.
+Finishing this tutorial completes the click-path through the evaluation loop; the agent-led capstone, [Evaluate with the Trust Agent](/tutorials/evaluate-with-the-trust-agent), drives the same loop by conversation. With the [scenarios](/concepts/scenarios) you curated in [the quickstart](/tutorials/quickstart) and the [Evaluator](/concepts/evaluators) you authored in [Build your first Evaluator](/tutorials/build-first-evaluator), you'll now **run an [Evaluation](/concepts/evaluations)** — the moment Trust AI produces its first piece of evidence about your agent's behavior.
 
 By the end you'll have:
 
-- A finished Evaluation run with scored scenarios
-- A clear pass/fail breakdown and aggregate stats
-- A side-by-side comparison against a prior [Agent Version](/concepts/agent-versions) (where available)
+- A finished Evaluation run with every scenario simulated and scored — one result per attached persona
+- A dual-headline readout: the agent's **Pass rate**, plus **evaluator accuracy** where human verdicts exist to grade the judges against
+- A second run against a different [Agent Version](/concepts/agent-versions) (where available), read side by side with the first
 - A concrete idea of what to do next based on what you saw
 
 Allow about 10 minutes. Most of that time is the run itself processing — the configuration and reading-results steps are quick.
@@ -19,64 +19,60 @@ Allow about 10 minutes. Most of that time is the run itself processing — the c
 
 You should have, from the prior two tutorials:
 
-- A [Project](/concepts/projects) with a connected runtime (or demo data)
-- At least one [Scenario set](/concepts/scenarios) with at least 3-5 scenarios (more is better)
-- At least one saved [Evaluator](/concepts/evaluators) calibrated against Annotations in that set
-- At least one **deployed Agent Version** that the Project's runtime can reach. If you're using demo data, two pre-seeded versions are already available.
+- A [Project](/concepts/projects) with at least one connected agent. If none is connected yet, the launcher will tell you: **No connected agents. Connect one in Settings → Connections.**
+- At least 3-5 scenarios in your **Scenarios** list (more is better)
+- At least one saved [Evaluator](/concepts/evaluators). Calibrating it against your Annotations (the prior tutorial) makes its verdicts trustworthy, but it isn't a gate — you can run before calibrating.
+
+One thing to check before launching: **evaluators travel with each scenario**, not with the run. Open a scenario's fly-in, and on its **Expected Output** tab make sure your Evaluator appears under **Expected behavior**. At run time the launcher inherits those evaluators automatically — there is no evaluator picker for a scenarios run.
 
 ## The five steps
 
 <Steps>
-  <Step title="Pick your Scenario set and Evaluator(s)">
+  <Step title="Open the Evaluation Launcher from your scenarios">
     <Note>
-      *Ask the Trust Agent:* "Start a new Evaluation run using the scenario set I curated in the quickstart and the Evaluator I just authored."
+      *Ask the Trust Agent:* "Run an evaluation across the scenarios I curated in the quickstart, graded by the Evaluator I just authored."
     </Note>
 
-    You'll see the run configuration open with those artifacts pre-selected; or set it up by hand: from the Project home, navigate to **Evaluations → New Run**.
+    The agent proposes the run and waits for your approval before anything launches. Or set it up by hand: open **Scenarios**, select the scenarios you want (or select none to run the whole view), and click **Run** — the split button's default is **Run & evaluate**. (The chevron also offers **Run only**, which simulates without grading; skip that for now.)
 
-    The run configuration asks for three things:
+    Either path opens the same **Evaluation Launcher** — one modal that drives every run in Trust AI. You can also reach it from the Evaluations page via **New evaluation**, where you first choose what to evaluate: scenarios (simulate with an agent) or sessions (grade recorded conversations directly).
 
-    - **Scenario set** — pick the one you curated in the quickstart
-    - **Evaluators** — pick the one you authored in the prior tutorial. You can pick more than one (each scenario will be scored by every selected Evaluator) but for your first run, one is enough.
-    - **Agent Version** — covered in the next step
+    Notice the **Evaluators** section is read-only: *"Inherited from each scenario — graded automatically, no picking needed."* If it instead says the scenarios don't carry any evaluators yet, go back and add your Evaluator on each scenario's **Expected Output** tab first.
 
-    **You should see:** the scenario-set picker, evaluator multi-select, and agent version selector populated with your prior artifacts.
+    **You should see:** the launcher open with your selected scenarios counted, your Evaluator shown as an inherited pill, and a name field ("Shown on the Evaluations page").
   </Step>
 
-  <Step title="Pick the Agent Version">
+  <Step title="Pick the agent">
     <Note>
-      *Ask the Trust Agent:* "Set this run to evaluate my production Agent Version."
+      *Ask the Trust Agent:* "Use my production agent for this run."
     </Note>
 
-    For the **Agent Version**, pick the version your Project has currently active. If you connected an AgentCore runtime in the quickstart, Trust AI has already auto-discovered the deployed alias and surfaced it in this dropdown.
+    The **Agent** selector answers one question: *which connected agent simulates each scenario*. Pick the agent your Project has connected — if you connected one during [the quickstart](/tutorials/quickstart), it's in this list. If multiple are connected, pick the production one for your first run; you'll run against another version in step 5.
 
-    If multiple versions are available, **pick the production one** for your first run. You'll compare against another version in step 5.
+    **What's happening underneath:** a scenarios run always **simulates**. For every scenario, each attached persona plays out the scenario's goal against this agent in a live conversation — Trust AI doesn't replay stored responses, it gets fresh ones from the agent under test. That's also why each persona gets its own scored result.
 
-    **What's happening underneath:** Trust AI will send each scenario's input to this specific Agent Version, via the Project's runtime connection, collect the agent's structured response, and feed both to the selected Evaluator(s) for scoring. The agent is **invoked live** — Trust AI doesn't reuse the Session's original response, it gets a fresh one from the version under test.
-
-    **You should see:** all three selections filled in — Scenario set, Evaluator(s), and Agent Version.
+    **You should see:** the Agent selected, and the **This will run** preview totaling the fan-out — how many simulations the run will produce across your scenarios and their personas.
   </Step>
 
-  <Step title="Kick off the run">
+  <Step title="Launch and watch it run">
     <Note>
-      *Ask the Trust Agent:* "Run this Evaluation now."
+      *Ask the Trust Agent:* "Launch it."
     </Note>
 
-    You'll see the run start immediately; or do it by hand: click **Run Evaluation**.
+    Approve the agent's proposed run, or click the launcher's confirm button (**Run evaluation**) yourself.
 
     What happens in the background, in roughly this order:
 
-    1. Trust AI calls your Project's connected runtime once per scenario, sending the scenario's input
-    2. The agent responds; Trust AI captures the full response (including tool calls, latency, all the Session-shaped detail)
-    3. Each response is wrapped as a new Session — these will appear in your Sessions list tagged `from-eval`. (This is the "Evaluation results are Sessions too" pattern from ADR 0006, expanded in [the Evaluations concept page](/concepts/evaluations#evaluation-results-are-sessions-too).)
-    4. For each new Session, every selected Evaluator runs against the appropriate Turns and produces a score + reasoning
-    5. Aggregate stats roll up: pass rate, score distribution, failure patterns
+    1. For each scenario × persona pair, Trust AI simulates a fresh conversation with your agent
+    2. Each conversation is captured as a real Session — it appears in your Sessions list with Source **Scenario**, linked back to the scenario that produced it (the "Evaluation results are Sessions, too" pattern, expanded in [the Evaluations concept page](/concepts/evaluations#evaluation-results-are-sessions-too))
+    3. The evaluators inherited from each scenario grade each result and produce a verdict + reasoning
+    4. The headline numbers roll up on the run detail page
 
-    For a small Scenario set (5-10 scenarios) this completes in 30-60 seconds. For larger sets it can run for several minutes; the page stays live and shows rows filling in as they complete.
+    If you launched from the Scenarios list, you stay right there: each in-flight scenario shows a live **Generating…** badge that settles as it finishes. On the run's detail page, the status badge moves from **Running** to **Complete** — and a **Cancel run** action is available the whole time if you picked far more scenarios than you meant to. A handful of scenarios usually finishes within a few minutes; larger runs take proportionally longer. {/* ACCURACY-AUDIT-PENDING: run-duration ranges not verified against the tag */}
 
-    If you need to kick off runs programmatically, the endpoint is documented in the [API Reference](/api-reference).
+    The pipeline is also built not to lie to you about infrastructure: model-capacity throttling is retried automatically with backoff, and one bad result can't sink the whole run.
 
-    **You should see:** the Evaluation detail page transitions from `In progress` to `Complete`. Aggregate stats appear at the top.
+    **You should see:** the run reach **Complete**, with headline numbers at the top of its detail page.
   </Step>
 
   <Step title="Read the results">
@@ -84,35 +80,38 @@ You should have, from the prior two tutorials:
       *Ask the Trust Agent:* "Summarize this Evaluation — what's the pass rate, and which scenarios failed?"
     </Note>
 
-    You'll get a written rundown you can act on; or read it yourself in the UI. The Run Detail page shows:
+    You'll get a written rundown you can act on; or read it yourself in the UI. The run detail page leads with a **dual headline**:
 
-    - **Aggregate stats** — pass rate, score distribution, latency, common failure patterns
-    - **Results matrix** — each scenario × each Evaluator, with per-evaluator verdict chips (green for pass, red for fail). Click any cell to open a fly-in with the full evaluation card — score, reasoning, and reference comparison.
-    - **CSV export** — download the full results from the toolbar
+    - **Pass rate** grades the *agent* — how often it passed each case.
+    - **Evaluator accuracy** grades the *judges* — how often the evaluators' combined verdict agreed with a human verdict on the same case. It only appears once human verdict annotations exist; with none yet, only the pass rate shows.
+
+    Below that, the **results matrix** has one row per scenario × persona — the persona's name leads each row — and one column per evaluator, with verdict chips. Click any result to open it in full: score, reasoning, and a **Transcript** tab labeled **Simulated** (a fresh conversation was driven for this run) or **Replayed** (stored turns were graded). **Export** in the header downloads the full results.
+
+    A verdict isn't just pass or fail — there's a third, honest state. Guardrail-intercepted responses show as **Guardrail blocked**, and infrastructure problems (a judge call that couldn't complete, a flaky environment) show as **Environment problem — not the agent · Excluded from the score**. These render neutrally, never as a red fail, and they don't count against the pass rate — so a capacity hiccup can't masquerade as a drop in agent quality.
 
     **What to look at first:**
 
-    1. **The aggregate pass rate.** Sanity check: is it roughly where you expected? If your calibration agreement in the prior tutorial was 90%, you'd expect roughly that — on this run, with this specific Agent Version, on these scenarios.
-    2. **Failed scenarios, top-down.** Open the first failed scenario. Read the Evaluator's reasoning. Read the agent's response. Decide: did the agent regress, or did the Evaluator over-reject? Both are valid findings; they point you in different directions.
-    3. **Latency outliers.** If one scenario took 20x as long as the others, that's almost always an infrastructure issue worth knowing about.
+    1. **The pass rate.** Sanity check: is it roughly where you expected? If your calibration agreement in the prior tutorial was 90%, you'd expect roughly that — on this run, with this agent, on these scenarios.
+    2. **Failed results, top-down.** Open the first failure. Read the evaluator's reasoning, then the transcript. The triage is three-way: did the agent regress, did the evaluator over-reject, or is it marked as an environment problem (in which case it's already excluded and points at infrastructure, not the agent)? Each answer sends you in a different direction.
+    3. **Persona spread.** If one persona fails where the others pass, the matrix's divergence hints will say so in plain English — that's a behavior gap tied to *who's asking*, which a single aggregate number would have hidden.
 
-    **You should see:** an Evaluation that tells a story. Pass rate, the distribution of failures, the reasoning behind each one. This is the evidence Trust AI exists to produce.
+    One more headline you may meet later: a run configured to repeat each test case multiple times leads with a **Pass^K** reliability rate instead — the share of cases that passed *every* attempt, with the full curve on hover. Your first run scores each case once, so you'll see the plain pass rate.
+
+    **You should see:** an Evaluation that tells a story — pass rate, per-persona spread, and the reasoning behind each verdict. This is the evidence Trust AI exists to produce.
   </Step>
 
-  <Step title="Compare to a previous Agent Version">
-    If your Project has more than one Agent Version (the demo data ships with two; a real Project gets a second one when you deploy a new version of your agent), do one more thing:
+  <Step title="Run it again — and against another Agent Version">
+    Two buttons appear on a finished run: **Export** and **Re-run**. **Re-run** is a faithful repeat — it reopens the launcher pre-seeded with the original run's full configuration, same agent and same judges, so a second run is directly comparable to the first.
+
+    If your Project has a second agent connected — a staging build, or a previous [Agent Version](/concepts/agent-versions) of the same agent — do one more thing:
 
     <Note>
-      *Ask the Trust Agent:* "Re-run this same Evaluation against my previous Agent Version, then compare the two runs."
+      *Ask the Trust Agent:* "Run the same evaluation again, but against my previous agent version. Then tell me which scenarios changed verdict between the two runs."
     </Note>
 
-    You'll see the second run kick off and a comparison open when it finishes; or do it by hand: click **Run again against a different version** from the Evaluation detail page, then pick the second Agent Version (e.g., the previous week's deployment, or the demo's `v2026-05-04-prod`). Trust AI re-runs the same Scenario set + same Evaluator(s) against the alternate version. When the second run completes, open either Evaluation and click **Compare**, then pick the other run.
+    By hand: launch from your Scenarios list again with the same selection, and this time pick the other agent in the **Agent** selector. When it completes, open both runs from the Evaluations list — in two tabs works well — and read them side by side: the headline pass rates, then the per-persona matrices, scenario by scenario. A pass that became a fail is a regression; a fail that became a pass is an improvement.
 
-    **You should see:** a side-by-side view of the same scenarios, scored against both Agent Versions. Per scenario, the diff: pass → fail (regression), fail → pass (improvement), same → same. Aggregate: the headline pass-rate delta.
-
-    This is the **regression-tracking primitive** that Trust AI is built around. Everything in the first three tutorials served this view.
-
-    For the full how-to on comparison reading, see [Compare two Agent Versions](/how-to/compare-agent-versions).
+    There's no dedicated run-vs-run comparison view yet — the side-by-side reading is manual (or delegated to the Trust Agent, which is exactly the kind of cross-referencing it's good at). This is still the regression-tracking habit Trust AI is built around: same scenarios, same evaluators, different agent, and the diff is your evidence.
   </Step>
 </Steps>
 
@@ -120,24 +119,24 @@ You should have, from the prior two tutorials:
 
 The Evaluation results point in three possible directions, often more than one at once:
 
-- **Refine the Evaluator.** If the Evaluator and the agent both produced reasonable outputs but the rubric scored them differently than you would, the rubric needs tightening. Go back to [Build your first Evaluator](/tutorials/build-first-evaluator) → calibration step, and iterate.
-- **Expand the Scenario set.** If one category of behavior is missing from your set (the scenarios all passed because they all skipped the failure mode), add more scenarios from your Sessions list — annotate them first, then bulk-curate.
-- **Fix the agent.** If the Evaluator is fair and the rubric is good, but the agent failed a scenario a human would expect it to pass, that's a real bug. Hand it to the team owning the agent with the Evaluation row as the artifact.
+- **Refine the Evaluator.** If the agent produced reasonable output but the rubric scored it differently than you would, the rubric needs tightening. Go back to [Build your first Evaluator](/tutorials/build-first-evaluator) → calibration step, and iterate.
+- **Expand your scenarios.** If one category of behavior is missing (everything passed because everything skipped the failure mode), add scenarios that cover it — **New scenario**, or **Add recommended scenarios** on the Scenarios list. And you don't have to convert real traffic into scenarios to grade it: select sessions in your Sessions list and use **Evaluate** to judge them directly.
+- **Fix the agent.** If the evaluator is fair and the rubric is good, but the agent failed a scenario a human would expect it to pass, that's a real bug. Hand it to the team owning the agent with the failing result — transcript, verdict, and reasoning — as the artifact.
 
 Most teams iterate on all three over time. The Evaluation isn't a verdict — it's a piece of evidence that closes one round of the [evaluation loop](/concepts/evaluation-loop).
 
 ## You've completed the click-path loop
 
-Finishing this tutorial closes one full round of the evaluation loop, click by click. The agent-led capstone, [Evaluate with the Trust Agent](/tutorials/evaluate-with-the-trust-agent), drives the same loop by conversation — find sessions, build a scenario set, run an evaluation, approving each write.
+Finishing this tutorial closes one full round of the evaluation loop, click by click. The agent-led capstone, [Evaluate with the Trust Agent](/tutorials/evaluate-with-the-trust-agent), drives the same loop by conversation — find sessions, curate scenarios, run an evaluation, approving each write.
 
 <CardGroup cols={2}>
   <Card title="The evaluation loop" icon="refresh-cw" href="/concepts/evaluation-loop">
     The full conceptual narrative the three tutorials walk one round of. Worth re-reading now that you've done it once.
   </Card>
-  <Card title="Compare two Agent Versions" icon="git-branch" href="/how-to/compare-agent-versions">
-    The deep how-to on reading regression diffs — what to look for, common patterns, when to ship vs. block.
+  <Card title="Simulate agents with scenarios" icon="users" href="/how-to/simulate-with-scenarios">
+    Go deeper on personas and goals — the machinery behind every scenario run you just launched.
   </Card>
-  <Card title="Connect another runtime" icon="plug" href="/how-to/connect-agentcore">
+  <Card title="Connect another agent" icon="plug" href="/how-to/connect-agentcore">
     Bring a second agent (or a second environment of the same agent) into Trust AI. Same shape, narrower scope.
   </Card>
   <Card title="API Reference" icon="code" href="/api-reference">
