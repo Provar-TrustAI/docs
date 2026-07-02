@@ -1,0 +1,99 @@
+---
+title: "Tables and panels"
+icon: "table"
+description: "The shared interaction language of Trust AI's list surfaces — one table, one detail panel, one set of badges — learned once, used everywhere."
+---
+
+Trust AI's list surfaces are built from one kit. The table you learn on [Sessions](/concepts/sessions) is the same table on [Scenarios](/concepts/scenarios) and on a run's results in [Evaluations](/concepts/evaluations); the detail panel that flies in when you click a session is the same panel on a scenario, a result, or an evaluator. This page teaches that language once — how the table, the fly-in panel, and the shared badges behave — so the per-surface pages can focus on what's *in* them.
+
+## The shared table
+
+Every entity list is the same data table: sortable columns, a column menu, row selection, and cells you can often edit in place. Columns are fixed-width by default, so one long value never blows out the layout — resize a column instead.
+
+{/* CAPTURE-PENDING: shared-table-header-menu.png — a column header's click-to-open menu on the Sessions table, showing Sort ascending / Sort descending / Hide column */}
+
+### Column headers
+
+Click any column header to open its menu. Every column offers **Sort ascending**, **Sort descending**, and **Hide column**; some columns add their own actions — an annotation column offers **Edit categories…**, **Edit tags…**, or **Delete column…**, and the Persona column offers **Manage personas…**. The active sort direction is marked in the menu, and the header shows a sort chevron.
+
+To resize, drag the handle at a header's right edge. To reorder, use the column menu described next.
+
+### The column menu
+
+One gear button in the toolbar opens the column menu: a single list with one row per column, where each row is both a **visibility checkbox** and a **drag handle**. Check to show, uncheck to hide, drag to reorder — one popover, no separate settings. On Sessions the list is grouped into **Session** columns and **Annotation columns**, so your human-graded columns stay together.
+
+The arrangement you build here isn't throwaway — it's saved per view (see [Saved views persist your layout](#saved-views-persist-your-layout)).
+
+### Selecting rows
+
+Each row carries a checkbox, and checking one also sets the *anchor* for range selection: **Shift-click** another checkbox to select the whole slice of rows between the two, following the current sort and filters. Rows that can't be selected are skipped — a disabled checkbox's tooltip explains why — and **Select all** skips them the same way. Holding Shift and clicking a different row re-draws the range from the same anchor.
+
+Selecting rows raises the surface's bulk-actions bar — on Sessions, for example, **Evaluate**, **Tag**, and **Download**.
+
+### Editing in place
+
+Many cells are click-to-edit: click the cell, type, and you're done — no edit page. On Scenarios that covers the name, goal, personas, and evaluators; on Sessions it covers annotation cells like **Verdict** and **Severity**. Text cells commit on <kbd>Enter</kbd> (with <kbd>Shift</kbd>+<kbd>Enter</kbd> for a newline in longer fields like a goal) and revert on <kbd>Esc</kbd>. An empty cell shows a quiet placeholder such as *Add goal…* so you can see what's still missing.
+
+### Chips and overflow
+
+List-shaped values — personas, tags, **Expected routes**, evaluators — render as chips. When the column is too narrow to fit them all, the tail collapses into a **+N** marker rather than wrapping or clipping; at least one chip always stays visible, truncating its own label if it must. Widen the column (or open the record's fly-in) to see the full list.
+
+## Saved views persist your layout
+
+The table's layout is not global state — it belongs to the active [saved view](/concepts/saved-views). Each view remembers its own filters, sort, and column layout: which columns are visible, their left-to-right order, and their widths. Switch views and the arrangement switches with them; **Set as default** makes a view the way a surface opens for you.
+
+The toolbar's **Save view** button is always visible — disabled with an explanatory tooltip when there's nothing to save — and its adjacent menu offers **Save as new view**, **Reset view**, and **Manage views**. Built-in views like **All sessions** or **Missing expected output** can never be overwritten: saving while one is active falls through to creating a new view, so the shared starting points stay stable for everyone.
+
+## The fly-in panel
+
+Click a record and its detail flies in from the right, over the list — you read, edit, and act without losing your place. The panel is one shared chassis across Sessions, Scenarios, a run's results, and Evaluators: the same header cluster (the surface's actions, a fullscreen toggle where the surface offers one, previous/next chevrons, close), the same tab bar, the same keyboard behavior.
+
+{/* CAPTURE-PENDING: scenario-two-level-fly-in.png — the two-level fly-in on Scenarios: the scenario panel with the nested session panel stacked over it */}
+
+### Keyboard contract
+
+Every fly-in speaks the same keys, and the panel's footer reminds you of them:
+
+- <kbd>J</kbd> or <kbd>↓</kbd> — next record; <kbd>K</kbd> or <kbd>↑</kbd> — previous. Navigation steps through the list you opened the panel from and doesn't wrap around at either end.
+- <kbd>F</kbd> — toggle fullscreen, on panels that offer it. Fullscreen widens the panel over the table with a two-column layout.
+- <kbd>Esc</kbd> — context-sensitive: it exits fullscreen first, and closes the panel only on the next press.
+
+The shortcuts stand down while you're typing in a field, so pressing <kbd>j</kbd> in a goal editor types a letter instead of changing records. <kbd>Esc</kbd> still works everywhere — its first job is to get you out of whatever is on top.
+
+### Stacked panels
+
+Some surfaces stack two panels. On Scenarios, clicking a scenario opens the scenario panel, and clicking one of its linked sessions stacks a session panel *over* it — you drill from test case to transcript without ever losing your place in the list. While the top panel is open, it owns the keyboard: <kbd>J</kbd>/<kbd>K</kbd> step through that scenario's sessions and <kbd>Esc</kbd> closes the top panel first, returning you to the scenario underneath.
+
+The first-level scenario panel is the one fly-in without a fullscreen mode — it keeps <kbd>J</kbd>/<kbd>K</kbd>/<kbd>Esc</kbd> only, since the nested session panel is its way of going deeper.
+
+## Badges and ids
+
+Three small primitives repeat across every surface, and they always mean the same thing.
+
+### Verdict pills
+
+A verdict pill is three-state, never blank:
+
+| State | What it means |
+|---|---|
+| **Pass** (green) | Every automated evaluation passed. Result cells spell it out as **Passed all**. |
+| **Fail** (red) | At least one failed — result cells say how many, e.g. **Failed 1 of 3**. |
+| **Not evaluated** (neutral) | Zero automated evaluations ran. A deliberate neutral badge, not an empty cell. |
+
+The pill reflects automated evaluations only. A human **Verdict** [annotation](/concepts/annotations) is a separate signal — it grades the judges and never changes the pill. While a run is still scoring, the pill shows a **Scoring…** spinner.
+
+### Source chips
+
+Every session wears a **Source** chip naming how the conversation entered the system — exactly one of **Scenario**, **Playground**, or **External**, each in its own hue so a mixed list reads at a glance. There is no fourth value.
+
+### Readable ids
+
+Records carry stable, human-readable ids in a monospace pill: `SCN-000123` for a scenario, `RUN-000014` for a session generated in-product, `SES-000013` for a session synced from a connected runtime. The id never changes for the life of the record, so it's the handle you put in a bug report or a message to a teammate. The pill itself is inert — it labels the record rather than linking anywhere — and ids keep resolving even as lists are re-sorted, filtered, or renamed around them.
+
+## Related concepts
+
+- **[Sessions](/concepts/sessions)** — the review-and-grade surface where the table, panel, and all three badges meet
+- **[Scenarios](/concepts/scenarios)** — the authoring surface, with the two-level fly-in
+- **[Evaluations](/concepts/evaluations)** — run results rendered with the same verdict pills
+- **[Saved views](/concepts/saved-views)** — the persistence layer behind your table layouts
+- **[Annotations](/concepts/annotations)** — the human Verdict, distinct from the automated verdict pill
