@@ -4,6 +4,66 @@ icon: "history"
 description: "Trust AI release notes."
 ---
 
+<Update label="v2026.06.30.1 — June 2026">
+  The headline of this release: the evaluation product is re-rooted on a flat, first-class **Scenario**. Around it land a Trust Library so new projects don't start from a blank slate, no-code evaluator tailoring, a guided Trust Agent cold start, an overhauled Sessions review surface, and a Test Data Management preview.
+
+  **Scenarios are a first-class surface.** One flat, searchable [Scenarios](/concepts/scenarios) list replaces the old data-rows view — scenario sets are gone — with stable ids like `SCN-000123`, safe delete that blocks anything still referenced by an evaluation, and inline editing for names, goals, personas, and evaluators. Every scenario opens into a two-level fly-in: personas and goals, the **Expected Output** editor — where you define the grading contract from vocabulary the product learned from your real sessions — and the scenario's linked sessions, with a nested panel to drill into any single session. On the wire, a `/v1/scenarios` family joins the API; `/v1/datasets` remains the legacy container API underneath.
+
+  **One Evaluation Launcher, five doors.** Every run now starts from the same launcher — bulk from Scenarios or Sessions, one-off from either fly-in, or fresh from Evaluations — with a fan-out preview before you commit and a **Re-run** that faithfully restores a run's full configuration. Scenario runs simulate a fresh conversation per persona; session runs grade the conversations you already have. Results lead with a dual headline — how often the agent passed, and how often the automated judges agreed with a human — plus a per-persona matrix with plain-English divergence hints. See [Evaluations](/concepts/evaluations).
+
+  **Evaluate real conversations.** [Sessions](/concepts/sessions) are now first-class evaluation targets: a primary **Evaluate** action grades captured conversations with your AI-judge evaluators (the old "Add to dataset" detour is retired), each session carries a Source chip — **Scenario**, **Playground**, or **External** — and "Open session" on any result lands you on the exact conversation it graded.
+
+  **Grade sessions in place.** Reviewers get typed [annotation columns](/concepts/annotations) on Sessions — pass/fail verdict, severity, score, tags, and reviewer notes — editable inline in the table or in the fly-in. A person's verdict is the ground truth that evaluator accuracy is measured against; it never overrides the automated verdict.
+
+  **Trust Library.** Adopt 12 recommended evaluators (six Quality, six Safety, each a plain-language judge with a provenance chip) and 10 starter safety scenarios mapped to the OWASP Agentic AI Top 10 — in one move, from the [Evaluators](/concepts/evaluators) library or a cold-start empty state. Everything adopted is an ordinary, fully editable object.
+
+  **Define pass and fail in plain language.** LLM-judge evaluators gain a **Passes when / Fails when** rubric editor — short sentences instead of judge prompts, quietly assembled back into the exact criteria the live judge uses so verdicts never shift — and a **Tailor with AI** box drafts the rules from a one-line goal plus a description of your agent, for you to review before anything saves.
+
+  **The Trust Agent walks you from zero to first eval.** A brand-new user is guided end to end in one conversation: connect an agent, run an observe-only exploration that watches behavior without scoring it, accept proactively drafted behavior and security coverage, and get a first scored evaluation. One-tap next-step chips pre-fill (never auto-send) the composer, and the Welcome screen's starter prompts adapt to your setup state. See [Trust Agent](/concepts/trust-agent).
+
+  **Reliability under load.** Bulk runs ride out model-capacity throttling with automatic retry and backoff, live per-scenario progress badges keep you on the list while forty runs settle, one bad row can't sink a run, and a judge call that can't complete is set aside as an environment problem — a capacity hiccup never masquerades as a drop in agent quality.
+
+  **Access Center, refined.** The workspace admin surface consolidates six tabs into four (Members, Teams, Project access, General); the full roles-and-permissions matrix now appears inline at the moment you assign a role, and access history is an in-context drawer.
+
+  **Test Data Management (preview, off by default).** Behind a preview flag: register environments and data connections, author per-scenario starting data and the end state a run should reach, then grade the agent on the backend state it actually leaves behind — a five-dimension verdict matrix (Safety, Outcome, Quality, Behavior, End state) with a per-record expected-vs-actual diff and a change ledger. The loop is proven across Salesforce Agentforce, AWS AgentCore, and Claude-managed runtimes. Preview surfaces are flag-gated and off by default in production builds.
+</Update>
+
+<Update label="v2026.06.22.1 — June 2026">
+  This release brings the evaluation loop's first transparency surfaces, a far more livable Trust Agent chat, and an enterprise-readiness track: workspace administration, a unified authorization engine, and a Salesforce Agentforce connector.
+
+  **Calibrate: measure how much to trust an AI judge.** LLM-judge [Evaluators](/concepts/evaluators) gain a Calibrate tab: point the judge at labeled scenarios carrying your own pass/fail verdicts and see a plain-English agreement score — computed by the exact judge your evaluation runs use, so the number you see is the number you'll get. A disagreement-first table shows where you and the judge part ways, and calibration history tracks agreement as you tune the rubric.
+
+  **Pass^K reliability scoring.** A "Repeat each test case" control on the run form runs every case up to four times, and a finished run leads with how often the agent passed **all** attempts — surfacing flaky agents a single run hides (an agent that looks 87% reliable on one attempt may pass all four only 31% of the time). New runs default to Pass^2. See [Evaluations](/concepts/evaluations).
+
+  **Trust Agent chat comfort pass.** Unsent drafts survive navigation, an Attach button brings PDF, Word, text, CSV, JSON, and Markdown files into the conversation with side-rail previews, long messages collapse behind Show more, an interrupted reply reopens with a one-tap Continue, and the Plan / Context / Outputs rail stays put across the whole conversation. See [Trust Agent](/concepts/trust-agent).
+
+  **Full agent traces.** Transcripts now show what the model was thinking ("Thinking" steps) and what each model call asked and answered, in plain language, across replay transcripts and the live Trust Agent. Reasoning is provider-dependent — it appears where the runtime supports it and degrades to an honest "not available" state elsewhere, never a blank frame. See [Sessions](/concepts/sessions).
+
+  **The Trust Agent drives the scenario loop end to end.** Ask it to generate scenarios and it proposes persona-and-goal test cases; run an evaluation with simulation and it plays out a fresh multi-turn conversation for every persona against your live agent and scores those real transcripts. The old generate-static-sessions detour — and its tool — is gone. See [Scenarios](/concepts/scenarios).
+
+  **Access Center: no-code workspace administration.** Owners and admins invite members and manage the full invite lifecycle, group people into teams, grant per-project **Viewer**/**Editor** access directly or through a team, and audit who-can-reach-what with plain-language provenance. Underneath, a single FedRAMP-ready authorization engine now governs every access decision and writes each one to a durable, append-only audit trail. See [Multi-tenancy](/concepts/multi-tenancy).
+
+  **Salesforce Agentforce connector.** Connect an Agentforce org with JWT-bearer credentials from Settings and drive a live agent through evaluations.
+
+  **Data-table power features.** Drag columns into your own order (remembered per [saved view](/concepts/saved-views)), shift-click to select a whole range of rows, and a single unified column menu replaces the duplicate gear icons — across Sessions, scenario detail, and run detail tables.
+
+  **Security.** Host connection secrets — Salesforce private keys, AWS access keys, and managed-agent API keys — are now masked in every API response; the UI still shows whether a connection is configured.
+</Update>
+
+<Update label="v2026.06.15.1 — June 2026">
+  A hardening and durability release on top of the v2026.06.09.1 launch: the rebuilt surfaces became production-trustworthy.
+
+  **Claude joins AgentCore as a first-class connector.** A new Claude Managed Agent connector lands alongside a multi-connector Connection tab that treats AWS AgentCore and Claude as peers, and "Sync now" becomes a per-agent action. See [Agent Versions](/concepts/agent-versions).
+
+  **Evaluation you can trust.** LLM-judge and calibration verdicts are now deterministic — judges are pinned to temperature 0 — and grade against the agent's *actual* tool calls. When a runtime guardrail blocks a response, the result is labeled as blocked instead of being scored as a quality failure. See [Evaluators](/concepts/evaluators).
+
+  **Runs are reproducible and managed.** Each evaluation run snapshots the exact data version it ran against, verifies its inputs belong to your project, and gains a real lifecycle: cancel an in-progress run at a row boundary, or delete a finished one. Simulation-at-evaluation now emits real, reviewable [Sessions](/concepts/sessions). See [Evaluations](/concepts/evaluations).
+
+  **The Trust Agent survives reload and disconnect.** Streamed turns, assistant messages, and approval cards persist in true event order through a client disconnect and rehydrate when you reopen the chat — pending [approval gates](/how-to/approve-agent-writes) come back answerable, and a message sent mid-response is queued rather than lost. See [Trust Agent](/concepts/trust-agent).
+
+  **Honest errors, enforced tenancy.** Malformed ids return 404 instead of 500 across every domain, bulk session tagging and export are tenant-scoped, and the dead `GET /v1/agents/{id}/stats` endpoint was removed.
+</Update>
+
 <Update label="v2026.06.09.1 — June 2026">
   This release rebuilds the in-app [Trust Agent](/concepts/trust-agent), makes it the default at `/projects/:id/agent` on every project, adds the [Scenarios](/concepts/scenarios) and [Playground](/concepts/playground) surface, and enforces multi-tenant isolation across the data model.
 
@@ -13,7 +73,7 @@ description: "Trust AI release notes."
 
   **Approval gate before the agent writes.** The agent stops for you before it writes. Permission and clarifying-question cards take over the composer; permission cards show a rich preview — the diff, the dependencies, and the proposed end state — before you decide; and approving actually executes the write on the real run path, tenant-scoped and server-anchored. The full flow is its own guide: [Approve agent writes](/how-to/approve-agent-writes).
 
-  **Scenarios and Playground.** A new surface lets you build persona-and-goal [Scenarios](/concepts/scenarios) — including a generate-from-scratch wizard — then chat with and simulate your agent in a live [Playground](/concepts/playground), and drive persona-and-goal simulation at evaluation time. **Scenarios** is the user-facing name for the converged list surface; it lives at the `/datasets` route and `/v1/datasets` API. There is no separate scenarios backend or `/v1/scenarios` endpoint.
+  **Scenarios and Playground.** A new surface lets you build persona-and-goal [Scenarios](/concepts/scenarios) — including a generate-from-scratch wizard — then chat with and simulate your agent in a live [Playground](/concepts/playground), and drive persona-and-goal simulation at evaluation time. **Scenarios** is the user-facing name for the converged list surface; it lives at the `/datasets` route and `/v1/datasets` API. There is no separate scenarios backend or `/v1/scenarios` endpoint. *(Superseded in v2026.06.30.1: scenarios now live at `/projects/:id/scenarios` with a dedicated `/v1/scenarios` API — see that entry above.)*
 
   **Tenant isolation across the data model.** The foundation underneath all of it is now production-hardened: `organization_id` is enforced across the data model behind a shared tenant guard, so an agent or Playground session only ever sees your own organization's data. See [Multi-tenancy](/concepts/multi-tenancy).
 </Update>
