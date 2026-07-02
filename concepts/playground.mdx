@@ -1,18 +1,17 @@
 ---
 title: "Playground"
 icon: "flask-conical"
-description: "Chat with or simulate against a connected agent under test, and capture conversations as scenarios for evaluation."
+description: "Chat with or simulate against a connected agent under test, and save conversations worth keeping as scenarios for evaluation."
 ---
 
-The Playground is where you run the agent under test directly: pick a connected agent, **chat** with it live, or **simulate** a persona pursuing a goal against it — and capture any conversation worth keeping as a [scenario](/concepts/scenarios). It sits between building scenario sets and running [evaluations](/concepts/evaluations): you drive an agent by hand here before grading it at scale.
+The Playground is where you run the agent under test directly: pick a connected agent, **chat** with it live, or **simulate** a persona pursuing a goal against it — and save any conversation worth keeping as a [scenario](/concepts/scenarios). It sits between building scenarios and running [evaluations](/concepts/evaluations): you drive an agent by hand here before grading it at scale.
 
 The Playground is a per-project surface at `/projects/:id/playground`. It is project-scoped — the agents you can pick, the sessions you can drive, and the History you can browse all belong to the project you are in.
-{/* ACCURACY-AUDIT-PENDING: the Playground renders as a full-screen chat surface at /projects/:id/playground and is project-scoped — verify by driving the route and switching projects on the release tag */}
 
 <Note>
   **The Playground is not the Trust Agent.** They are two different chats, on two different routes:
 
-  - The **[Trust Agent](/concepts/trust-agent)** is *your* in-app assistant at `/projects/:id/agent` — it does evaluation work for you (finds sessions, builds scenario sets, runs evaluations) and stops for your approval before it writes.
+  - The **[Trust Agent](/concepts/trust-agent)** is *your* in-app assistant at `/projects/:id/agent` — it does evaluation work for you (finds sessions, builds scenarios, runs evaluations) and stops for your approval before it writes.
   - The **Playground** (this page) at `/projects/:id/playground` is where you chat with and simulate against the *agent under test* — the customer's [Agent Version](/concepts/agent-versions) you are judging.
 
   They do not share a thread. When this page says "the agent," it means the connected agent under test, not the Trust Agent.
@@ -38,20 +37,16 @@ The Playground is a full-screen chat surface — there is no floating dock here.
 ### The agent picker
 
 The topbar carries a grouped agent picker. Connected agents are grouped by their source system, and picking one shows the agent's display name alongside the system it came from — never a raw ID. Once a session starts, the picker locks to the agent you chose, so the whole conversation runs against one agent.
-{/* ACCURACY-AUDIT-PENDING: the agent picker groups connected agents by source system, selecting one shows the agent's display name + its source system (no UUID), and the picker locks to the chosen agent once a session starts — verify by opening the picker on the release tag */}
 
 ### The Chat / Simulate toggle
 
 Before a session starts, the composer carries a segmented **Chat / Simulate** toggle — two options, labeled exactly **Chat** and **Simulate**. This is a mode switch, not an "Ask" mode and not the Trust Agent's mode toggle. Once you send a first message, the toggle collapses out of the way — a session is committed to the mode it started in.
-{/* ACCURACY-AUDIT-PENDING: the composer carries a two-option segmented control labeled 'Chat' and 'Simulate' before any message is sent, and it collapses (to an agent hint) once a session starts — verify the labels and the collapse behavior on the release tag */}
 
 ## Chat — manual streamed conversation
 
 **Chat** is a manual conversation with the connected agent. You send a message; the agent streams a real reply back live, the same way it would in production — nothing is canned or pre-recorded. Send another message and it continues the same thread; the agent picker stays locked to your chosen agent and the conversation accumulates.
-{/* ACCURACY-AUDIT-PENDING: Chat streams a real live reply from the connected agent (not canned) and a follow-up message continues the same session — verify by sending two turns on the release tag */}
 
-Under the surface, a Chat session is a [simulation](#how-the-playground-runs) with no persona: the first message you send opens the session, and each message after that drives the connected agent for the next reply. You don't have to think about that to use Chat — it behaves like an ordinary conversation — but it is why a Chat conversation can be captured as a scenario and replayed later, just like a simulated one.
-{/* ACCURACY-AUDIT-PENDING: Chat is backed by a no-persona simulation — first send creates the session, each subsequent send drives the agent for a reply on the same session — verify the behavior (not the internal route) on the release tag */}
+Under the surface, a Chat session is a [simulation](#how-the-playground-runs) with no persona: the first message you send opens the session, and each message after that drives the connected agent for the next reply. You don't have to think about that to use Chat — it behaves like an ordinary conversation — but it is why a Chat conversation can be saved as a scenario and re-run later, just like a simulated one.
 
 ## Simulate — persona and goal driven
 
@@ -60,74 +55,71 @@ Under the surface, a Chat session is a [simulation](#how-the-playground-runs) wi
 <Steps>
   <Step title="Pick exactly one persona">
     A single-select persona picker. A simulation needs a concrete persona to role-play, so the project's default persona is deliberately not offered here — you choose a specific persona, not the implicit fallback. You can also create a new persona inline from the picker; a persona you create is auto-selected for the run.
-    {/* ACCURACY-AUDIT-PENDING: the Simulate persona picker is single-select, hides the project's default persona, and supports inline 'create new persona' that auto-selects the new persona for the run — verify by opening the picker on a project with a default persona on the release tag */}
   </Step>
   <Step title="Write one goal">
     A single goal field describing what the persona is trying to accomplish. **Simulate** stays disabled until you have both a persona and a non-empty goal.
-    {/* ACCURACY-AUDIT-PENDING: a single goal text field, and the Simulate action is disabled until a persona is chosen and a non-empty goal is entered — verify on the release tag */}
   </Step>
   <Step title="Choose a run mode">
     Two run modes control how much you stay involved:
 
     - **Full auto** — simulates the whole conversation end-to-end. The persona's user turns and the agent's replies alternate automatically until the conversation resolves or hits its turn cap.
     - **Stay in the loop** — drafts each user turn for you. The persona's next message lands in the composer as a suggestion; you confirm it or edit it before it sends, so you can steer the conversation as it goes.
-    {/* ACCURACY-AUDIT-PENDING: the run-mode control offers exactly 'Full auto' (auto-sends every turn to the cap) and 'Stay in the loop' (drafts each user turn into the composer for you to confirm or edit) — verify the labels and behavior on the release tag */}
   </Step>
 </Steps>
 
 Press **Simulate** and the conversation auto-drives turn by turn: the chosen persona role-plays the user pursuing the goal, the agent replies, and both stream live while you watch. The run continues for a bounded number of turns rather than forever — long enough to see the agent's behavior, short enough to stay legible.
-{/* ACCURACY-AUDIT-PENDING: pressing Simulate (Full auto) auto-drives a persona↔agent conversation turn-by-turn — persona drafts a user turn, agent replies, alternating and streaming until the conversation ends or hits its turn cap — verify on the release tag */}
 
-## Add a conversation as a scenario
+### The agent's trace
 
-Any conversation worth keeping — a **Chat** or a **Simulate** session — can be captured into a [scenario](/concepts/scenarios) set. Once a conversation has at least one exchange, an **Add conversation as scenario** action appears in the topbar; it stays hidden on the empty greeting state, since there's nothing to save yet.
-{/* ACCURACY-AUDIT-PENDING: the save-as-scenario affordance appears in the topbar only once the conversation is non-empty (absent on the greeting/empty state) — verify the trigger and its placement on the release tag */}
+The transcript shows more than the agent's replies. Where the agent's runtime supports it, each turn also surfaces what the agent did to produce its answer: plain-language **Thinking** steps carrying the model's reasoning, the tools it called, and **Model call** entries summarizing each underlying model request — with the raw request and response tucked behind an **Input** / **Output** disclosure rather than spilled onto the surface. Reasoning is provider-dependent: when the connected agent's runtime can't emit it, the trace simply shows no Thinking steps instead of an empty frame.
 
-When you trigger it, you choose where the conversation lands — an existing scenario set or a brand-new one — and you can optionally attach a persona and a goal. The conversation is then saved as one scenario row in that set, carrying its captured turns.
-{/* ACCURACY-AUDIT-PENDING: Add-as-scenario lets you pick an existing scenario set or create a new one, optionally attach a persona and a goal, and writes the conversation as one scenario row — verify by saving into an existing set and opening it on the release tag */}
+## Save a conversation as a scenario
 
-A captured conversation is written through the same scenario-row path the [generate-from-scratch wizard](/concepts/scenarios) uses, so a row you capture from the Playground and a row the wizard generates are structurally identical — same Persona and Goal columns, same fly-in transcript. A captured row carries its origin so you can tell where it came from:
+Any conversation worth keeping — a **Chat** or a **Simulate** session — can be saved as a [scenario](/concepts/scenarios). Once a session starts, a **Save as a scenario** button (a database icon) appears in the topbar and stays visible for the whole session. It becomes actionable once the conversation has at least one user message and one agent reply; before that, its tooltip reads **Send a message and get a reply first**.
 
-| You captured a… | Origin shown in the scenario set |
-|---|---|
-| **Simulate** session (a persona role-played the user) | **Simulated** |
-| **Chat** session (a goal-driven manual chat, no persona) | **Generated** |
+Trigger it and a **Save as a scenario** modal opens — the same lightweight intake a new scenario gets anywhere else:
 
-A captured row is never labeled **Uploaded** — that origin is reserved for rows you bring in from outside.
-{/* ACCURACY-AUDIT-PENDING: captured rows go through the same createRow path as the generate wizard (structurally identical rows); a Simulate capture reads origin 'Simulated', a no-persona Chat capture reads 'Generated', and neither reads 'Uploaded' — verify by capturing one of each and opening the scenario set on the release tag */}
+- **Name** (required) — a short, descriptive scenario name.
+- **Goal** (required) — what the user was trying to achieve. A Simulate session pre-fills this with the run's goal; for a Chat you write it yourself.
+- **Personas** (optional) — a Simulate session pre-selects the persona that drove the run; a Chat starts empty. Each attached persona means one simulated session per run later.
+
+{/* CAPTURE-PENDING: playground-save-scenario-modal.png — the 'Save as a scenario' modal with the turn-count summary, Name, Goal, and Personas fields */}
+
+The modal summarizes what you're capturing as a turn count, and **Save scenario** does two things at once: it creates a flat scenario in the project's Scenarios list, and it attaches the conversation you just ran as that scenario's linked [session](/concepts/sessions). Nothing is copied or re-typed — the live conversation itself becomes the scenario's session, with its **Source** shown as **Scenario**.
+
+Notice what the modal does *not* ask for: an expected output. Its own sub-text says why — "You'll set expected output later — usually from a session you like." A freshly saved scenario is deliberately incomplete: it shows up as missing expected output (the Scenarios list ships a built-in **Missing expected output** view for exactly these), and you author its grading contract later in the scenario's Expected Output editor — often from the very conversation you just saved. Define cheap, run, then learn the expected output from a real session.
 
 <Note>
-  **Scenarios is a UI surface over your test sets, not a separate backend.** When you save a conversation as a scenario, it becomes a row in a scenario set — the same store the [Scenarios](/concepts/scenarios) surface lists. There is no separate "scenarios" service behind it; the Playground writes into the scenario-set model and the row shows up wherever scenarios are listed.
+  **Saving creates two things you can find later.** The scenario lands in the project's flat [Scenarios](/concepts/scenarios) list with a stable id like `SCN-000123`; the conversation lands on the [Sessions](/concepts/sessions) surface as that scenario's linked session. There is no separate copy — the scenario's Sessions tab and the Sessions list are showing the same conversation.
 </Note>
+
+### Where Playground conversations show up as sessions
+
+Every session carries a **Source** — exactly one of **Scenario**, **Playground**, or **External** — plus a **Simulated from** card in its details recording where it came from. A conversation you save as a scenario reads Source **Scenario**; a Playground session you never save reads Source **Playground**. This is the same shape the Scenarios surface's **Generate sessions** flow produces, so a conversation you captured by hand and one the generate flow simulated land identically: real, scenario-linked sessions.
+
+Because a saved conversation is a real session, you can also grade it directly, as it is: sessions are first-class evaluation targets, and the Sessions surface's primary **Evaluate** action grades the conversations that already happened. The [Sessions](/concepts/sessions) page owns that surface.
 
 ## History — past sessions
 
-The Playground keeps a **History** view of the project's past sessions, newest first. Each entry shows a turn count and a title drawn from the first user message; a persona-driven session is labeled with its persona name, and a manual chat is labeled with just the agent. It lists a scannable recent set rather than every session ever run.
-{/* ACCURACY-AUDIT-PENDING: History lists real past sessions newest-first with a turn count and a first-message title; Simulate sessions are labeled with the persona name (e.g. '{persona} · simulated') and manual chats with the agent only — verify the labels and ordering on the release tag */}
+The Playground keeps a **History** view of the project's past sessions, newest first. Each entry shows a turn count and a title — a Simulate session takes its title from the run's goal and is labeled with its persona name; a manual chat takes its title from the first user message and is labeled with just the agent. It lists a scannable recent set rather than every session ever run.
 
-History is real, persisted data — the project's actual sessions, not mock entries and not something kept only in your browser. Reopen a session from History and its full transcript reloads from the server; it survives a hard reload and shows up no matter which browser you signed in from.
-{/* ACCURACY-AUDIT-PENDING: History is server-persisted (the project's real sessions), not mock and not browser-local — reopening a session reloads its persisted transcript and it survives a hard reload / different browser — verify on the release tag */}
+History is real, persisted data — the project's actual sessions, not mock entries and not something kept only in your browser. Reopen a session from History and its full transcript reloads from the server; it survives a hard reload and shows up no matter which browser you signed in from. Starting a new session clears the previous conversation from the surface — past conversations live in History, not in the composer.
 
 {/* CAPTURE-PENDING: playground-history.png — the History menu open, listing real past sessions newest-first with persona/agent labels and turn counts */}
 
-## Running the same simulation at evaluation time
+## Running a saved scenario at evaluation time
 
-The persona-and-goal simulation you drive by hand in the Playground can also run automatically inside an [evaluation](/concepts/evaluations). The new-evaluation-run form carries a **Simulate at eval time** toggle. With it on, the evaluation drives a *fresh* persona-and-goal conversation for each simulatable scenario row — instead of replaying the row's stored input turns — so you grade the agent on a newly-generated conversation rather than a recording.
-{/* ACCURACY-AUDIT-PENDING: the new-evaluation-run form carries a 'Simulate at eval time' toggle, and with it on the evaluation drives a fresh persona+goal conversation per simulatable row instead of replaying stored turns — verify the toggle label and behavior on the release tag */}
+The persona-and-goal simulation you drive by hand here is the same thing an evaluation runs automatically. Once a conversation is saved as a scenario, that scenario can simulate *fresh* conversations on demand: from the Scenarios list or the scenario's fly-in, **Run & evaluate** opens the Evaluation Launcher, you pick the agent to run against, and the run simulates a new conversation for each persona attached to the scenario — grading each one with the evaluators the scenario carries. A goal-only scenario with no persona still simulates one conversation from its goal. The split button's chevron also offers **Run only** — simulate without grading — when you just want more conversations to look at.
 
-A scenario row is **simulatable** only if it carries both at least one persona and a non-empty goal. The toggle reflects a server-computed count of simulatable rows in the set you selected: pick a persona-and-goal set and the toggle is available; pick a replay-only set whose rows have no persona or goal and there's nothing to simulate. Rows that aren't simulatable are replayed, not simulated — a set can mix both.
-{/* ACCURACY-AUDIT-PENDING: a row is simulatable only with both a persona and a non-empty goal; the toggle's availability reflects a server-computed simulatable-row count for the selected set; non-simulatable rows are replayed not simulated — verify by selecting a replay-only set vs a persona+goal set on the new-eval form on the release tag */}
+Two paths, one distinction: a scenario-sourced run always simulates fresh conversations; grading conversations that *already happened* — including your captured Playground sessions — is the launcher's sessions mode, opened from **Evaluate** on the Sessions surface. Either way, every conversation a run grades is a real session: **Open session** on any result lands you on the exact conversation that was judged. The full execution anatomy — the launcher's entry points, the fan-out preview, and the run results — lives on the [Evaluations](/concepts/evaluations) page. This page names the capability; Evaluations owns the depth.
 
-The full conversation a simulation produces at eval time is persisted on the result and renders inside the evaluation result detail fly-in, so you can read exactly what was said. The full execution anatomy — how each row is simulated, the result matrix, and the transcript in the result panel — lives on the [Evaluations](/concepts/evaluations) page. This page names the capability and the simulatable-row boundary; Evaluations owns the depth.
-{/* ACCURACY-AUDIT-PENDING: the full simulated conversation captured at eval time is persisted on the result and rendered inside the evaluation result detail fly-in — verify by opening a result row's fly-in after a simulate-at-eval-time run on the release tag */}
-
-<Card title="Simulate against scenario sets" icon="play" href="/how-to/simulate-with-scenarios">
-  The end-to-end walkthrough: pick a persona and goal, drive a simulation in the Playground, capture it as a scenario, and run it at evaluation time — the moving demo of the whole flow.
+<Card title="Simulate with scenarios" icon="play" href="/how-to/simulate-with-scenarios">
+  The end-to-end walkthrough: drive a persona-and-goal simulation in the Playground, save it as a scenario, and run it at evaluation time — the moving demo of the whole flow.
 </Card>
 
 ## How the Playground runs
 
-You don't need the plumbing to use the Playground, but a little context helps. A Playground session is a **simulation**: the simulations domain backs the surface, every session is scoped to its project, and a session is in one of three states — running, ended, or abandoned. That's why History can list, label, and reopen your sessions: each one is a real persisted record, not a transient chat.
+You don't need the plumbing to use the Playground, but a little context helps. A Playground session is a **simulation**: the simulations domain backs the surface, every session is scoped to its project, and a session is in one of three states — running, ended, or abandoned. That's why History can list, label, and reopen your sessions, and why saving a conversation as a scenario needs no copy step: each session is a real persisted record, not a transient chat.
 {/* ACCURACY-AUDIT-PENDING: a Playground session is a project-scoped simulation whose status is running / ended / abandoned, and History reflects those states — verify behaviorally on the release tag; do not publish the internal route table as a stable public API */}
 
 The Playground reuses the same streaming infrastructure the Trust Agent's runtime sits on, but it is a **separate surface** — it is not the Trust Agent runtime, and the two don't share a conversation. Any wait you feel before a reply streams in is upstream **model thinking time** — how long the connected agent's model takes to respond. It is not a fixed latency the Playground promises and not a bug; the time depends on the model and the infrastructure it runs on, which is exactly why the Playground streams the reply in as it lands rather than showing a countdown.
@@ -139,9 +131,9 @@ The Playground reuses the same streaming infrastructure the Trust Agent's runtim
 
 ## Related concepts
 
-- **[Scenarios](/concepts/scenarios)** — the persona-and-goal test sets you build, generate, and capture Playground conversations into
-- **[Evaluations](/concepts/evaluations)** — where the same persona-and-goal simulation can run at eval time, scored at scale
+- **[Scenarios](/concepts/scenarios)** — the flat list of persona-and-goal test cases you build, generate sessions from, and save Playground conversations into
+- **[Evaluations](/concepts/evaluations)** — where the same persona-and-goal simulation runs at scale through the Evaluation Launcher
 - **[Agent Versions](/concepts/agent-versions)** — the agent under test that you chat with and simulate against here
 - **[Trust Agent](/concepts/trust-agent)** — the *other* chat: your in-app assistant, a distinct surface from the Playground
-- **[Sessions](/concepts/sessions)** — the production interactions the Playground complements with hands-on, on-demand conversations
+- **[Sessions](/concepts/sessions)** — where every conversation lands, Playground-driven or not, with its Source and provenance
 - **[Multi-tenancy](/concepts/multi-tenancy)** — the organization boundary your Playground sessions are scoped to
