@@ -1,90 +1,128 @@
 ---
 title: "The evaluation loop"
 icon: "refresh-cw"
-description: "How Sessions become Scenario sets become Evaluations — the workflow Trust AI is built around."
+description: "How Scenarios, Sessions, Evaluators, and Evaluations feed each other — the workflow Trust AI is built around."
 ---
 
 The Trust AI workflow is a **loop, not a line**. Each step feeds the next; the output of the final step closes back to the start. Every concept page in this section is one verb in this loop. Read this page to see how they connect.
 
 ## In one paragraph
 
-You **ingest Sessions** from your agent runtime. You **review** them, attaching **Annotations** that capture pass/fail or rubric judgment. You **curate** the most informative annotated Sessions into a **Scenario set**. You **define Evaluators** — LLM Judges and Structured Match assertions — and calibrate them against the Annotations until their scores agree with human reviewers. You **run an Evaluation** by applying those Evaluators across the Scenario set, scoped to a specific **Agent Version**. When you ship a candidate Agent Version, you **compare its Evaluation results to the prior version's** — that diff is the regression signal. Then you ingest the next batch of Sessions and the loop continues.
+You **define Scenarios** — persona-plus-goal test cases you author yourself, save from a Playground chat, adopt from the recommended starters, or ask the Trust Agent to draft. You **run them**: each persona simulates a conversation against your connected agent, and every simulated conversation lands as a real **Session** next to the ones synced from your runtime. You read those sessions and **author each scenario's Expected Output** — the grading contract — picking actions, routes, and judge criteria from vocabulary Trust AI learned from real sessions. You **run an Evaluation** from one unified launcher, against scenarios (live simulation) or against sessions that already happened (judge-only grading), scoped to a specific **Agent Version**. Results lead with a dual headline: **Pass rate** grades the agent, **Evaluator accuracy** grades the judges. You **annotate sessions** with human verdicts — the ground truth the judges are measured against — then **calibrate** each judge until it agrees with your reviewers. Then you tighten the scenarios, re-run, and the loop continues.
 
 ## The diagram
 
 ```mermaid
 flowchart TD
-    S1["<b>1. Ingest Sessions</b><br/><i>from AgentCore / Agentforce / Copilot Studio</i>"]
-    S2["<b>2. Review + Annotate</b><br/><i>QA Practitioner reviewer judgment</i>"]
-    S3["<b>3. Curate Scenario set</b><br/><i>versioned, snapshot-bound test bed</i>"]
-    S4["<b>4. Define Evaluators</b><br/><i>LLM Judge or Structured Match</i>"]
-    S5["<b>5. Run Evaluation</b><br/><i>scored, per-row results</i>"]
-    S6["<b>6. Compare Agent Versions</b><br/><i>the regression signal</i>"]
-    SHIP(["Ship the winner.<br/>Ingest the next batch."])
+    S1["<b>1. Define Scenarios</b><br/><i>author, save from the Playground, adopt starters, or ask the Trust Agent</i>"]
+    S2["<b>2. Simulate and observe</b><br/><i>persona-by-goal runs become real Sessions</i>"]
+    S3["<b>3. Author Expected Output</b><br/><i>the grading contract, built from learned vocabulary</i>"]
+    S4["<b>4. Run an Evaluation</b><br/><i>one launcher — scenarios or sessions</i>"]
+    S5["<b>5. Read the results</b><br/><i>Pass rate + Evaluator accuracy, per persona</i>"]
+    S6["<b>6. Annotate Sessions</b><br/><i>human verdicts — the ground truth</i>"]
+    S7["<b>7. Calibrate and tighten</b><br/><i>check agreement, refine, re-run</i>"]
+    SHIP(["Ship the winner.<br/>Feed the next batch back in."])
 
     S1 --> S2
     S2 --> S3
     S3 --> S4
     S4 --> S5
     S5 --> S6
-    S6 --> SHIP
+    S6 --> S7
+    S7 --> SHIP
     SHIP -.->|loop| S1
 ```
 
-The loop is not strictly linear — you'll often define an Evaluator before fully curating a Scenario set, or build a scenario set before having any Annotations. The arrows show the **dependency direction**, not a forced sequence.
+The loop is not strictly linear — you can evaluate sessions before authoring any Expected Output, or calibrate a judge before writing your own scenarios. The arrows show the **dependency direction**, not a forced sequence. Annotation is never a prerequisite: an evaluation can start the moment you have scenarios or sessions to grade.
 
-## The six steps in depth
+## The seven steps in depth
 
-### 1. Ingest Sessions
+### 1. Define Scenarios
 
-Your agent runtime emits invocation logs. Trust AI's ingestion pipeline pulls those logs (or you push them via API) and surfaces each invocation as a structured **Session** in your **Project**.
+A **Scenario** is a first-class test case: a name, a goal, the personas that will pursue it, and (eventually) an Expected Output that defines what passing looks like. Every scenario carries a stable id like `SCN-000123`, and your project keeps them in one flat, searchable **Scenarios** list.
 
-Trust AI supports AWS Bedrock AgentCore today via a cross-account IAM role. Agentforce and Copilot Studio connectors are on the roadmap. The ingestion path is read-only; Trust AI never modifies the source runtime.
+Four ways to get scenarios, cheapest first:
+
+- **Adopt starters.** Click **Add recommended scenarios** to adopt curated safety scenarios mapped to the OWASP Agentic AI Top 10 — coverage before you've written a word.
+- **Ask the Trust Agent.** Describe what your agent should and shouldn't do; the Trust Agent drafts behavior and security scenarios for you.
+- **Save from the Playground.** Had a conversation worth keeping? **Save as a scenario** turns it into a scenario with the conversation already attached as its first session.
+- **Author by hand.** Name, goal, personas. Expected output is deliberately deferred — you'll set it later, usually from a session you like.
+
+Defining scenarios is deliberately cheap. The product's opinion: write the test case first, let real runs teach you what "correct" looks like.
+
+**Read more:** [Scenarios](/concepts/scenarios) · [Simulate with scenarios](/how-to/simulate-with-scenarios)
+
+### 2. Simulate and observe
+
+Run a scenario and Trust AI simulates it against your connected agent — one conversation per persona per goal. Each simulated conversation is persisted as a real **Session**, linked back to its scenario, sitting alongside the sessions synced from your runtime. Nothing about a generated session is second-class: same transcript view, same annotations, same evaluations.
+
+Sessions arrive from three directions, and each one wears a **Source** chip telling you which: **Scenario** (simulated from a scenario run or evaluation), **Playground** (an unsaved Playground conversation), or **External** (synced from your connected runtime). Trust AI connects to **Salesforce Agentforce**, **AWS Bedrock Agents**, **AWS Bedrock AgentCore**, and **Claude Managed Agent** runtimes; syncing is read-only — Trust AI never modifies the source runtime.
+
+The Scenarios list has a **Run** split button: **Run & evaluate** to simulate and grade in one move, or **Run only** to simulate without grading — useful when you're still learning how the agent behaves. Bulk runs keep you on the list with live per-scenario progress badges.
 
 **Read more:** [Sessions](/concepts/sessions) · [Connect an AWS Bedrock AgentCore agent](/how-to/connect-agentcore)
 
-### 2. Review and annotate
+### 3. Author the Expected Output
 
-A **QA Practitioner** opens a Session, walks it Turn by Turn, and attaches **Annotations** capturing reviewer judgment — pass/fail, rubric score, or freeform comment. Annotations are the **human signal** that everything downstream calibrates against.
+The **Expected Output** is a scenario's grading contract — the keystone of the loop. Open a scenario's fly-in, and the **Expected Output** tab gives you three sections:
 
-The Annotations queue is the working surface here: filtered lists of Sessions needing review, organized by tag, intent, or recency. A team can blow through a few hundred Sessions in a sitting once the workflow clicks.
+- **Expected behavior** — LLM-judge evaluator cards, with the presets that fit this scenario surfaced first under **Recommended for this scenario**.
+- **Expected actions** — the tool calls the agent must (or must not) make, with parameter checks.
+- **Expected routes** — where the conversation should be routed.
 
-**Read more:** [Annotations](/concepts/annotations) · [Sessions](/concepts/sessions)
+You don't type these from memory. The options come from vocabulary Trust AI **learned from your real sessions** — the actions and routes your agent actually uses. That's why this step comes after simulation: run the scenario, open a session where the agent did the right thing, and encode what you saw as the contract.
 
-### 3. Curate a Scenario set
+**Read more:** [Scenarios](/concepts/scenarios) · [Evaluators](/concepts/evaluators)
 
-Annotated Sessions become the raw material for a **Scenario set** — a versioned, curated collection of test cases. The Scenario set is the stable test bed every Evaluation runs against. You filter, bulk-select, and curate the annotated Sessions into a Scenario set; the human judgment travels with each row.
+### 4. Run an Evaluation
 
-A **scenario** — one row in the set — is a **snapshot** of the source Session, not a deep-link. Upstream edits don't change historical Evaluation results (ADR 0004). That's the core reproducibility guarantee.
+Every run starts from one place: the **Evaluation Launcher**, opened from **+ New evaluation** on the Evaluations list, from **Run & evaluate** on scenarios, or from **Evaluate** on sessions. The launcher shows a fan-out preview of exactly what will run, and it grades two kinds of source:
 
-**Read more:** [Scenarios](/concepts/scenarios)
+- **Scenarios** — live simulation: each persona enacts its goal against the Agent Version you picked, and the judges plus the scenario's Expected Output grade the result.
+- **Sessions** — grade the conversations that **already happened**. The judges read each captured session and score it; nothing is re-sent to your agent, and the session is never modified.
 
-### 4. Define Evaluators
+A **Repeat each test case** control (defaulting to 2) runs every test case multiple times, because an agent that passes once isn't an agent that passes reliably — a finished repeated run leads with a **Pass^K** reliability headline. For quick checks there's also one-off grading: **Evaluate in place** scores a single scenario or session where it lives, with no run added to the Evaluations list.
 
-An **Evaluator** is a reusable judgment function: defined once, applied to many Evaluations. Two families:
-
-- **LLM Judge** — a plain-English rubric scored by a strong LLM at evaluation time. Good for qualitative judgment (politeness, completeness, accuracy of unstructured text).
-- **Structured Match** — a deterministic assertion on agent output metadata (intent code, tool-call shape, schema validation). Good for structured judgment.
-
-You **calibrate** each Evaluator against the Annotations from step 2 — refining the rubric or assertion until the Evaluator scores rows the way human reviewers did. Calibration agreement is what makes the Evaluator trustworthy as a regression signal.
-
-**Read more:** [Evaluators](/concepts/evaluators) · [Write an effective LLM-judge prompt](/how-to/write-llm-judge-prompt) *(coming soon)*
-
-### 5. Run an Evaluation
-
-An **Evaluation** is a single run: pick a Scenario set, pick one or more Evaluators, pick an Agent Version, and kick it off. Trust AI sends each scenario to the live agent (via the Project's runtime connection), collects responses, scores them with the Evaluators, and produces a per-row scored result.
-
-A subtle but important pattern (ADR 0006): **the agent responses produced during an Evaluation are themselves Sessions**, structurally indistinguishable from production Sessions. They show up in your Sessions list tagged "from-eval," available for re-annotation, re-evaluation, or curation into the next Scenario set. The loop is genuinely a loop.
+Each run records the version of your scenario data at launch, so editing a scenario later never rewrites historical results.
 
 **Read more:** [Evaluations](/concepts/evaluations) · [Run your first Evaluation](/tutorials/run-first-evaluation)
 
-### 6. Compare Agent Versions
+### 5. Read the results
 
-The headline workflow: same Scenario set, same Evaluators, two **Agent Versions** (production vs. candidate replacement, last week vs. today, prompt-A vs. prompt-B). The comparison surfaces per-row deltas — rows that passed before and fail now (regressions), rows that failed before and pass now (improvements), and rows that flap (a calibration smell).
+Run detail leads with a **dual headline**:
 
-This is the regression-tracking primitive Trust AI is built around. The product exists to make this diff reliable, reviewable, and routine.
+- **Pass rate** — how often the agent met the bar. This grades **the agent**.
+- **Evaluator accuracy** — how often the automated judges agreed with a human's verdict on the same sessions. This grades **the judges**.
 
-**Read more:** [Compare two Agent Versions](/how-to/compare-agent-versions) · [Agent Versions](/concepts/agent-versions)
+The split matters. A pass rate is only as trustworthy as the judges producing it, so Trust AI shows you both numbers side by side.
+
+Below the headline, a per-persona matrix scores **every attached persona on its own**, with plain-English divergence hints when personas disagree — the friendly persona passing while the frustrated one fails is exactly the signal you ran multiple personas to find. Results are honest about what isn't the agent's fault: a guardrail-blocked response shows as **Guardrail blocked**, and infrastructure hiccups show as **Environment problem — not the agent**, excluded from the score rather than painted as a red fail. Any result's **Open session** button lands you on the exact session it graded.
+
+**Read more:** [Evaluations](/concepts/evaluations)
+
+### 6. Annotate Sessions
+
+Human judgment enters the loop on the Sessions surface. Every project starts with a **Verdict** (pass/fail) column, a **Severity** column, and a **Reviewer note** column, and you can add your own typed annotation columns — score, category, tags, comment. Set verdicts inline in the table, or in a session fly-in's **Annotations** tab while reading the transcript.
+
+Two verdicts, two jobs: the **automated verdict** (Pass / Fail / Not evaluated) comes from the judges; your **human Verdict** is the ground truth those judges are graded against. A human verdict never overrides the automated one — it measures it. Every verdict you record sharpens the Evaluator accuracy headline on the next run.
+
+**Read more:** [Annotations](/concepts/annotations) · [Sessions](/concepts/sessions)
+
+### 7. Calibrate and tighten
+
+An **Evaluator** is a reusable judge — plain-language **Passes when… / Fails when…** rules, no prompt engineering required. Start from the recommended evaluators (a curated Trust Library spanning quality and safety checks), tailor them to your agent, or draft rules with **Tailor with AI**.
+
+Then make the judge earn your trust. An LLM-judge evaluator's **Calibrate** tab runs the exact production judge against sessions you've already given human verdicts and reports a plain-language agreement score, with disagreements listed first. Work the disagreements: refine a rule, re-check agreement, watch the calibration history climb. Judge verdicts are deterministic — the same transcript always gets the same verdict — so improvement you measure is improvement you keep.
+
+Tightening feeds every earlier step: a judge that over-rejects gets a sharper rule, a scenario that no longer reflects reality gets edited or safely deleted, a gap in coverage gets a new scenario. Then you re-run — **Re-run** on any finished run restores its full configuration.
+
+**Read more:** [Evaluators](/concepts/evaluators) · [Write an effective LLM-judge prompt](/how-to/write-llm-judge-prompt)
+
+## The Trust Agent can drive the loop
+
+You don't have to click through the loop by hand — the **Trust Agent** can run it conversationally. For a brand-new project it guides the whole cold start inside one conversation: connect your agent, run an observe-only exploration that watches how it behaves without scoring it, draft behavior and security scenarios (it proposes adversarial coverage on its own), and launch your first scored evaluation. On an established project, asking it to draft scenarios, adjust coverage, or kick off a run is usually faster than the UI.
+
+**Read more:** [The Trust Agent](/concepts/trust-agent) · [Work with the Trust Agent](/how-to/work-with-the-trust-agent)
 
 ## Where this fits in your team's workflow
 
@@ -92,13 +130,13 @@ Different roles touch different parts of the loop:
 
 <CardGroup cols={3}>
   <Card title="SI Consultant" icon="user-cog">
-    **Touches all six steps** during a customer engagement. Sets up the Project, connects the runtime, leads the first wave of Annotations, scaffolds Scenario sets and Evaluators, runs the first Evaluations, then hands off recurring operations to the customer team.
+    **Touches all seven steps** during a customer engagement. Sets up the Project, connects the runtime, adopts the recommended evaluators and scenarios, leads the first simulation-and-annotation wave, runs the first Evaluations, then hands recurring operations to the customer team.
   </Card>
   <Card title="QA Practitioner" icon="clipboard-check">
-    **Lives in steps 2 and 3** — the Annotations queue and Scenario set curation. Spends real time per week here; their judgment is what makes every downstream Evaluator possible.
+    **Lives in steps 3, 6, and 7** — authoring Expected Output from real sessions, recording human verdicts, and calibrating judges. Their judgment is the ground truth every automated verdict is measured against.
   </Card>
   <Card title="Agent Owner" icon="user-shield">
-    **Lives in steps 5 and 6** — running Evaluations on candidate Agent Versions, reading regression reports, making ship / don't-ship decisions. Touches the loop weekly or per-release, not daily.
+    **Lives in steps 4 and 5** — running Evaluations on candidate Agent Versions, reading the dual-headline results, making ship / don't-ship decisions. Touches the loop weekly or per-release, not daily.
   </Card>
 </CardGroup>
 
@@ -106,21 +144,22 @@ The personas overlap on real teams. A solo founder might play all three. A large
 
 ## What to do with the results
 
-The output of step 6 is rarely a single number. It's a diff with structure. Three common outcomes:
+The output of a run is rarely a single number. Three common outcomes:
 
-- **Ship the candidate.** Pass rate improved; regressions are absent or acceptable. Tag the new Agent Version as the production version and start the loop fresh.
-- **Investigate a regression.** A category of rows failed. Open the failing rows, read the reasoning, decide whether the agent regressed, the Evaluator is over-rejecting, or the scenario is no longer valid. Each of those points back into the loop at a different step.
-- **Refine the Evaluator.** The Evaluator and the human reviewer disagree on a row. Update the rubric (or the assertion), recalibrate against the Annotations, re-run the Evaluation. The Evaluator gets better; the next regression signal is sharper.
+- **Ship the candidate.** Pass rate cleared your bar, Evaluator accuracy says the judges are trustworthy, and the reliability headline holds up across repeated trials. To compare **Agent Versions**, run the same scenarios and evaluators against each version and read the two run details side by side — there is no dedicated side-by-side comparison view in the product today.
+- **Investigate a failure.** A persona or a category of scenarios failed. Open the failing results, read the judges' reasoning, jump to the graded conversation with **Open session**, and decide: did the agent regress, is the judge over-rejecting, or is the scenario stale? Each answer re-enters the loop at a different step.
+- **Refine the judge.** The judge and your reviewers disagree. Record human verdicts on the disputed sessions, open the evaluator's **Calibrate** tab, work the disagreements-first list, and re-run. The judge gets better; the next signal is sharper.
 
-In all three, the **next batch of Sessions ingested** completes the loop: new production interactions become new annotation candidates, which become new scenarios, which sharpen the next round of Evaluations.
+In all three, the next batch of sessions — synced from production or simulated from scenarios — feeds the loop again: new conversations become new verdicts, new verdicts calibrate the judges, calibrated judges make the next run's headline worth trusting.
 
 ## Related reading
 
 - **[Projects](/concepts/projects)** — the workspace boundary every loop runs inside
-- **[Sessions](/concepts/sessions)** — step 1 raw material
-- **[Annotations](/concepts/annotations)** — step 2 human signal
-- **[Scenarios](/concepts/scenarios)** — step 3 test beds
-- **[Evaluators](/concepts/evaluators)** — step 4 judgment functions
-- **[Evaluations](/concepts/evaluations)** — step 5 scored runs
-- **[Agent Versions](/concepts/agent-versions)** — step 6 the thing being compared
+- **[Scenarios](/concepts/scenarios)** — step 1 test cases and step 3 grading contracts
+- **[Sessions](/concepts/sessions)** — step 2 conversations, simulated and synced
+- **[Playground](/concepts/playground)** — chat with your agent and save the keepers as scenarios
+- **[Evaluators](/concepts/evaluators)** — step 7 judgment functions
+- **[Evaluations](/concepts/evaluations)** — steps 4 and 5, scored runs
+- **[Annotations](/concepts/annotations)** — step 6 human signal
+- **[Agent Versions](/concepts/agent-versions)** — the thing every run is scoped to
 - **[Glossary](/glossary)** — every term, defined once, sortable
