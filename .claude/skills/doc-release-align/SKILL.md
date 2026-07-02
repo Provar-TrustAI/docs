@@ -95,6 +95,26 @@ isolated worktree, `mint broken-links` gated, writers never merge) and scopes NE
 explicit scope decisions — *"no page for X this release because Y"* — in the plan; an undecided
 gap is debt, a decided one is a boundary.
 
+## Operational lessons (v2026.06.30.1 loop — hard-won, follow them)
+
+- **Every concurrent writer/fixer gets its own git worktree — including ad-hoc single-agent
+  dispatches.** Two fixers sharing the main checkout raced on branches mid-commit (both recovered,
+  but only by luck and care). Workflow-dispatched agents with `isolation: worktree` never hit this.
+- **Mintlify skips preview builds under concurrent-branch load** ("skipping" check state). The
+  substitute gate: merge the candidate branch(es) onto `origin/main` in a *detached* temp worktree,
+  run `mint broken-links` there, then merge on GitHub. Never merge a skipped-preview PR unvalidated,
+  and never run that validation inside the main checkout.
+- **Dispatch big waves via Workflow, not loose Agent calls** — when a mid-wave rate limit killed 9
+  of 17 writers, `resumeFromRunId` replayed the 8 cached successes free and re-ran only the dead
+  ones. Loose agents have no such resume.
+- **Cross-check writer flags against sibling pages before merging.** The two systemic errors this
+  loop (Pass^K "default 2", agent-evaluates-sessions) were each caught because one writer's
+  code-verified flag contradicted three sibling pages — both errors originated in the
+  orchestrator's own wave briefs, sourced from release-note prose instead of tagged code.
+- **Two fresh-eyes cross-surface auditors after the waves merge** (concepts coherence + task-page
+  journey coherence) found 28 real findings that per-page verification could not see. Budget for
+  this pass; it is where parallel-writing's seams show.
+
 ## Outputs
 
 - Scratchpad: `impact-tracks.json`, `impact-pages.json`, the release-notes files.
