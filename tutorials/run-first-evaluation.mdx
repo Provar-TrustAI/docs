@@ -85,7 +85,7 @@ One thing to check before launching: **evaluators travel with each scenario**, n
     - **Pass rate** grades the *agent* — how often it passed each case.
     - **Evaluator accuracy** grades the *judges* — how often the evaluators' combined verdict agreed with a human verdict on the same case. It only appears once human verdict annotations exist; with none yet, only the pass rate shows.
 
-    Below that, the **results matrix** has one row per scenario × persona — the persona's name leads each row — and one column per evaluator, with verdict chips. Click any result to open it in full: score, reasoning, and a **Transcript** tab labeled **Simulated** (a fresh conversation was driven for this run) or **Replayed** (stored turns were graded). **Export** in the header downloads the full results.
+    Below that, the **results matrix** has one row per scenario × persona — the persona's name leads each row — and one column per evaluator, with verdict pills. Click any result to open it in full: score, reasoning, and a **Transcript** tab labeled **Simulated** (a fresh conversation was driven for this run) or **Replayed** (stored turns were graded). **Export** in the header downloads the full results.
 
     A verdict isn't just pass or fail — there's a third, honest state. Guardrail-intercepted responses show as **Guardrail blocked**, and infrastructure problems (a judge call that couldn't complete, a flaky environment) show as **Environment problem — not the agent · Excluded from the score**. These render neutrally, never as a red fail, and they don't count against the pass rate — so a capacity hiccup can't masquerade as a drop in agent quality.
 

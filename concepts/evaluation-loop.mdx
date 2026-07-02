@@ -56,7 +56,7 @@ Defining scenarios is deliberately cheap. The product's opinion: write the test 
 
 Run a scenario and Trust AI simulates it against your connected agent — one conversation per persona per goal. Each simulated conversation is persisted as a real **Session**, linked back to its scenario, sitting alongside the sessions synced from your runtime. Nothing about a generated session is second-class: same transcript view, same annotations, same evaluations.
 
-Sessions arrive from three directions, and each one wears a **Source** chip telling you which: **Scenario** (simulated from a scenario run or evaluation), **Playground** (an unsaved Playground conversation), or **External** (synced from your connected runtime). Trust AI connects to **Salesforce Agentforce**, **AWS Bedrock Agents**, **AWS Bedrock AgentCore**, and **Claude Managed Agent** runtimes; syncing is read-only — Trust AI never modifies the source runtime.
+Sessions arrive from three directions, and each one wears a **Source** chip telling you which: **Scenario** (simulated from a scenario run or evaluation), **Playground** (an unsaved Playground conversation), or **External** (synced from your connected runtime). Trust AI connects to **Salesforce Agentforce**, **AWS Bedrock AgentCore**, and **Claude Managed Agent** runtimes; syncing is read-only — Trust AI never modifies the source runtime.
 
 The Scenarios list has a **Run** split button: **Run & evaluate** to simulate and grade in one move, or **Run only** to simulate without grading — useful when you're still learning how the agent behaves. Bulk runs keep you on the list with live per-scenario progress badges.
 
@@ -81,7 +81,7 @@ Every run starts from one place: the **Evaluation Launcher**, opened from **+ Ne
 - **Scenarios** — live simulation: each persona enacts its goal against the Agent Version you picked, and the judges plus the scenario's Expected Output grade the result.
 - **Sessions** — grade the conversations that **already happened**. The judges read each captured session and score it; nothing is re-sent to your agent, and the session is never modified.
 
-A run whose test cases were attempted more than once leads with a **Pass^K** reliability headline, because an agent that passes once isn't an agent that passes reliably. (At this release the launcher runs each case once; Pass^K renders on repeated-trial runs where they exist.) For quick checks there's also one-off grading: **Evaluate in place** scores a single scenario or session where it lives, with no run added to the Evaluations list.
+A run whose test cases were attempted more than once leads with a **Pass^K** reliability headline, because an agent that passes once isn't an agent that passes reliably. (At this release the launcher runs each case once; Pass^K renders on repeated-trial runs where they exist.) For quick checks there's also one-off evaluation in place: **Evaluate** on a single scenario or session scores it where it lives, with no run added to the Evaluations list.
 
 Each run records the version of your scenario data at launch, so editing a scenario later never rewrites historical results.
 
@@ -112,7 +112,7 @@ Two verdicts, two jobs: the **automated verdict** (Pass / Fail / Not evaluated) 
 
 An **Evaluator** is a reusable judge — plain-language **Passes when… / Fails when…** rules, no prompt engineering required. Start from the recommended evaluators (a curated Trust Library spanning quality and safety checks), tailor them to your agent, or draft rules with **Tailor with AI**.
 
-Then make the judge earn your trust. An LLM-judge evaluator's **Calibrate** tab runs the exact production judge against sessions you've already given human verdicts and reports a plain-language agreement score, with disagreements listed first. Work the disagreements: refine a rule, re-check agreement, watch the calibration history climb. Judge verdicts are deterministic — the same transcript always gets the same verdict — so improvement you measure is improvement you keep.
+Then make the judge earn your trust. An LLM-judge evaluator's **Calibrate** tab runs the exact production judge against scenarios you've already marked pass or fail and reports a plain-language agreement score, with disagreements listed first. Work the disagreements: refine a rule, re-check agreement, watch the calibration history climb. Judge verdicts are deterministic — the same transcript always gets the same verdict — so improvement you measure is improvement you keep.
 
 Tightening feeds every earlier step: a judge that over-rejects gets a sharper rule, a scenario that no longer reflects reality gets edited or safely deleted, a gap in coverage gets a new scenario. Then you re-run — **Re-run** on any finished run restores its full configuration.
 

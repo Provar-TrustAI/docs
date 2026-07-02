@@ -16,16 +16,16 @@ Trust AI is built around seven core nouns. Every workflow and every screen in th
   <Card title="Project" icon="sliders-horizontal" href="/concepts/projects">
     The workspace container — owns members, connection config, and every Session, Scenario, Evaluator, Evaluation, and Agent Version under it.
   </Card>
-  <Card title="Session" icon="message-square" href="/concepts/sessions">
+  <Card title="Session" icon="database" href="/concepts/sessions">
     One real conversation between a user and an agent — a sequence of turns and tool calls. Every session carries a Source — Scenario, Playground, or External — and can be evaluated directly.
   </Card>
   <Card title="Annotation" icon="tag" href="/concepts/annotations">
     Human judgment recorded in typed columns on a session — a pass/fail Verdict, a Severity, reviewer notes, and custom columns. The ground truth evaluator accuracy is measured against.
   </Card>
-  <Card title="Scenario" icon="users" href="/concepts/scenarios">
+  <Card title="Scenario" icon="flask-conical" href="/concepts/scenarios">
     A first-class test case — name, goal, personas, expected output, and linked sessions, with a stable id like `SCN-000123`. Every project keeps them in one flat Scenarios list.
   </Card>
-  <Card title="Evaluator" icon="wand-sparkles" href="/concepts/evaluators">
+  <Card title="Evaluator" icon="ruler" href="/concepts/evaluators">
     A reusable judgment function — LLM Judge (plain-English rules) or Structured Match (routing and tool checks). Adopt one from the Trust Library or write your own, then calibrate it against human verdicts.
   </Card>
   <Card title="Evaluation" icon="chart-line" href="/concepts/evaluations">
@@ -73,7 +73,7 @@ Read the diagram in three layers:
 - **Annotations point at the judges, not the agent.** A human pass/fail verdict grades evaluator accuracy; it never overrides the session's automated verdict.
 - **The loop feeds itself.** Simulated and Playground conversations are saved as real sessions linked to their scenario, so every run leaves reviewable raw material behind — and the vocabulary learned from real sessions is what expected outputs are authored from.
 
-All of this happens **inside a Project**. The Project is the boundary around the loop — members, connection config, and every artifact above belong to one specific Project, and every artifact is scoped to your own organization. Access is decided by a fail-closed authorization engine, every access decision and permission change lands in an append-only audit trail, and members, teams, and per-project Viewer and Editor roles are managed from the app's Access Center. See [Multi-tenancy](/concepts/multi-tenancy) for the security-shaped detail.
+All of this happens **inside a Project**. The Project is the boundary around the loop — members, connection config, and every artifact above belong to one specific Project, and every artifact is scoped to your own organization. Access is decided by a fail-closed authorization engine, every access decision and permission change lands in an append-only audit trail, and members, teams, and per-project Viewer and Editor roles are managed from **Workspace settings**. See [Multi-tenancy](/concepts/multi-tenancy) for the security-shaped detail.
 
 <Tip>
   **Next:** read [The evaluation loop](/concepts/evaluation-loop) for the workflow narrative in depth, or dig into any individual noun from the cards above.
@@ -100,7 +100,7 @@ On a brand-new project it runs a guided cold start: connect your agent, watch an
 
 ### Scenarios
 
-**Scenarios** is the project's flat list of test cases, at `/projects/:id/scenarios` (old `/datasets` links redirect there). Each scenario opens a fly-in panel: its personas and goals, its expected output, and the sessions linked to it. The **Expected output** editor is the scenario's grading contract — expected behavior (LLM-judge cards), expected actions, and expected routes, chosen from vocabulary the product learned from real sessions rather than typed by hand.
+**Scenarios** is the project's flat list of test cases, at `/projects/:id/scenarios` (old `/datasets` links redirect there). Each scenario opens a fly-in panel: its personas and goals, its expected output, and the sessions linked to it. The **Expected Output** editor is the scenario's grading contract — expected behavior (LLM-judge cards), expected actions, and expected routes, chosen from vocabulary the product learned from real sessions rather than typed by hand.
 
 A **persona** is a reusable, project-scoped role-play profile (one can be the project default); a **goal** is what the synthetic user is trying to achieve. At run time every attached persona is simulated and scored on its own, and a goal-only scenario with no persona still simulates. On the wire, scenario reads and edits go through `/v1/scenarios`, with the legacy `/v1/datasets` endpoints still served underneath — the API Reference tab has the full surface. The [Scenarios](/concepts/scenarios) page covers the rest.
 
@@ -114,7 +114,7 @@ The **Playground** at `/projects/:id/playground` drives a connected agent live. 
 
 ### The Trust Library
 
-A new project doesn't start from a blank slate. **Add recommended evaluators** offers 12 curated LLM-judge presets, grouped quality then safety, that become ordinary fully editable evaluators once adopted; **Add recommended scenarios** offers 10 starter safety scenarios mapped to the OWASP Agentic AI Top 10, each paired with the evaluators that score it well. A no-code rubric editor defines what pass and fail mean in plain language — "Passes when… / Fails when…" — and **Tailor with AI** drafts the rules from one sentence about your agent. Once a judge is in use, its **Calibrate** tab measures how often it agrees with sessions a person already marked pass or fail. See [Evaluators](/concepts/evaluators).
+A new project doesn't start from a blank slate. **Add recommended evaluators** offers 12 curated LLM-judge presets, grouped quality then safety, that become ordinary fully editable evaluators once adopted; **Add recommended scenarios** offers 10 starter safety scenarios mapped to the OWASP Agentic AI Top 10, each paired with the evaluators that score it well. A no-code rubric editor defines what pass and fail mean in plain language — "Passes when… / Fails when…" — and **Tailor with AI** drafts the rules from one sentence about your agent. Once a judge is in use, its **Calibrate** tab measures how often it agrees with scenarios a person already marked pass or fail. See [Evaluators](/concepts/evaluators).
 
 ### The Evaluation Launcher
 
@@ -126,10 +126,10 @@ A single **Evaluation Launcher** starts every run — from the Scenarios list, a
   <Card title="Trust Agent" icon="sparkles" href="/concepts/trust-agent">
     The in-app assistant that does evaluation work alongside you — streaming transcript, clickable records, human-in-the-loop approvals, and a guided cold start. *Not* an Agent Version.
   </Card>
-  <Card title="Scenarios" icon="users" href="/concepts/scenarios">
+  <Card title="Scenarios" icon="flask-conical" href="/concepts/scenarios">
     Flat, persona-and-goal test cases with an authored grading contract. Create, generate, or adopt them, then run them against your agent.
   </Card>
-  <Card title="Playground" icon="joystick" href="/concepts/playground">
+  <Card title="Playground" icon="play" href="/concepts/playground">
     Chat with or simulate against a connected agent live, then save the result as a scenario.
   </Card>
   <Card title="Multi-tenancy" icon="building-2" href="/concepts/multi-tenancy">

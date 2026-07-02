@@ -1,10 +1,10 @@
 ---
 title: "Glossary"
 icon: "book-marked"
-description: "Trust AI domain terms, with the same icons used in the app's navigation."
+description: "Trust AI domain terms, with core-entity icons matching the app's navigation."
 ---
 
-The vocabulary of Trust AI. Icons match the Trust AI app's navigation, so the concept you read about here is the same concept you'll click on in product. Cards link through to dedicated concept pages where they exist.
+The vocabulary of Trust AI. Core-entity icons match the Trust AI app's navigation, so the concept you read about here is the same concept you'll click on in product. Cards link through to dedicated concept pages where they exist.
 
 ## Core entities
 
@@ -13,7 +13,7 @@ The vocabulary of Trust AI. Icons match the Trust AI app's navigation, so the co
     The top-level workspace container. Owns members, runtime connection config (AgentCore, Salesforce Agentforce, and similar), and every Session, Scenario, Evaluator, Evaluation, and Agent Version under it.
   </Card>
   <Card title="Session" icon="database" href="/concepts/sessions">
-    One conversation between a user and an agent — a sequence of Turns and Tool Calls. Sessions arrive from three places, shown as a [Source](#session-internals) chip: synced from your connected runtime, saved from the Playground, or created from a Scenario. Each carries a readable id (`SES-` for synced sessions, `RUN-` for sessions created in-product) and is a first-class evaluation target in its own right.
+    One conversation between a user and an agent — a sequence of Turns and Tool Calls. Sessions arrive from three places, shown as a [Source](#session-internals) chip: synced from your connected runtime, run in the Playground, or simulated from a Scenario. Each carries a readable id (`SES-` for synced sessions, `RUN-` for sessions created in-product) and is a first-class evaluation target in its own right.
   </Card>
   <Card title="Annotation" icon="tag" href="/concepts/annotations">
     A human-authored signal recorded on a Session through typed annotation columns. Every project starts with three — **Verdict** (pass/fail), **Severity** (minor / major / blocker), and **Reviewer note** — and you can add your own (pass/fail, 1–5 score, category, tags, or comment). The human Verdict is the ground truth that grades your automated judges: it feeds [evaluator accuracy](#running-and-scoring-evaluations) and never overrides the automated verdict.
@@ -42,7 +42,7 @@ The vocabulary of Trust AI. Icons match the Trust AI app's navigation, so the co
     An invocation of an agent tool inside a Turn — function name, arguments, and the returned value. Structured Match Evaluators commonly assert on these.
   </Card>
   <Card title="Source" icon="signpost">
-    Where a session came from — exactly one of **Scenario** (created by simulating or generating from a scenario), **Playground** (saved from a Playground conversation), or **External** (synced from your connected agent runtime). Every session shows its source as a chip on the Sessions list, and scenario-born sessions add a **Simulated from** provenance card.
+    Where a session came from — exactly one of **Scenario** (created by simulating or generating from a scenario), **Playground** (a Playground conversation not saved as a scenario), or **External** (synced from your connected agent runtime). Every session shows its source as a chip on the Sessions list, and scenario-born sessions add a **Simulated from** provenance card.
   </Card>
 </CardGroup>
 
@@ -119,7 +119,7 @@ A **scenario** — one goal-driven test case — is defined under [Core entities
     The reliability headline on a run whose test cases were attempted more than once: the share of test cases the agent passed on every repeat, so a flaky agent that passes once but fails on retry can't hide behind a single lucky run. The launcher currently runs each case once; Pass^K renders where repeated-trial runs exist.
   </Card>
   <Card title="Calibration" icon="scale" href="/concepts/evaluators">
-    A check of an LLM Judge against sessions you already marked pass or fail, run from the evaluator's **Calibrate** tab. It uses the exact judge that runs in production, reports a plain-language agreement headline with disagreements listed first, and keeps a calibration history so you can see whether rubric edits helped.
+    A check of an LLM Judge against scenarios you already marked pass or fail, run from the evaluator's **Calibrate** tab. It uses the exact judge that runs in production, reports a plain-language agreement headline with disagreements listed first, and keeps a calibration history so you can see whether rubric edits helped.
   </Card>
   <Card title="Trust Library" icon="library" href="/concepts/evaluators">
     The curated starter catalog, so a new project never begins from a blank slate: 12 recommended evaluators (grouped Quality and Safety) and 10 starter safety scenarios mapped to the OWASP Agentic AI Top 10, adopted through **Add recommended evaluators** and **Add recommended scenarios**. Adopted items become ordinary, fully editable records that keep a **Recommended** provenance chip, and **Tailor with AI** drafts grading rules for your agent from a one-sentence description when you create an evaluator.
@@ -140,14 +140,14 @@ A **scenario** — one goal-driven test case — is defined under [Core entities
   <Card title="Saved View" icon="bookmark" href="/concepts/saved-views">
     A named, persisted combination of filters, sort order, and column configuration for a list surface. Views can be saved per user and shared with the team.
   </Card>
-  <Card title="Fly-in panel" icon="panel-right">
-    A slide-out detail panel that opens from the right when you click a record in Sessions, Scenarios, or Evaluations. Shows the full transcript, metadata, and contextual actions without leaving the list. On Scenarios it stacks two levels: the scenario panel (tabs **Personas & Goals**, **Expected Output**, and **Sessions**), with a nested session-detail panel over it for one linked session. **J**/**K** step between records; **Esc** closes the top panel first.
+  <Card title="Fly-in panel" icon="panel-right" href="/concepts/tables-and-panels">
+    A slide-out detail panel that opens from the right when you click a record in Sessions, Scenarios, Evaluators, or Evaluations. Shows the full transcript, metadata, and contextual actions without leaving the list. On Scenarios it stacks two levels: the scenario panel (tabs **Personas & Goals**, **Expected Output**, and **Sessions**), with a nested session-detail panel over it for one linked session. **J**/**K** step between records; **Esc** closes the top panel first.
   </Card>
-  <Card title="Verdict chip" icon="badge-check">
+  <Card title="Verdict pill" icon="badge-check" href="/concepts/tables-and-panels">
     A three-state badge on results and sessions: **pass** (green), **fail** (red), or a neutral **Not evaluated** — never blank. Judge or infrastructure failures render as a neutral environment problem that is excluded from the score, never as a red fail.
   </Card>
   <Card title="Results matrix" icon="grid-3x3">
-    The grid view on a run's detail page. Columns are the run's pinned evaluators; rows are scored conversations — one result per attached persona per scenario, plus session-graded results. Each cell is a verdict chip, beneath the run's dual **Pass rate** and **Evaluator accuracy** headline.
+    The grid view on a run's detail page. Columns are the run's pinned evaluators; rows are scored conversations — one result per attached persona per scenario, plus session-graded results. Each cell is a verdict pill, beneath the run's dual **Pass rate** and **Evaluator accuracy** headline.
   </Card>
 </CardGroup>
 
@@ -155,6 +155,6 @@ A **scenario** — one goal-driven test case — is defined under [Core entities
 
 <CardGroup cols={2}>
   <Card title="MCP Server" icon="cable" href="/concepts/mcp-integration">
-    The Model Context Protocol endpoint that lets external AI agents and IDEs read and write Trust AI data. Authenticated via WorkOS; write operations require approval.
+    The Model Context Protocol endpoint that exposes a curated subset of the Trust Agent's tools — today the tool layer behind the in-product Trust Agent, reached through your authenticated Trust AI session. Standalone external clients (Claude Desktop, Cursor, IDEs) are on the roadmap pending OAuth; write operations require approval.
   </Card>
 </CardGroup>

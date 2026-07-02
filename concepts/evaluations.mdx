@@ -25,11 +25,11 @@ One **Evaluation Launcher** drives every run. It opens from five places:
 2. **A single session's panel** — **Evaluate** in the header (one-off).
 3. **Scenarios list** — select scenarios and use the **Run** split button (**Run & evaluate**, or **Run only** to simulate without grading).
 4. **A single scenario's fly-in** (one-off).
-5. **Evaluations list** — click **New evaluation** and pick the source yourself.
+5. **Evaluations list** — click **New evaluation** and pick the source yourself: Sessions or Scenarios, then a [saved view](/concepts/saved-views) of that surface to scope the run.
 
 However you arrive, the launcher shows a **fan-out preview** — exactly what will run, including the per-persona expansion for scenarios — before you commit.
 
-Two launcher details worth knowing:
+One launcher detail worth knowing:
 
 - **Re-run** — on any finished run, **Re-run** reopens the launcher pre-seeded with the original run's full configuration: same targets, same Evaluators, same Agent Version. Change one variable (usually the Agent Version) and launch.
 
@@ -50,7 +50,7 @@ Finished runs offer **Export** (download the results as CSV) and a primary **Re-
 Run detail leads with **two headline numbers**, and they answer different questions:
 
 - **Pass rate** grades the *agent*: of the results that count, how many passed.
-- **Evaluator accuracy** grades the *judges*: how often the automated Evaluators agreed with a human's verdict on the same sessions. Human Pass / Fail / Not-evaluated verdicts, recorded as [Annotations](/concepts/annotations), are the ground truth here — a human verdict grades the judges, and never overrides the automated verdict.
+- **Evaluator accuracy** grades the *judges*: how often the automated Evaluators agreed with a human's verdict on the same sessions. Human Pass / Fail verdicts, recorded as [Annotations](/concepts/annotations), are the ground truth here — a human verdict grades the judges, and never overrides the automated verdict.
 
 A high pass rate means little if evaluator accuracy is low: you'd be trusting judges that a human reviewer routinely disagrees with. The two numbers together tell you whether to believe the run.
 
@@ -86,7 +86,7 @@ Open any result to see:
 
 ## Evaluation results are Sessions, too
 
-The conversations produced when an Evaluation simulates scenarios are themselves Sessions — structurally the same as production Sessions. They appear in your Sessions list with a **Source** chip of **Scenario** (captured production traffic shows **External**; conversations saved from the Playground show **Playground**), and their **Simulated from** provenance shows which scenario and persona produced them.
+The conversations produced when an Evaluation simulates scenarios are themselves Sessions — structurally the same as production Sessions. They appear in your Sessions list with a **Source** chip of **Scenario** (captured production traffic shows **External**; unsaved Playground conversations show **Playground**, and saving one as a scenario flips it to **Scenario**), and their **Simulated from** provenance shows which scenario and persona produced them.
 
 This is what unlocks:
 
@@ -106,7 +106,7 @@ There is no dedicated run-vs-run comparison view in the app today; the faithful 
 
 ## Working with Evaluations
 
-You drive Evaluations from the Trust AI app, or by asking the Trust Agent. Tell the Trust Agent to evaluate your scenarios against an Agent Version — or click **New evaluation** on the Evaluations list and configure the launcher yourself. Evaluating captured sessions is launcher-driven: start it from the Sessions list or a session's panel (see [Evaluate sessions](/how-to/evaluate-sessions)). Open a run to watch progress, read results, cancel it mid-flight, or re-run it against a different Agent Version. The Trust Agent can also pull aggregate stats and slice results by persona for you.
+You drive Evaluations from the Trust AI app, or by asking the [Trust Agent](/concepts/trust-agent). Tell the Trust Agent to evaluate your scenarios against an Agent Version — or click **New evaluation** on the Evaluations list and configure the launcher yourself. Evaluating captured sessions is launcher-driven: start it from the Sessions list or a session's panel (see [Evaluate sessions](/how-to/evaluate-sessions)). Open a run to watch progress, read results, cancel it mid-flight, or re-run it against a different Agent Version. The Trust Agent can also pull aggregate stats and slice results by persona for you.
 
 Developers who want the underlying endpoints and request/response shapes can find them in the [API Reference](/api-reference).
 
@@ -117,4 +117,5 @@ Developers who want the underlying endpoints and request/response shapes can fin
 - **[Evaluators](/concepts/evaluators)** — the judgment functions applied to each result
 - **[Agent Versions](/concepts/agent-versions)** — what's under test
 - **[Annotations](/concepts/annotations)** — the human verdicts that grade the judges
+- **[Saved views](/concepts/saved-views)** — the launcher's **New evaluation** path scopes a run to a saved view
 - **[The evaluation loop](/concepts/evaluation-loop)** — Evaluations are the "run" step
