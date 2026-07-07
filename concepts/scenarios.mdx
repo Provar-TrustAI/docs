@@ -130,7 +130,7 @@ Because sessions are frozen snapshots and evaluations pin what they scored, dele
 
 ## API surface
 
-Scenario reads and edits go through the `/v1/scenarios` family — list, get, update, delete (with a pre-delete check), the recommended starter catalog, and each scenario's expected output. The legacy `/v1/datasets` family remains on the wire underneath as the storage the re-design was built over, so you may still see `dataset_id` fields in older payloads. Full request and response shapes live in the [API Reference](/api-reference).
+Scenario reads and edits go through the `/v1/scenarios` family — list, get, update, delete (with a pre-delete check), the recommended starter catalog, and each scenario's expected output. Under the hood a scenario is still stored in the `dataset_rows` table the re-design was built over — a scenario *is* a project-direct row — but the older `/v1/datasets` container API is retired: there is no `/v1/datasets` family on the wire, and scenario payloads carry no `dataset_id`. Full request and response shapes live in the [API Reference](/api-reference).
 
 ## Next step
 
