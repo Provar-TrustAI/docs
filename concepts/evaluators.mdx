@@ -23,7 +23,7 @@ New evaluators you create are LLM Judges. You no longer create standalone Struct
 
 ## Start from the recommended library
 
-A new project doesn't start from a blank slate. Trust AI ships a curated library of recommended defaults — the Trust Library — including 12 recommended evaluators — six **Quality** and six **Safety** presets, each a plain-language pass/fail judge:
+A new project doesn't start from a blank slate. Trust AI ships a curated library of recommended defaults — the Trust Library — including 12 recommended evaluators — six **Quality** and six **Safety** presets, most a plain-language pass/fail judge and a couple scored on a 1–5 scale:
 
 - Click **Add recommended** in the Evaluators header (or the **Add recommended evaluators** call-to-action on an empty project) to open the adopt modal.
 - Each preset shows a provenance chip — a friendly category like **Answer quality** or **Safety & security** — with the underlying method cited in its tooltip. Presets already in your project show a muted **In your project** label, so adopting twice never creates a duplicate.
@@ -85,7 +85,7 @@ Evaluation run results lead with a dual headline: the **Pass rate** grades the a
 
 - **Evaluators list** — every evaluator in the project, with kind, score type, and any **Recommended** provenance chips. **Add recommended** and **New evaluator** live in the header.
 - **Create flow** — name and describe the evaluator, pick the score type, then author the grading rules by hand or with **Tailor with AI**. The kind is fixed once created.
-- **Side panel** — click any evaluator to open its panel: **Overview** (recent trend), **Criteria** (the grading rules, committed with **Save grading rules**; for Structured Match, what it checks), **Runs** (run history), and **Calibrate** on LLM Judges.
+- **Side panel** — click any evaluator to open its panel: **Overview** (recent trend), **Criteria** (the grading rules, committed with **Save grading rules**; for Structured Match, what it checks), **Calibrate** (on LLM Judges), and **Runs** (run history).
 - **Safe delete** — the app checks references before deleting. If active evaluation runs still depend on the evaluator, the delete is refused (**Can't delete**), so you can't silently break a comparison.
 
 ## Reusing Evaluators across scenarios, Agent Versions, time
