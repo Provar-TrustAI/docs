@@ -83,7 +83,7 @@ description: "Trust AI release notes."
 
   **Placeholder buttons now functional.** Eleven previously placeholder buttons are now fully functional: Sync Now, Export CSV, Upload CSV, Run Evaluation, Remove Rows, Copy Sharing Link, Add to Dataset, Tag Row, Download Transcript, Export Sessions CSV, and Export Run Results CSV.
 
-  **MCP server for AI agents and IDEs.** A new MCP server lets external AI agents (Claude Desktop, Cursor, VS Code) query and act on Trust AI data directly. Read tools surface sessions, evaluations, and project data; write tools wrap Trust Agent operations with an approval gate. WorkOS authentication enforces per-tenant access.
+  **MCP server for AI agents and IDEs.** A new MCP server exposes the Trust Agent's read and write tools over the Model Context Protocol. Read tools surface sessions, evaluations, and project data; write tools wrap Trust Agent operations with an approval gate. WorkOS session authentication enforces per-tenant access. *(Clarified since v2026.05.26: because the Trust AI session cookie is the credential, a standalone external client — Claude Desktop, Cursor, VS Code — cannot present it to connect directly yet; direct third-party connection is on the roadmap, gated on OAuth authentication. See [MCP Integration](/concepts/mcp-integration).)*
 
   **Multi-tenant security.** Organization ID enforcement is now complete across all domain entities — datasets, agent versions, personas, simulations, saved views, and budgets all carry a NOT NULL `organization_id` with cross-tenant denial enforced at the repository layer.
 
