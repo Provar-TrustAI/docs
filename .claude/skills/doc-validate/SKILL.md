@@ -46,7 +46,7 @@ prints a report; an autonomous `doc-audit` ticket names exactly one dimension â€
 
 Read the page's source MDX and its **claim-map** (the `## Claim map` section the page's `doc-page`
 ticket carries, per `templates/claim-map.md`): every factual/behavioral claim the page makes. Read
-the surface's source ADRs (`trust-ai-app/docs/decisions/`) and the relevant section of the release
+the surface's source ADRs (`$APP_ROOT/docs/decisions/`) and the relevant section of the release
 notes. Note the page's **Diataxis type** â€” it sets the bar (a tutorial must be *runnable* end to
 end; a reference must be *complete*; a concept must be *correct*).
 

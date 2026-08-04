@@ -1,5 +1,11 @@
 # Versioning convention — docs.provar.dev
 
+> [!WARNING]
+> **The `vN/` folder archive described below is not current practice.** DEV-2182 removed the
+> `v2026.05.11` archive and the site has run as a single rolling version since; `/doc-release-align`
+> step 3.1 now archives the outgoing version as a **git tag** (`docs-<OLD_VERSION>`). This document
+> has not been reconciled — see DEV-6149.
+
 **Adopted:** 2026-05-20 (DEV-1810)
 **Rationale source:** [DEV-1764 spike memo](../audit/recommendation-memo.md) — but the canonical write-up is here.
 **Companion runbook:** `../runbooks/version-transition.md` (DEV-1811 — the step-by-step cutover procedure).

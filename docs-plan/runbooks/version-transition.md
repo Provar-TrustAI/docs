@@ -1,5 +1,11 @@
 # Runbook — docs version transition
 
+> [!WARNING]
+> **This runbook may no longer describe current practice.** DEV-2182 deleted the `v2026.05.11`
+> folder archive and the site has run as a single rolling version since; `/doc-release-align`
+> step 3.1 now prescribes an archive **git tag** (`docs-<OLD_VERSION>`) instead of a `v<old>/`
+> subfolder. Confirm which model applies before running this end to end — see DEV-6149.
+
 **Use this when:** the Trust AI app is cutting a new version and `docs.provar.dev` needs to advance to reflect it, archiving the prior version under `v<old>/`.
 
 **Companion docs:**
@@ -28,9 +34,9 @@ Substitute the version numbers throughout. The example uses `v2026.05.11` → `v
 ### 1. Pull main + create the transition branch
 
 ```bash
-cd /Users/brady.hunt/Developer/docs
+cd "$DOCS_ROOT"                    # see docs-plan/doc-kit/00-playbook.md §0
 git checkout main && git pull --ff-only origin main
-git checkout -b bradyhunt/dev-NNN-version-transition-v2026.05.19
+git checkout -b "$BRANCH_PREFIX/dev-NNN-version-transition-v2026.05.19"
 ```
 
 ### 2. Copy the current root into the archive subfolder
@@ -86,7 +92,7 @@ gh api 'repos/Provar-TrustAI/trustai-app/contents/services/api/openapi.json?ref=
 
 Add a second tab to `docs.json` for the archived API reference, OR (cleaner) link to it from the archive banner — the team decides per cutover. The M2 transition exercise will land the cleaner pattern.
 
-**4c. Walk through each root concept/tutorial/how-to page**: are there content changes between OLD and NEW that need reflecting? Open `RELEASE_NOTES_<NEW>.md` from `trust-ai-app/docs/` (or wherever release notes live for that version) and check.
+**4c. Walk through each root concept/tutorial/how-to page**: are there content changes between OLD and NEW that need reflecting? Open `RELEASE_NOTES_<NEW>.md` from `$APP_ROOT/docs/` (or wherever release notes live for that version) and check.
 
 For minor-version transitions (e.g., v2026.05.11 → v2026.05.19), the delta is often small — maybe a renamed endpoint, a new optional field. Update the affected pages.
 
@@ -117,7 +123,7 @@ v2026.05.20*/
 
 ```bash
 # (re)start mintlify dev on port 3333 if not running
-cd /Users/brady.hunt/Developer/docs
+cd "$DOCS_ROOT"
 npx mintlify dev --port 3333 &
 ```
 
@@ -134,7 +140,7 @@ Then via the `/browse` skill (or directly in your browser):
 ```bash
 git add v2026.05.11/ api-reference/openapi.json changelog.mdx .mintignore
 git commit -m "Transition docs to v2026.05.19; archive v2026.05.11 (DEV-NNN)"
-git push -u origin bradyhunt/dev-NNN-version-transition-v2026.05.19
+git push -u origin "$BRANCH_PREFIX/dev-NNN-version-transition-v2026.05.19"
 gh pr create --title "Transition to v2026.05.19; archive v2026.05.11 (DEV-NNN)" --body "..."
 ```
 

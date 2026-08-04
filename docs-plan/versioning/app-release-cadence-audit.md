@@ -38,7 +38,7 @@ These five tags represent the V0.5 deployment-pipeline shakedown. Brady chose to
 
 ### Post-2026-04-20: CalVer (16 tags so far, active)
 
-Canonical doc: `/Users/brady.hunt/Developer/trust-ai-app/docs/release/image-tags.md`.
+Canonical doc: `$APP_ROOT/docs/release/image-tags.md` (`docs-plan/doc-kit/00-playbook.md` §0).
 
 | Pattern | Example | Meaning |
 |---|---|---|

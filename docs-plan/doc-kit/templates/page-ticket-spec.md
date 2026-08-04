@@ -17,7 +17,7 @@ Fill every section. The claim-map is non-negotiable — it is what makes the pag
 ## Source of truth (read these BEFORE writing — in this order)
 - Shipped app: <route(s) on APP_CAPTURE_URL to drive, e.g. /projects/:id/agent>
 - Release notes section: <the v… release-notes heading this surface lives under>
-- ADRs: <trust-ai-app/docs/decisions/NNNN-*.md that pin the why>
+- ADRs: <$APP_ROOT/docs/decisions/NNNN-*.md that pin the why>
 - OpenAPI (reference pages only): <the api-reference path/fields in scope>
 - Prototype (demo embeds only): <PROTOTYPE_DIR file, if this page embeds a Tier-3 demo>
 

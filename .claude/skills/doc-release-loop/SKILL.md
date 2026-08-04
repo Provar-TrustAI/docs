@@ -48,9 +48,12 @@ Most loop stalls trace to infrastructure, not content. Verify ALL of:
   up on the release tag, say so and stop — without it every accuracy audit silently degrades to
   reading the prototype, which is only a design reference (`00-playbook.md` §1). Do NOT start or stop
   the user's app stack yourself.
-- [ ] **Prototype reference** — confirm the v7 prototype is on disk at `PROTOTYPE_DIR`
-  (`/Users/brady.hunt/Downloads/Paddington UIUX - brady v7/`) for the `doc-demo` tickets that embed
-  a sanitized demo. Record the path for CONFIG.
+- [ ] **Prototype reference (optional)** — if `$PADDINGTON_DIR` is set and on disk, record it as
+  `PROTOTYPE_DIR` for CONFIG; it is the source for `doc-demo` tickets that embed a sanitized
+  Tier-3 demo. **If it is unset, this is not a failure** — note "Tier-3 prototype embeds
+  unavailable" and confirm the plan's demo budget only calls for Tier-1/2 artifacts plus any
+  Tier-3 embeds already published from this repo. A `doc-demo` ticket that needs a prototype we
+  don't have is a scope error to raise, not a reason to stop the loop.
 
 If any check fails, fix it BEFORE starting the loop.
 

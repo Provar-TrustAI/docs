@@ -26,13 +26,15 @@ The two costliest fix classes in this repo's history both start as an un-ported 
 
 ## Non-negotiable ground rules
 
-1. **Pin the truth first.** The local app clone's `main` is AHEAD of the release. Create a
+1. **Pin the truth first.** The local app clone's `main` is AHEAD of the release. Resolve
+   `APP_ROOT` and `WORKTREE_DIR` per `docs-plan/doc-kit/00-playbook.md` §0, then create a
    read-only worktree at the tag and audit only there:
    ```bash
-   git -C ~/Developer/trust-ai-app worktree add --detach \
-     ~/Developer/trust-ai-worktrees/docs-audit-<TAG> <TAG>
+   git -C "$APP_ROOT" fetch --tags
+   git -C "$APP_ROOT" worktree add --detach "$WORKTREE_DIR/docs-audit-<TAG>" <TAG>
    ```
-   Remove it when the run ends. Never verify a claim against the clone's main.
+   Remove it when the run ends (`git -C "$APP_ROOT" worktree remove "$WORKTREE_DIR/docs-audit-<TAG>"`).
+   Never verify a claim against the clone's main.
 2. **Release notes are canonical for WHAT changed; the worktree is canonical for exact labels,
    routes, and flag defaults.** When they disagree, the worktree wins and the disagreement is
    itself a finding (v2026.06.30.1: release notes said the TDM preview flag shipped default-on;
@@ -48,7 +50,8 @@ The two costliest fix classes in this repo's history both start as an un-ported 
 ### 1. Establish the delta
 
 - Docs' last-aligned version: top `<Update>` label in `changelog.mdx`.
-- App tags since: `git -C ~/Developer/trust-ai-app tag --sort=-creatordate`.
+- App tags since: `git -C "$APP_ROOT" tag --sort=-creatordate` (after `fetch --tags` — a stale
+  clone silently hides the newest releases).
 - Pull each intervening release's notes: `gh release view <TAG> --json body -q .body` (run in the
   app repo). Save to the session scratchpad — they seed every downstream prompt.
 - Pin the worktree at the NEWEST tag (rule 1).

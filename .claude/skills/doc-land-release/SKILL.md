@@ -99,7 +99,7 @@ A landed release advances `docs.provar.dev` to the new version and archives the 
 for this step; do not re-derive it. The shape (substitute `<OLD>` = the version currently at root,
 `<NEW>` = `RELEASE_TAG`):
 
-1. Branch `bradyhunt/dev-NNN-version-transition-<NEW>` off fresh `main`.
+1. Branch `$BRANCH_PREFIX/dev-NNN-version-transition-<NEW>` off fresh `main` (`00-playbook.md` §0).
 2. `cp -r concepts how-to tutorials v<OLD>/` (NOT `index/glossary/changelog` — version-agnostic;
    NOT `api-reference/openapi.json` — handled in step 4).
 3. Insert the `<Info>` archive banner into every `v<OLD>/**/*.mdx` (the python-regex bulk-insert in

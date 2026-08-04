@@ -38,8 +38,9 @@ document the app. (`docs-plan/doc-kit/00-playbook.md` §1.)
 4. **Verify the premise still holds.** `git fetch origin` and read the current page on `origin/$TRUNK`
    ($TRUNK is injected; defaults to `main`). An earlier PR may already cover part of this. If the work
    is already done, or the spec contradicts the app, STOP and report — do not ship a no-op.
-5. **Branch off `$TRUNK`.** Create a branch `bradyhunt/dev-<ID>-<slug>` forked from `origin/$TRUNK` (a
-   worktree, or a fresh checkout) so you carry prior merged pages/components.
+5. **Branch off `$TRUNK`.** Create a branch `$BRANCH_PREFIX/dev-<ID>-<slug>` forked from `origin/$TRUNK`
+   (a worktree, or a fresh checkout) so you carry prior merged pages/components. `$BRANCH_PREFIX` is
+   injected; resolve it per `docs-plan/doc-kit/00-playbook.md` §0 if it is not — never hardcode a name.
 6. **Write the page.** Match the surrounding pages' voice, density, and component use. Apply the
    Diataxis bar (tutorial runs end-to-end; how-to steps in task order; reference complete; concept
    correct). Use the Mintlify component vocabulary for Tier-1 richness (`<Frame>`, `<Tabs>`, `<Steps>`,

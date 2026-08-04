@@ -21,19 +21,22 @@ source of truth. `TRUNK` is the one seam: it defaults to `main` and is set to
 ## CONFIG — fill in before launch
 
 ```
-LINEAR_PROJECT_UUID  = 110bcc83-c4f1-4a4b-be41-db756ee9d6af   # Doc Driven Development — REQUIRED
-LINEAR_PROJECT_NAME  = Doc Driven Development
+LINEAR_PROJECT_UUID  = <<the active docs-alignment project for this cycle — REQUIRED; /doc-plan names it>>
+LINEAR_PROJECT_NAME  = <<its name, e.g. Docs alignment — v2026.08.03.2>>
 RELEASE_TAG          = <<the trust-ai-app release this run documents, e.g. v2026.06.09.1>>
 RELEASE_SLUG         = <<kebab-case of the tag, e.g. docs-v2026-06-09-1>>
 TRUNK                = <<worktrunk/docs-<RELEASE_SLUG> in release mode; defaults to main for an ad-hoc single-page build>>
 MILESTONE            = <<the Linear milestone this release's tickets belong to>>
 WAVE_MILESTONES      = <<map of wave number → milestone UUID; or "fetch via list_milestones at session start">>
-BRANCH_PREFIX        = bradyhunt/dev-
+BRANCH_PREFIX        = <<resolved per 00-playbook.md §0; e.g. cameronbell — NOT an author literal>>
 MINT_DEV_URL         = http://localhost:3333          # the long-lived `mint dev` instance serving origin/$TRUNK
 APP_CAPTURE_URL      = http://localhost:3000          # the running trust-ai-app on RELEASE_TAG (for accuracy/freshness audits + captures)
-PROTOTYPE_DIR        = /Users/brady.hunt/Downloads/Paddington UIUX - brady v7   # design reference + demo-embed source
+PROTOTYPE_DIR        = <<$PADDINGTON_DIR if set — design reference + Tier-3 demo-embed source; OPTIONAL, empty ⇒ no Tier-3 prototype embeds>>
 CADENCE              = 5m
 ```
+
+Resolve `BRANCH_PREFIX`, `APP_ROOT`, `WORKTREE_DIR`, and `PROTOTYPE_DIR` with the snippet in
+`00-playbook.md` §0 before launch. Never paste an absolute path or an author's name in here.
 
 Everything below is the prompt. It refers to the CONFIG values by name.
 
@@ -172,7 +175,7 @@ acceptance, source ADRs/PRs, demo tier). You do NOT need to open the wave plan s
 ## Orchestration interface
 
 - Worktree off $TRUNK: git fetch origin && git worktree add ../docs-<ID> origin/$TRUNK (or reuse the
-  repo on a fresh branch bradyhunt/dev-<ID>-<slug>). The branch MUST fork from $TRUNK so it carries
+  repo on a fresh branch $BRANCH_PREFIX/dev-<ID>-<slug>). The branch MUST fork from $TRUNK so it carries
   prior merged pages/components.
 - Verify the ticket premise against the shipped app on APP_CAPTURE_URL before writing — an earlier
   PR may already cover part of this, or the surface may have shipped differently than the ticket
