@@ -42,7 +42,7 @@ If anything is non-terminal or unmerged, the release is not converged. STOP — 
 
 ## 2. Confirm audit convergence — every page, every dimension
 
-The bar is **not "pages exist"** — it is **every page's six dimensions converged** (`doc-audit-parent`
+The bar is **not "pages exist"** — it is **every page's seven dimensions converged** (`doc-audit-parent`
 Done) plus each wave's `cross-surface-audit` converged. Read each `doc-audit-parent` for the release
 milestone: every one must show `Convergence: <clean / converged>`, not `pending` or `ESCALATED`. An
 `ESCALATED` parent (capped at 3 rounds with gaps still appearing) is a **stop** — resolve it with the

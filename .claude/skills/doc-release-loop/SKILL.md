@@ -22,9 +22,9 @@ The whole release lands on `main` exactly once, via `/doc-land-release`. See
 
 Most loop stalls trace to infrastructure, not content. Verify ALL of:
 
-- [ ] **Linear MCP** — `mcp__linear__list_issues` with the project UUID
-  (`110bcc83-c4f1-4a4b-be41-db756ee9d6af`) returns tickets, not an empty list. An empty list means
-  you passed the slug not the UUID, or auth is stale — reauthenticate.
+- [ ] **Linear MCP** — `mcp__linear__list_issues` with the cycle's project UUID (the one `/doc-plan`
+  named; never the URL slug) returns tickets, not an empty list. An empty list means you passed the
+  slug, used a stale project, or auth expired — reauthenticate.
 - [ ] **GitHub auth** — `gh auth status` clean; branch permissions let the loop open and auto-merge
   PRs on `Provar-TrustAI/docs`.
 - [ ] **Mintlify preview** — the repo's Mintlify dashboard builds previews on PRs and they go green

@@ -12,8 +12,9 @@ first.
 
 ## Inputs
 
-- The plan documents on the **Doc Driven Development** project (produced by `/doc-plan`).
-- The Linear project UUID: `110bcc83-c4f1-4a4b-be41-db756ee9d6af`.
+- The plan documents produced by `/doc-plan`, on **this cycle's** Linear project.
+- That project's UUID — read it from the plan, never hardcode one. Each catch-up cycle gets its own
+  project; the original charter project was canceled 2026-07-15.
 
 ## Steps
 
