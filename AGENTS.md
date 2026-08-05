@@ -237,6 +237,22 @@ is pinned here so drafts and the eventual flip are consistent; the pages stay ou
   - **Requirements** — `enable_requirements` off in every environment; the router 404s and the
     sidebar row is hidden. Not documented this cycle.
   - `/v1/connect/environments*` are TDM-gated and must not be presented as generally available.
+
+  > [!WARNING]
+  > **The dev instance you drive runs preview flags ON. Production runs them OFF.**
+  >
+  > The local app for this cycle sets `ENABLE_TDM=true`, `VITE_TDM_PREVIEW=true`, and
+  > `ENABLE_REQUIREMENTS=true`, deliberately — you cannot verify a claim about a surface you
+  > cannot see, and the Requirements and Test Data drafts need driving.
+  >
+  > So **Requirements and Test Data will look like ordinary, working surfaces to you.** They are
+  > not. The sidebar row, the Test Data tab, the Environments screens, and the extra API routes
+  > are all invisible to every customer.
+  >
+  > **Seeing a surface work on your instance is not evidence that it ships.** Flag state is
+  > established from the tagged code and the production values files, never from the app in front
+  > of you. This applies with equal force to an `accuracy` audit: an auditor driving the dev app
+  > will find GA-voiced prose about Requirements perfectly accurate, and be wrong.
 - **Cookie-authenticated external MCP connection is internal only** — not a supported customer path.
   Do not present it as one. The engineering notes at `docs/eng/mcp-clients/README.md` are vestigial
   and are **not** a source.
