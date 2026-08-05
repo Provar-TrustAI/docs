@@ -4,6 +4,106 @@ icon: "history"
 description: "Trust AI release notes."
 ---
 
+<Update label="v2026.08.03.2 — August 2026">
+  A same-day follow-up to v2026.08.03.1, and entirely repairs — no new capability. All three user-facing fixes are on the Salesforce Agentforce path, and they share one shape: Salesforce was behaving correctly and TrustAI was misreporting it.
+
+  **A connection that succeeded no longer reports failure.** Connecting a Salesforce org could complete on the Salesforce side and still surface as an error. The connect result now reflects what actually happened.
+
+  **An inactive agent says so, at the right moment.** When a Salesforce agent exists but has not been activated, the connect step now explains that specifically — sign-in worked, the agent is not turned on — and points you to Agentforce Builder to activate it. The run-time message for the same condition stays separate, because the next thing you do differs.
+
+  **Evidence attribution is correct.** Turn-level evidence captured during a run is attributed to the turn that produced it.
+</Update>
+
+<Update label="v2026.08.03.1 — August 2026">
+  Salesforce runs now grade on evidence captured while the turn is happening.
+
+  **Evidence is captured in-turn, not polled after.** TrustAI used to drive a Salesforce conversation and then poll an eventually-consistent trace export to learn what the agent did — so you could finish a run and still not know whether your agent called the right actions. The runtime now reads the planner's own account of each turn as the turn completes, and grading uses that. The OpenTelemetry session trace still publishes on Salesforce's own schedule (typically ~11–13 minutes after a session ends) and remains available for deeper inspection; a banner tells you when it has not landed yet rather than showing you a blank.
+
+  **The Groundedness judge takes its final name.** The claim-grading judge introduced in v2026.07.26.1 is now called **Groundedness**, and its result chip reads *N% grounded*. See [Evaluators](/concepts/evaluators).
+</Update>
+
+<Update label="v2026.07.26.1 — July 2026">
+  **Grade answers against the material they should have come from.** A new **Groundedness judge** checks whether an agent's factual claims are supported by source material you supply. Attach the articles, policies, or knowledge a scenario should be answered from as **Reference material** on that scenario's Expected Output — up to five documents — and every factual claim in the agent's replies is graded against them.
+
+  Each supported claim carries a verbatim quote that the system verifies against the document, so the evidence is checkable rather than asserted. Claims are labeled **Supported**, **Contradicted**, **Unsupported**, **Unknown**, or **Conversational**, and a reviewer can override any per-claim verdict with a note — the score recomputes. Grading is strict: a single unsupported factual claim fails the check.
+
+  The judge does not penalise omissions, tone, style, or formatting — it answers one question, whether what the agent said is backed by what you gave it. See [Evaluators](/concepts/evaluators).
+</Update>
+
+<Update label="v2026.07.23.1 — July 2026">
+  Identity-infrastructure work with no change to what you see or do. TrustAI gained the ability to run its member roster, invitations, and organization claims on a self-hosted identity provider, for deployments that require one. Commercial workspaces continue on the existing provider, and every access surface — Members, Teams, Project access — behaves identically.
+</Update>
+
+<Update label="v2026.07.22.1 — July 2026">
+  Internal evaluation-harness work with no customer-facing surface. TrustAI gained the ability to evaluate its own agent through the same evaluation path customers use, which keeps the product honest about its own quality. Nothing in this release changes the product you interact with.
+</Update>
+
+<Update label="v2026.07.18.1 — July 2026">
+  **Connect and evaluate a live Salesforce Agentforce agent — without handing over a secret.**
+
+  Connecting an Agentforce org is now a two-step authorization: give TrustAI your org URL, authorize once in Salesforce as an administrator, then pick the agent and the user it should run as. TrustAI creates and manages the org-side application itself; there is no consumer key, certificate, or password to generate and paste. The older key, certificate, and password sign-in methods remain available for connections that already use them.
+
+  The whole flow also runs from the [Trust Agent](/concepts/trust-agent) conversation — ask it to connect your Agentforce agent and it walks you through authorization in a secure in-chat card, then confirms what it connected.
+
+  Once connected, an Agentforce agent is an ordinary evaluation target: simulate scenarios against it, grade the conversations it has, and review the results alongside every other platform. See [Agent Versions](/concepts/agent-versions).
+</Update>
+
+<Update label="v2026.07.16.1 — July 2026">
+  **Agent Profile: see what a connected agent can actually do.**
+
+  TrustAI now captures a connected agent's real capabilities — its tools with their exact input schemas, its knowledge sources, and where each fact was observed — into a versioned, human-reviewable profile. A profile belongs to one agent version, so it is a record of what that build could do, not a moving picture.
+
+  Open it from the Playground topbar or a connection's **Current agent version** row. Discovery coverage reads **Captured**, **Partial**, or **Limited** per dimension, and every source reports its own state — **Available**, **Not exposed**, **Not sampled**, or **Not run** — so an absence is always named rather than silently blank. Where the automatic capture is wrong or incomplete, correct it with an overlay that survives regeneration, then record **Approve** or **Request changes** against that revision.
+
+  Capability discovery currently reaches Conversational HTTP, Claude Managed Agent, and Salesforce Agentforce connections. Others report that profiling is not available for them yet.
+
+  A pinned profile also grounds the Trust Agent: when it drafts expected output for a scenario, the tools it can reference are the ones your agent actually has.
+</Update>
+
+<Update label="v2026.07.15.1 — July 2026">
+  A reliability and honesty release.
+
+  **The Trust Agent no longer goes silent.** When a model call fails mid-turn, the conversation now shows a plain-language error and a way forward instead of dead air. An interrupted reply offers **Continue**; a conversation that cannot be loaded offers **Retry**.
+
+  **Results distinguish "not evaluated" from "not graded."** A scenario nothing has run against reads **Not evaluated**. A run that produced evidence but no behavioural score reads **Not graded**. Two different situations, two different labels — where before both could read as a gap in your coverage. See [Evaluations](/concepts/evaluations).
+</Update>
+
+<Update label="v2026.07.13.1 — July 2026">
+  A platform-and-security release.
+
+  **Role enforcement is real across every project surface.** Permissions are now checked consistently wherever project data is read or written, and four read paths that returned more than they should have were closed — including one that let a member of one workspace see another's agents, and a usage summary that is now restricted to workspace owners and admins.
+
+  **Project lifecycle is owner-only.** Renaming, archiving, and deleting a project is restricted to the person who created it. A workspace owner or admin without an explicit grant on that project is also denied — the gate is stricter than "not ordinary members."
+
+  **A cross-tenant hazard was removed.** An organization mismatch on an otherwise valid grant used to reconcile itself by moving the project. It is now cleanly denied and nothing is moved. See [Multi-tenancy](/concepts/multi-tenancy).
+
+  **The agent service sits behind authentication.** Requests to the agent runtime are authenticated at the boundary rather than trusted by network position.
+</Update>
+
+<Update label="v2026.07.08.2 — July 2026">
+  A deploy hotfix over v2026.07.08.1, with no product change. A database migration could fail on an environment that had already applied part of it; it is now safe to re-run. Everything else in this release is identical to v2026.07.08.1.
+</Update>
+
+<Update label="v2026.07.08.1 — July 2026">
+  A large release with two independent headlines: the Trust Agent becomes something you can connect, watch, and improve from inside the conversation, and evaluation authoring moves further into plain language.
+
+  **Connect an agent from inside the chat.** Ask the [Trust Agent](/concepts/trust-agent) to connect your agent and it handles the whole exchange in a secure in-chat card — credentials are write-only and never read back. Once connected, a **Connected agent** card sits at the top of the conversation's Context rail with a live health state: **Not checked**, **Healthy**, **Degraded**, or **Unreachable**.
+
+  **Skills: reusable recipes the agent can run.** The Trust Agent's repeatable procedures are now visible and editable. Built-in skills ship with the product and are read-only; workspace skills are authored by your admins and available to everyone in the workspace. When the agent uses one, the transcript shows a receipt naming the skill, so you can see which recipe produced a result. Skills live in Workspace Settings.
+
+  **The Trust Agent can author expected output.** Ask it to write a scenario's grading contract and it proposes one in plain English — what the agent must do and must never do — for your approval before anything saves. Expected actions are checked against the tools your connected agent actually has, so it cannot invent a capability.
+
+  **Human-in-the-loop approvals become durable.** An approval you were asked for survives reload and disconnect, and comes back answerable. You can also grant a **standing approval** for a kind of action for the rest of a conversation, and turn it off at any time from the chip in the transcript. Irreversible deletes are always excluded. See [Approve agent writes](/how-to/approve-agent-writes).
+
+  **Usage caps for pilot workspaces.** Workspaces on a credit pool can see what they have used against it in Workspace Settings → **Credits**, with a breakdown of where the credits went. The pool resets monthly. When a workspace reaches its limit, runs are blocked with a clear message rather than failing obscurely.
+
+  **Scenarios absorb the last of the dataset container.** The legacy `/v1/datasets` API is retired; scenarios carry their own columns, rows, tag vocabulary, and CSV import and export directly. See [Scenarios](/concepts/scenarios).
+
+  **Preview — Requirements.** Business-language requirements that link to the scenarios and evaluators proving them, with a coverage rollup. This is behind a flag and off in every environment, including production — it is not reachable yet. It is noted here so the vocabulary is stable when it ships.
+
+  **Preview — Test Data Management.** The state-grounded evaluation track continued, still behind a preview flag and off by default in production.
+</Update>
+
 <Update label="v2026.06.30.1 — June 2026">
   The headline of this release: the evaluation product is re-rooted on a flat, first-class **Scenario**. Around it land a Trust Library so new projects don't start from a blank slate, no-code evaluator tailoring, a guided Trust Agent cold start, an overhauled Sessions review surface, and a Test Data Management preview.
 
@@ -15,7 +115,7 @@ description: "Trust AI release notes."
 
   **Grade sessions in place.** Reviewers get typed [annotation columns](/concepts/annotations) on Sessions — pass/fail verdict, severity, score, tags, and reviewer notes — editable inline in the table or in the fly-in. A person's verdict is the ground truth that evaluator accuracy is measured against; it never overrides the automated verdict.
 
-  **Trust Library.** Adopt 12 recommended evaluators (six Quality, six Safety, each a plain-language judge with a provenance chip) and 10 starter safety scenarios mapped to the OWASP Agentic AI Top 10 — in one move, from the [Evaluators](/concepts/evaluators) library or a cold-start empty state. Everything adopted is an ordinary, fully editable object.
+  **Trust Library.** Adopt 12 recommended evaluators (six Quality, six Safety, each a plain-language judge with a provenance chip) and 10 starter safety scenarios mapped to the OWASP Agentic AI Top 10 — in one move, from the [Evaluators](/concepts/evaluators) library or a cold-start empty state. Everything adopted is an ordinary, fully editable object. *(Superseded: the recommended catalog is now 11 evaluators — 5 Quality and 6 Safety. "Answer is grounded" was withdrawn, since as a plain judge it was never handed the source material it claimed to check; the [Groundedness judge](/concepts/evaluators) added in v2026.07.26.1 does that job properly. A couple of presets score on a 1–5 scale rather than pass/fail.)*
 
   **Define pass and fail in plain language.** LLM-judge evaluators gain a **Passes when / Fails when** rubric editor — short sentences instead of judge prompts, quietly assembled back into the exact criteria the live judge uses so verdicts never shift — and a **Tailor with AI** box drafts the rules from a one-line goal plus a description of your agent, for you to review before anything saves.
 
@@ -43,7 +143,7 @@ description: "Trust AI release notes."
 
   **Access Center: no-code workspace administration.** Owners and admins invite members and manage the full invite lifecycle, group people into teams, grant per-project **Viewer**/**Editor** access directly or through a team, and audit who-can-reach-what with plain-language provenance. Underneath, a single FedRAMP-ready authorization engine now governs every access decision and writes each one to a durable, append-only audit trail. See [Multi-tenancy](/concepts/multi-tenancy).
 
-  **Salesforce Agentforce connector.** Connect an Agentforce org with JWT-bearer credentials from Settings and drive a live agent through evaluations.
+  **Salesforce Agentforce connector.** Connect an Agentforce org with JWT-bearer credentials from Settings and drive a live agent through evaluations. *(Superseded in v2026.07.18.1: new Agentforce connections are made by authorizing TrustAI once as a Salesforce administrator — no certificate to generate or hand over. The certificate path remains only for connections that already use it.)*
 
   **Data-table power features.** Drag columns into your own order (remembered per [saved view](/concepts/saved-views)), shift-click to select a whole range of rows, and a single unified column menu replaces the duplicate gear icons — across Sessions, scenario detail, and run detail tables.
 
