@@ -2,7 +2,7 @@
 
 The reusable **PLAN → SYNC → BUILD-LOOP → AUDIT → LAND** machinery that ports each Trust AI
 release into `docs.provar.dev`. It is a direct adaptation of the trust-ai-app **UI Build Kit**
-(`trust-ai-app/docs/eng/ui-build-kit/`) for Mintlify documentation. Read this first; it is the
+(`$APP_ROOT/docs/eng/ui-build-kit/`, §0) for Mintlify documentation. Read this first; it is the
 map. Every skill and agent below reads back to one of the model docs this file points at.
 
 We ship a release every 1–2 weeks. Doc Kit exists so that catching the docs up is an
@@ -19,6 +19,42 @@ accurate, and interactive without bloating.
 | AUDIT | `/doc-validate` | Read-only audit primitive. Six dimensions, each checked against the **shipped app**. Runs inside the loop (one dimension per ticket) and by hand (all six + report). |
 | LAND | `/doc-land-release` | The rigorous gate the release worktrunk passes through onto `main`, then the **version-transition** archive, then a reflection that feeds the harness forward. |
 
+## §0. Path resolution — never hardcode a checkout
+
+Doc Kit runs on whoever's machine is driving the loop. **No skill, agent, or runbook may hardcode
+an absolute path or an author's branch prefix.** Resolve these once, at the start of a run, and
+refer to them by name everywhere else:
+
+| Var | Resolution |
+|---|---|
+| `DOCS_ROOT` | `git rev-parse --show-toplevel` from inside the docs repo |
+| `APP_ROOT` | `$TRUSTAI_APP_ROOT`, else the first existing of `$DOCS_ROOT/../trustai-app`, `$DOCS_ROOT/../trust-ai-app`, `~/Developer/trust-ai-app` |
+| `WORKTREE_DIR` | `$TRUSTAI_WORKTREES`, else `$(dirname "$APP_ROOT")/.doc-audit-worktrees` |
+| `BRANCH_PREFIX` | `$DOC_BRANCH_PREFIX`, else derived from `git config user.email` — **fails loudly if neither resolves** |
+| `PROTOTYPE_DIR` | `$PADDINGTON_DIR` — **optional**. Unset ⇒ Tier-3 prototype embeds are unavailable and the demo budget plans Tier-1/2 only (§3) |
+
+```bash
+DOCS_ROOT=$(git rev-parse --show-toplevel)
+APP_ROOT="${TRUSTAI_APP_ROOT:-}"
+if [ -z "$APP_ROOT" ]; then
+  for _c in "$DOCS_ROOT/../trustai-app" "$DOCS_ROOT/../trust-ai-app" "$HOME/Developer/trust-ai-app"; do
+    [ -d "$_c/.git" ] && APP_ROOT=$(cd "$_c" && pwd) && break
+  done
+fi
+[ -n "$APP_ROOT" ] || { echo "APP_ROOT unresolved — set TRUSTAI_APP_ROOT"; exit 1; }
+WORKTREE_DIR="${TRUSTAI_WORKTREES:-$(dirname "$APP_ROOT")/.doc-audit-worktrees}"
+BRANCH_PREFIX="${DOC_BRANCH_PREFIX:-$(git config user.email | cut -d@ -f1 | tr -d '.')}"
+[ -n "$BRANCH_PREFIX" ] || { echo "BRANCH_PREFIX unresolved — set DOC_BRANCH_PREFIX or git config user.email"; exit 1; }
+PROTOTYPE_DIR="${PADDINGTON_DIR:-}"   # optional
+```
+
+The `BRANCH_PREFIX` guard is not paranoia: git identity is configured **per-repo** on some
+machines, so a fresh docs clone has no `user.email` and the naive derivation silently yields an
+empty prefix — every branch then lands as `/dev-<ID>-<slug>`.
+
+**Branch convention:** `$BRANCH_PREFIX/dev-<ID>-<slug>`, matching the org-wide
+`<user>/<linear-ticket>-<slug>` rule.
+
 ## §1. The source-of-truth hierarchy — the one conceptual seam
 
 The UI Build Kit's axiom is "the shipped UI must match the design prototype (`docs/design/_source`)."
@@ -28,13 +64,13 @@ is only a design reference. Authority order, highest first:
 1. **The shipped app.** trust-ai-app running on the release tag. The `accuracy` audit *drives the
    real app* and any doc claim the app contradicts is a blocker. This is the analog of "render
    the prototype" — except here we render the truth, not the design.
-2. **The release notes + ADRs** (`trust-ai-app/docs/decisions/` — 17+ ADRs are canonical for the
+2. **The release notes + ADRs** (`$APP_ROOT/docs/decisions/` — 17+ ADRs are canonical for the
    *why*; the GitHub release notes are canonical for *what changed*).
 3. **The OpenAPI snapshot** (`api-reference/openapi.json`, pinned per version) — reference truth.
-4. **The Paddington v7 prototype** (`/Users/brady.hunt/Downloads/Paddington UIUX - brady v7/`) —
-   design reference only. It is the source for **interactive demo embeds** (§3), never for a
-   behavioral claim. When the prototype and the shipped app disagree, the app wins and the doc
-   describes the app.
+4. **The Paddington v7 prototype** (`$PROTOTYPE_DIR`, §0) — design reference only, and **optional**:
+   when it is unset the kit simply has no Tier-3 prototype source and plans around that. It is the
+   source for **interactive demo embeds** (§3), never for a behavioral claim. When the prototype and
+   the shipped app disagree, the app wins and the doc describes the app.
 
 **Empowerment.** The goal is not "every ticket closed" — it is **"every page describes the
 shipped app correctly, completely, and legibly, and renders clean."** Tickets are a means. When
@@ -125,10 +161,13 @@ step in for a genuine product-intent ambiguity the release notes don't resolve �
 
 - **Prose/planning narrative → Linear documents** (the plan is a Linear document, never committed).
 - **The pages → the docs repo** (`concepts/`, `tutorials/`, `how-to/`, `api-reference/`).
-- **Tickets → Linear** (the "Doc Driven Development" project, `110bcc83-c4f1-4a4b-be41-db756ee9d6af`).
+- **Tickets → Linear**, in the **active docs-alignment project** on the DEV team. Each catch-up
+  cycle gets its own project; `/doc-plan` names the one it persisted to and every downstream skill
+  reads it from there. (The original charter project, "Doc Driven Development"
+  `110bcc83-c4f1-4a4b-be41-db756ee9d6af`, was canceled 2026-07-15 — history, not a destination.)
 - **The release↔worktrunk link → the milestone description** (`Worktrunk:` line; `release-worktrunk-model.md`).
 - **Interactive demo assets → `/images` (Tier 1–2) or a sanitized static asset (Tier 3)**; the
-  prototype source stays in Downloads, never committed raw.
+  prototype source stays outside the repo (`$PROTOTYPE_DIR`), never committed raw.
 
 ## §8. Reuse — what already exists, do not rebuild
 
@@ -139,8 +178,8 @@ step in for a genuine product-intent ambiguity the release notes don't resolve �
 | Version archive on land | `docs-plan/runbooks/version-transition.md` (folded into `/doc-land-release`) |
 | Local preview / link check | `npx mintlify dev --port 3333` ; `mint broken-links` |
 | Archive tab pattern | the `docs.json` `navigation.tabs[]` + `.mintignore` `v2026.*/` convention |
-| Ticket tracking | the "Doc Driven Development" Linear project + DEV team |
-| Loop discipline | branch `bradyhunt/dev-NNNN-slug`; **never `--delete-branch` on merge** (Mintlify preview race); isolated worktree per concurrent agent; skipped Mintlify previews → local-merge validation gate (see `/doc-release-align` operational lessons) |
+| Ticket tracking | the active docs-alignment Linear project + DEV team (§7) |
+| Loop discipline | branch `$BRANCH_PREFIX/dev-NNNN-slug` (§0); **never `--delete-branch` on merge** (Mintlify preview race); isolated worktree per concurrent agent; skipped Mintlify previews → local-merge validation gate (see `/doc-release-align` operational lessons) |
 | Release-notes → impact map + mechanical port | `/doc-release-align` (front half of PLAN; harvested from the v2026.06.30.1 loop) |
 | OpenAPI re-pin + sanitization | `/doc-openapi-sanitize` → `docs-plan/doc-kit/openapi-sanitize.py` |
 | Vocabulary law enforcement | `/doc-terminology-guard` (landing gate + post-rename sweep) |

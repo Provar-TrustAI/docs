@@ -25,7 +25,7 @@ eventually gets skipped or done inconsistently — so the policy lives in
 3. **Run it** from the docs repo root, archiving the outgoing pin beside the existing archives:
    ```bash
    python3 docs-plan/doc-kit/openapi-sanitize.py \
-     --source ~/Developer/trust-ai-worktrees/docs-audit-<TAG>/services/api/openapi.json \
+     --source "$WORKTREE_DIR/docs-audit-<TAG>/services/api/openapi.json" \
      --version <TAG-without-v> \
      --archive-current api-reference/archive/v<OLD_VERSION>.json \
      --extra-exclude '<flag-gated-path-regex>'

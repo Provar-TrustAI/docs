@@ -31,7 +31,7 @@ the fast lane. Two tiers:
 
 | Tier | PR | Gate | Merge |
 |---|---|---|---|
-| **Page PR** | `bradyhunt/dev-<ID>-<slug> → worktrunk/docs-<slug>` | fast: `mint broken-links` on the touched files + a clean Mintlify preview build for the branch | `gh pr merge --auto --merge` (no `--delete-branch`) |
+| **Page PR** | `$BRANCH_PREFIX/dev-<ID>-<slug> → worktrunk/docs-<slug>` | fast: `mint broken-links` on the touched files + a clean Mintlify preview build for the branch | `gh pr merge --auto --merge` (no `--delete-branch`) |
 | **Landing PR** | `worktrunk/docs-<slug> → main` | full: whole-site `mint broken-links` + full Mintlify **production** preview + final accuracy/completeness sweep | `gh pr merge --merge` (merge-commit, preserves page history) |
 
 The landing PR is the first time the *whole* release meets the full site as one unit. A failure there

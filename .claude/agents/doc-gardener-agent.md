@@ -50,7 +50,7 @@ Your dispatch prompt says which:
 
 ## Shipping (fix mode)
 
-One small PR: branch `bradyhunt/gardener-<slug>`, `mint broken-links` clean, commit message
+One small PR: branch `$BRANCH_PREFIX/gardener-<slug>` (`00-playbook.md` §0), `mint broken-links` clean, commit message
 `docs(gardener): <what>` with the Co-Authored-By trailer, `gh pr create`, **never
 `--delete-branch`** on any merge. Report: findings table (hit → classification → action), PR URL,
 and anything you deliberately left (with why).

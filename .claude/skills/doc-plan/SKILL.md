@@ -22,14 +22,14 @@ summary so `/doc-linear-sync` can record the branch↔release link. See
 
 - A release exists with notes (`gh release view <tag> --repo Provar-TrustAI/trustai-app`).
 - A Linear project for docs exists — **Doc Driven Development** (`110bcc83-c4f1-4a4b-be41-db756ee9d6af`).
-- Read access to the shipped app source (`trust-ai-app/docs/decisions/` ADRs, the running app).
+- Read access to the shipped app source (`$APP_ROOT/docs/decisions/` ADRs, the running app).
 
 ## Steps
 
 ### 1. Release intake
 
 Read the release notes end-to-end (`gh release view <tag> --repo Provar-TrustAI/trustai-app`).
-Pull the canonical *why* from the ADRs it references (`trust-ai-app/docs/decisions/`). List every
+Pull the canonical *why* from the ADRs it references (`$APP_ROOT/docs/decisions/`). List every
 **user-facing surface or capability** the release adds or changes — this is the raw material. Note
 which are customer-facing (concept/tutorial/how-to shaped) versus admin/ops-facing
 (reference-shaped). The release notes + ADRs + the **shipped app** are the source of truth
