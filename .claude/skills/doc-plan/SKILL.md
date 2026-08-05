@@ -21,7 +21,9 @@ summary so `/doc-linear-sync` can record the branch↔release link. See
 ## Prerequisites
 
 - A release exists with notes (`gh release view <tag> --repo Provar-TrustAI/trustai-app`).
-- A Linear project for docs exists — **Doc Driven Development** (`110bcc83-c4f1-4a4b-be41-db756ee9d6af`).
+- A Linear project exists for **this catch-up cycle** on the DEV team. Each cycle gets its own
+  project; `/doc-plan` names the one it persists to, and every downstream skill reads it from there.
+  (The original charter project, "Doc Driven Development", was canceled 2026-07-15 — do not use it.)
 - Read access to the shipped app source (`$APP_ROOT/docs/decisions/` ADRs, the running app).
 
 ## Steps

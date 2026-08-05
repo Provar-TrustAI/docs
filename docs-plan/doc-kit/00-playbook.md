@@ -16,7 +16,7 @@ accurate, and interactive without bloating.
 | PLAN | `/doc-plan` | **Interactive.** Derive the doc **surfaces** a release needs (pages to create/update), map each to a Diataxis type, decompose into waves, set the **demo budget**, compose the ticket roster. Persist the plan as Linear documents. |
 | SYNC | `/doc-linear-sync` | Idempotent. Turn the approved plan into Linear tickets: page tickets, demo-asset tickets, per-page audit parents + round-1 dimension audits, wave-convergence gates. |
 | BUILD | `/doc-release-loop` → `doc-orchestrator-prompt.md` | Preflight + launch the autonomous loop. The orchestrator polls Linear, dispatches subagents, reconciles PRs, runs multi-round audit convergence. |
-| AUDIT | `/doc-validate` | Read-only audit primitive. Six dimensions, each checked against the **shipped app**. Runs inside the loop (one dimension per ticket) and by hand (all six + report). |
+| AUDIT | `/doc-validate` | Read-only audit primitive. **Seven** dimensions (§5), each checked against the **shipped app**. Runs inside the loop (one dimension per ticket) and by hand (all seven + report). |
 | LAND | `/doc-land-release` | The rigorous gate the release worktrunk passes through onto `main`, then the **version-transition** archive, then a reflection that feeds the harness forward. |
 
 ## §0. Path resolution — never hardcode a checkout
