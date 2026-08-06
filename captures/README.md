@@ -34,7 +34,28 @@ pnpm capture:evaluations
 pnpm capture:evaluators
 pnpm capture:welcome
 pnpm capture:sidebar
+pnpm capture:trust-agent   # slow: drives real agent turns, see below
 ```
+
+## One capture drives the product instead of screenshotting it
+
+`scripts/trust-agent-surface.ts` is the odd one out. The Trust Agent's transcript,
+tool-call cards, side rail and permission cards do not exist until a real conversation
+produces them, so that script sends prompts and waits for turns. Consequences:
+
+- **It is slow and not byte-reproducible.** A turn is upstream model time (20-120s) and
+  the agent's wording differs between runs. Budget minutes, and re-run if a reply comes
+  back badly worded.
+- **`settle()` is not enough.** A network-idle agent surface is usually one that has not
+  started streaming. Use that script's `waitForTurn()`, which waits for the typing
+  indicator to appear *and* go away.
+- **Never reuse a chat from the Recent chats rail.** It is capped at five entries and
+  other sessions push yours off it, so "click the chat I made" silently clicks somebody
+  else's. Each test starts its own chat.
+- **Clean up what a previous run created.** The write capture asks the agent to create a
+  named evaluator. Run it twice without deleting the first one and the agent correctly
+  refuses with a question card instead of a write gate — a valid, useless screenshot.
+  `dropEvaluator()` handles it.
 
 ## Two traps this harness is built around
 

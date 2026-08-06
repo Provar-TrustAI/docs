@@ -8,7 +8,8 @@
     "capture:evaluations": "npx playwright test evaluations-results-matrix",
     "capture:evaluators": "npx playwright test evaluators-create-flow",
     "capture:welcome": "npx playwright test welcome-surface",
-    "capture:sidebar": "npx playwright test sidebar-navigation"
+    "capture:sidebar": "npx playwright test sidebar-navigation",
+    "capture:trust-agent": "npx playwright test trust-agent-surface"
   },
   "devDependencies": {
     "@playwright/test": "^1.50.0",
