@@ -78,7 +78,7 @@ The Salesforce connection form asks for your org URL and then offers a single ac
   Connect a Salesforce Sandbox, not production. Approving Trust AI sets up a connected app in whichever org the admin signs in to — the form says so on the way past.
 </Warning>
 
-The create form offers no other sign-in method. **App key & secret**, **Certificate (JWT)**, and **Username & password** are legacy paths kept alive for connections that already use them: they surface only when you edit such a connection. Don't plan a new Salesforce connection around them.
+The create form offers no other sign-in method. A **Sign-in method** picker appears only on the *edit* form — and it appears there for every Salesforce connection, including one you created by admin authorization. Alongside **Authorize TrustAI as an admin (recommended)** it lists three legacy paths kept alive for setups that already use them: **External Client App key + secret (legacy)**, **Certificate-based JWT (legacy)**, and **Username + password (legacy)**. Seeing them on a connection you authorized as an admin is not an invitation to switch: don't plan a new Salesforce connection around them.
 
 If a connection saves before an agent has been chosen, the Trust Agent opens an in-chat agent picker so you pick yours by name.
 
@@ -94,7 +94,7 @@ When you connect an org that your workspace already reached in another Project, 
 - **Sign-in** — **Admin authorization**, **App key & secret**, **Certificate (JWT)**, or **Username & password**
 - Its connection status, and **Disconnect** or **Delete**
 
-**Disconnect** tears down the External Client App Trust AI deployed in the org, so it's offered only for connections Trust AI provisioned. A connection wired to an app your admin created offers **Delete** only.
+**Disconnect** tears down the External Client App Trust AI deployed in the org, so it's offered only for connections Trust AI provisioned. A connection wired to an app your admin created offers **Delete** only. Both act on the org, not on one Project: each removes the connection from every Project listed under **Used by**. **Delete** leaves the org-side app in place so you can reconnect later; **Disconnect** does not.
 
 Both the reuse offer and the workspace list respect your access: you see only the Projects you can reach, and reuse candidates only for a Project you could edit.
 
@@ -109,7 +109,9 @@ Access has two layers.
 
 Project **Owner** is conferred when a Project is created. It is not a grantable tier and it does not transfer.
 
-The Project boundary holds for administrators too: a workspace admin who isn't a member of a Project doesn't automatically see its contents. Content access resolves against the Project's own grants.
+The Project boundary holds for **Admins** too: a workspace Admin who isn't a member of a Project doesn't automatically see its contents. Content access resolves against the Project's own grants. Managing access is a separate power from having it: an Admin can grant access to any Project in the workspace, including to themselves, but until that grant exists the Project's contents stay closed to them.
+
+The workspace **Owner** is the exception, and it is the only one. The Owner reaches every Project in the workspace — view, edit, delete, and run — without holding a grant on any of them. Read the boundary as "everyone but the Owner".
 
 ## Importing sessions
 
