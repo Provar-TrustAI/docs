@@ -57,6 +57,29 @@ spinner over an empty table reading "0 sessions" while the nav said 10.
 `settle()` waits for network idle, for spinners to disappear, and briefly for layout to stop
 shifting. `assertTableHasRows(page, n)` additionally proves the table holds real rows.
 
+## The fixture is not self-sufficient — populate it first
+
+`acme-refunds-csat` seeds sessions richly and everything else thinly. Before a
+capture pass, populate what your surface needs through the API:
+
+- **Personas** — the seed creates none. `POST /v1/projects/:id/personas`.
+- **Scenarios** — 9 of 10 seed as empty shells (`name: null`). PATCH
+  `/v1/scenarios/:id` with a name, goal, persona_ids and tags, or every
+  Scenarios screenshot reads "Add name…".
+- **Annotation values** — the columns exist but hold nothing. PUT
+  `/v1/sessions/:id/annotations/{verdict,severity,reviewer_note}`.
+- **Scenario verdicts** — PUT `/v1/scenarios/:id/annotations/verdict`.
+
+A screenshot of an unpopulated surface is technically valid and useless. This
+has now wasted three separate capture attempts.
+
+## Watch for horizontal scroll
+
+Showing extra columns pushes a wide table into horizontal scroll, and the shot
+silently loses its leftmost column — usually the id a reader needs to orient.
+Hide the columns your fixture has no data for, then assert `scrollLeft === 0`
+before shooting. `scripts/sessions-annotations.ts` does both.
+
 ## Verify by looking
 
 **Open every screenshot before committing it.** Exit code is not evidence — every failure mode

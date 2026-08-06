@@ -38,7 +38,9 @@ Annotating is hands-on judgment work — you do it directly on the Sessions surf
 
     Editing a cell and opening a row are distinct gestures: clicking inside the Verdict toggle never opens the fly-in, and clicking anywhere else on the row never edits a cell. A reviewer can sweep straight down the column without a panel ever opening.
 
-    {/* CAPTURE-PENDING: sessions-inline-verdict still — the Sessions table with a few Verdict cells set, one toggle mid-hover */}
+    <Frame caption="Verdict and Severity edited in place, with the rows staying closed.">
+      <img src="/images/sessions-inline-verdict.png" alt="The Sessions table with the Verdict and Severity columns shown, several rows carrying Pass or Fail verdicts and minor / major / blocker severity chips." />
+    </Frame>
 
     **You should see:** the cell paint your choice in place, with the row staying closed.
   </Step>
@@ -60,7 +62,9 @@ Annotating is hands-on judgment work — you do it directly on the Sessions surf
 
     **One exception, and it bites exactly where this recipe lands you: the shortcuts stand down while your cursor is in a field.** With focus inside the **Reviewer note** box — where you just finished typing — <kbd>J</kbd> and <kbd>K</kbd> are plain letters and get typed into the note instead of moving the panel. Take focus out of the box first: click anywhere else in the panel, or press <kbd>Tab</kbd>. Either gesture also flushes the note, so nothing you wrote is lost. The same guard covers <kbd>F</kbd> (fullscreen) and every text input on the surface.
 
-    {/* CAPTURE-PENDING: session-fly-in-annotations still — the fly-in's Annotations tab showing the Verdict buttons, Severity chips, and a Reviewer note in progress */}
+    <Frame caption="The Annotations tab renders every column in the project schema, and the footer keeps the keyboard contract in view.">
+      <img src="/images/session-fly-in-annotations.png" alt="The session fly-in on its Annotations tab: a Verdict pass/fail pair with Fail selected, Severity chips with major selected, and a filled-in Reviewer note." />
+    </Frame>
 
     **You should see:** the **Annotations** tab list every column in the schema, your note persist without a save click, and <kbd>J</kbd> / <kbd>K</kbd> walk the list once focus is out of the note box.
   </Step>
