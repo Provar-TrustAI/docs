@@ -9,7 +9,7 @@ This how-to connects an **AWS Bedrock AgentCore** agent to a Trust AI [Project](
 - Your AgentCore agent's conversations import into the Project as [Sessions](/concepts/sessions) — on demand with **Sync now**, or automatically if you set up streaming
 - The connected agent appears as an [agent version](/concepts/agent-versions) you can pick when you launch an Evaluation, and on each session's Details
 
-AgentCore is one of four platforms in the **Add connection** picker, alongside [Salesforce Agentforce](/how-to/connect-agentforce), [Claude Managed Agent](/how-to/connect-claude-managed-agent), and **Conversational HTTP agent**. Each has its own setup path; this page covers AgentCore only.
+AgentCore is one of four platforms in the **Add connection** picker, alongside [Salesforce Agentforce](/how-to/connect-agentforce), [Claude Managed Agent](/how-to/connect-claude-managed-agent), and [Conversational HTTP agent](/how-to/connect-http-agent). Each has its own setup path and its own guide; this page covers AgentCore only.
 
 Before you start, it's worth asking the [Trust Agent](/concepts/trust-agent) whether an agent is already connected — try *"Is an agent connected to this project?"* It checks the project's connected agents and tells you what it finds, so you don't reconnect something that already works. The AgentCore connection itself is made in a guided wizard in Project Settings, described below.
 
@@ -124,7 +124,7 @@ If Trust AI hasn't enabled session import for your region yet, the wizard says s
 
 The admin-handoff role — **AWS role from admin setup (recommended)** — is the way to connect. The AgentCore connection form also carries other **Sign-in method** options: **Local AWS profile (local development only)**, **AWS access keys (advanced fallback)**, **OAuth token**, and **JWT token**. They live in the full manual form, which the wizard hides behind **Advanced setup for developers → Open full manual form**, and they are not the supported path for a production connection.
 
-Whatever method you use, secrets are write-only: a saved access key or token is shown only as a masked value and is never displayed back — to change it, you enter a new one.
+Whatever method you use, secrets are write-only, exactly as on the other three connectors: reopening a saved connection shows the credential field **blank**, carrying a **Configured** status pill and the placeholder `•••• configured — leave blank to keep existing`. Leave it blank to keep the stored value; type a new one to replace it. The value itself is never displayed back.
 
 ## Troubleshooting
 

@@ -32,7 +32,7 @@ Which one you land in is decided by *how the evaluator was created*, not by a se
 | How the evaluator was created | Where its criteria land |
 |---|---|
 | Hand-authored on **New evaluator** | Advanced prompt editing — **Judge criteria** is a plain prompt box you type into |
-| Drafted with **Tailor with AI** | Structured grading rules |
+| Drafted with **Tailor with AI** | Structured grading rules — but the draft can't be saved at this release; see [Draft with Tailor with AI](#draft-with-tailor-with-ai) |
 | Adopted from the recommended catalog | Structured grading rules |
 
 A brand-new hand-authored evaluator therefore starts as a **prompt**, not a rule list. That is the default, not a fallback.
@@ -133,9 +133,15 @@ If the judgment really does need natural-language reasoning, keep it in criteria
 
 ## Draft with Tailor with AI
 
-On the **New evaluator** form — create mode only, and only for an LLM judge — the **Tailor with AI** box drafts the criteria for you: describe what you want to check in one sentence under **Describe what this evaluator should check**, click **Draft for my agent**, and the form fills in a name, a description, a score type, and a set of pass/fail rules. Drafting also switches **Judge criteria** from the prompt box to the structured rule lists, so you review discrete rows rather than a paragraph. Nothing is saved until you save.
+On the **New evaluator** form — create mode only, and only for an LLM judge — the **Tailor with AI** box drafts the criteria for you. Its own line reads *"Describe what you want to check in a sentence and we'll draft the grading rules below. You can edit everything before you save."* Type that sentence, click **Draft for my agent**, and the form fills in a name, a description, a score type, and a set of pass/fail rules. Drafting also switches **Judge criteria** from the prompt box to the structured rule lists, so you review discrete rows rather than a paragraph.
 
-Treat the draft the way you'd treat a colleague's first pass:
+<Warning>
+  **A drafted evaluator cannot be saved at this release.** The draft lands in the form correctly, but **Create evaluator** is rejected: the create posts the drafted rule lists with an empty prompt, the server refuses it, an inline *"Something went wrong creating this evaluator. Check your details and try again."* appears above the buttons, and the toast reads **Couldn't create evaluator**.
+
+  Use **Tailor with AI** as a **drafting aid you copy out of**, not as a create path. Write the criteria into **Judge criteria** yourself as a paragraph, click **Create evaluator**, then convert the saved judge to rule lists from its **Criteria** tab with **Switch to structured rules** — the end state is identical. [Build your first Evaluator](/tutorials/build-first-evaluator) walks that route step by step.
+</Warning>
+
+If you are using it as a drafting aid, treat the draft the way you'd treat a colleague's first pass:
 
 - **Make it yours.** Drafts are only as specific as your one-line description. Feed it your agent's actual constraints ("never promises a refund it can't authorize") rather than a generic goal ("is helpful").
 - **Delete rules you can't observe.** If a drafted rule isn't checkable against the transcript, cut it or rewrite it.

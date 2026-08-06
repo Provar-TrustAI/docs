@@ -126,7 +126,11 @@ One thing to check before launching: **evaluators travel with each scenario**, n
   </Step>
 
   <Step title="Run it again — and against another Agent Version">
-    A finished run's header carries three things, not two: **Export**, a primary **Re-run**, and a **…** menu. **Re-run** is a faithful repeat — it reopens the launcher pre-seeded with the original run's full configuration, same agent and same judges, so a second run is directly comparable to the first. The **…** menu holds one action, **Delete run**, behind a confirm; deleting removes the run and its results from the project, and can't be undone.
+    A finished run's header carries three things, not two: **Export**, a primary **Re-run**, and a **…** menu. **Re-run** reopens the launcher pre-seeded from the original run — the same source, the same scenarios, the same judges, the same agent, the same environment, and a suggested name derived from the original. Everything it restores stays editable. The **…** menu holds one action, **Delete run**, behind a confirm; deleting removes the run and its results from the project, and can't be undone.
+
+    <Warning>
+      **Re-run does not restore Repeat each test case.** It resets to **1** on every re-run, whatever the original was set to. You left it at **1** for this tutorial, so nothing is lost here — but if you ever repeat a run and then re-run it, set the count back before you launch. A `Pass^K` reliability rate and a single-attempt pass rate are different metrics, so a re-run left at 1 produces a comparison that looks valid and isn't.
+    </Warning>
 
     If your Project has a second agent connected — a staging build, or a previous [Agent Version](/concepts/agent-versions) of the same agent — do one more thing:
 
@@ -134,7 +138,7 @@ One thing to check before launching: **evaluators travel with each scenario**, n
       *Ask the Trust Agent:* "Run the same evaluation again, but against my previous agent version. Then tell me which scenarios changed verdict between the two runs."
     </Note>
 
-    By hand: open the finished run, click **Re-run**, and change **only the Agent** to the other build. When it completes, open both runs from the Evaluations list — in two tabs works well — and read them side by side: the headline pass rates, then the results tables, summary row by summary row. A pass that became a fail is a regression; a fail that became a pass is an improvement.
+    By hand: open the finished run, click **Re-run**, check that **Repeat each test case** still matches the first run, and change **only the Agent** to the other build. When it completes, open both runs from the Evaluations list — in two tabs works well — and read them side by side: the headline pass rates, then the results tables, summary row by summary row. A pass that became a fail is a regression; a fail that became a pass is an improvement.
 
     There's no dedicated run-vs-run comparison view yet — the side-by-side reading is manual (or delegated to the Trust Agent, which is exactly the kind of cross-referencing it's good at). This is still the regression-tracking habit Trust AI is built around: same scenarios, same evaluators, different agent, and the diff is your evidence. [Compare two Agent Versions](/how-to/compare-agent-versions) is the full workflow — matched configuration, reading the flipped cases, making the ship call.
   </Step>
