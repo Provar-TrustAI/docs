@@ -37,7 +37,9 @@ The editor opens as a panel titled **Skills**, with the subtitle "Teach the agen
 - **On the left**, a list: **+ New skill** at the top, then one row per skill. Each row shows the skill's **/name** and a one-line description; a built-in also carries a **Built-in** chip.
 - **On the right**, the detail form for whichever row you selected.
 
-{/* CAPTURE-PENDING: shipped skills editor — master list with Built-in chips + detail form */}
+<Frame caption="The chip is the whole distinction: every row carrying Built-in is read-only, and the one without it — selected here — is the workspace skill you can change. Note what the form gives you on a saved skill: a locked Slug, and Delete and Save changes rather than Create skill.">
+  <img src="/images/skills-editor-panel.png" alt="The Skills panel. On the left, + New skill above a list of skills, each showing its /name and a one-line description; the selected row /acme-refund-review carries no chip while the rows below it — /analyze-failures, /analyze-patterns, /author-adapter-lifecycle and others — are each tagged Built-in. On the right, the detail form for the selected skill with its Slug greyed out and fixed, and Label, Description, When to use and Instructions filled in, over Delete, Close and Save changes buttons." />
+</Frame>
 
 ## Built-in skills are read-only
 
@@ -129,7 +131,9 @@ When the agent consults a skill, the transcript shows a receipt: **Reviewed** fo
 
 Select the receipt to expand the skill's one-line purpose, so you can see what the agent was working from without leaving the conversation.
 
-{/* CAPTURE-PENDING: shipped transcript skill receipt — "Reviewed <name>" + Core skill chip, expanded purpose */}
+<Frame caption="Nobody typed a slash command here — the agent matched the request to the skill's description and reached for it. The receipt is how you find that out: the skill's name in words, where it came from, and the purpose it was working from once you select it.">
+  <img src="/images/skills-transcript-receipt.png" alt="The top of a Trust Agent transcript. The user asks what kinds of conversations the refunds assistant is actually handling; below it a Reviewed the project receipt, then a receipt reading Reviewed Analyze patterns with a Core skill chip, expanded to show the skill's one-line purpose about surfacing behavioural patterns across a session set." />
+</Frame>
 
 ## Related reading
 
