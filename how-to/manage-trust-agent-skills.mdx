@@ -20,7 +20,12 @@ The quickest way to see what you have is to ask the agent — "Which skills do y
 <Warning>
   Creating, editing, or deleting a skill requires the workspace **Owner** or **Admin** role. Using a skill does not — anyone in the workspace can invoke one, and the agent can reach for one on any project you can open.
 
-  The editor is **not hidden from Members**. A Member can open it, fill in every field, and choose **Create skill** — the refusal only arrives on save, as **You do not have access to this resource**, and nothing is stored. If you are not an Admin, ask one to author the skill for you rather than filling in the form first. See [Administer workspace access](/how-to/administer-workspace-access) for who holds which role.
+  Neither editor is **hidden from Members**. A Member can open the Trust Agent's skills editor or the **Workspace Settings → Skills** form, fill in every field, choose **Create skill**, and only be refused on save; nothing is stored. The two surfaces word that refusal differently, and only one of them says what went wrong:
+
+  - **Workspace Settings → Skills** gives the reason — **You do not have access to this resource**.
+  - The **Trust Agent's skills editor** shows its catch-all, **Couldn't save the skill. Check the slug and try again.** That is the same sentence it shows for a rejected name, so a permission refusal there reads like a typo. Check your role before you go hunting for a bad slug.
+
+  If you are not an Admin, ask one to author the skill for you rather than filling in the form first. See [Administer workspace access](/how-to/administer-workspace-access) for who holds which role.
 </Warning>
 
 ## Open the skills editor
@@ -58,7 +63,7 @@ You cannot fork a built-in onto its own name. Every built-in's name is reserved,
 What the refusal looks like depends on where you are:
 
 - In **Workspace Settings → Skills**, the message names the conflict: "'analyze-failures' is a built-in skill and is always available — it can't be used for a custom skill. Choose a different name for your skill."
-- In the Trust Agent's skills editor, the same rejection reads more generally: "Couldn't save the skill. Check the slug and try again." If you hit that message and you were using a built-in's name, that is why.
+- In the Trust Agent's skills editor, the same rejection reads more generally: "Couldn't save the skill. Check the slug and try again." That sentence is the editor's catch-all for *any* failed save — a reserved name, a malformed one, or a role that is not allowed to save at all — so it never tells you which. Rule out the name and your role before you rewrite the recipe.
 
 To customise one: open the built-in, read its **Instructions**, then choose **+ New skill**, give it **your own** name, and write your version there. Your skill sits alongside the built-in rather than replacing it, so name it for what makes it different — `refund-review-weekly`, not `analyze-patterns`.
 
