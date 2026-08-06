@@ -53,6 +53,14 @@ npx remotion render src/index.ts DemoComposition out/<name>.mp4 \
 `--props` selects which demo renders. Duration and viewport are derived from the timeline
 via `calculateMetadata`, so a longer recording needs no code change.
 
+**Pass an absolute path to `--props`.** A relative path is resolved against Remotion's bundle,
+not your shell — `--props=public/x.json` silently fails over to `defaultProps` and renders the
+example at the example's length. Use `--props="$PWD/public/x.json"`.
+
+Remotion MERGES `--props` over `defaultProps`, so a bare timeline still arrives carrying the
+example's nested `timeline` key. `Root.tsx` therefore detects the bare shape by its top-level
+`beats` array and prefers it; do not "simplify" that back to `props.timeline ?? props`.
+
 ### Verify the output
 
 Render a single frame and **look at it** before shipping:
@@ -83,7 +91,7 @@ Four Tier-2 demos this cycle, one per surface, each blocking a page. Timeline st
 | `d1-salesforce-authorize` | `how-to/connect-agentforce.mdx` | DEV-6216 |
 | `d2-agent-profile-review` | `how-to/review-an-agent-profile.mdx` | DEV-6217 |
 | `d3-groundedness-report` | `how-to/check-answers-against-source-material.mdx` | DEV-6218 |
-| `d4-launcher-fanout` | `concepts/evaluations.mdx` | DEV-6219 |
+| `d4-launcher-fanout` | `concepts/evaluations.mdx` | DEV-6219 ✅ shipped |
 
 Recordings (`public/*.webm`) and renders (`out/`) are gitignored — they are large binaries,
 and only the finished asset belongs in `/images`.

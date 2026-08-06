@@ -60,7 +60,13 @@ Repeat more than once and the run leads with a **Pass^K** rate instead of a plai
 
 This is the honest number for a non-deterministic agent. One that passes 87% of cases on a single attempt can pass far fewer on all four, and the gap between those two figures *is* the reliability finding. A single-attempt run can't show it — which is the reason to reach for the selector before you conclude an agent is solid.
 
-Raising the repeat count multiplies the work: the launcher shows the resulting fan-out ("*this will run N sessions × M evaluators*") before you commit, so the cost is visible up front.
+Raising the repeat count multiplies the work — but read the launcher's fan-out preview carefully, because it doesn't say so. The preview counts **one attempt**: "*10 sessions × 2 evaluators → 20 evaluator runs*" reads the same at a repeat of 1 as at a repeat of 4. Multiply it yourself. At 3 repeats, that 20 is really 60.
+
+<video controls muted playsInline className="w-full rounded-xl" src="/images/demos/d4-launcher-fanout.mp4"></video>
+
+<Note>
+  Picking sessions rather than scenarios grades captured conversations in place. The same selector and the same preview appear on the Scenarios branch, where the middle number becomes simulated conversations — one per attached persona.
+</Note>
 
 ### Results are grouped by scenario
 
