@@ -9,7 +9,12 @@
         who="connections that already use it" />
 
     Voice: matter-of-fact. A reader on the old path is not doing anything wrong, and the
-    product's own picker says "(legacy)" — match that word rather than escalating it. */}
+    product's own picker says "(legacy)" — match that word rather than escalating it.
+
+    Wrapper choice is deliberate, and pairs with preview-notice.mdx:
+      <Note> — PreviewNotice. Something is limited RIGHT NOW; the reader may not see it.
+      <Info> — DeprecatedNotice. Nothing is limited or at risk; the guidance has moved.
+    Neither uses <Warning>: no reader is in danger in either case. */}
 
 export const DeprecatedNotice = ({ what, instead, who }) => (
   <Info>
