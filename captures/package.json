@@ -9,7 +9,8 @@
     "capture:evaluators": "npx playwright test evaluators-create-flow",
     "capture:playground": "npx playwright test playground-surfaces",
     "capture:welcome": "npx playwright test welcome-surface",
-    "capture:sidebar": "npx playwright test sidebar-navigation"
+    "capture:sidebar": "npx playwright test sidebar-navigation",
+    "capture:skills": "npx playwright test skills-editor"
   },
   "devDependencies": {
     "@playwright/test": "^1.50.0",
