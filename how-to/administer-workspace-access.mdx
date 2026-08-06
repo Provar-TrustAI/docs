@@ -1,7 +1,7 @@
 ---
 title: "Administer workspace access"
 icon: "users"
-description: "Invite members and manage the invite lifecycle, assign workspace roles, build teams, and grant per-project Viewer/Editor access — all from Workspace settings."
+description: "Invite members and manage the invite lifecycle, assign workspace roles, build teams, grant per-project Viewer/Editor access, and read your credit pool and workspace connections — all from Workspace settings."
 ---
 
 Everything about who can get into your workspace — and what they can reach once they're in — is administered from one surface: **Workspace settings**. This how-to walks the admin jobs end to end:
@@ -11,6 +11,7 @@ Everything about who can get into your workspace — and what they can reach onc
 - Group people into **teams** so project access can be granted once, to the whole team
 - Grant **per-project access** (Viewer or Editor), directly or via a team, and read where each person's access comes from
 - Trace any access change in the in-context **access history**
+- Read your workspace's **credit** usage and the **Salesforce connections** the whole workspace shares
 
 This is a hands-on admin surface, so you work in the UI directly.
 
@@ -18,23 +19,29 @@ This is a hands-on admin surface, so you work in the UI directly.
 
 - A **Trust AI account** in the workspace you want to administer
 - A workspace role that can manage members, teams, and access — **Owner** or **Admin** (the app describes the Admin role as "Manage members, teams & access")
-  {/* ACCURACY-AUDIT-PENDING: workspace administration requires Owner or Admin — inferred from the Admin role card's description and the roles matrix; verify by opening Workspace settings as a Member/Guest on the release tag */}
+
+Both halves of that gate are real. A member or guest never sees the **Workspace Settings** row in the sidebar footer, and if they reach the surface by a saved link they get a card reading "Workspace management is admin-only" instead of the tabs. The server enforces it independently: an admin-only read like the members roster is refused before the identity provider is even called, so hiding the door is a convenience, not the control.
 
 ## Open Workspace settings
 
-Click **Workspace Settings** in the sidebar footer (it sits above your user chip, outside any one project). The page that opens is titled **Workspace settings** — release notes sometimes call this surface the *Access Center* — and it has four tabs:
+Click **Workspace Settings** in the sidebar footer (it sits above your user chip, outside any one project). The page that opens is titled **Workspace settings** — release notes sometimes call this surface the *Access Center* — and it has six tabs:
 
 | Tab | What it holds |
 |---|---|
 | **Members** | People in this workspace, their roles, and the teams they belong to. |
 | **Teams** | Groups that bundle project access so you grant it once, not per person. |
 | **Project access** | Who can open each project — directly or inherited through a team. |
+| **Credits** | Your workspace credit pool, how much you have used this billing month, and where it went. |
+| **Connections** | The Salesforce orgs your workspace is connected to, and the projects that use each one. |
 | **General** | Settings that apply across every project in this workspace. |
 
 Each tab is a stable, bookmarkable route, so a refresh or a shared link lands on the right tab. The page opens on **Members** by default.
-{/* ACCURACY-AUDIT-PENDING: sidebar footer nav item "Workspace Settings" opens /workspace/settings with H1 "Workspace settings" and exactly four tabs Members / Teams / Project access / General, defaulting to Members — verify by driving the surface on the release tag */}
 
-{/* CAPTURE-PENDING: workspace-settings-members screenshot — the Workspace settings page on the Members tab (four-tab strip + roster + Invite button) */}
+<Note>
+  A June 2026 release note describes this surface consolidating "six tabs into four". That was true of that release; **Credits** and **Connections** landed afterwards. Six is the current count.
+</Note>
+
+{/* CAPTURE-PENDING: workspace-settings-members screenshot — the Workspace settings page on the Members tab (six-tab strip + roster + Invite button) */}
 
 ## Two role vocabularies, one rule
 
@@ -44,16 +51,30 @@ The surface uses two distinct vocabularies — keep them apart:
 - **Project access tiers** describe what a grant on one project confers: **Viewer** (read) or **Editor** (read and change). These are the only two grantable tiers — admin-level access is conferred by ownership, never granted from a dialog.
 
 One rule ties them together: **project content is always gated by a project grant, admins included**. A workspace Admin who has no grant on a project doesn't see its content — the roles reference renders those cells as "Needs grant" rather than a blanket allow.
-{/* ACCURACY-AUDIT-PENDING: workspace roles render as Owner/Admin/Member/Guest and grant tiers as Viewer/Editor; an org owner/admin without a project grant is still denied project content (the roles matrix paints "Needs grant") — verify role labels and the admin-without-grant denial on the release tag */}
 
 Wherever you pick a role — the invite dialog and the member sheet — a **What can each role do?** link opens a read-only reference drawer summarizing what each workspace role is allowed to do, across every project. You never have to leave the flow to check.
+
+## What a grant tier actually gates
+
+The two grantable tiers are deliberately narrow, and the tightening that shipped in July 2026 is stricter than "not ordinary members":
+
+| You want to | You need |
+|---|---|
+| Open the project and read its contents — scenarios, sessions, evaluators, evaluation runs | **Viewer** |
+| Create and change the project's contents, and start an evaluation run | **Editor** |
+| Grant or revoke other people's access to the project | Workspace **Owner** or **Admin** |
+| Rename, archive, or delete the project — or delete an evaluation run | The project's **owner** — the person who created it |
+
+Two consequences worth knowing before you promise someone access:
+
+- **Project lifecycle is owner-only.** Renaming, archiving, and deleting a project belong to whoever created it. A workspace Owner or Admin *without* a grant on that project is denied as well — on project content the check resolves purely from the project grant, and workspace standing confers nothing.
+- **Managing access is the exception.** Granting and revoking access to a project is a workspace-level job, so an Admin can hand out grants on a project whose contents they can't open.
 
 ## Invite members
 
 <Steps>
   <Step title="Send the invitation">
-    On the **Members** tab, click **Invite**. The **Invite to workspace** dialog takes an **Email address** and a **Workspace role** — a card each for **Admin**, **Member** (the default), and **Guest**. Owner is never offered: ownership is conferred, not assigned. Check **What can each role do?** if you're unsure, then click **Send invite**.
-    {/* ACCURACY-AUDIT-PENDING: the Invite dialog offers exactly Admin/Member/Guest role cards with Member preselected and a Send invite CTA — verify by opening the dialog on the release tag */}
+    On the **Members** tab, click **Invite**. The **Invite to workspace** dialog takes an **Email address** and a **Workspace role** — a card each for **Admin** ("Manage members, teams & access."), **Member** ("Standard access to granted projects.", the default), and **Guest** ("External; project-scoped, no teams."). Owner is never offered: ownership is conferred, not assigned. Check **What can each role do?** if you're unsure, then click **Send invite**.
 
     **You should see:** the dialog close and the invitee appear as a row in the roster with an **Invited** pill — the header count reads like "4 members · 1 pending".
   </Step>
@@ -65,12 +86,11 @@ Wherever you pick a role — the invite dialog and the member sheet — a **What
     - **Revoke invitation** to withdraw it — the row drops out of the roster
 
     Once the invitee accepts, the row becomes a full member with a role badge, team chips, and a **Joined** date.
-    {/* ACCURACY-AUDIT-PENDING: pending/expired invite rows show Invited/Expired pills and a menu with resend + Revoke invitation; accepting turns the row into a member — verify the lifecycle end to end on the release tag */}
   </Step>
 </Steps>
 
 <Note>
-  The Members roster is read live from the workspace's WorkOS-backed identity directory — the same identity your organization's SSO signs you in with. If your directory changes, the roster reflects it; there is no separate member list to sync. See [Multi-tenancy](/concepts/multi-tenancy) for how identity maps onto your tenant.
+  The Members roster is read live from your workspace's SSO identity provider — the same identity your organization signs you in with. If your directory changes, the roster reflects it; there is no separate member list to sync. Which provider backs your workspace is a deployment choice, and nothing in this flow changes with it. See [Multi-tenancy](/concepts/multi-tenancy) for how identity maps onto your tenant.
 </Note>
 
 ## Change a member's workspace role
@@ -79,17 +99,15 @@ Click a member's row to open their detail sheet: identity at the top, then a **W
 
 Three guardrails protect the workspace while you're in here — each disables the option and explains itself inline instead of failing after the fact:
 
-- **The Owner's role is not a picker.** It renders as a badge; ownership isn't reassignable from this sheet.
+- **The Owner's role is not a picker.** It renders as a read-only line — "Owner — full access to every project in the workspace." — and ownership isn't reassignable from this sheet.
 - **You can't demote yourself out of admin.** An admin stripping their own access would be a self-lockout — "You can't remove your own admin access." Another admin has to do it.
 - **The last administrator can't be demoted.** "Promote another admin before demoting the last one." — otherwise no one could manage the workspace.
 
 Any other role change is a single click on the target card; the row's role badge repaints when it lands.
-{/* ACCURACY-AUDIT-PENDING: the member sheet renders the owner's role as a non-editable badge and disables self-demotion and last-admin demotion with those inline reasons — verify each guard on the release tag */}
 
 ## Remove a member
 
-The member sheet's footer holds the remove action. The same two hard guards apply: the **Owner can never be removed**, and the **last remaining administrator can never be removed** ("Promote another admin before removing the last one."). For anyone else, removal takes them out of the workspace and **sweeps their direct project grants with it** in the same operation — no orphaned access is left behind. Access they had only through a team ends with their team membership.
-{/* ACCURACY-AUDIT-PENDING: removing a member deletes the workspace membership and cascades their direct project grants in one transaction; owner and last-admin removals are refused — verify on the release tag */}
+The member sheet's footer holds the remove action. The same two hard guards apply: the **Owner can never be removed**, and the **last remaining administrator can never be removed** ("Promote another admin before removing the last one."). For anyone else, removal takes them out of the workspace and **sweeps their direct project grants with it** in the same operation — no orphaned access is left behind, and if the directory removal fails the swept grants roll back with it. Access they had only through a team ends with their team membership.
 
 ## Build teams
 
@@ -97,19 +115,19 @@ Teams exist so you can grant project access once instead of per person.
 
 <Steps>
   <Step title="Create the team">
-    On the **Teams** tab, click **New team**. The **Create a team** dialog takes a name (for example, "Risk & Compliance") — click **Create team**.
+    On the **Teams** tab, click **New team**. The **Create a team** dialog takes a name (for example, "Risk & Compliance") — click **Create team**. The dialog tells you what comes next: "Add members and grant project access once you've created it."
 
     **You should see:** the team appear in the list with a member count.
   </Step>
 
   <Step title="Add people to it">
-    Click the team's row to open its sheet. The **Members** section has an email field — type a workspace member's email and click **Add**. The team name is editable in place from the sheet's header.
-    {/* ACCURACY-AUDIT-PENDING: the team sheet adds members by email via an Add button and supports inline rename — verify by driving the sheet on the release tag */}
+    Click the team's row to open its sheet. Under **Members**, click **Add member…** — it opens a picker that autocompletes against the workspace roster, with a **Search people…** field. Pick someone and the popover closes; they're added.
+
+    You are not asked to transcribe an address. If you type a full, well-formed email that matches nobody on the list, the picker offers an **Add \<that address\>** row so you can still add it verbatim — the escape hatch for someone the roster doesn't list yet. The team name is editable in place from the sheet's header.
   </Step>
 
   <Step title="Know what deleting a team does">
-    **Delete team** sits in the sheet's footer. If the team still grants project access, the app stops you with an explicit confirmation: deleting it revokes those shared grants, and *anyone who reached those projects only through this team loses access immediately*. The people themselves stay in the workspace. This can't be undone.
-    {/* ACCURACY-AUDIT-PENDING: deleting a team that still carries project grants raises a cascade confirmation with that warning — verify by deleting a granting team on the release tag */}
+    **Delete team** sits in the sheet's footer. A team that grants no project access is deleted straight away. If the team still grants project access, the app stops you with an explicit confirmation — "This team still grants project access. Deleting it revokes those shared grants — anyone who reached those projects only through this team loses access immediately. Members stay in the workspace. This can't be undone."
   </Step>
 </Steps>
 
@@ -117,15 +135,15 @@ Teams exist so you can grant project access once instead of per person.
 
 <Steps>
   <Step title="Open the project's access panel">
-    On the **Project access** tab, click a project's row. The sheet that opens is headed **Project access** — "Who can reach this project — and whether it's a direct grant or inherited from a team" — with two sections: **Teams with access** and **People with access**.
+    On the **Project access** tab, click a project's row. The sheet that opens is headed by the **project's own name**, with its description underneath, and holds two sections: **Teams with access** and **People with access**. A section with nothing in it is simply not drawn.
 
-    The same panel is also mounted inside each project, at Project Settings → **Members** — grants made in either place are the same grants.
-    {/* ACCURACY-AUDIT-PENDING: the workspace Project access tab's row sheet and a project's Settings → Members tab mount the identical Project access panel — verify both mounts on the release tag */}
+    The same access surface is also mounted inside each project, at Project Settings → **Members**, where it is headed **Project access** — "Who can reach this project — and whether it's a direct grant or inherited from a team". Grants made in either place are the same grants.
   </Step>
 
   <Step title="Add a grant">
-    Click **Add access**. The **Grant access to [project]** dialog has a **Role** toggle — exactly **Viewer** or **Editor**, with Editor preselected — and a **People** / **Teams** tab pair listing the candidates. Click a person to grant them the selected role directly, or a team to grant everyone in it at once. Candidates that already hold a grant at the selected tier don't appear.
-    {/* ACCURACY-AUDIT-PENDING: the grant dialog offers exactly a Viewer/Editor toggle (Editor default) and People/Teams candidate tabs, granting on click — verify by granting both kinds on the release tag */}
+    Click **Add access**. The **Grant access to [project]** dialog has a **Role** toggle — exactly **Viewer** or **Editor**, with Editor preselected — and a **People** / **Teams** tab pair listing the candidates, filtered by one search field that spans both tabs. Click a person to grant them the selected role directly, or a team to grant everyone in it at once. A status pill reads back what you're about to hand out ("Granting as Editor"), and **Done** closes the dialog.
+
+    Candidates are filtered by whether they already hold a grant **at all**, not by the tier you have selected: someone with any direct grant on the project is absent from **People** even when you switch the toggle to the other tier. To change an existing grant, use the inline role control on its row rather than looking for the person here.
 
     {/* CAPTURE-PENDING: grant-access-dialog screenshot — the Grant access dialog (Viewer/Editor toggle + People/Teams candidate list) */}
 
@@ -133,8 +151,7 @@ Teams exist so you can grant project access once instead of per person.
   </Step>
 
   <Step title="Read the provenance, adjust, or revoke">
-    Every grant row tells you *how* the access exists: a **Direct** pill for a per-person grant, a **via [team]** chip when the access is inherited through a team. A person can carry both at once. Each row's role is changeable inline between **Viewer** and **Editor**, and each row has a revoke action. One grant you may see but can't revoke: the project owner's own access, which is conferred by ownership rather than granted.
-    {/* ACCURACY-AUDIT-PENDING: grant rows carry Direct pill / "via {team}" chip provenance, an inline Viewer/Editor role change, and per-row revoke; the owner's conferred grant is not revocable — verify on the release tag */}
+    Every grant row tells you *how* the access exists: a **Direct** pill for a per-person grant, a **via [team]** chip when the access is inherited through a team. A person can carry both at once. Each row's role is changeable inline between **Viewer** and **Editor**, and each row has a revoke action. One grant you may see but can't revoke: the project owner's own access, which is conferred by ownership rather than granted — its row has no revoke action.
   </Step>
 </Steps>
 
@@ -142,15 +159,28 @@ Teams exist so you can grant project access once instead of per person.
 
 Both the **Members** and **Project access** tabs carry a **View access history** button. It opens a right-anchored drawer — no navigation away from what you were doing — described in the app as "Every authorization decision and access change in this workspace, newest first. Select a person to trace how they reached the projects they can see."
 
-Behind it, every access decision and permission change — including invite sends, revokes, and resends — is written to a durable, append-only audit trail; a permission change that can't be audited doesn't happen.
-{/* ACCURACY-AUDIT-PENDING: the View access history drawer opens from Members and Project access with the newest-first feed + per-person trace; access decisions and permission changes (incl. invite lifecycle) persist to an append-only audit sink — verify the drawer on the release tag */}
+The feed is a table of **Person · Action · Resource · Outcome · When**, newest first, with an outcome of **Allowed** or a denial on every row, and a person's row is clickable to trace how they reached what they can see. Behind it, every access decision and permission change — including invite sends, revokes, and resends — is written to a durable, append-only audit trail; a permission change that can't be audited doesn't happen.
 
 {/* CAPTURE-PENDING: access-history-drawer screenshot — the access history drawer opened from the Members tab */}
+
+## The Credits tab
+
+**Credits** tracks how much of your workspace credit pool you have used this billing month. The **Credit usage** card carries a used-percentage meter and three figures — **Used**, **Pool**, and **Remaining** — plus a **Where your credits went** breakdown and the timestamp it was read at. **The pool resets monthly.**
+
+Two states are worth recognizing:
+
+- **No pool yet.** Usage is metered but nothing is capped, and the card says so.
+- **Past the pool.** The card reads "You have gone past your credit pool for this billing month." When a workspace is capped and reaches its limit, runs are refused with a clear message telling you to contact your admin, rather than failing obscurely.
+
+## The Connections tab
+
+**Connections** lists the Salesforce orgs your *workspace* is connected to — one card per org, showing which projects use it, its connection state, and how it signs in (for a connection made the recommended way, **Admin authorization**). Each card offers **Disconnect** — which tears the connection down in the org — and **Delete**, which removes it from Trust AI across every project that uses it. Both are destructive and both ask you to confirm.
+
+This tab is where you see connections your projects share. Creating one is a per-project job — see [Connect a Salesforce Agentforce agent](/how-to/connect-agentforce).
 
 ## The General tab
 
 **General** holds the settings that apply across every project in the workspace. At this release that is **Conversation capture**: a **Capture TrustAI agent conversations** switch (off by default) with an explicit **Save changes** commit. When on, conversations with the in-app agent across every project are saved into one auto-managed project for review and evaluation; turning it off deletes that project and everything captured in it, so the off-switch asks you to confirm.
-{/* ACCURACY-AUDIT-PENDING: the General tab houses the Conversation capture setting (off by default, explicit Save changes, destructive turn-off confirmation, captured conversations land in an auto-managed project) — verify on the release tag */}
 
 <Note>
   Workspace administration is also available on the wire — members, invites and their lifecycle, teams, per-project grants, roles, and the audit feed. Request and response shapes live in the [API Reference](/api-reference).
@@ -164,7 +194,15 @@ Behind it, every access decision and permission change — including invite send
   </Accordion>
 
   <Accordion title="An Admin can't open a project">
-    Expected. A workspace role governs administration, not project content — project content is always gated by a project grant, admins included. Grant them **Viewer** or **Editor** on the project (directly or via a team) from **Project access**.
+    Expected. A workspace role governs administration, not project content — project content is always gated by a project grant, admins included. Grant them **Viewer** or **Editor** on the project (directly or via a team) from **Project access**. The same is true of a workspace **Owner** without a grant.
+  </Accordion>
+
+  <Accordion title="An Admin can't rename or delete a project">
+    Also expected, and stricter than the content rule. Renaming, archiving, and deleting a project belong to the person who created it. A grant — even Editor — doesn't confer it, and neither does workspace Owner or Admin standing.
+  </Accordion>
+
+  <Accordion title="The roles reference calls the Member role &quot;Editor&quot;">
+    The **What can each role do?** drawer labels the third workspace role **Editor**, while the roster and the invite dialog call the same role **Member**. It is one role under two labels, not two roles. Read the drawer's row as the workspace **Member** role; **Editor** as a *grant* tier is a different thing entirely — it is what a person holds on one project.
   </Accordion>
 
   <Accordion title="Someone I invited isn't in the roster as a member">
@@ -184,4 +222,5 @@ Behind it, every access decision and permission change — including invite send
 
 - **[Projects](/concepts/projects)** — how workspace membership and per-project access fit the Project model
 - **[Multi-tenancy](/concepts/multi-tenancy)** — the organization boundary all of this access control lives inside
+- **[Connect a Salesforce Agentforce agent](/how-to/connect-agentforce)** — how a Salesforce connection is created in the first place
 - **[Glossary](/glossary)** — the vocabulary in one place
