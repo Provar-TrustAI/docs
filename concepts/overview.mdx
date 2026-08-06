@@ -26,13 +26,13 @@ Trust AI is built around seven core nouns. Every workflow and every screen in th
     A first-class test case — name, goal, personas, expected output, and linked sessions, with a stable id like `SCN-000123`. Every project keeps them in one flat Scenarios list.
   </Card>
   <Card title="Evaluator" icon="ruler" href="/concepts/evaluators">
-    A reusable judgment function — LLM Judge (plain-English rules) or Structured Match (routing and tool checks). Adopt one from the Trust Library or write your own, then calibrate it against human verdicts.
+    A reusable judgment function. Two kinds are yours to create: an **LLM judge** (plain-language grading rules) and a **Groundedness judge** (checks each claim against the scenario's reference material). Adopt one from the Trust Library or write your own, then calibrate it against human verdicts.
   </Card>
   <Card title="Evaluation" icon="chart-line" href="/concepts/evaluations">
     A scored run of one or more Evaluators — simulating scenarios against an agent, or grading sessions that already happened — scoped to an Agent Version.
   </Card>
   <Card title="Agent Version" icon="git-branch" href="/concepts/agent-versions">
-    A snapshot of the agent under test, connected through AgentCore, Claude Managed Agent, or Salesforce Agentforce. Running the same scenarios against two versions is how regressions get caught.
+    A snapshot of the agent under test, connected through one of four platforms. Running the same scenarios against two versions is how regressions get caught.
   </Card>
 </CardGroup>
 
@@ -47,7 +47,7 @@ flowchart LR
         C["<b>Scenario</b><br/>persona + goal +<br/>expected output<br/><i>test case</i>"]
         S["<b>Session</b><br/>turns + tool calls<br/><i>real conversation</i>"]
         A["<b>Annotation</b><br/>human verdict<br/><i>ground truth</i>"]
-        E["<b>Evaluator</b><br/>LLM Judge or<br/>Structured Match<br/><i>judgment rule</i>"]
+        E["<b>Evaluator</b><br/>LLM judge or<br/>Groundedness judge<br/><i>judgment rule</i>"]
         R["<b>Evaluation</b><br/>scored run<br/><i>pass rate + evaluator accuracy</i>"]
         V["<b>Agent Version</b><br/>pinned snapshot<br/><i>agent under test</i>"]
 
@@ -100,9 +100,11 @@ On a brand-new project it runs a guided cold start: connect your agent, watch an
 
 ### Scenarios
 
-**Scenarios** is the project's flat list of test cases, at `/projects/:id/scenarios` (old `/datasets` links redirect there). Each scenario opens a fly-in panel: its personas and goals, its expected output, and the sessions linked to it. The **Expected Output** editor is the scenario's grading contract — expected behavior (LLM-judge cards), expected actions, and expected routes, chosen from vocabulary the product learned from real sessions rather than typed by hand.
+**Scenarios** is the project's flat list of test cases, at `/projects/:id/scenarios` (old `/datasets` links redirect there). Each scenario opens a fly-in panel: its personas and goals, its expected output, and the sessions linked to it. The **Expected Output** editor is the scenario's grading contract, in three sections — **Expected behavior** (the evaluators that grade the scenario), **Expected actions**, and **Expected routes** — with actions and routes chosen from vocabulary the product learned from real sessions rather than typed by hand. Structural checks live here, on the scenario being graded: creating a standalone **Structured match** evaluator is retired, and the create form no longer offers it. Existing ones keep working.
 
-A **persona** is a reusable, project-scoped role-play profile (one can be the project default); a **goal** is what the synthetic user is trying to achieve. At run time every attached persona is simulated and scored on its own, and a goal-only scenario with no persona still simulates. On the wire, scenario reads and edits go through `/v1/scenarios`, with the legacy `/v1/datasets` endpoints still served underneath — the API Reference tab has the full surface. The [Scenarios](/concepts/scenarios) page covers the rest.
+**Reference material** is the fourth thing that editor can hold, and it is not a fourth section: it nests *inside* **Expected behavior**, and only appears once a **Groundedness judge** is attached to the scenario. It holds the source documents that judge checks the agent's claims against. Reference material belongs to the scenario, never to the evaluator, so the same judge can grade different scenarios against different sources. Until material is attached, a scenario with a Groundedness judge on it cannot run, and the editor says so.
+
+A **persona** is a reusable, project-scoped role-play profile (one can be the project default); a **goal** is what the synthetic user is trying to achieve. At run time every attached persona is simulated and scored on its own, and a goal-only scenario with no persona still simulates. On the wire, `/v1/scenarios` is the whole surface — the older `/v1/datasets` container endpoints were removed, and a scenario is addressed directly under its project. The [API Reference](/api-reference) owns the endpoint detail; the [Scenarios](/concepts/scenarios) page covers the rest.
 
 ### Sessions
 
@@ -112,13 +114,38 @@ A **Session** is both raw material and evaluation target. The Sessions list show
 
 The **Playground** at `/projects/:id/playground` drives a connected agent live. A **Chat** / **Simulate** toggle lets you chat with the agent yourself or auto-drive a persona-agent conversation, and **Save as a scenario** turns a run you like into a scenario with the conversation attached as its session. The full surface is the subject of the [Playground](/concepts/playground) page.
 
+### Connections, Agent Versions, and Agent Profiles
+
+An Agent Version has to come from somewhere. Connections are configured per project from **Project Settings → Connection → Add connection**, and four platforms are connectable today:
+
+| Platform | How you add it |
+| --- | --- |
+| **AWS Bedrock AgentCore** | A guided setup wizard |
+| **Salesforce Agentforce** | The connection form |
+| **Claude Managed Agent** | The connection form |
+| **Conversational HTTP agent** | The connection form |
+
+The **Conversational HTTP agent** connector is the general-purpose one: it connects any agent that accepts AG-UI run requests and streams AG-UI events back over SSE, so an in-house agent does not need a vendor connector to be evaluated. On Salesforce, the admin-authorize path — **Authorize TrustAI as an admin (recommended)** — is the way to create a connection.
+
+Once a version is connected, its **[Agent Profile](/concepts/agent-profile)** is the captured record of what that build could actually do — its identity, the tools it exposes, and the knowledge sources it draws on. A profile is *about* a version and nests under it, so the two are never the same noun: an Evaluation pins an **agent version**, while a Trust Agent session pins a **profile revision**, the profile's versioned unit. Profiles carry their own lifecycle — **Profile queued**, **Profile in progress**, **Profile available**, **Profile failed**, **Profile out of date** — and report coverage as **Captured**, **Partial**, or **Limited** rather than as a percentage. Automatic capability discovery is implemented for Conversational HTTP, Claude Managed Agent, and Salesforce Agentforce connections; an AgentCore connection reports that agent profiling isn't available for it yet.
+
 ### The Trust Library
 
-A new project doesn't start from a blank slate. **Add recommended evaluators** offers 12 curated LLM-judge presets, grouped quality then safety, that become ordinary fully editable evaluators once adopted; **Add recommended scenarios** offers 10 starter safety scenarios mapped to the OWASP Agentic AI Top 10, each paired with the evaluators that score it well. A no-code rubric editor defines what pass and fail mean in plain language — "Passes when… / Fails when…" — and **Tailor with AI** drafts the rules from one sentence about your agent. Once a judge is in use, its **Calibrate** tab measures how often it agrees with scenarios a person already marked pass or fail. See [Evaluators](/concepts/evaluators).
+A new project doesn't start from a blank slate. **Add recommended evaluators** offers 11 curated LLM-judge presets — five **Quality** and six **Safety** — that become ordinary, fully editable evaluators once adopted. Nine are pass/fail; two (*Answer is complete* and *Accomplished the goal*) are scored 1–5 and pass at 3 or above, so those two report a score rather than a verdict. **Add recommended scenarios** offers 10 starter safety scenarios mapped to the OWASP Agentic AI Top 10, each paired with the evaluators that score it well.
+
+A no-code rubric editor defines what pass and fail mean in plain language — "Passes when… / Fails when…" — and **Tailor with AI** drafts the rules from one sentence about your agent. Once a judge is in use, its **Calibrate** tab measures how often it agrees with scenarios a person already marked pass or fail. See [Evaluators](/concepts/evaluators).
 
 ### The Evaluation Launcher
 
-A single **Evaluation Launcher** starts every run — from the Scenarios list, a single scenario, the Sessions list, a single session, or the Evaluations page's **+ New evaluation** button, where you pick a source and a saved view. It previews the fan-out before you launch, and **Re-run** on a finished run restores its full configuration — same agent, same judges. Results lead with a dual headline: **Pass rate** (how the agent did) and **Evaluator accuracy** (how often the automated judges agreed with a human's verdict), with a per-persona matrix underneath. See [Evaluations](/concepts/evaluations) and [Saved views](/concepts/saved-views).
+A single **Evaluation Launcher** starts every run — from the Scenarios list, a single scenario, the Sessions list, a single session, or the Evaluations page's **+ New evaluation** button, where you pick a source and a saved view. It previews the fan-out before you launch, and **Re-run** on a finished run restores its full configuration — same agent, same judges. Results lead with **Pass rate** (how the agent did), with a per-persona matrix underneath. **Evaluator accuracy** (how often the automated judges agreed with a human's verdict) joins it as a second headline once there are human verdicts to score the judges against, and stays hidden when there are none.
+
+**Pass rate is not always a number.** A finished run that produced no behavioural grade reads the neutral **Not graded** rather than a fabricated 0% — completed-conversation counters are evidence of progress, not a grading denominator. Read **Not graded** as "evidence exists, nothing scored it"; it is a different label from **Not evaluated**, which means no evaluation exists at all. See [Evaluations](/concepts/evaluations) and [Saved views](/concepts/saved-views).
+
+### Workspace credits
+
+The work behind the loop — simulating scenarios, running judges, and the Trust Agent's own turns — draws on a **credit pool** that belongs to the workspace, not to any one project. **Workspace Settings → Credits** shows **Credit usage** for the current billing month and a **Where your credits went** breakdown. The pool resets monthly.
+
+When the pool runs out, runs stop rather than degrade: the workspace sees a **Credit limit reached** banner, and a run that would exceed the limit is refused with a message telling you to contact your admin.
 
 ## Go deeper
 
@@ -131,6 +158,12 @@ A single **Evaluation Launcher** starts every run — from the Scenarios list, a
   </Card>
   <Card title="Playground" icon="play" href="/concepts/playground">
     Chat with or simulate against a connected agent live, then save the result as a scenario.
+  </Card>
+  <Card title="Evaluators" icon="ruler" href="/concepts/evaluators">
+    The full judgment taxonomy — which kinds you create, which are authored on a scenario instead, and how the Groundedness judge uses reference material.
+  </Card>
+  <Card title="Agent Profile" icon="id-card" href="/concepts/agent-profile">
+    The captured record of what one agent build could do — identity, tools, knowledge sources, and how much of it Trust AI could see.
   </Card>
   <Card title="Multi-tenancy" icon="building-2" href="/concepts/multi-tenancy">
     The organization boundary every artifact is scoped to — fail-closed authorization, per-project roles, and an append-only audit trail.
