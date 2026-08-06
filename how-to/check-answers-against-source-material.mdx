@@ -20,11 +20,10 @@ A Groundedness judge **only** decides whether a claim is backed by the material.
 
 - **Penalise omissions.** Leaving a detail out is a coverage question, not a groundedness one.
 - **Judge tone, style, or formatting.** A curt, badly-formatted, perfectly-grounded answer passes.
-- **Reward helpfulness or completeness.** Those are not inputs to its decision.
 
-So a passing Groundedness check is a narrow, strong statement: *nothing here was made up*. It is not a statement that the answer was good. Pair it with an [LLM judge](/how-to/write-llm-judge-prompt) for everything it deliberately ignores — that combination is the point, not a workaround.
+So a passing Groundedness check is a narrow, strong statement: *nothing here was made up*. It is not a statement that the answer was good — helpfulness and completeness are not inputs to its decision either, they simply are not among the boundaries the judge states. Pair it with an [LLM judge](/how-to/write-llm-judge-prompt) for everything it deliberately ignores — that combination is the point, not a workaround.
 
-The judge states these boundaries itself. Open one from the Evaluators list and its **Criteria** tab leads with **How this judge works**, then the same two never-does lines, then the verdict vocabulary below.
+The judge states those two boundaries itself. Open one from the Evaluators list and its **Criteria** tab reads top to bottom: **How this judge works** (what it checks, then the two never-does lines above), **Verdict vocabulary**, the editable **Additional guidance**, and **Grades these scenarios** — the last of which lists every scenario this judge is bound to and flags the ones still reading *"No reference material"*, so you can find the unattached ones without opening each scenario.
 
 ## 1. Create the judge
 
@@ -48,7 +47,7 @@ That is the whole difference: **you write no criteria and pick no score type.** 
 
 ## 2. Bind it to a scenario
 
-Open a [Scenario](/concepts/scenarios) and go to its **Expected Output** tab. Under **Expected behavior**, use **Add evaluator** and pick your judge. All bound evaluators must pass for the scenario to pass.
+Open a [Scenario](/concepts/scenarios) and go to its **Expected Output** tab. Under **Expected behavior**, use **Add evaluator** and pick your judge. The section's own subtitle states the gating rule — every bound evaluator has to pass for the scenario to pass — with one carve-out this judge can trigger: a check that lands on **Needs review** is excluded from pass/fail gating rather than counted as a failure. See [step 5](#5-read-the-result).
 
 ## 3. Attach the reference material
 
@@ -76,7 +75,7 @@ Attached documents list by title with their size and, when you gave one, a **Sou
 
 ## 4. Run — the launcher blocks before it starts
 
-If a scenario binds a Groundedness judge and has no reference material, the run **does not start and is not queued**. The launcher disables **Run evaluation** and names the problem inline:
+If a scenario binds a Groundedness judge and has no reference material, the run **does not start and is not queued**. The launcher disables its primary button — **Run evaluation** on a bulk launch, **Run & evaluate** when you launch a single scenario, **Queue run** when the environment you picked is busy — and names the problem inline:
 
 > **Reference material required**
 > *&lt;scenario&gt;* needs reference material before it can run — a Groundedness judge grades its answers against attached documents, but none are attached. Add reference material on its Expected Output tab.
@@ -85,17 +84,21 @@ More than one offending scenario is listed together in one message. The same rul
 
 Fix it on the scenario's **Expected Output** tab, then run again.
 
-{/* ACCURACY-AUDIT-PENDING — sections 5 and 6 are verified against the shipped
-    v2026.08.03.2 source (evaluator-check-card.tsx, faithfulness-report-drawer.tsx,
-    judge.py, evaluations/service.py) but were NOT driven on the local app: no
-    connected agent exists there, so no run can produce a graded Groundedness
-    score. Re-drive both when a gradable connection is available. */}
+{/* ACCURACY-AUDIT-PENDING — everything from here to the end of the page
+    (sections 5, 6 and 7, and the "When claims can't be adjudicated" section)
+    is read from the shipped v2026.08.03.2 source, NOT driven on the local
+    app: that instance has no connected agent, so every run ends
+    harness_failure and none can produce a graded Groundedness score. Re-drive
+    the result card, the report drawer and the override flow when a gradable
+    connection is available. */}
 
 ## 5. Read the result
 
-The check renders as a card in the result fly-in with three things on it.
+The check renders as a card in the result fly-in, carrying a verdict, a metric chip, and a per-verdict tally of the claims.
 
-**The verdict** is **Pass**, **Fail**, or **Needs review**. Needs review is a real third state, not a soft fail — it is the answer when the grade can't be trusted as-is, and it is excluded from pass/fail gating, so it neither passes the row silently nor paints it red.
+**The verdict** is **Pass**, **Fail**, or **Needs review** — or, on a row where the judge had nothing to grade, no verdict at all. Needs review is a real third state, not a soft fail: it is the answer when the grade can't be trusted as-is, and it is excluded from pass/fail gating, so it neither passes the row silently nor paints it red.
+
+A fourth, quieter state exists and is worth recognising. A Groundedness check is pinned to the whole evaluation, but reference material lives on each scenario — so on a run covering several scenarios, a row whose scenario doesn't bind the judge shows the check card ungraded: no verdict chip, a neutral (never red) accent, and the line *"No reference material attached — not graded."* That is honest bookkeeping, not a failure, and step 4's launcher gate does not prevent it — the gate only fires for a scenario that binds the judge *and* has no documents.
 
 **The metric chip** reads **N% grounded** — the share of scored claims the judge could ground in the material. It sits next to the verdict as a neutral annotation, never in place of it.
 
@@ -153,7 +156,7 @@ An overridden claim keeps a provenance strip reading *"Overridden by reviewer �
 
 ## When claims can't be adjudicated
 
-Overrides need a claim list worth adjudicating. A check that finished grading, and one that needs review specifically because of unknown claims, both offer them. A check that needs review for a structural reason — a truncated judge response, an unparseable one, or a claim set over the budget — has no reliable claim list, so the report offers no override affordance and asks you to re-run instead.
+Overrides need a claim list worth adjudicating, and only two check states have one: a check that finished grading, and a check that needs review *specifically* because of unknown claims. Every other route to Needs review is structural — a truncated or unparseable judge response, a claim set over the budget, a decomposition that failed a guard, or reference material edited while the run was in flight — and none of those leaves a claim list the product will let you adjudicate. On those the report offers no override affordance and asks you to re-run instead.
 
 <Note>
   The launch and result endpoints behind this flow, including the per-claim adjudication calls, are in the [API Reference](/api-reference).
