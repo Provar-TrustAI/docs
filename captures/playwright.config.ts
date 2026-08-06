@@ -2,7 +2,7 @@ import { defineConfig, devices } from "@playwright/test";
 
 export default defineConfig({
   testDir: "./scripts",
-  testMatch: "*.ts",
+  testMatch: "*.ts",  // shared helpers live in ../lib, outside testDir
   fullyParallel: false,
   retries: 0,
   workers: 1,

@@ -1,19 +1,13 @@
 /**
  * Capture: Sessions list overview
- * Navigates to the sessions page and screenshots the sortable table with filter bar.
  * Output: ../images/sessions-list-overview.png
  */
 import { test } from "@playwright/test";
+import { gotoSurface, assertTableHasRows, settle } from "../lib/helpers";
 
 test("capture sessions table", async ({ page }) => {
-  await page.goto("/sessions");
-
-  // Wait for the table to render with at least one data row.
-  // shadcn/ui tables use <table> inside a wrapper; rows live in <tbody>.
-  await page.locator("table tbody tr").first().waitFor({ state: "visible" });
-
-  await page.screenshot({
-    path: "../images/sessions-list-overview.png",
-    fullPage: false,
-  });
+  await gotoSurface(page, "sessions", "table");
+  await assertTableHasRows(page, 5);
+  await settle(page);
+  await page.screenshot({ path: "../images/sessions-list-overview.png", fullPage: false });
 });

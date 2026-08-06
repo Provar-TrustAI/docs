@@ -21,3 +21,6 @@ captures/node_modules/
 # Pipeline build artifacts
 pipeline/node_modules/
 pipeline/out/
+
+# Playwright run artifacts
+captures/test-results/
