@@ -151,12 +151,15 @@ Nothing is created when the rubric is refused. Note the scope: this rule governs
 
 ## Check the result on the Expected Output tab
 
-After you approve, open the scenario from the [Scenarios](/concepts/scenarios) list and choose the **Expected Output** tab. It is the observation pane for everything above, in four sections:
+After you approve, open the scenario from the [Scenarios](/concepts/scenarios) list and choose the **Expected Output** tab. It is the observation pane for everything above. Three sections are always there:
 
 - **Expected behavior** — the evaluators grading this scenario. All must pass for the session to pass.
-- **Reference material** — the documents a Groundedness judge grades answers against.
 - **Expected actions** — "Required tools must be called to pass; Disallowed must not be called." Argument pins sit under each action.
 - **Expected routes** — subagents, skills, and topics, with the same Required / Disallowed pair.
+
+**Reference material is not a fourth section.** It is a subsection nested under **Expected behavior**, and it is revealed only by attaching a judge that grades against it — today, a Groundedness judge. A scenario without one never shows it, so don't go looking for it before you attach the judge. Once it is showing and still empty it carries a blocker naming the judge: *"Reference material required — … grades this scenario's answers against reference material. Attach at least one document — until then this scenario can't run."*
+
+Above all of it sits the tab's **Requirements** section — the `REQ-{n}` pills for the requirements this scenario covers, plus **Link requirement**. It is the *why* behind the contract rather than part of the contract, and it is covered in [Requirements](/concepts/requirements).
 
 The action and route pickers suggest values observed across the project's sessions; on a project that hasn't run yet they say *"Nothing observed yet. Type a tool name to add it — observed actions will appear here as suggestions once sessions run."* You can type a name that has never been observed, which is exactly how an unverified tool name reaches a contract — the same gap the agent warns you about.
 
@@ -180,7 +183,7 @@ The action and route pickers suggest values observed across the project's sessio
   </Accordion>
 
   <Accordion title="The scenario can't run and mentions reference material">
-    A Groundedness judge is attached but no documents are. Attach at least one document under **Reference material** on the Expected Output tab.
+    A Groundedness judge is attached but no documents are. Attaching that judge is also what reveals the **Reference material** subsection, under **Expected behavior** on the Expected Output tab — attach at least one document there.
   </Accordion>
 </AccordionGroup>
 
