@@ -31,13 +31,33 @@ A **scenario** is one test case worth scoring your agent on: a name, the goal a 
 
 ## The Scenarios list
 
-Open **Scenarios** in the left nav to get the flat table: an **ID** column with the `SCN` handle, the scenario name, the **User Goal**, **Personas** as removable pills, **Expected routes** and **Expected actions** chips, attached **Evaluators**, and a **Sessions** count. Name, goal, personas, and evaluators are editable inline — click the cell, change it, done. The table and fly-in behaviors shared across list surfaces are described in [Tables and panels](/concepts/tables-and-panels).
+Open **Scenarios** in the left nav to get the flat table, newest first: an **ID** column with the `SCN` handle, the scenario name, the **User Goal**, **Personas** as removable pills, **Expected routes** and **Expected actions** chips, attached **Evaluators**, a **Verdict** column, and a **Sessions** count. Name, goal, personas, evaluators, and Verdict are all editable inline — click the cell, change it, done. The table and fly-in behaviors shared across list surfaces are described in [Tables and panels](/concepts/tables-and-panels).
+
+### The Verdict column
+
+**Verdict** is a Pass / Fail toggle you set yourself, on the scenario. It is not an evaluation result and no judge writes to it — it's your judgment of whether this test case is one the agent should be passing.
+
+It exists for one specific job: **calibration**. The Calibrate tab in an Evaluator's panel compares that judge against your scenario verdicts on the same material, and it has nothing to sample until some scenarios are marked. If you have wondered where to record the labels a calibration run needs, this column is the answer — not the Verdict [annotation](/concepts/annotations) on Sessions, which feeds the separate evaluator-accuracy figure on run results.
 
 {/* CAPTURE-PENDING: scenarios-list.png — the flat Scenarios table at /projects/:id/scenarios with SCN ids, persona pills, and Expected routes chips */}
 
 The page ships with two built-in [saved views](/concepts/saved-views): **All scenarios** and **Missing expected output** — the second is your worklist of scenarios that can simulate but don't yet say what "good" means. The header carries the page's four actions: **Manage personas**, **Add recommended scenarios**, a **Run** split-button, and **New scenario**.
 
-During a bulk run you stay on the list: each scenario shows a live in-flight badge that settles as it finishes. Runs ride out model-capacity throttling with automatic retry, and a capacity hiccup is excluded from quality metrics — it never masquerades as a drop in agent quality.
+### Every Run affordance opens the launcher
+
+**Run** doesn't start anything on its own. Whichever way you reach it — the header's **Run** split-button, the bulk-actions bar after selecting scenarios, or **Run & evaluate** in a fly-in — you land in the shared **Evaluation launcher** modal first. You confirm what to evaluate, which agent version to run against, and how many trials; nothing is enqueued until you launch from inside it.
+
+What happens next depends on what you launched:
+
+| Launch | Where you end up |
+|---|---|
+| **Run only** (simulate, no grading) | Stays on the Scenarios list, live in-flight badges settling as each finishes |
+| A one-off from a fly-in | Stays put — it mints no run, and the fly-in reports the verdict |
+| **Run & evaluate** | Navigates to the new run's detail page |
+
+So "stay on the list and watch the badges" is the ungraded story. A graded run takes you to its results, because that's where the grading it just produced lives.
+
+Runs ride out model-capacity throttling with automatic retry, and a capacity hiccup is excluded from quality metrics — it never masquerades as a drop in agent quality.
 
 ## The scenario fly-in
 
@@ -45,15 +65,20 @@ Click a scenario to open a two-level fly-in over the list. The first level is th
 
 - **Personas & Goals** — edit who pursues the goal and what the goal is.
 - **Expected Output** — the grading contract editor (next section).
+- **Test Data** — the environment this scenario runs against (below).
 - **Sessions** — every conversation this scenario has produced, with a live count in the tab label. Click a session to stack a second-level panel over the first with that session's transcript, annotations, and evaluations — you drill in without ever losing your place in the list.
 
 The panel's **More** menu carries **Run & evaluate**, **Run only**, and **Delete scenario**.
 
 {/* CAPTURE-PENDING: scenario-flyin.png — the two-level fly-in: L1 scenario panel on the Expected Output tab, with the nested session panel stacked over it */}
 
-<Note>
-  Projects piloting the **Test Data Management preview** see one more tab here — **Test Data**, for describing the records a run should start from and the end state it should reach. It is a preview feature behind a feature flag that is off by default in production.
-</Note>
+### Test Data is about the environment first
+
+It's natural to read a "Test Data" tab as *"list the records this run starts from."* That's not what it leads with. The tab is **lifecycle-first**: what it shows by default is the environment automatically selected for the agent you're testing, and the promise that Trust AI acquires it, runs against it, resets it, and releases it for you. In the common case there is nothing here to fill in.
+
+Two things sit past that default. A scenario can replace the environment's connector-owned lifecycle with an explicit adapter payload. And an **Advanced** disclosure holds the record-level controls — structured starting records, expected-state records, file import, and concurrency — for the cases that need them.
+
+The tab only offers what your connector actually supports, so you won't find a control here that can't do anything.
 
 ## Expected output — the grading contract
 
@@ -63,7 +88,9 @@ The keystone of a scenario is its **Expected Output** tab: the place you author 
 - **Expected actions** — the tools the agent must (or must not) use, with per-action parameter checks. Add one with **Add action**.
 - **Expected routes** — where the conversation should be routed. Add one with **Add route**.
 
-You don't type action and route names by hand. The options come from **vocabulary the product learned from your real sessions** — the actions and routes your agent has actually used — so the contract is grounded in observed behavior rather than guesses.
+The add-menus lead with **vocabulary the product learned from your real sessions** — the actions and routes your agent has actually used, each with a "seen in N sessions" hint — so the easy path grounds the contract in observed behavior rather than guesses.
+
+That list is an assist, not a gate. Type a name that hasn't been observed and the menu offers to add it anyway (**Add "…"**), which is how you assert on behavior the agent *should* have but hasn't yet exhibited. Before any sessions exist, the menus are honestly empty and say so — the intended order is define something cheap, run it, then tighten the contract against what you actually saw.
 
 This is why the recommended order is to define the scenario cheaply first and author expected output *after* you have sessions: run the scenario, read the conversations, find one that went the way you want, and write the contract from what you see. The **Missing expected output** saved view keeps track of the scenarios still waiting for that step.
 
@@ -123,14 +150,14 @@ Attach several personas to one scenario to test the same goal from different ang
 Delete is safe by design, with three outcomes:
 
 - **Blocked** — a scenario referenced by evaluations can't be deleted; you'll see "Can't delete: used in N evaluations." instead of a confirm.
-- **Confirm with disclosure** — if the scenario has produced sessions, the confirm tells you the sessions are **kept** (they are frozen records of what happened; only the link to the scenario is removed) while the scenario's expected-output contract goes with it.
+- **Confirm with disclosure** — if the scenario has produced sessions, the confirm names exactly what survives and what doesn't: *"Those sessions are kept (they retain a frozen snapshot); only the link is removed. Deleting also removes this scenario's expected-output rubric and test data."* Both the rubric **and** the test data go with the scenario.
 - **Instant** — a scenario with no evaluations and no sessions deletes immediately.
 
 Because sessions are frozen snapshots and evaluations pin what they scored, deleting or editing a scenario never rewrites history: past results stay exactly as they were recorded.
 
 ## API surface
 
-Scenario reads and edits go through the `/v1/scenarios` family — list, get, update, delete (with a pre-delete check), the recommended starter catalog, and each scenario's expected output. The legacy `/v1/datasets` family remains on the wire underneath as the storage the re-design was built over, so you may still see `dataset_id` fields in older payloads. Full request and response shapes live in the [API Reference](/api-reference).
+Scenario reads and edits go through the `/v1/scenarios` family — list, get, update, delete (with a pre-delete check), the recommended starter catalog, and each scenario's expected output. That family is the whole surface: there is no `/v1/datasets` API. Full request and response shapes live in the [API Reference](/api-reference).
 
 ## Next step
 
