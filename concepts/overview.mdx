@@ -32,7 +32,7 @@ Trust AI is built around seven core nouns. Every workflow and every screen in th
     A scored run of one or more Evaluators — simulating scenarios against an agent, or grading sessions that already happened — scoped to an Agent Version.
   </Card>
   <Card title="Agent Version" icon="git-branch" href="/concepts/agent-versions">
-    A snapshot of the agent under test, connected through one of four platforms. Running the same scenarios against two versions is how regressions get caught.
+    A snapshot of the agent under test, connected through one of four connectable platforms. Running the same scenarios against two versions is how regressions get caught.
   </Card>
 </CardGroup>
 
@@ -108,7 +108,7 @@ A **persona** is a reusable, project-scoped role-play profile (one can be the pr
 
 ### Sessions
 
-A **Session** is both raw material and evaluation target. The Sessions list shows every conversation your agent has had — each with a **Source** chip (**Scenario**, **Playground**, or **External**) and a **Routed To** column — and its primary **Evaluate** action grades real conversations, in bulk or one at a time, using LLM-judge evaluators. Typed annotation columns — **Verdict**, **Severity**, **Reviewer note**, plus custom columns — edit inline in the table or in the session fly-in, and the human verdict they capture is what evaluator accuracy is measured against. See [Sessions](/concepts/sessions) and [Annotations](/concepts/annotations).
+A **Session** is both raw material and evaluation target. The Sessions list shows every conversation your agent has had, and **Routed To** is one of the columns it opens with. Every session also carries a **Source** — **Scenario**, **Playground**, or **External** — but that column is off by default: turn it on from **Add column**, where it sits under **Hidden columns** alongside User, Duration, and Tags. The list's primary **Evaluate** action grades real conversations, in bulk or one at a time, using LLM-judge evaluators. Typed annotation columns — **Verdict**, **Severity**, **Reviewer note**, plus custom columns — edit inline in the table or in the session fly-in, and the human verdict they capture is what evaluator accuracy is measured against. See [Sessions](/concepts/sessions) and [Annotations](/concepts/annotations).
 
 ### The Playground
 
@@ -131,7 +131,7 @@ Once a version is connected, its **[Agent Profile](/concepts/agent-profile)** is
 
 ### The Trust Library
 
-A new project doesn't start from a blank slate. **Add recommended evaluators** offers 11 curated LLM-judge presets — five **Quality** and six **Safety** — that become ordinary, fully editable evaluators once adopted. Nine are pass/fail; two (*Answer is complete* and *Accomplished the goal*) are scored 1–5 and pass at 3 or above, so those two report a score rather than a verdict. **Add recommended scenarios** offers 10 starter safety scenarios mapped to the OWASP Agentic AI Top 10, each paired with the evaluators that score it well.
+A new project doesn't start from a blank slate. **Add recommended evaluators** offers 11 curated LLM-judge presets — five **Quality** and six **Safety** — that become ordinary, fully editable evaluators once adopted. Nine carry the **Pass / fail** score type; two — *Answer is complete* and *Accomplished the goal* — carry **1–5 scale**, with 3 declared as their pass cutoff. The score type governs how the rubric is written and read, not whether the evaluator reaches a verdict: all eleven are LLM judges, and every LLM judge returns a pass or a fail on the run. **Add recommended scenarios** offers 10 starter safety scenarios mapped to the OWASP Agentic AI Top 10, each paired with the evaluators that score it well.
 
 A no-code rubric editor defines what pass and fail mean in plain language — "Passes when… / Fails when…" — and **Tailor with AI** drafts the rules from one sentence about your agent. Once a judge is in use, its **Calibrate** tab measures how often it agrees with scenarios a person already marked pass or fail. See [Evaluators](/concepts/evaluators).
 
