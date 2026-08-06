@@ -1,0 +1,162 @@
+---
+title: "Review an agent profile"
+icon: "clipboard-check"
+description: "Generate a profile for a connected agent build, read what capture could and could not see, correct it with your own edits, and record Approve or Request changes against that exact revision."
+---
+
+An [Agent Profile](/concepts/agent-profile) is a captured record of what one agent build can do — its identity, its tool contracts, and the knowledge it draws on. The record is only worth as much as the review behind it, and this page is that review loop: generate a profile, read where capture got a good look and where it didn't, correct what's wrong, and record a decision against the exact revision you read.
+
+Ask the [Trust Agent](/concepts/trust-agent) first. *"Show me the agent profile for this connection — what tools does it expose, and how complete is the discovery coverage?"* reads the captured revision and answers in the same **Captured / Partial / Limited** words the surface uses, so you can triage before opening anything. It can also propose a corrected summary and behavioral rules as an [approval-gated write](/how-to/approve-agent-writes). The fly-in described below is where you confirm what it found and where you record the decision — the agent can read and propose, but a review is a person's signature on one revision.
+
+## Before you start
+
+- **A connection on a platform that supports capability discovery.** Discovery is implemented for **Conversational HTTP**, [**Claude Managed Agent**](/how-to/connect-claude-managed-agent), and [**Salesforce Agentforce**](/how-to/connect-agentforce).
+- **A connectable agent build on that connection.** The profile describes one [Agent Version](/concepts/agent-versions); a connection with no build has no profile row to open.
+
+<Warning>
+  **AWS Bedrock AgentCore connections cannot be profiled.** Opening the profile on an [AgentCore connection](/how-to/connect-agentcore) shows one calm line — *"Agent profiling isn't available for this connection yet."* — and no retry, because a retry could never succeed. This is a platform limit, not a failure to work around: nothing you change on the connection will make discovery reach it. Skip this page if AgentCore is your only connection.
+  {/* ACCURACY-AUDIT-PENDING: the limit and the exact string are confirmed in the shipped code (services/gateway/src/domain/hosts/service.py:3566-3571 falls every other platform through to CAPABILITY_DISCOVERY_UNSUPPORTED; services/api/src/domain/agent_profile/exceptions.py:111 fixes the wording; the fly-in's unsupported branch renders no retry). The instance used for this pass carries no AgentCore connection, so how that state renders was not driven. */}
+</Warning>
+
+## Open the profile
+
+There are two entry points, and both open the same right-anchored fly-in over whatever you were doing.
+
+- **Project settings → Connection.** Each connection card carries a **Current agent version** row — the build's name, its version line and tool count, and the profile's lifecycle pill. Click the row.
+- **The Playground topbar.** The info button beside the agent picker is labelled **Agent profile**; it opens the profile for the agent you're talking to.
+
+The fly-in has exactly three tabs — **Overview**, **Tools** (with the catalog count beside it), and **Sources**. There is no history tab; a revision's past lives in the revisions themselves, not in a separate view. **Esc** closes the panel.
+
+<Note>
+  **The two entry points name the same healthy state differently, on purpose.** The connection row's pill reads **Profile available** — the entry point reports status. The fly-in's own header reads **Version-pinned profile** — the header names the pinning contract instead of repeating what you just clicked. Same profile, two vantage points; it isn't an inconsistency to reconcile.
+</Note>
+
+## Run the review
+
+<Steps>
+  <Step title="Generate the first profile">
+    A build that has never been captured opens on a plain sentence — *"No profile has been generated for this agent build yet."* — and a single **Generate profile** button. Click it.
+
+    Capture runs in the background and the panel follows it without a reload. The lifecycle pill moves **Profile queued** → **Profile in progress**, and the body says so in words: *"A profile capture is in progress."* with the reassurance *"This panel updates on its own once the profile is ready."* When it lands, the header pill settles on **Version-pinned profile** (and the connection row's pill on **Profile available**).
+
+    Two other lifecycle pills exist and you'll meet them later, not now: **Profile failed** for a capture that ran and didn't succeed, and **Profile out of date** for a profile whose build has moved on.
+  </Step>
+
+  <Step title="Read the discovery coverage">
+    The Overview tab opens with **What this version does** — the captured behavior summary — then **Critical behavioral rules**, the compact source-backed rules that actually affect how you'd author an evaluation against this agent. Either section says plainly when nothing was captured rather than showing an empty box.
+
+    Below them, **Discovery coverage** is the section that decides how much weight the rest of the profile can bear. Four dimensions, each with its own level:
+
+    | Dimension | What it covers |
+    | --- | --- |
+    | **Agent identity and behavior summary** | How the agent presents itself and how it's configured to behave |
+    | **Tool schemas** | The actions it exposes, and the parameter contracts behind them |
+    | **Policy and knowledge sources** | The material it can draw on to answer |
+    | **System instructions and observed behavior** | Its source instructions, plus sampled conversations and safe probes |
+
+    The level is one of three words — **Captured**, **Partial**, or **Limited** — and never a percentage. Each row carries a supporting line naming the fact behind the verdict, so the level is never the whole story: *"2 agent-side and user-side tools"*, or *"Instructions were not exposed; conversations and safe probes were not sampled"*.
+
+    Read **Partial** and **Limited** as scope, not as failure. A profile whose tools are **Captured** but whose identity is **Partial** is perfectly usable for checking what the agent *can* do, and thin evidence for what it's supposed to *refuse* — which is exactly the kind of judgment a review is for.
+
+    Under the coverage list sit the version facts — **Agent version**, **Discovery source**, **Tool catalog**, **Reference material**, **Profile captured**, and **Review** — and, when the catalog groups into subject areas, a **Topics this version covers** section. Topics are inferred by grouping the agent's own actions, not declared by the connected platform, and the section is simply absent when nothing groups.
+  </Step>
+
+  <Step title="Drill into a tool">
+    The **Tools** tab is the catalog: one row per tool with its parameter count, its actor (**Agent** or **User**), its availability (**Always** or **Discoverable**), and its description. A search box narrows the list.
+
+    Click a row to open the tool's detail — headed *"Exact invocation from agent version …"*. **Tool contract** spells out the actor in long form (**Evaluated agent** or **Simulated user**) and the availability (**Always available** or **Discoverable**), and the **Parameters** table lists each recorded parameter with its name, type, whether it's required, and its allowed values.
+
+    <Note>
+      **The schema you read is the schema that was recorded.** Capture stores the exact bytes the platform advertised and this drill-down serves those bytes back — the connected platform is never re-contacted. A schema you read today therefore cannot have quietly changed underneath a review you did yesterday. Where no exact schema was recorded, the detail says so rather than re-serializing the parameter facts into a look-alike.
+    </Note>
+  </Step>
+
+  <Step title="Read the Sources tab for what was not captured">
+    **Sources** is where absence is spelled out. **Context sources** lists five categories the capture run tries to reach — **Tool schemas**, **Policy documents**, **System instructions**, **Observed conversations**, and **Safe exploration** — and gives each one of four states:
+
+    | State | Means |
+    | --- | --- |
+    | **Available** | The material reached the capture run |
+    | **Not exposed** | The connector never surfaced this kind of material at all |
+    | **Not sampled** | It exists, but no conversations covering it were sampled |
+    | **Not run** | The probe that would have found it wasn't run |
+
+    Three of those four are absences, and they are never collapsed into one "unavailable" — because they lead to opposite next actions. **Not exposed** is a platform limit you plan around. **Not sampled** and **Not run** are gaps you can close by capturing again with more material behind you.
+
+    Below the manifest, **Reference material** lists each recorded source with its kind and when its content was recorded, and a source that wasn't reachable says so in plain language with the reason. **Profile provenance** names the connector the facts were read through and the agent version the discovery was pinned to, with the fine-grained detail tucked behind **Advanced provenance**.
+  </Step>
+
+  <Step title="Correct it with your own edits">
+    Capture reports what the platform said. Where it's wrong, thin, or missing the thing that actually matters, correct it: the header's **Edit profile** action opens the editor.
+
+    Two fields:
+
+    - **Behavior summary** — a replacement summary. Leave it empty to keep the generated one.
+    - **Added rules** — plain-language rules you add, which appear alongside the generated behavioral rules. Type a rule and click **Add rule**; the trash control removes one.
+
+    Click **Save edits**. The editor states the durability contract itself: *"Your edits apply on top of the generated profile and are kept when the profile is regenerated."*
+
+    That holds because your edits belong to the **build**, not to the revision — there is one set of edits per build, and regenerating mints a new revision underneath them. Regenerate as often as you like; you will not lose your corrections.
+  </Step>
+
+  <Step title="Record Approve or Request changes">
+    The Overview tab's **Review** section is the decision. Before anyone decides, it reads *"This profile revision has not been reviewed yet."* and the **Review** version fact reads **Not reviewed**. Two actions sit under it: **Approve** and **Request changes**.
+
+    Record one, and the section restates it as attribution — the verdict, who decided, and when — while the version fact switches to **Approved** or **Changes requested**. Re-deciding supersedes the previous decision; there is one review record per revision.
+
+    <Warning>
+      **A review signs one revision, not the build.** Approve a profile, regenerate it, and the new revision is unreviewed again — it reads *"This profile revision has not been reviewed yet."* even though your edits carried across. That is deliberate: an approval that silently carried forward onto content nobody examined would be worth nothing. Regenerating is cheap; re-reading before you re-approve is the point.
+    </Warning>
+  </Step>
+
+  <Step title="Refresh when the agent changes">
+    The header's **Refresh profile** action requests a fresh capture at any time, and the pill walks the same **Profile queued** → **Profile in progress** → ready path. Repeat requests while a capture is already queued or running don't stack — they return the run that's already going.
+
+    When the connected build moves on, the pill reads **Profile out of date**: the profile you're looking at is still a true record of what was captured, but the live agent has changed since. Refresh, re-read the coverage, and record a decision on the new revision.
+
+    A capture that ran and didn't succeed reads **Profile failed** with a plain-language reason, and its body offers **Try capturing again**. Unlike the AgentCore case above, this one *is* worth retrying — an unreachable endpoint or a half-configured connector is a real failure, not a platform limit.
+    {/* ACCURACY-AUDIT-PENDING: the failed-capture body and its retry action are read from the shipped code (apps/web/src/components/features/agent-profile-fly-in/agent-profile-fly-in.tsx:522-539). Every capture on the instance used for this pass succeeded — one with gaps — so a genuinely failed capture was not reproducible without breaking a shared connection, and this paragraph is written at behavior level only. */}
+  </Step>
+</Steps>
+
+## What a Trust Agent session pins
+
+A [Trust Agent](/concepts/trust-agent) session resolves **one** profile revision when it starts and holds it for the session's life. A capture landing a new revision mid-conversation never changes what that session already understood the agent to be.
+
+The pinned revision is injected as hidden background context, and it is **not** part of the transcript — you will never see the profile block in the conversation, and the agent is instructed to use it for grounding rather than quote it back at you. What you *will* see is its effect: ask about the connected agent and the answers are grounded in the revision that was pinned, in the profile surface's own vocabulary.
+
+This is a different pin from the one an [Evaluation](/concepts/evaluations) makes. An evaluation pins an **agent version** — the build whose behavior it grades. A Trust Agent session pins a **profile revision** — the record of what it understood that build to be. Regenerating a profile changes what a *new* session pins; it never changes what a running one already did, and it never changes what an evaluation runs against.
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="The profile says 'Agent profiling isn't available for this connection yet'">
+    The connected platform isn't one capability discovery reaches. There is no retry offered because a retry could not succeed. Discovery covers Conversational HTTP, Claude Managed Agent, and Salesforce Agentforce; **AWS Bedrock AgentCore** falls outside it — see [which platforms can be profiled](/concepts/agent-profile#which-platforms-can-be-profiled).
+  </Accordion>
+
+  <Accordion title="Coverage came back Limited across the board">
+    The capture reached the connection but the connector surfaced almost nothing — a common shape when an agent isn't activated or its metadata isn't readable with the saved credentials. Check the **Sources** tab: **Not exposed** across the manifest points at the connector or the agent's configuration, while **Not sampled** and **Not run** point at the capture having nothing to observe yet. Fix the connection, then **Refresh profile**.
+  </Accordion>
+
+  <Accordion title="The Tools tab shows a count of 0">
+    Nothing in the tool catalog reached this capture. The coverage row says the same thing in words — *"No tools were reachable when this profile was captured"* — and the **Sources** tab's **Tool schemas** row names which kind of absence it was. A profile with no tools is still a valid record; it just can't carry a review about what the agent is able to do.
+  </Accordion>
+
+  <Accordion title="I approved this profile, and now it says it hasn't been reviewed">
+    The profile was regenerated, so you are looking at a new revision. Reviews are recorded per revision and never carry forward. Your own edits *do* carry forward — they belong to the build — so re-reading and re-approving is usually quick.
+  </Accordion>
+
+  <Accordion title="The header pill says 'Version-pinned profile' but the connection row said 'Profile available'">
+    Both are correct and both describe a healthy profile. The connection row reports the capture's status; the fly-in header names the pinning contract. Nothing is out of sync.
+  </Accordion>
+</AccordionGroup>
+
+Developers who want the profile, overlay, and revision-review endpoints can find them in the [API Reference](/api-reference).
+
+## Related reading
+
+- **[Agent Profile](/concepts/agent-profile)** — what a profile is, why the revision is the versioned unit, and what each state means
+- **[Agent Versions](/concepts/agent-versions)** — the build a profile describes, and what an evaluation pins
+- **[Trust Agent](/concepts/trust-agent)** — the assistant that reads profiles and proposes corrections
+- **[Approve agent writes](/how-to/approve-agent-writes)** — the approval gate a proposed profile edit goes through
+- **[Compare agent versions](/how-to/compare-agent-versions)** — reading two builds against each other once both are profiled
