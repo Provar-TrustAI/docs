@@ -23,7 +23,7 @@ And one thing the quickstart didn't set up — the small extra step this tutoria
 
 - Your own **pass/fail verdicts** on some of those scenarios
 
-That last one matters most. Calibration compares the judge's verdicts with yours, so it only works against verdicts you actually recorded. You don't have to create a column for them: every project ships with a **Verdict** column on the Scenarios list. Open **Scenarios**, mark a handful of scenarios **Pass** or **Fail** in that column, and you're ready.
+That last one matters most. Calibration compares the judge's verdicts with yours, so it only works against verdicts you actually recorded. You don't have to create a column for them: a **Verdict** column is created on the Scenarios list alongside a project's first scenario, so if you finished the quickstart you already have one. Open **Scenarios**, mark a handful of scenarios **Pass** or **Fail** in that column, and you're ready.
 
 ## The five steps
 
@@ -87,7 +87,7 @@ That last one matters most. Calibration compares the judge's verdicts with yours
     Then click **Create evaluator**.
 
     <Warning>
-      **Don't create this one through Tailor with AI.** The **Tailor with AI** box at the top of the form does draft for you — describe the check in a sentence, click **Draft for my agent**, and it fills in a name, a description, and **Passes when… / Fails when…** rule lists. But at this release, saving a judge whose criteria came from that draft fails: the create is rejected and the toast reads **Couldn't create evaluator**. Write the criteria yourself as above, create the Evaluator, and convert it to rule lists in step 3 — the outcome is identical.
+      **Don't create this one through Tailor with AI.** The **Tailor with AI** box at the top of the form does draft for you — describe the check in a sentence, click **Draft for my agent**, and it fills in a name, a description, and **Passes when… / Fails when…** rule lists. But at this release, saving a judge whose criteria came from that draft fails: the create is rejected, an inline *"Something went wrong creating this evaluator. Check your details and try again."* appears above the buttons, and the toast reads **Couldn't create evaluator**. Write the criteria yourself as above, create the Evaluator, and convert it to rule lists in step 3 — the outcome is identical. [Write grading rules and judge prompts](/how-to/write-llm-judge-prompt#draft-with-tailor-with-ai) covers using the draft as a copy-out aid.
     </Warning>
 
     <Note>

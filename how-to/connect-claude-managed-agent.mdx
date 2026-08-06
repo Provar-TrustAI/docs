@@ -135,7 +135,7 @@ A connection is saved either way. **Unreachable** means the credentials didn't w
 
 ## Edit or delete a connection
 
-**Edit** reopens the form on the saved connection. The **Anthropic API key** field is blank and carries a **Configured** status pill — the stored key has no representation in the form, so it can't be shown back. Leave it blank to keep the existing key; type a new one to replace it. Because the stored key isn't available to the form, **Find agents** needs you to re-enter the key before it will search again, and says so.
+**Edit** reopens the form on the saved connection. The **Anthropic API key** field is blank and carries a **Configured** status pill plus the placeholder `•••• configured — leave blank to keep existing` — the stored key has no representation in the form, so it can't be shown back. Leave it blank to keep the existing key; type a new one to replace it. Because the stored key isn't available to the form, **Find agents** needs you to re-enter the key before it will search again, and says so.
 
 The delete button does not remove the connection on the spot. It opens a confirmation dialog headed **Delete connection**, naming the connection and warning that *Trust AI will stop pulling sessions and new evaluations cannot run until a connection is re-added*, with **Cancel** and **Delete**.
 
@@ -149,7 +149,7 @@ Sessions for this connector are created when Trust AI drives the agent:
 - **Simulated conversations** — from the [Playground](/concepts/playground), or fanned out per persona when an evaluation runs [scenarios with simulation](/how-to/simulate-with-scenarios)
 - **Evaluation runs** against the connected Agent Version
 
-Each lands on the [Sessions](/concepts/sessions) surface. If you want to see which of those a session came from, turn on the **Source** column: it is hidden by default, and you enable it from the table's **Columns** control.
+Each lands on the [Sessions](/concepts/sessions) surface. If you want to see which of those a session came from, turn on the **Source** column: it is hidden by default. Click **Add column** at the right edge of the Sessions table header and pick **Source** under **Hidden columns**.
 
 Connected Agent Versions are also readable programmatically — see the [API Reference](/api-reference) for the response shape.
 
@@ -194,3 +194,4 @@ Connected Agent Versions are also readable programmatically — see the [API Ref
 - **[Work with the Trust Agent](/how-to/work-with-the-trust-agent)** — driving the assistant that opens the connection card
 - **[Connect an AWS Bedrock AgentCore agent](/how-to/connect-agentcore)** — the neighboring connector, with historical session sync
 - **[Connect a Salesforce Agentforce agent](/how-to/connect-agentforce)** — the other platform that connects in the chat
+- **[Connect a Conversational HTTP agent](/how-to/connect-http-agent)** — the fourth platform in the picker, for an agent on no named vendor platform

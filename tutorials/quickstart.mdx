@@ -37,7 +37,7 @@ You'll need:
 
     Creating a Project is the one setup step you do before the Trust Agent comes into play — the conversation lives *inside* a Project, so you need one first. Open the project switcher at the top of the sidebar and click **Create new project** (on a workspace with no projects yet, you'll land on a **Create your first project** screen with a **New project** button instead). Name it after the agent under evaluation (e.g., "Acme Support Agent") — a description is optional — and click **Create project**.
 
-    **You should see:** you land inside the new Project. The left nav shows its surfaces, top to bottom: **New chat**, **Playground**, **Scenarios**, **Sessions**, **Evaluators**, **Evaluations**, and **Project Settings** — all empty for now. Scenarios, Sessions, Evaluators, and Evaluations each carry a count badge, reading 0 on a new project.
+    **You should see:** you land inside the new Project. The left nav shows its surfaces, top to bottom: **New chat**, **Playground**, **Requirements**, **Scenarios**, **Sessions**, **Evaluators**, **Evaluations**, and **Project Settings** — all empty for now. Requirements, Scenarios, Sessions, Evaluators, and Evaluations each carry a count badge, reading 0 on a new project.
   </Step>
 
   <Step title="Connect your agent">
@@ -56,7 +56,7 @@ You'll need:
     - **AWS Bedrock AgentCore** — a guided setup wizard: prepare an admin handoff package, have your AWS admin deploy the cross-account role, then paste the role ARN back. Full walkthrough: [Connect an AWS Bedrock AgentCore agent](/how-to/connect-agentcore).
     - **Salesforce Agentforce** — a two-step flow. Enter your org's URL, then click **Authorize in Salesforce with an administrator account**; Salesforce opens in a new tab and the connection is set up for you when the admin approves. Step two is picking the agent to test. Full walkthrough: [Connect a Salesforce Agentforce agent](/how-to/connect-agentforce).
     - **Claude Managed Agent** — a form for an Anthropic Managed Agent on Claude Platform on AWS. Full walkthrough: [Connect a Claude Managed Agent](/how-to/connect-claude-managed-agent).
-    - **Conversational HTTP agent** — for any agent that accepts AG-UI run requests and streams AG-UI events over SSE. Use this when your agent isn't on one of the named platforms.
+    - **Conversational HTTP agent** — for any agent that accepts AG-UI run requests and streams AG-UI events over SSE. Use this when your agent isn't on one of the named platforms. Full walkthrough: [Connect a Conversational HTTP agent](/how-to/connect-http-agent).
 
     <Warning>
       The Salesforce authorize step deploys a connected app into whichever org you sign in to. Point it at a Sandbox, not production.
@@ -138,7 +138,7 @@ You'll need:
 
     A second headline, **evaluator accuracy**, appears once you've recorded human Pass/Fail verdicts on sessions — it measures how often the automated judges agree with a person, grading the judges rather than the agent. Until then it is absent from the header entirely, and the **Evaluator accuracy** column on the **Evaluations** list reads as empty.
 
-    Below that is the results table. It opens **By scenario** — one group per scenario, expandable to its individual attempts — and the column gear switches it to **Flat** for a plain per-attempt table. Each row names the persona that drove the conversation, and carries the **Final verdict** plus one column per evaluator, so you can see *which* check failed and *who* the agent struggled with.
+    Below that is the results table. It opens **By scenario** — one summary per scenario and persona, expandable to its individual attempts. To flatten it, open the **Columns** menu in the results toolbar: the **View** toggle sits at the very top, offering **By scenario** and **Flat**. Each row names the persona that drove the conversation, and carries the **Final verdict** plus one column per evaluator, so you can see *which* check failed and *who* the agent struggled with.
 
     Open any result to read the full conversation. The transcript labels how the result was produced, and there are exactly two labels: **Simulated** (the run drove a fresh conversation with your agent and scored that) or **Replayed** (the run replayed the scenario's saved input and scored the agent against it).
 
