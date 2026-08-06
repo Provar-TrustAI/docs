@@ -14,8 +14,7 @@ Ask the [Trust Agent](/concepts/trust-agent) first. *"Show me the agent profile 
 - **A connectable agent build on that connection.** The profile describes one [Agent Version](/concepts/agent-versions); a connection with no build has no profile row to open.
 
 <Warning>
-  **AWS Bedrock AgentCore connections cannot be profiled.** Opening the profile on an [AgentCore connection](/how-to/connect-agentcore) shows one calm line — *"Agent profiling isn't available for this connection yet."* — and no retry, because a retry could never succeed. This is a platform limit, not a failure to work around: nothing you change on the connection will make discovery reach it. Skip this page if AgentCore is your only connection.
-  {/* ACCURACY-AUDIT-PENDING: the limit and the exact string are confirmed in the shipped code (services/gateway/src/domain/hosts/service.py:3566-3571 falls every other platform through to CAPABILITY_DISCOVERY_UNSUPPORTED; services/api/src/domain/agent_profile/exceptions.py:111 fixes the wording; the fly-in's unsupported branch renders no retry). The instance used for this pass carries no AgentCore connection, so how that state renders was not driven. */}
+  **AWS Bedrock AgentCore connections cannot be profiled — and the panel doesn't say so until you try.** Opening the profile on an [AgentCore connection](/how-to/connect-agentcore) looks exactly like any other never-captured build: *"No profile has been generated for this agent build yet."* with a **Generate profile** button. Press it and the capture comes straight back as one calm line — *"Agent profiling isn't available for this connection yet."* — with no retry, because a retry could never succeed. This is a platform limit, not a failure to work around: nothing you change on the connection will make discovery reach it. Skip this page if AgentCore is your only connection.
 </Warning>
 
 ## Open the profile
@@ -110,12 +109,11 @@ The fly-in has exactly three tabs — **Overview**, **Tools** (with the catalog 
   </Step>
 
   <Step title="Refresh when the agent changes">
-    The header's **Refresh profile** action requests a fresh capture at any time, and the pill walks the same **Profile queued** → **Profile in progress** → ready path. Repeat requests while a capture is already queued or running don't stack — they return the run that's already going.
+    The header's **Refresh profile** action requests a fresh capture, and the pill walks the same **Profile queued** → **Profile in progress** → ready path. Repeat requests while a capture is already queued or running don't stack — they return the run that's already going. **Refresh profile** and **Edit profile** are there only while there is a profile to show: the empty, in-progress, and failed states carry no header actions, because each already offers the one action that makes sense from where it stands.
 
     When the connected build moves on, the pill reads **Profile out of date**: the profile you're looking at is still a true record of what was captured, but the live agent has changed since. Refresh, re-read the coverage, and record a decision on the new revision.
 
-    A capture that ran and didn't succeed reads **Profile failed** with a plain-language reason, and its body offers **Try capturing again**. Unlike the AgentCore case above, this one *is* worth retrying — an unreachable endpoint or a half-configured connector is a real failure, not a platform limit.
-    {/* ACCURACY-AUDIT-PENDING: the failed-capture body and its retry action are read from the shipped code (apps/web/src/components/features/agent-profile-fly-in/agent-profile-fly-in.tsx:522-539). Every capture on the instance used for this pass succeeded — one with gaps — so a genuinely failed capture was not reproducible without breaking a shared connection, and this paragraph is written at behavior level only. */}
+    A capture that ran and didn't succeed reads **Profile failed** and states the reason in the body — *"The last profile capture failed: The agent's capability endpoint is unreachable, so no catalog could be read."* — with a **Try capturing again** button under it. Unlike the AgentCore case above, this one *is* worth retrying: an unreachable endpoint or a half-configured connector is a real failure, not a platform limit.
   </Step>
 </Steps>
 
@@ -131,7 +129,7 @@ This is a different pin from the one an [Evaluation](/concepts/evaluations) make
 
 <AccordionGroup>
   <Accordion title="The profile says 'Agent profiling isn't available for this connection yet'">
-    The connected platform isn't one capability discovery reaches. There is no retry offered because a retry could not succeed. Discovery covers Conversational HTTP, Claude Managed Agent, and Salesforce Agentforce; **AWS Bedrock AgentCore** falls outside it — see [which platforms can be profiled](/concepts/agent-profile#which-platforms-can-be-profiled).
+    You reached this by pressing **Generate profile** — the button is offered on every platform, and only the capture result tells you discovery can't reach this one. The connected platform isn't one capability discovery reaches, and no retry is offered because a retry could not succeed. Discovery covers Conversational HTTP, Claude Managed Agent, and Salesforce Agentforce; **AWS Bedrock AgentCore** falls outside it — see [which platforms can be profiled](/concepts/agent-profile#which-platforms-can-be-profiled).
   </Accordion>
 
   <Accordion title="Coverage came back Limited across the board">
