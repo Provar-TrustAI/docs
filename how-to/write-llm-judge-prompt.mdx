@@ -1,34 +1,68 @@
 ---
-title: "Write grading rules that calibrate"
+title: "Write grading rules and judge prompts"
 icon: "ruler"
-description: "How to write Passes when / Fails when rules a judge can apply consistently, the anti-patterns that don't, and the Calibrate loop that proves them."
+description: "The two ways to author an LLM judge's criteria — structured Passes when / Fails when rules, and advanced prompt editing — when each is right, how to switch between them, and the calibration loop that proves either one."
 ---
 
-This is the **deep how-to** on authoring LLM Judge grading rules. If you just want to author your first Evaluator end-to-end, start with [Build your first Evaluator](/tutorials/build-first-evaluator). Come here when you need rules that:
+This is the **deep how-to** on authoring an **LLM judge**'s criteria. If you just want to author your first evaluator end-to-end, start with [Build your first Evaluator](/tutorials/build-first-evaluator). Come here when you need criteria that:
 
 - Calibrate to high agreement with a careful human reviewer
 - Stay stable when you re-run them next month
 - Don't drift across scenarios that should score the same
 
-Writing grading rules is a craft. The patterns below come from teams that have iterated on dozens of rubrics; they save real time when you internalize them.
+<Note>
+  **This page is about the LLM judge kind only.** A **Groundedness judge** has no criteria and no score type — see [what it does instead](#the-groundedness-judge-has-nothing-to-author). Creating a **Structured match** evaluator is retired; structural route and tool checks live on a scenario's **Expected Output** instead. Neither kind has a **Calibrate** tab.
+</Note>
 
-## You write rules — the product writes the prompt
+## Two ways to author an LLM judge's criteria
 
-You never author a judge prompt in Trust AI. An LLM Judge evaluator is defined by plain-language **grading rules**:
+An LLM judge grades each response against a block of **criteria** — and you can author that block in either of two modes. Both are supported, both are ungated, and you can move between them whenever you want.
 
-- A **pass/fail** judge takes two rule lists: **Passes when…** and **Fails when…** — each rule one short sentence.
-- A **1–5 scale** judge takes three anchors: **Rate 5 when…**, **Rate 3 when…**, and **Rate 1 when…**.
+<CardGroup cols={2}>
+  <Card title="Structured grading rules" icon="list-checks">
+    Plain-language rule lists — **Passes when…** / **Fails when…**, or the three **Rate 5 / 3 / 1 when…** anchors. The product assembles them into the prompt the judge reads.
+  </Card>
+  <Card title="Advanced prompt editing" icon="pencil">
+    The **Judge criteria** box holds the prompt text directly and you edit it by hand. Nothing is assembled for you.
+  </Card>
+</CardGroup>
 
-The app assembles your rules into the exact criteria the live judge reads — each rule becomes its own line, so the judge can work through them one at a time. You can inspect the result any time under **Advanced — view the prompt this produces**, but it's read-only: everything else about the judge is owned by the product and is not an authoring surface.
+Which one you land in is decided by *how the evaluator was created*, not by a setting you pick:
 
-| You write | Trust AI owns |
+| How the evaluator was created | Where its criteria land |
 |---|---|
-| The grading rules (or scale anchors) | The judge's system prompt and framing |
-| The score type and pass threshold | The judge model |
-| The **Reason step by step** toggle | The output format and verdict parsing |
-| | Temperature — pinned to `0` on every judge call |
+| Hand-authored on **New evaluator** | Advanced prompt editing — **Judge criteria** is a plain prompt box you type into |
+| Drafted with **Tailor with AI** | Structured grading rules |
+| Adopted from the recommended catalog | Structured grading rules |
 
-This narrows the craft in a useful way. All the classic judge-prompt advice about neutral system-prompt framing, output schemas, and temperature tuning is handled for you. **Your entire authoring surface is the rules** — which is exactly where the judgment quality lives.
+A brand-new hand-authored evaluator therefore starts as a **prompt**, not a rule list. That is the default, not a fallback.
+
+### Switching between them
+
+Both switches live on a saved evaluator's **Criteria** tab, and both are repeatable.
+
+- **Rules → prompt.** Click **Switch to advanced prompt editing**. A confirm step spells out the trade — *"The structured grading rules will be detached and the prompt they currently generate becomes directly editable"* — with **Keep the rules** to back out. The prompt carries over exactly as the rules had generated it, so the judge reads identical criteria across the switch.
+- **Prompt → rules.** Click **Switch to structured rules**. The rule lists open **empty** — your prompt is never decomposed into rules for you — and **Save grading rules** *replaces* the prompt with the prose your new rules generate. **Cancel** leaves the prompt untouched.
+
+<Warning>
+  A round trip is lossy in one direction. Going prompt → rules regenerates the whole criteria block from your rule rows, so any framing you had — an adopted preset's opening line, a closing "judge only the tone, not the correctness" instruction — is replaced by the generic framing. Copy anything you want to keep out of the **Advanced — view the prompt this produces** disclosure before you save.
+</Warning>
+
+### What the product still owns — in both modes
+
+"Advanced prompt editing" means you own the **criteria block**. It does not hand you the judge's system prompt.
+
+| You write | Trust AI owns, in both modes |
+|---|---|
+| The criteria — as rules, or as prose | The judge's system prompt, which fixes the verdict contract |
+| The score type and pass threshold | The judge model |
+| The **Reason step by step** toggle | Temperature — pinned to `0` on every judge call |
+| | Verdict parsing |
+
+Your criteria are inserted into the judge's payload alongside the expected and the actual response; the system prompt is what tells the judge to answer with one word. Two consequences worth internalizing:
+
+- **A structured rubric holds grading rules only.** It has room for your rule rows (or anchors) plus the product's opening framing and closing guidance — and nothing else. A response-format, verdict-shape, or answer-key section is rejected server-side.
+- **In prompt mode you can type such a section, but it won't take effect.** The system prompt still owns the verdict contract, and contradicting it is the main way to break verdict parsing. If your prompt never names the verdict vocabulary, the editor warns inline — *"This prompt may not tell the judge to answer PASS or FAIL — verdicts could fail to parse."* It is a nudge, never a gate; saving is always allowed.
 
 <Note>
   *Ask the Trust Agent:* "Draft an evaluator that checks my agent never promises a refund it can't actually authorize." It drafts the rules and the evaluator definition, shows you the write for [approval](/how-to/approve-agent-writes) before anything is saved, and can queue a calibration check against scenarios you've already marked pass or fail once you approve.
@@ -36,9 +70,15 @@ This narrows the craft in a useful way. All the classic judge-prompt advice abou
 
 ## Start from a recommended evaluator when one fits
 
-Before hand-authoring from scratch, check the starter catalog: **Add recommended** on the Evaluators library offers twelve curated LLM-judge presets — six Quality, six Safety — that adopt as ordinary, fully editable evaluators. A few carry a **Tailor first** badge, meaning they were written against a generic agent: add a rule about what *your* agent is specifically allowed or required to do before relying on them. Adopting, tailoring one or two rules, then calibrating is usually faster than a blank page — see [Evaluators](/concepts/evaluators) for the full catalog.
+Before hand-authoring from scratch, check the starter catalog: **Add recommended** on the Evaluators library offers **11** curated LLM-judge presets — **five Quality** and **six Safety** — that adopt as ordinary, fully editable evaluators. Nine score pass/fail; two (*Answer is complete*, *Accomplished the goal*) use the 1–5 scale.
+
+Three of them carry a **Tailor first** badge — the presets that judge goal completion, scope, and unauthorized commitments were written against a generic agent, so add a rule about what *your* agent is specifically allowed or required to do before relying on them. Adopting, tailoring a rule or two, then calibrating is usually faster than a blank page — see [Evaluators](/concepts/evaluators) for the full catalog.
+
+An adopted preset arrives as **structured rules**, so you edit it as discrete rows rather than as a wall of prose.
 
 ## Write rules, not vibes
+
+This section is about rules, but everything in it applies equally to a hand-written prompt — the failure modes are identical.
 
 The biggest single mistake new authors make is writing a rule as **a vague quality judgment**:
 
@@ -71,23 +111,29 @@ This works because:
 - Each rule names an **observable behavior** in the transcript, not a quality
 - A different reviewer applying these rules would reach the same verdict on most scenarios
 
-A useful test: **could a mechanical check catch this failure?** If the thing you're checking is which route the session took or which tools the agent called, you may not need an LLM Judge at all — author it as a structural check in the scenario's **Expected Output** editor (**Expected routes** and **Expected actions**, picked from vocabulary learned from your real sessions); see [Scenarios](/concepts/scenarios). Legacy **Structured Match** evaluators (**Routing match**, **Tool match**) you already have keep working as ordinary evaluator objects. If the judgment really does need natural-language reasoning, keep it in rules — but make each rule as observable as the problem allows.
+In the rule editor, each list is built from **Add a pass rule** / **Add a fail rule**, and the lists tell you how they combine: everything under **Passes when…** must be true, while **any one** thing under **Fails when…** fails the session. Rows can be reordered and removed.
 
 ### One criterion per rule
 
-Resist compound rules. "Passes when the response is accurate and friendly and ends with a next step" hides three criteria in one line — when the judge fails it, you can't tell which criterion tripped, and the disagreement table (below) gets much harder to read. Split it: three rules, each independently checkable. The rule lists are ordered and you can add as many as you need.
+Resist compound rules. "Passes when the response is accurate and friendly and ends with a next step" hides three criteria in one line — when the judge fails it, you can't tell which criterion tripped, and the disagreement table gets much harder to read. Split it: three rules, each independently checkable.
+
+### Could a mechanical check catch this instead?
+
+A useful triage before you write anything. If the thing you're checking is **which route the session took** or **which tools the agent called**, you may not need an LLM judge at all — author it as a structural check in the scenario's **Expected Output** editor (**Expected routes** and **Expected actions**, picked from vocabulary learned from your real sessions); see [Scenarios](/concepts/scenarios). Creating a **Structured match** evaluator is retired, though existing ones keep working as ordinary evaluator objects.
+
+If the judgment really does need natural-language reasoning, keep it in criteria — but make each rule as observable as the problem allows.
 
 ## Pick the score type
 
 **Pass / fail** is the easiest to calibrate. Reviewers tend to agree on binary judgments; judges are most consistent at them. Start here.
 
-**1–5 scale** is more nuanced — useful when pass and fail hide detail you care about (1 = "actively harmful," 5 = "fully resolves it," 3 = "technically correct but blunt"). You anchor the scale at three points — **Rate 5 when…**, **Rate 3 when…**, **Rate 1 when…** — each anchor a single sentence. Scores of 2 and 4 have no anchor text of their own; they land between yours, so write the three anchors as clearly distinguishable behaviors. A **Pass threshold** control (≥2 / ≥3 / ≥4 / ≥5, default **≥3**) converts the score into the pass/fail verdict the rest of the product reports: scores at or above the threshold count as a pass. Cost: reviewer agreement on a scale is markedly lower than on binary, so calibration takes longer.
+**1–5 scale** is more nuanced — useful when pass and fail hide detail you care about (1 = "actively harmful," 5 = "fully resolves it," 3 = "technically correct but blunt"). You anchor the scale at three points — **Rate 5 when…**, **Rate 3 when…**, **Rate 1 when…** — each anchor a single sentence, and all three are required. Scores of 2 and 4 have no anchor text of their own; they land between yours, so write the three anchors as clearly distinguishable behaviors. A **Pass threshold** control (≥2 / ≥3 / ≥4 / ≥5, default **≥3**) converts the score into the pass/fail verdict the rest of the product reports: scores at or above the threshold count as a pass. Cost: reviewer agreement on a scale is markedly lower than on binary, so calibration takes longer.
 
 **Rule of thumb:** start pass/fail. Move to the 1–5 scale only when you can name the specific gradations the binary view is collapsing — and write those gradations into the anchors.
 
 ## Draft with Tailor with AI
 
-On the evaluator create form, the **Tailor with AI** box drafts the rules for you: describe what you want to check in one sentence under **Describe what this evaluator should check**, click **Draft for my agent**, and draft pass/fail rules (or scale anchors) prefill the rule lists. Nothing is saved until you save — the draft is a starting point for review, not a finished rubric.
+On the **New evaluator** form — create mode only, and only for an LLM judge — the **Tailor with AI** box drafts the criteria for you: describe what you want to check in one sentence under **Describe what this evaluator should check**, click **Draft for my agent**, and the form fills in a name, a description, a score type, and a set of pass/fail rules. Drafting also switches **Judge criteria** from the prompt box to the structured rule lists, so you review discrete rows rather than a paragraph. Nothing is saved until you save.
 
 Treat the draft the way you'd treat a colleague's first pass:
 
@@ -97,26 +143,51 @@ Treat the draft the way you'd treat a colleague's first pass:
 
 ## When to turn on Reason step by step
 
-The **Reason step by step** toggle makes the judge think through each criterion before deciding, instead of returning a snap verdict. It's slower, but better at catching subtle failures like tool order or arguments. Turn it on when your rules reference *how* the agent did something (which tools, in what order, with what arguments) rather than just *what* the final response says — and leave it off for simple response-content checks, where it mostly adds latency.
+The **Reason step by step** toggle makes the judge work through each criterion before deciding, instead of returning a snap verdict. It's slower, but better at catching subtle failures like tool order or arguments. Turn it on when your criteria reference *how* the agent did something (which tools, in what order, with what arguments) rather than just *what* the final response says — and leave it off for simple response-content checks, where it mostly adds latency.
 
-## Calibrate — the loop that makes the rules trustworthy
+The toggle is an LLM-judge control: it doesn't appear on a Groundedness judge's form, and the service refuses to set it on any other kind.
 
-Authoring is half the work. The other half is proving the judge agrees with you, on the **Calibrate** tab of the evaluator's panel (LLM Judge evaluators only — Structured Match has nothing to calibrate). A judge is only useful if its verdicts agree with yours, and the pass/fail verdicts you recorded on scenarios are the ground truth here — your verdict grades the judge; it never overrides the automated result.
+## When advanced prompt editing is the right call
+
+Reach for it when a rule list genuinely can't express what you need — a judge that has to weigh several conditions against each other, or one whose framing matters as much as its criteria. Reach for the rules the rest of the time: discrete rows are what make a disagreement in the calibration table traceable back to a single line you can tighten.
+
+Whichever mode you're in, the criteria still have to earn trust the same way — by calibrating.
+
+## Calibrate — the loop that makes the criteria trustworthy
+
+Authoring is half the work. The other half is proving the judge agrees with you, on the **Calibrate** tab of the evaluator's panel.
+
+**Calibrate is an LLM-judge tab, and only an LLM-judge tab.** It is not about determinism — a Groundedness judge is a model too, and it has no **Calibrate** tab either, nor does an outcome-grounded evaluator. Where it doesn't apply the tab is hidden, not disabled.
+
+The pass/fail verdicts you recorded on scenarios are the ground truth here — your verdicts grade the judge.
+
+The loop, in short:
+
+1. **Mark scenarios pass or fail yourself.** Aim for 10–20 spanning both passes and fails — don't only mark the easy cases. If nothing is marked, the tab says so and links you to where you can fix it, rather than offering a dead button.
+2. **Confirm the sample, then click Calibrate.** The **Check agreement** section takes two picks — **Scenarios** and **Your verdicts** — but in the common case there is nothing to pick: a lone eligible source is selected for you, and a source with a single pass/fail column auto-picks that column too. The button stays disabled until the picked column has at least one verdict on it. The caption is honest about scope: *"Checks up to 20 rows — takes about a minute."*
+3. **Read the agreement headline.** A plain-language agreement rate with a verdict breakdown. The vocabulary is *agreement*, deliberately — no F1 or precision to decode.
+4. **Work the disagreements.** The **Row by row — disagreements first** table puts every scenario where you and the judge split at the top. The disagreements are the data.
+5. **Tighten the criteria and save.** Once you've edited, the last result carries a **Criteria changed since this check** warning — the agreement on screen reflects the *old* criteria until you re-check.
+6. **Re-calibrate and repeat.** After a first result the button reads **Re-calibrate**, and **Calibration history** keeps every check, newest first.
+
+The check runs the *exact production judge* — same model, same criteria, same parser as a real evaluation run. For the full walkthrough, including the empty states and how to read the breakdown, see [Calibrate an evaluator](/how-to/calibrate-an-evaluator).
+
+Don't chase 100%. Perfect agreement on a small set usually means the criteria have over-fit those specific scenarios. A well-calibrated judge tolerates a small disagreement rate — and on a healthy one, the remaining disagreements are typically the genuinely ambiguous cases a human reviewer would also have flagged for discussion.
 
 <Note>
   *Ask the Trust Agent:* "Update my Policy Quote Accuracy evaluator's rules and calibrate it against the scenarios I've marked." It proposes the rule edit for approval and follows it with a calibration check, so you see the agreement move in the same conversation.
 </Note>
 
-The loop:
+## The Groundedness judge has nothing to author
 
-1. **Mark scenarios pass or fail yourself.** Pick 10–20 spanning both passes and fails — don't only mark the easy cases. If nothing is marked yet, the Calibrate tab's empty state points you at the exact place to do it.
-2. **Click Calibrate in the Check agreement section.** The check runs the *exact production judge* — same model, same prompt, same parser as a real evaluation run — against your marked scenarios. Calibration samples at most 20 scenarios per check and takes about a minute.
-3. **Read the agreement headline.** You get a plain-language agreement rate with a verdict breakdown. The vocabulary is *agreement*, deliberately — no F1 or precision to decode.
-4. **Work the disagreements.** The **Row by row — disagreements first** table puts every scenario where you and the judge split at the top. The disagreements are the data — they show exactly where the rules are wrong.
-5. **Tighten the rules and save.** Rule edits commit with **Save grading rules**. Once you've edited, the last result shows a stale-rubric warning — the agreement on screen reflects the *old* rules until you re-check.
-6. **Re-calibrate and repeat.** After a first result the button reads **Re-calibrate**. **Calibration history** keeps every check, newest first, so you can watch agreement climb as the rules tighten.
+Almost nothing on this page applies to a **Groundedness judge**, so it's worth saying plainly what it does instead of leaving you looking for a rule editor that isn't there.
 
-Don't chase 100%. Perfect agreement on a small set usually means the rules have over-fit those specific scenarios. A well-calibrated rubric tolerates a small disagreement rate — and on a healthy rubric, the remaining disagreements are typically the genuinely ambiguous cases a human reviewer would also have flagged for discussion.
+- **No criteria and no score type.** Its rubric is built in and can't be edited; it always scores pass/fail. Its **Criteria** tab explains how the judge works and lists the claim verdicts it can return — **Supported**, **Contradicted**, **Unsupported**, **Unknown**, **Conversational** — rather than offering an editor.
+- **Two levers, and only two.** **Additional guidance** on the evaluator, appended to the built-in rubric for domain quirks it should respect, and the **reference material** attached to each scenario's **Expected Output** tab. Guidance is optional; leave it blank to grade with the standard rubric.
+- **Reference material is per scenario, never on the evaluator.** The same judge grades different scenarios against different sources — and a scenario with no reference material isn't graded by it.
+- **No Calibrate tab**, as above.
+
+See [Evaluators](/concepts/evaluators) for the full picture.
 
 ## Common pitfalls
 
@@ -125,10 +196,10 @@ Don't chase 100%. Perfect agreement on a small set usually means the rules have 
     **Symptom:** the judge passes nearly every scenario, including ones you'd clearly fail.
 
     **Common causes:**
-    - The pass rules are vibes ("the response is reasonable") — the judge can always find a reading that satisfies them
+    - The pass criteria are vibes ("the response is reasonable") — the judge can always find a reading that satisfies them
     - There are no **Fails when…** rules at all, so nothing names what failure looks like
 
-    **Fix:** rewrite each pass rule as an observable behavior, and add explicit fail rules for the failures you've actually seen. The judge's framing and temperature are already pinned by the product — leniency here is always a rules problem.
+    **Fix:** rewrite each pass rule as an observable behavior, and add explicit fail rules for the failures you've actually seen. The judge's framing and temperature are pinned by the product — leniency here is always a criteria problem.
   </Accordion>
 
   <Accordion title="The 'over-reject' judge">
@@ -136,23 +207,31 @@ Don't chase 100%. Perfect agreement on a small set usually means the rules have 
 
     **Common causes:**
     - A fail rule is broader than you intended ("fails when the response is incomplete" — incomplete by what standard?)
-    - You're grading against an implicit requirement the rules never state (the agent had to close with an offer to help — but no rule says so)
+    - You're grading against an implicit requirement the criteria never state (the agent had to close with an offer to help — but nothing says so)
 
-    **Fix:** re-read the rules as if you'd never seen the responses. Every requirement you actually hold should be its own explicit rule; everything else should be deleted.
+    **Fix:** re-read the criteria as if you'd never seen the responses. Every requirement you actually hold should be stated explicitly; everything else should be deleted.
   </Accordion>
 
   <Accordion title="The 'flaps' judge">
     **Symptom:** the same scenario scores differently across checks.
 
-    **Cause:** ambiguous rules. The judge runs at temperature 0 with a fixed model and prompt, so the model settings are never the variable — the usual culprit is rules loose enough that the judge picks a different interpretation per call.
+    **Cause:** ambiguous criteria. The judge runs at temperature 0 with a fixed model and system prompt, so the model settings are never the variable — the usual culprit is criteria loose enough that the judge picks a different interpretation per call.
 
     **Fix:** find the flapping scenarios in the disagreements table, identify which rule they hinge on, and tighten it until two careful humans reading it would agree.
+  </Accordion>
+
+  <Accordion title="The 'everything fails' judge">
+    **Symptom:** after hand-editing the prompt, every scenario scores fail.
+
+    **Cause:** the prompt stopped speaking the verdict vocabulary the parser reads. A pass/fail judge's reply is read for PASS or FAIL; a 1–5 judge's for a score. A prompt that instructs some other output format doesn't change the parser — it just fails to parse, and the scenario degrades to fail.
+
+    **Fix:** heed the inline warning under the criteria box and add an explicit instruction like *"Answer PASS or FAIL."* Switching back to structured rules also fixes it, since assembled criteria always speak the right vocabulary.
   </Accordion>
 
   <Accordion title="The 'category-blind' judge">
     **Symptom:** a whole category of responses (e.g., "agent returned an error") all score the same way, ignoring real differences within the category.
 
-    **Cause:** no rule accounts for the category, so the judge applies the same default verdict across it.
+    **Cause:** nothing in the criteria accounts for the category, so the judge applies the same default verdict across it.
 
     **Fix:** add an explicit rule for the category. "Fails when the agent returns an error, unless the error message correctly identifies that the customer's input was missing required information."
   </Accordion>
@@ -183,7 +262,7 @@ This calibrates well because each rule is testable independently, failure is exp
 
 ### Example 2 — Tone and completeness (1–5 scale)
 
-**Use case:** evaluating whether an agent's *style* matches your brand voice. Note this is intentionally a *style* rubric, not a *correctness* rubric — combining the two in one Evaluator is an anti-pattern.
+**Use case:** evaluating whether an agent's *style* matches your brand voice. Note this is intentionally a *style* rubric, not a *correctness* rubric — combining the two in one evaluator is an anti-pattern.
 
 ```
 Rate 5 when… the response is friendly, complete, jargon-free, and ends
@@ -196,21 +275,21 @@ Rate 1 when… the response is off-tone (sarcastic, condescending,
   jargon-heavy) or so incomplete it fails to answer.
 ```
 
-Set the **Pass threshold** to **≥3** so an adequate-but-flat response still passes while tone regressions below it fail. Two separate Evaluators (this style one plus the accuracy one from Example 1) beat one combined rubric, because regressions in tone don't drown out regressions in accuracy.
+Set the **Pass threshold** to **≥3** so an adequate-but-flat response still passes while tone regressions below it fail. Two separate evaluators (this style one plus the accuracy one from Example 1) beat one combined rubric, because regressions in tone don't drown out regressions in accuracy.
 
 ## What's next
 
 <CardGroup cols={2}>
   <Card title="Build your first Evaluator" icon="ruler" href="/tutorials/build-first-evaluator">
-    The hands-on tutorial that walks through authoring and calibrating an LLM Judge end-to-end.
+    The hands-on tutorial that walks through authoring and calibrating an LLM judge end-to-end.
+  </Card>
+  <Card title="Calibrate an evaluator" icon="target" href="/how-to/calibrate-an-evaluator">
+    The full Calibrate walkthrough — picking the sample, reading agreement, and working the disagreement table.
   </Card>
   <Card title="Read about Evaluators" icon="book-open" href="/concepts/evaluators">
-    Full conceptual reference — the evaluator families, the recommended-evaluator catalog, and reuse semantics.
+    Full conceptual reference — the evaluator kinds, the recommended catalog, and reuse semantics.
   </Card>
   <Card title="Read about Annotations" icon="tag" href="/concepts/annotations">
-    Session-level human verdicts, which ground evaluator accuracy on runs — your verdicts grade the judges, never the other way around.
-  </Card>
-  <Card title="Compare two Agent Versions" icon="git-branch" href="/how-to/compare-agent-versions">
-    Where the calibrated Evaluators ultimately serve — tracking regressions across versions.
+    Session-level human verdicts, which ground evaluator accuracy on runs — your verdicts grade the judges.
   </Card>
 </CardGroup>
