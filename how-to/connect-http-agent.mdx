@@ -114,8 +114,15 @@ A tool's `parameters` schema is stored byte-for-byte alongside the profile revis
 ## Prerequisites
 
 - A **Trust AI Project**. If you don't have one, start with [Your first 10 minutes in Trust AI](/tutorials/quickstart).
-- Your agent's **base URL**, reachable from Trust AI. It must be an absolute `http://` or `https://` URL with no query string, no fragment, and no embedded credentials — Trust AI rejects anything else with *"Base URL must be an absolute HTTP or HTTPS URL"*.
-- The **run** and **health** paths, if they differ from the defaults. Both must start with `/`.
+- Your agent's **base URL**, reachable from Trust AI. Three separate rules apply, and each is rejected in its own words — match the message to the rule rather than reading them as one:
+
+  | The base URL | Message on save |
+  |---|---|
+  | is not an absolute `http://` or `https://` URL | *"Base URL must be an absolute HTTP or HTTPS URL"* |
+  | carries a `user:password@` prefix | *"Base URL must not contain embedded credentials"* |
+  | carries a query string or a `#` fragment | *"Base URL must not contain a query string or fragment"* |
+
+- The **run** and **health** paths, if they differ from the defaults. Each must start with `/` and carry no query string or fragment — one message covers both faults: *"Endpoint paths must start with '/' and must not contain a query string or fragment"*.
 - A **bearer token**, if your agent requires one.
 
 ## Connect the agent
@@ -201,7 +208,20 @@ Capture reads `/agui/capabilities` once and builds an immutable **profile revisi
 - The agent's **name**, **description**, and **version** as its identity
 - The **Tools** tab, one entry per published tool, each with the exact schema bytes it advertised
 - The **Sources** tab, one entry per published prompt and knowledge source
-- **Discovery coverage** per area — **Captured** where the manifest published a block, **Partial** where it published some of one
+- **Discovery coverage** — four areas, each pilled **Captured**, **Partial**, or **Limited**
+
+### What the coverage pills will say
+
+Coverage is not simply "did you publish the block". Two of the four areas can never read **Captured** from a capabilities manifest, however complete it is, so don't read a **Partial** there as something you left out:
+
+| Area | Captured | Partial | Limited |
+|---|---|---|---|
+| **Tool schemas** | every published tool was readable | some were | the manifest published none |
+| **Policy and knowledge sources** | every published source was readable | some were | the manifest published none |
+| **Agent identity and behavior summary** | never on capture | your `agent.description` was read | no description published |
+| **System instructions and observed behavior** | never on capture | your `prompts` block was read | no prompts published |
+
+The last two are honest gaps, not misconfiguration. **Captured** on identity additionally needs behavioral rules, and capture records none — a discovered revision is provider-grounded only, so the panel says *"No behavioral rules were captured for this version."* **Captured** on the fourth row additionally needs sampled conversations or safe probes, and capture runs neither: it reads one endpoint and stops. Both rows settle at **Partial** on a fully populated manifest.
 
 The row's pill then reads **Profile available**, and the fly-in header reads **Version-pinned profile**. Reviewing is per-revision: **Approve** or **Request changes**. See [Agent Profile](/concepts/agent-profile) for what a revision is and why review doesn't carry forward.
 
@@ -229,8 +249,10 @@ The row's pill then reads **Profile available**, and the fly-in header reads **V
     The last one is the common first-integration mistake: emit `RUN_FINISHED`.
   </Accordion>
 
-  <Accordion title="The profile says it isn't available, or captures nothing">
-    Profile capture reads `/agui/capabilities` under the base URL — a fixed path the **Run endpoint** field does not control. If that route 404s, or returns something that isn't a JSON object, capture fails while ordinary conversations keep working. Serve the manifest at that exact path, then use **Generate profile** again.
+  <Accordion title="The profile capture failed">
+    Profile capture reads `/agui/capabilities` under the base URL — a fixed path the **Run endpoint** field does not control. If that route 404s, or returns something that isn't a JSON object, capture fails while ordinary conversations keep working.
+
+    The row's pill reads **Profile failed** and the fly-in names the cause — *"The last profile capture failed: The agent's capability endpoint returned status 404, so no catalog could be read."* Serve the manifest at that exact path, then click **Try capturing again**. (**Generate profile** is the never-captured empty state's button; once a capture has failed, the retry control replaces it.)
   </Accordion>
 
   <Accordion title="The saved connection card shows a masked 'Secret Access Key'">
