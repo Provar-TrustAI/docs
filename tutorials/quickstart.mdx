@@ -74,7 +74,7 @@ You'll need:
       *Ask the Trust Agent:* "Pull in some of my real conversations so we have material to work from."
     </Note>
 
-    Or do it by hand: open **Sessions** and click **Sync now** — it opens a per-agent picker, so choose your connected agent. Conversations pulled from your platform land in the list. By default the list shows **Session ID**, **Transcript**, **Routed To**, **Tools Called**, **Turns**, and **Date**; **Source** is one of the columns you add from **Add column**, and it reads exactly one of **Scenario**, **Playground**, or **External** (see [Sessions](/concepts/sessions)).
+    Or do it by hand: open **Sessions** and click **Sync now** — it opens a per-agent picker, so choose your connected agent. Conversations pulled from your platform land in the list. By default the list shows **Session ID**, **Transcript**, **Routed To**, **Tools Called**, **Turns**, **Date**, and **Verdict** — the reserved human Pass/Fail column every project starts with. **Source** is one of the columns you add from **Add column**, and it reads exactly one of **Scenario**, **Playground**, or **External** (see [Sessions](/concepts/sessions)).
 
     Click any Session to open it. The fly-in leads with the full **Transcript** — every turn, tool calls included — plus tabs for **Annotations**, **Evaluations**, and **Details**. Read one end to end; this is the raw material everything downstream grades. A session nothing has scored yet reads **Not evaluated**.
 
@@ -134,9 +134,9 @@ You'll need:
   <Step title="Read the results">
     Open the run from **Evaluations**.
 
-    The run header carries the pass rate, the completed count, and the date it ran. The results body leads with a single headline stat — **Conversations passed**, e.g. "6 of 10 conversations". A run where nothing carries a behavioural grade reads **Not graded** rather than a fabricated number, and a simulation-only run has no headline stat at all, because nothing was scored.
+    The run header carries the completed count and the date it ran, led by the pass rate — or by **Not graded**, when the run carries no behavioural grade at all. The results body then leads with a single headline stat, **Conversations passed**, e.g. "6 of 10 conversations". That stat reads **Not graded** too, captioned "No conversation has been scored yet", whenever nothing on the run was behaviourally graded — which is exactly what a **Run only** run looks like. Neither place ever shows a fabricated number.
 
-    A second headline, **evaluator accuracy**, appears once you've recorded human Pass/Fail verdicts on sessions — it measures how often the automated judges agree with a person, grading the judges rather than the agent. Until then the column reads as empty.
+    A second headline, **evaluator accuracy**, appears once you've recorded human Pass/Fail verdicts on sessions — it measures how often the automated judges agree with a person, grading the judges rather than the agent. Until then it is absent from the header entirely, and the **Evaluator accuracy** column on the **Evaluations** list reads as empty.
 
     Below that is the results table. It opens **By scenario** — one group per scenario, expandable to its individual attempts — and the column gear switches it to **Flat** for a plain per-attempt table. Each row names the persona that drove the conversation, and carries the **Final verdict** plus one column per evaluator, so you can see *which* check failed and *who* the agent struggled with.
 
