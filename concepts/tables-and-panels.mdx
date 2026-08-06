@@ -64,9 +64,9 @@ The fly-in is the common case and the rest of this section describes it. The two
 
 ### Expanding rows: grouped run results
 
-A run's results open **By scenario** by default, and that view has a layer the rest of the app doesn't. Its top-level rows are not results — they are one **scenario summary** per scenario, carrying a rollup verdict and a passed-of-total count, with the individual trials nested beneath. Clicking a summary row **expands it in place** to reveal its trials; it does not fly anything in, because there is no single record behind it to show.
+A run's results open **By scenario** by default, and that view has a layer the rest of the app doesn't. Its top-level rows are not results — they are one **scenario summary** per scenario, carrying a rollup verdict and a passed-of-total count, with the individual **Trial** rows nested beneath. Clicking a summary row **expands it in place** to reveal those Trial rows; it does not fly anything in, because there is no single record behind it to show.
 
-Click a trial and the fly-in behaves normally. Switch the **View** toggle to **Flat** and every row is a real result again, so clicking any row opens the panel. Where a scenario has more than one trial, the result panel's header grows a scenario-scoped **Trial N of K** switcher for stepping between that scenario's runs without going back to the table.
+Click a **Trial** row and the fly-in behaves normally. Switch the **View** toggle to **Flat** and every row is a real result again, so clicking any row opens the panel. Where a scenario was repeated, the result panel's header grows a scenario-scoped **Trial N of K** switcher for stepping between that scenario's runs without going back to the table.
 
 <Note>
   Grouped run results are the only place a row expands. If a row expands instead of opening a panel, it's a scenario summary, not a record.
