@@ -63,7 +63,7 @@ The agent thinks and answers in the open. Reasoning, text, and tool-call argumen
   <Tab title="Reasoning and model calls">
     The model's thinking streams into a collapsible **reasoning rail**. While the agent is working you see a live **Thinking… *Ns*** timer filling the wait; when the reasoning resolves it collapses to **Thought for *Xs***, expandable if you want to read what the agent considered. Reasoning is persisted with the chat, so a reopened conversation rebuilds its Thinking rails rather than losing them.
 
-    The trace goes one level deeper than tools: each underlying model request appears as a **Model call** step with a plain-language summary — a friendly model name and the token counts, like *Model call · 1180 in / 142 out* — and the raw request and response tucked behind an opt-in **Input**/**Output** disclosure. A raw model identifier or a JSON dump never reaches the surface.
+    The trace goes one level deeper than tools: each underlying model request appears as a **Model call** step with a plain-language summary — a friendly model name and the token counts, like *Claude Opus 4.8 · 1180 in / 142 out* — and the raw request and response tucked behind an opt-in **Input**/**Output** disclosure. A raw model identifier or a JSON dump never reaches the surface.
 
     Both trace kinds are provider-dependent, and the trace degrades honestly. Where the underlying model provider can't emit reasoning, there is simply no Thinking rail — not a blank frame or an error — and Model call steps appear only where the provider surfaces that request boundary.
 
@@ -95,7 +95,7 @@ References carry their live state with them. A finished evaluation that produced
 
 ### The in-chat scenario workspace
 
-A scenario reference doesn't bounce you out of the conversation. Clicking one opens the **full** scenario detail over the chat — the same tabbed panel the Scenarios list opens, with **Personas & Goals**, **Expected Output**, **Test Data**, and **Sessions** — and the Sessions tab drills one level further into a run's transcript, evaluations, and annotations without leaving the chat.
+A scenario reference doesn't bounce you out of the conversation. Clicking one opens the **full** scenario detail over the chat — the same tabbed panel the Scenarios list opens, with **Personas & Goals**, **Expected Output**, and **Sessions** — and the Sessions tab drills one level further into a run's transcript, evaluations, and annotations without leaving the chat.
 
 Runs launch from there in place, too: the panel's **Run & evaluate** and **Run only** controls start the run you asked for over the conversation, instead of sending you to the Scenarios list to pick the mode a second time.
 
@@ -124,7 +124,7 @@ The Trust Agent stops for you before it does anything consequential. Approvals u
 - A **connect-agent card** — the secure in-chat gate for connecting the agent you want to test.
 - A **choose-agent card** — picks which Salesforce agent a just-provisioned connection should use.
 
-All five halt the run the same way: the agent's turn pauses at that tool call, and only your decision resumes it. Question cards can be waved off with **Skip**, which lets the conversation continue without an answer. A question card offers a free-text **Other** answer when the agent asks for one — that is a per-question choice, not something every card carries.
+All five halt the run the same way: the agent's turn pauses at that tool call, and only your decision resumes it. Every card can also be waved off rather than answered — question cards with **Skip**, a permission card with its floating **×**, which approves nothing and hands the turn back with *You dismissed the request. I'll wait for your next message.* A question card offers a free-text **Other** answer when the agent asks for one — that is a per-question choice, not something every card carries.
 
 ### What a permission card asks
 
@@ -138,7 +138,7 @@ You get three scopes, not one button:
 | **Always … in this chat** | Creates a **standing approval** — for example, "Always create evaluators in this chat". Offered for create, update, and run actions, and only when the agent proposes it. |
 | **Reject** | A row that *is* a note field, placeholder **Reject — and tell me why (optional)**. Type a reason or leave it blank. |
 
-The footer's primary control follows what you picked: **Approve** for either grant, **Send rejection** once the reject row is selected. Your decision is recorded in the transcript afterwards — **You approved: Create it**, **You rejected: *&lt;your note&gt;*** — so the audit trail a reopened chat shows matches what happened live.
+The footer's primary control follows what you picked: **Approve** for either grant, **Send rejection** once the reject row is selected. A delete card is the exception — its primary control names the destruction and its scale, **Delete *N* items**, in a danger tone, and it reverts to a neutral control the moment you select reject, because rejecting a delete is a cancellation rather than a destructive act. Your decision is recorded in the transcript afterwards — **You approved: Create it**, **You rejected: *&lt;your note&gt;*** — so the audit trail a reopened chat shows matches what happened live.
 
 <Warning>
   **A permission card halts the run — unless a standing approval already covers that write.** A write covered by a live standing grant commits with no card and no pause. That is the point of granting one, and it is worth understanding before you do.
@@ -238,7 +238,9 @@ Two guardrails keep authored coverage tied to evidence rather than to the model'
 
 **The connected agent's profile is pinned per session.** At a conversation's first run, one [Agent Profile](/concepts/agent-profile) revision is resolved for the project's connected agent and pinned to that session. Every later turn — including a resume after an approval — reads that same snapshot, so a profile refresh landing mid-conversation never changes what the agent has already been reasoning from. The profile is injected as hidden context, never as a transcript message: you won't see it in the conversation, and it carries only the profile's humanised facts — no identifiers, no secrets. Where there is no captured profile, the agent is told so explicitly rather than handed an invented one.
 
-**Expected outcomes are hard-gated on having read the real data.** Before the agent can save a scenario's expected end-state records, it must first have read that scenario's test data — or the connected store — in this session. It is a runtime gate, not a prompt suggestion: an ungrounded write is refused rather than quietly committed. The rule it protects is simple: a scenario states the objective, never the procedure. Expected records come from recorded evidence of the connected agent, not from memory.
+**Expected output is gated on having read the real data.** Before the agent can save a scenario's expected end-state records, it must first have read that scenario's own records — or the project's connected data store — in this session. It is a runtime gate, not a prompt suggestion: an ungrounded write is refused, and the refusal names the store you have to go read first, rather than quietly committing.
+
+Know the gate's one deliberate limit: it fires only when a store can be **positively confirmed**. A project with no connected data store, or one whose store is momentarily unreachable, is not blocked — the gate never fails a write over evidence it cannot see. So treat it as a guard against inventing an end state next to real data, not as proof that every expected record was checked against a store. The rule it protects is simple: a scenario states the objective, never the procedure. Expected records come from recorded evidence of the connected agent, not from memory.
 
 The agent can also read the connected agent's own definition straight from its platform — system prompt, model, tools, MCP servers, and skills — as a metadata-only read that starts no conversation. It's the fastest way for the agent to learn what it is testing, and where a platform exposes no definition, it says so and falls back to watching a conversation. What it learns is written back as a reviewable Agent Profile revision, not as chat text.
 
@@ -253,7 +255,7 @@ On a brand-new project, the Trust Agent doesn't wait for you to know what to ask
 
 The Welcome page is setup-aware to match. A brand-new project (no sessions or data yet) gets four cold-start starter pills — **Connect agent**, **Explore behaviour**, **Create scenarios**, **Run evaluation** — that steer into this arc; a warmed-up project gets a curated set instead (**Curate data**, **Annotate data**, **Evaluate agent**, **Analyze failures**). Picking a pill expands its example prompts, and picking a prompt pre-fills the composer — the same never-auto-send contract as the next-step chips.
 
-When the agent generates test coverage, it creates flat, persona-and-goal [scenarios](/concepts/scenarios) — no transcripts yet — and simulation happens later, at evaluation time, when fresh conversations are played out per persona against the pinned agent build. Generated scenarios land directly in your project's one flat Scenarios list — there is no intermediate collection to manage.
+When the agent generates test coverage, it creates flat, persona-and-goal [scenarios](/concepts/scenarios) — no transcripts yet — and simulation happens later, at evaluation time, when fresh conversations are played out per persona against the pinned agent version. Generated scenarios land directly in your project's one flat Scenarios list — there is no intermediate collection to manage.
 
 ## How the Trust Agent runs
 
@@ -281,7 +283,7 @@ Write execution is **tenant-scoped and server-anchored**. An approved write exec
 
 Tool permissions are a workspace **restriction** model, not an allowlist, and the difference matters:
 
-- **The default is allow-all.** A tool with no permission rule is available. A workspace that never opens the admin surface gets every tool.
+- **The default is allow-all.** A tool with no permission rule is available. A workspace that never opens the admin surface gets every tool the Trust Agent offers it.
 - **A workspace opts a tool *out*** — disabling it, or restricting it to a role — from Workspace Settings.
 - **A restriction is enforced twice.** A restricted tool is dropped before the agent's tool surface is built, so the model never learns it exists, and it is re-checked at call time so a stale or replayed call still fails closed.
 
