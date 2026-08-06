@@ -11,7 +11,7 @@ This is the **deep how-to** on authoring an **LLM judge**'s criteria. If you jus
 - Don't drift across scenarios that should score the same
 
 <Note>
-  **This page is about the LLM judge kind only.** A **Groundedness judge** has no criteria and no score type — see [what it does instead](#the-groundedness-judge-has-nothing-to-author). Creating a **Structured match** evaluator is retired; structural route and tool checks live on a scenario's **Expected Output** instead. Neither kind has a **Calibrate** tab.
+  **This page is about the LLM judge kind only.** A **Groundedness judge** has no authorable criteria and no score-type choice — see [what you author instead](#what-a-groundedness-judge-lets-you-author). Creating a **Structured match** evaluator is retired; structural route and tool checks live on a scenario's **Expected Output** instead. Neither kind has a **Calibrate** tab.
 </Note>
 
 ## Two ways to author an LLM judge's criteria
@@ -178,12 +178,14 @@ Don't chase 100%. Perfect agreement on a small set usually means the criteria ha
   *Ask the Trust Agent:* "Update my Policy Quote Accuracy evaluator's rules and calibrate it against the scenarios I've marked." It proposes the rule edit for approval and follows it with a calibration check, so you see the agreement move in the same conversation.
 </Note>
 
-## The Groundedness judge has nothing to author
+## What a Groundedness judge lets you author
 
-Almost nothing on this page applies to a **Groundedness judge**, so it's worth saying plainly what it does instead of leaving you looking for a rule editor that isn't there.
+Almost nothing on this page applies to a **Groundedness judge**, so it's worth saying plainly what you get instead of leaving you looking for a rule editor that isn't there. It has a **Criteria** tab like any other evaluator — but the tab reads mostly as an explainer, with exactly one editable field.
 
-- **No criteria and no score type.** Its rubric is built in and can't be edited; it always scores pass/fail. Its **Criteria** tab explains how the judge works and lists the claim verdicts it can return — **Supported**, **Contradicted**, **Unsupported**, **Unknown**, **Conversational** — rather than offering an editor.
-- **Two levers, and only two.** **Additional guidance** on the evaluator, appended to the built-in rubric for domain quirks it should respect, and the **reference material** attached to each scenario's **Expected Output** tab. Guidance is optional; leave it blank to grade with the standard rubric.
+- **No rules to write, and no score type to pick.** Its rubric is built in and can't be edited, and it always scores pass/fail — the score type shows on **Overview** as a fixed value, not a choice.
+- **Two levers, and only two.** **Additional guidance**, appended to the built-in rubric for domain quirks it should respect, and the **reference material** attached to each scenario's **Expected Output** tab. Guidance is optional; leave it blank to grade with the standard rubric.
+- **Guidance is edited on the Criteria tab.** That's the one editable field on the tab — click into **Additional guidance**, type, and it saves in place; clear it to go back to the standard rubric.
+- **The rest of the tab is read-only, and worth reading.** **How this judge works** states what it checks and what it deliberately never judges (it never penalizes omissions, and never judges tone, style, or formatting). **Verdict vocabulary** lists the claim verdicts it can return — **Supported**, **Contradicted**, **Unsupported**, **Unknown**, **Conversational**. **Grades these scenarios** lists every scenario the judge is attached to and names the reference material on each, so the ones still reading **No reference material** are visible without opening them one at a time.
 - **Reference material is per scenario, never on the evaluator.** The same judge grades different scenarios against different sources — and a scenario with no reference material isn't graded by it.
 - **No Calibrate tab**, as above.
 
