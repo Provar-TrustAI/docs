@@ -58,9 +58,11 @@ Annotating is hands-on judgment work — you do it directly on the Sessions surf
 
     Read the transcript, judge, annotate, then press <kbd>J</kbd> / <kbd>K</kbd> (or the arrow keys) to move to the next or previous Session without closing the panel — that rhythm is how a batch gets graded.
 
+    **One exception, and it bites exactly where this recipe lands you: the shortcuts stand down while your cursor is in a field.** With focus inside the **Reviewer note** box — where you just finished typing — <kbd>J</kbd> and <kbd>K</kbd> are plain letters and get typed into the note instead of moving the panel. Take focus out of the box first: click anywhere else in the panel, or press <kbd>Tab</kbd>. Either gesture also flushes the note, so nothing you wrote is lost. The same guard covers <kbd>F</kbd> (fullscreen) and every text input on the surface.
+
     {/* CAPTURE-PENDING: session-fly-in-annotations still — the fly-in's Annotations tab showing the Verdict buttons, Severity chips, and a Reviewer note in progress */}
 
-    **You should see:** the **Annotations** tab list every column in the schema, your note persist without a save click, and <kbd>J</kbd> / <kbd>K</kbd> walk the list.
+    **You should see:** the **Annotations** tab list every column in the schema, your note persist without a save click, and <kbd>J</kbd> / <kbd>K</kbd> walk the list once focus is out of the note box.
   </Step>
 
   <Step title="Create a custom annotation column">
@@ -107,7 +109,7 @@ The automated pill has **four** labels, not three — the neutral state is two d
 | **Pass** | Every counted evaluation on this Session passed |
 | **Fail** | At least one counted evaluation failed |
 | **Not evaluated** | No evaluation has ever run against this Session |
-| **Not graded** | Evaluations exist, but none of them produced a behavioural score — every run against the Session was either excluded from the denominator (an **Environment problem** or a **Guardrail blocked** outcome) or scored nothing that judges the agent's behaviour |
+| **Not graded** | Evaluations exist, but none of them produced a behavioural score — every run against the Session was either excluded from the denominator (a **Guardrail blocked**, **Environment problem**, or **Access blocked** outcome) or scored nothing that judges the agent's behaviour |
 
 Read the difference as a next action. **Not evaluated** means nobody has run the judges yet — run them. **Not graded** means someone did, and the run never got far enough to say anything about the agent — fix the run, then re-run it. Neither is a Fail, and neither ever becomes a Pass because you recorded a human Verdict.
 
@@ -144,6 +146,10 @@ Once a batch is graded, the natural next move is to run the judges over it — s
 
   <Accordion title="I can't edit a Score, Tags, or Comment cell in the table">
     In the table, only **Pass / Fail** and **Category** cells edit inline. **Score**, **Tags**, and **Comment** values are written in the fly-in — open the row and use the **Annotations** tab.
+  </Accordion>
+
+  <Accordion title="I pressed J and it typed a letter into my note">
+    The panel's <kbd>J</kbd> / <kbd>K</kbd> / <kbd>F</kbd> shortcuts deliberately stand down while focus sits in a text field, so a reviewer typing a note can't have every keystroke hijack the panel. Click outside the **Reviewer note** box — or press <kbd>Tab</kbd> — and the shortcuts come back. Delete the stray letters; leaving the field saves whatever the note reads at that moment.
   </Accordion>
 
   <Accordion title="I picked the wrong type for a column">
