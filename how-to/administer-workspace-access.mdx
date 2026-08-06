@@ -47,10 +47,14 @@ Each tab is a stable, bookmarkable route, so a refresh or a shared link lands on
 
 The surface uses two distinct vocabularies — keep them apart:
 
-- **Workspace roles** describe someone's standing in the workspace: **Owner**, **Admin**, **Member**, **Guest**. The Owner has full access to every project and ownership is never reassignable from this surface; Admins manage members, teams, and access; Members get standard access to the projects they're granted; Guests are external and project-scoped, with no teams.
+- **Workspace roles** describe someone's standing in the workspace: **Owner**, **Admin**, **Member**, **Guest**. Ownership is never reassignable from this surface; Admins manage members, teams, and access; Members get standard access to the projects they're granted; Guests are external and project-scoped, with no teams.
 - **Project access tiers** describe what a grant on one project confers: **Viewer** (read) or **Editor** (read and change). These are the only two grantable tiers — admin-level access is conferred by ownership, never granted from a dialog.
 
-One rule ties them together: **project content is always gated by a project grant, admins included**. A workspace Admin who has no grant on a project doesn't see its content — the roles reference renders those cells as "Needs grant" rather than a blanket allow.
+One rule ties them together: **project content is always gated by a project grant, and no workspace role is an exception — Owner included**. A workspace Admin who has no grant on a project doesn't see its content, and neither does the workspace Owner; the roles reference renders those cells as "Needs grant" rather than a blanket allow.
+
+<Warning>
+  The member sheet renders the Owner's role as a read-only line, "Owner — full access to every project in the workspace." Read that as administrative standing, not as a content key. At this release the content check resolves purely from the project grant, so a workspace Owner with no grant on a project is denied its contents exactly like anyone else.
+</Warning>
 
 Wherever you pick a role — the invite dialog and the member sheet — a **What can each role do?** link opens a read-only reference drawer summarizing what each workspace role is allowed to do, across every project. You never have to leave the flow to check.
 
@@ -135,7 +139,7 @@ Teams exist so you can grant project access once instead of per person.
 
 <Steps>
   <Step title="Open the project's access panel">
-    On the **Project access** tab, click a project's row. The sheet that opens is headed by the **project's own name**, with its description underneath, and holds two sections: **Teams with access** and **People with access**. A section with nothing in it is simply not drawn.
+    On the **Project access** tab, click a project's row. The sheet that opens is headed by the **project's own name**, with its description underneath (or, for a project with no description, the line "Who can reach this project — and how."). It holds two sections, and they behave differently when empty: **Teams with access** is drawn only when a team actually holds a grant, while **People with access** is always drawn — with no direct grants it reads "No people have a direct grant yet."
 
     The same access surface is also mounted inside each project, at Project Settings → **Members**, where it is headed **Project access** — "Who can reach this project — and whether it's a direct grant or inherited from a team". Grants made in either place are the same grants.
   </Step>
@@ -151,7 +155,9 @@ Teams exist so you can grant project access once instead of per person.
   </Step>
 
   <Step title="Read the provenance, adjust, or revoke">
-    Every grant row tells you *how* the access exists: a **Direct** pill for a per-person grant, a **via [team]** chip when the access is inherited through a team. A person can carry both at once. Each row's role is changeable inline between **Viewer** and **Editor**, and each row has a revoke action. One grant you may see but can't revoke: the project owner's own access, which is conferred by ownership rather than granted — its row has no revoke action.
+    Every grant row tells you *how* the access exists: a **Direct** pill for a per-person grant, a **via [team]** chip when the access is inherited through a team. A person can carry both at once. Each row's role is changeable inline between **Viewer** and **Editor**, and each row has a revoke action.
+
+    One grant you may see but can't change or revoke: the project owner's own access, conferred by ownership rather than granted. Its row shows a static badge reading **Admin** — a third label you will see nowhere else on this surface — with no Viewer/Editor control and no revoke action. **Admin** on a grant row means "this is the owner", not a third grantable tier.
   </Step>
 </Steps>
 
@@ -159,7 +165,14 @@ Teams exist so you can grant project access once instead of per person.
 
 Both the **Members** and **Project access** tabs carry a **View access history** button. It opens a right-anchored drawer — no navigation away from what you were doing — described in the app as "Every authorization decision and access change in this workspace, newest first. Select a person to trace how they reached the projects they can see."
 
-The feed is a table of **Person · Action · Resource · Outcome · When**, newest first, with an outcome of **Allowed** or a denial on every row, and a person's row is clickable to trace how they reached what they can see. Behind it, every access decision and permission change — including invite sends, revokes, and resends — is written to a durable, append-only audit trail; a permission change that can't be audited doesn't happen.
+The feed is a table of **Person · Action · Resource · Outcome · When**, newest first. Two kinds of row are interleaved, and the **Outcome** column is how you tell them apart:
+
+| Row | Outcome reads | Clickable |
+|---|---|---|
+| An **authorization decision** — someone tried to reach something | **Allowed** or **Denied** | Yes — opens that person's provenance |
+| A **permission change** — a grant, a revoke, an invite sent or withdrawn, a team edit | **Change** | No |
+
+So a grant you just handed out does not appear as "Allowed"; it appears as a **Change** row, tinted by what it did. Behind the feed, every access decision and permission change is written to a durable, append-only audit trail; a permission change that can't be audited doesn't happen.
 
 {/* CAPTURE-PENDING: access-history-drawer screenshot — the access history drawer opened from the Members tab */}
 
@@ -174,9 +187,11 @@ Two states are worth recognizing:
 
 ## The Connections tab
 
-**Connections** lists the Salesforce orgs your *workspace* is connected to — one card per org, showing which projects use it, its connection state, and how it signs in (for a connection made the recommended way, **Admin authorization**). Each card offers **Disconnect** — which tears the connection down in the org — and **Delete**, which removes it from Trust AI across every project that uses it. Both are destructive and both ask you to confirm.
+**Connections** lists the Salesforce orgs your *workspace* is connected to — one card per org, showing which projects use it, its connection state, and how it signs in (for a connection made the recommended way, **Admin authorization**).
 
-This tab is where you see connections your projects share. Creating one is a per-project job — see [Connect a Salesforce Agentforce agent](/how-to/connect-agentforce).
+Every card offers **Delete**, which removes the connection from Trust AI across every project that uses it. **Disconnect** — which also tears down the app Trust AI deployed in your Salesforce org — appears **only on connections made by admin authorization**, because those are the only ones with a Trust AI–deployed app to remove; a connection wired to an app your own admin created offers **Delete** alone. Both actions are destructive and both ask you to confirm.
+
+This tab is where you see connections your projects share. Reading a row, reusing an org, and choosing between the two removals are covered in full in [Manage Salesforce connections](/how-to/manage-salesforce-connections). Creating one is a per-project job — see [Connect a Salesforce Agentforce agent](/how-to/connect-agentforce).
 
 ## The General tab
 
@@ -222,5 +237,6 @@ This tab is where you see connections your projects share. Creating one is a per
 
 - **[Projects](/concepts/projects)** — how workspace membership and per-project access fit the Project model
 - **[Multi-tenancy](/concepts/multi-tenancy)** — the organization boundary all of this access control lives inside
+- **[Manage Salesforce connections](/how-to/manage-salesforce-connections)** — the Connections tab in full: reading a row, reusing an org, Disconnect vs Delete
 - **[Connect a Salesforce Agentforce agent](/how-to/connect-agentforce)** — how a Salesforce connection is created in the first place
 - **[Glossary](/glossary)** — the vocabulary in one place
