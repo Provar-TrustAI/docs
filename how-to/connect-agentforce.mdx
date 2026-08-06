@@ -132,14 +132,18 @@ Historical import is a different thing and it is not available for Agentforce. Y
   instead="the one-time admin authorization above"
   who="connections that already use them" />
 
-The **Sign-in method** selector exists only when you **edit** an existing connection, where it offers, in order:
+In **Project Settings**, the **Sign-in method** selector appears only when you **edit** an existing connection, where it offers, in order:
 
 - **Authorize TrustAI as an admin (recommended)**
 - **External Client App key + secret (legacy)**
 - **Certificate-based JWT (legacy)**
 - **Username + password (legacy)**
 
-Use it to keep an older connection working, or to move one onto the recommended path. Don't start a new connection on a legacy method — the create wizard doesn't offer them, and each one asks you to hand over credentials the admin authorization never needs. Secrets on those modes stay write-only: a saved value shows as **Configured** with the placeholder `•••• configured — leave blank to keep existing`, and a blank field keeps what's already stored.
+Use it to keep an older connection working, or to move one onto the recommended path.
+
+The chat card is the one exception, and it is worth knowing so you can walk past it: on a **new** connection, its sign-in step carries a collapsed **Advanced / legacy sign-in options** link that reveals two of the legacy modes, labelled **Key and secret** and **Certificate (JWT)** there. Leave it collapsed. **Authorize TrustAI (recommended)** is already selected, and each legacy mode asks you to hand over credentials the admin authorization never needs.
+
+Secrets on the legacy modes stay write-only: a saved value shows as **Configured** with the placeholder `•••• configured — leave blank to keep existing`, and a blank field keeps what's already stored.
 
 ## Troubleshooting
 
