@@ -30,7 +30,9 @@ This how-to walks you through a working session with the **Trust Agent** — the
 
     Getting from a pill to a sent prompt takes **two clicks, not one**. Clicking a pill doesn't fill the composer — it marks that pill active and expands an inline panel of three ready-made prompts underneath it (the panel has its own close control). Clicking one of *those* prompts fills the composer. Nothing streams unprompted: the prompt you submit is what sends as turn one and starts the first streaming reply.
 
-    {/* CAPTURE-PENDING: the Trust Agent Welcome surface with the starter-prompt pills — capture from the release tag (the old welcome-surface.png predates the Trust Agent and shows the wrong nav) */}
+    <Frame caption="One click in: the pill is active and its three ready-made prompts are showing. The composer is still empty — filling it takes the second click.">
+      <img src="/images/howto-agent-welcome-pills.png" alt="The Trust Agent Welcome page for a Project with data: a greeting, an empty composer reading 'Ask anything or pick a suggestion below…', and four starter pills — Curate data, Annotate data, Evaluate agent, Analyze failures. Annotate data is active, and an inline panel below it lists three prompts with a close control in its header." />
+    </Frame>
 
     **You should see:** the Welcome page render at `/projects/:id/agent` with no flag set; clicking a pill expand its prompts panel rather than fill the composer; clicking a prompt fill the composer; and your submitted prompt open a new chat at `?task=…` as turn one.
   </Step>
@@ -50,7 +52,9 @@ This how-to walks you through a working session with the **Trust Agent** — the
       The three shells are covered in depth on the [Trust Agent concept page](/concepts/trust-agent). This recipe assumes the **full page** shell.
     </Note>
 
-    {/* CAPTURE-PENDING: trust-agent full-page shell still (left nav + Recent chats + transcript + bottom composer) — capture from the release tag and replace this placeholder */}
+    <Frame caption="The full-page shell. Recent chats sits under the nav rows on the left — no floating selector — and the composer stays anchored at the bottom of the pane rather than scrolling away with the transcript.">
+      <img src="/images/howto-agent-full-page-shell.png" alt="The Trust Agent full-page shell: the Project's left nav with New chat, Playground, Requirements, Scenarios, Sessions, Evaluators, Evaluations and Project Settings above a Recent chats list; the transcript in the centre with the user's message, a collapsed '2 tool calls' group and the streamed reply; the composer anchored at the bottom with its attach, Ask and model controls; the side rail on the right." />
+    </Frame>
 
     **You should see:** a **Recent chats** section in the left nav listing your conversations most-recent-first, and the same chat thread persist as you switch shells and navigate between tabs.
   </Step>
@@ -92,7 +96,9 @@ This how-to walks you through a working session with the **Trust Agent** — the
     - **A clickable object table** — when a call returns multiple records, the card's summary line becomes a disclosure header (for example **Reviewed sessions**) over a list of real rows carrying each record's reader-visible id and title, not bare UUIDs. Click a row to open that record's fly-in in context; long lists expand five at a time.
     - **A single-record card** — a one-record result renders as a card with a label and description (no bare ID); the whole card is the click target and opens the real record's fly-in.
 
-    {/* CAPTURE-PENDING: trust-agent tool-call card + clickable object table still — capture from the release tag and replace this placeholder */}
+    <Frame caption="Two receipts from the same reply. A call with nothing to list stays a one-line summary; a call that returned records turns that summary into a disclosure header over rows you can click — each one carrying the Session's own id and title, never a UUID.">
+      <img src="/images/howto-agent-tool-call-table.png" alt="Two tool-call cards stacked. The first reads 'Reviewed the project' and nothing else. The second, 'Reviewed sessions', is a disclosure header over five rows — RUN-000019 through RUN-000015, each with a persona and goal summary and an open-record control — followed by a 'Show more (14)' row." />
+    </Frame>
 
     Alongside the transcript, a **side rail** tracks the task. It appears once the turn has folded something into it — a plan, records the agent read, or records it changed — and then stays for the rest of the conversation. A purely conversational exchange shows no rail. Its sections, in order:
 
@@ -101,7 +107,9 @@ This how-to walks you through a working session with the **Trust Agent** — the
     3. **Outputs** — what the agent created, updated, or ran, one row per entity, each deep-linking to a fly-in. It also carries **live in-flight rows** while work is still running: a simulating scenario reads **Generating…** and a running evaluation reads **Running…**, each a quiet spinner row that settles into the real, clickable record the moment it lands.
     4. **Attachments** — the files you attached, each opening its in-place preview. Hidden when the chat has none.
 
-    {/* CAPTURE-PENDING: trust-agent side-rail still (Progress, Context, Outputs, Attachments sections) — capture from the release tag and replace this placeholder */}
+    <Frame caption="The rail on a chat that has planned, read and been handed a file. Context leads with the Connected agent card, and the records the agent reviewed sit under it as counts you can expand. Outputs is absent here because this chat hasn't changed anything yet — the section appears with the first write.">
+      <img src="/images/howto-agent-side-rail.png" alt="The Trust Agent side rail. Progress shows a six-step checklist reading '2 of 6 done', the first two steps ticked and struck through. Context, marked '2 references', opens with a Connected agent card for 'Refunds Concierge' — a conversational HTTP agent with a 'Not checked' health chip and its base URL, run endpoint, health endpoint and sign-in method — above expandable rows reading '1 evaluation' and '15 scenarios'. Attachments lists one file, acme-refund-policy-v4.md." />
+    </Frame>
 
     When a turn finishes, the agent may offer up to three **next-step chips** — one-tap suggestions for what to do next. Clicking a chip **pre-fills the composer** with a ready-to-send prompt; a chip never sends anything on its own.
 
