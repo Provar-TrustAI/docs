@@ -14,13 +14,15 @@ Every entity list is the same data table: sortable columns, a column menu, row s
 
 ### Column headers
 
-Click any column header to open its menu. Every column offers **Sort ascending**, **Sort descending**, and **Hide column**; some columns add their own actions — an annotation column offers **Edit categories…**, **Edit tags…**, or **Delete column…**, and the Persona column offers **Manage personas…**. The active sort direction is marked in the menu, and the header shows a sort chevron.
+Click any column header to open its menu. Most columns offer **Sort ascending**, **Sort descending**, and **Hide column** — but neither group is guaranteed: sort items appear only on sortable columns, and some columns are deliberately unhideable. A column with nothing to offer has no menu at all, and its header is a plain label. Some columns add their own actions — an annotation column offers **Edit categories…**, **Edit tags…**, or **Delete column…**, and the Persona column offers **Manage personas…**. The active sort direction is marked in the menu, and the header shows a sort chevron.
 
 To resize, drag the handle at a header's right edge. To reorder, use the column menu described next.
 
 ### The column menu
 
-One gear button in the toolbar opens the column menu: a single list with one row per column, where each row is both a **visibility checkbox** and a **drag handle**. Check to show, uncheck to hide, drag to reorder — one popover, no separate settings. On Sessions the list is grouped into **Session** columns and **Annotation columns**, so your human-graded columns stay together.
+One gear button in the toolbar — labelled **Columns** — opens the column menu: a list with one row per column, where each row is both a **visibility checkbox** and a **drag handle**. Check to show, uncheck to hide, drag to reorder — one popover, no separate settings. Once a surface has annotation columns the list splits into a **Session** group and an **Annotation columns** group, so your human-graded columns stay together.
+
+A surface can also mount its own control *above* the column list in the same popover. Run results do: a **View** toggle switching the results table between **By scenario** and **Flat** sits at the top of the gear popover rather than in the toolbar.
 
 The arrangement you build here isn't throwaway — it's saved per view (see [Saved views persist your layout](#saved-views-persist-your-layout)).
 
@@ -32,7 +34,7 @@ Selecting rows raises the surface's bulk-actions bar — on Sessions, for exampl
 
 ### Editing in place
 
-Many cells are click-to-edit: click the cell, type, and you're done — no edit page. On Scenarios that covers the name, goal, personas, and evaluators; on Sessions it covers annotation cells like **Verdict** and **Severity**. Text cells commit on <kbd>Enter</kbd> (with <kbd>Shift</kbd>+<kbd>Enter</kbd> for a newline in longer fields like a goal) and revert on <kbd>Esc</kbd>. An empty cell shows a quiet placeholder such as *Add goal…* so you can see what's still missing.
+Many cells are click-to-edit: click the cell, type, and you're done — no edit page. On Scenarios that covers the name, goal, personas, evaluators, and a **Verdict** column whose pass/fail toggle writes a human verdict straight from the row; on Sessions it covers annotation cells like **Verdict** and **Severity**. Text cells commit on <kbd>Enter</kbd> (with <kbd>Shift</kbd>+<kbd>Enter</kbd> for a newline in longer fields like a goal) and revert on <kbd>Esc</kbd>. An empty cell shows a quiet placeholder such as *Add goal…* so you can see what's still missing.
 
 ### Chips and overflow
 
@@ -48,6 +50,16 @@ The toolbar's **Save view** button is always visible — disabled with an explan
 
 Click a record and its detail flies in from the right, over the list — you read, edit, and act without losing your place. The panel is one shared chassis across Sessions, Scenarios, a run's results, and Evaluators: the same header cluster (the surface's actions, a fullscreen toggle where the surface offers one, previous/next chevrons, close), the same tab bar, the same keyboard behavior.
 
+### The one exception: grouped run results
+
+A run's results open **By scenario** by default, and that view has a layer the rest of the app doesn't. Its top-level rows are not results — they are one **scenario summary** per scenario, carrying a rollup verdict and a passed-of-total count, with the individual trials nested beneath. Clicking a summary row **expands it in place** to reveal its trials; it does not fly anything in, because there is no single record behind it to show.
+
+Click a trial and the fly-in behaves normally. Switch the **View** toggle to **Flat** and every row is a real result again, so clicking any row opens the panel. Where a scenario has more than one trial, the result panel's header grows a scenario-scoped **Trial N of K** switcher for stepping between that scenario's runs without going back to the table.
+
+<Note>
+  This is the only place the click-a-row-to-fly-in rule doesn't hold. If a row expands instead of opening a panel, it's a scenario summary, not a record.
+</Note>
+
 {/* CAPTURE-PENDING: scenario-two-level-fly-in.png — the two-level fly-in on Scenarios: the scenario panel with the nested session panel stacked over it */}
 
 ### Keyboard contract
@@ -58,7 +70,13 @@ Every fly-in speaks the same keys, and the panel's footer reminds you of them:
 - <kbd>F</kbd> — toggle fullscreen, on panels that offer it. Fullscreen widens the panel over the table with a two-column layout.
 - <kbd>Esc</kbd> — context-sensitive: it exits fullscreen first, and closes the panel only on the next press.
 
-The shortcuts stand down while you're typing in a field, so pressing <kbd>j</kbd> in a goal editor types a letter instead of changing records. <kbd>Esc</kbd> still works everywhere — its first job is to get you out of whatever is on top.
+The shortcuts stand down while you're typing in a field, so pressing <kbd>j</kbd> in a goal editor types a letter instead of changing records. <kbd>Esc</kbd> works everywhere, but it always addresses the innermost thing first, and it takes one press per layer:
+
+- Mid-edit in a panel field, the first <kbd>Esc</kbd> **reverts that edit** and leaves the panel open. Press it again to close the panel.
+- With a modal, menu, or popover open over the panel, <kbd>Esc</kbd> belongs to that layer; the panel stays put.
+- In fullscreen, the first <kbd>Esc</kbd> exits fullscreen.
+
+The rule to carry away: <kbd>Esc</kbd> never closes two things at once.
 
 ### Stacked panels
 
@@ -72,15 +90,20 @@ Three small primitives repeat across every surface, and they always mean the sam
 
 ### Verdict pills
 
-A verdict pill is three-state, never blank:
+A verdict pill is never blank. It has a pass leg, a fail leg, and a neutral leg — and the neutral leg carries **two different labels**, because "nothing ran" and "something ran but produced no grade" are different facts:
 
 | State | What it means |
 |---|---|
 | **Pass** (green) | Every automated evaluation passed. Result cells spell it out as **Passed all**. |
 | **Fail** (red) | At least one failed — result cells say how many, e.g. **Failed 1 of 3**. |
 | **Not evaluated** (neutral) | Zero automated evaluations ran. A deliberate neutral badge, not an empty cell. |
+| **Not graded** (neutral) | An evaluation *did* run, but it produced no behavioural score — a lifecycle-only result, or one that hit an environment problem. |
+
+The two neutral labels are not interchangeable, and neither is ever a fabricated **Pass** or a red **Fail**. If you see **Not graded**, there is a result to open; **Not evaluated** means there is nothing behind it yet.
 
 The pill reflects automated evaluations only. A human **Verdict** [annotation](/concepts/annotations) is a separate signal — it grades the judges and never changes the pill. While a run is still scoring, the pill shows a **Scoring…** spinner.
+
+The pill *chrome* is not universal, though the vocabulary is. A run-results table paints its **Final verdict** cell as a flat chip — a coloured dot and coloured text, no fill or border — so that a dense matrix of rows doesn't read as a wall of badges. The soft-filled pill is reserved for panel headers and single-record readouts. Same four states, same words, lighter paint.
 
 ### Source chips
 
@@ -94,6 +117,6 @@ Records carry stable, human-readable ids in a monospace pill: `SCN-000123` for a
 
 - **[Sessions](/concepts/sessions)** — the review-and-grade surface where the table, panel, and all three badges meet
 - **[Scenarios](/concepts/scenarios)** — the authoring surface, with the two-level fly-in
-- **[Evaluations](/concepts/evaluations)** — run results rendered with the same verdict pills
+- **[Evaluations](/concepts/evaluations)** — run results, where the grouped **By scenario** view is the one exception to the fly-in rule
 - **[Saved views](/concepts/saved-views)** — the persistence layer behind your table layouts
 - **[Annotations](/concepts/annotations)** — the human Verdict, distinct from the automated verdict pill
