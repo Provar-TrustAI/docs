@@ -1,80 +1,114 @@
 ---
-title: "MCP Integration"
+title: "MCP integration"
 icon: "cable"
-description: "How Trust AI exposes the Trust Agent's tools over the Model Context Protocol, and how access is authenticated and gated."
+description: "The Model Context Protocol server behind the Trust Agent — the eight tools it exposes, the project role each one needs, and the approval gate every write passes through."
 ---
 
-Trust AI runs a [Model Context Protocol](https://modelcontextprotocol.io) (MCP) server that exposes a curated subset of the **Trust Agent's** tools — the same read and write operations the agent uses inside the product — so they can be driven over a standard protocol instead of a bespoke integration.
+Trust AI runs a [Model Context Protocol](https://modelcontextprotocol.io) (MCP) server that publishes a small, fixed subset of the **Trust Agent's** tools — the same read and write operations the agent performs inside the product, reached over a standard protocol instead of a bespoke integration.
 
-{/* Verified against the v2026.06.30.1 tag (services/api/src/mcp_server.py — cookie-session auth, the nine exposed tools, the can_use_tool gate). Re-verify at the next release tag. */}
+It is a second door onto those operations, not the door the product uses. The Trust Agent inside Trust AI dispatches its tools directly; the MCP server is a separate transport over the same implementations. What makes it worth explaining is that the transport is where the surface becomes explicit: a fixed allowlist, a declared shape per tool, an access check per call, and a trace for every invocation including the refused ones.
 
-<Note>
-  **Today, the MCP server is reached through your authenticated Trust AI session.** That makes it the tool layer behind the in-product Trust Agent and Trust AI's own in-process agent runtime. **Connecting a standalone external client** (Claude Desktop, Cursor, a VS Code MCP extension) over the internet is **on the roadmap** — it needs OAuth-based authentication that is being designed, not the manual token flow earlier drafts of this page described. See [Connect an MCP client](/how-to/connect-mcp-client) for current status.
-</Note>
+<Warning>
+  **There is no supported way for you to point your own MCP client at Trust AI.** The server authenticates on a signed-in Trust AI session, and connecting an external client that way is an internal path only — not a customer integration. There is no MCP configuration surface anywhere in the product. Read this page as an explanation of how the Trust Agent's tools are governed, not as setup instructions.
+
+  A customer-facing path would need issued, revocable **MCP tokens** in place of a session — that is a design direction, not something in this release. Earlier drafts of this page promised OAuth; no such work is planned.
+</Warning>
 
 ## What MCP is
 
-MCP is an open protocol that standardizes how AI applications discover and invoke tools exposed by external systems. A server publishes a tool surface; any client that speaks the protocol can connect, discover the available tools, and call them — no custom SDK or plugin per client. For protocol details, see [modelcontextprotocol.io](https://modelcontextprotocol.io).
+MCP is an open protocol that standardizes how AI applications discover and invoke tools exposed by external systems. A server publishes a tool surface; any client that speaks the protocol can discover the available tools and call them, with no custom SDK per client. For protocol details, see [modelcontextprotocol.io](https://modelcontextprotocol.io).
 
-## What the Trust AI MCP server exposes
+## The eight tools
 
-The server exposes a **deliberate subset** of the Trust Agent's tool registry — the data and write operations a caller needs, without the agent's internal prompt-scaffolding tools.
+The Trust Agent's own tool registry is much larger than what MCP publishes. The MCP surface is a deliberate allowlist of **eight** tools — four reads and four writes — and a build-time conformance test fails if the running server ever serves a tool that isn't on it.
 
-**Read tools** — queries against your Trust AI data, executed immediately:
+**Read tools.** These run immediately; there is no approval step.
 
-- `get_project_state` — a structured summary of a Project: entity counts, setup flags, and the most recent evaluation run
-- `query_data` — list and filter Sessions, Scenarios, Evaluators, Evaluations, Personas, and Agent Versions
-- `read_file` — retrieve the extracted text of a task-attached file
-- `analyze` — run a structured failure analysis over a completed evaluation run
+| Tool | What it does | Project role |
+| --- | --- | --- |
+| `trustai.get_project_state` | Summarizes a project: entity counts, setup flags, and the most recent evaluation run | Viewer |
+| `trustai.query_data` | Lists and filters one entity type at a time, capped at 1,000 rows per call | Viewer |
+| `trustai.read_file` | Returns the extracted text of a file attached to a Trust Agent task | Viewer |
+| `trustai.analyze` | Runs a failure analysis over a completed evaluation run — a short note on each failure, then named themes. Takes 30–60 seconds | Viewer |
 
-**Write tools** — operations that modify Trust AI state, each wrapped with an approval gate:
+**Write tools.** Each one previews first and then waits for an explicit approval.
 
-- Sync Sessions from a connected platform, curate Sessions into scenarios, update or delete scenarios, and start an Evaluation. These are the Trust Agent's own write operations, surfaced over MCP and held behind the same confirmation step.
+| Tool | What it does | Project role |
+| --- | --- | --- |
+| `trustai.save_dataset` | Curates conversations into the project's scenarios. The tool name is historical; what it writes is your **Scenarios** list | Editor |
+| `trustai.update_items` | Updates one item, identified by an item type and an id | Editor |
+| `trustai.delete_items` | Deletes a batch of items of one item type | Owner |
+| `trustai.run_evaluation` | Starts an evaluation run over the project's scenarios with one evaluator | Editor |
 
-{/* Exposed tool list verified at the v2026.06.30.1 tag: get_project_state/query_data/read_file/analyze + sync_sessions/save_dataset/update_items/delete_items/run_evaluation per _MCP_EXPOSED_TOOLS in mcp_server.py. Re-confirm at the next release tag. */}
+There is **no session-sync tool** on this surface. Syncing conversations from a connected platform is not something MCP can trigger — earlier drafts of this page said otherwise and were wrong.
 
-## Authentication
+### What `query_data` accepts
 
-The MCP server enforces the **same auth boundary as the rest of the Trust AI API** — there is no separate permission shape for it. A request is authenticated by your Trust AI **WorkOS session**, and access is scoped to your organization: a caller sees only the Projects, Sessions, and Evaluations that belong to your org, exactly as in the UI. That tenancy enforcement now rides Trust AI's shared authorization engine — the same fail-closed permission resolver that governs the rest of the product — a behavior-preserving cutover that changes nothing about who can call what.
+`query_data` takes one `entity_type` per call and returns the same envelope — `items`, `total`, `notes` — whatever you ask for, so one renderer handles every type. The types that map to documented surfaces are `sessions`, `scenarios`, `evaluators`, `evaluations`, `personas`, `agent_versions`, and `datasets`.
 
-Because that session is the credential, the server today serves callers that already carry it — the in-product Trust Agent and Trust AI's in-process runtime. A **standalone external client cannot present that session**, so direct third-party connection is gated on a dedicated, OAuth-issued credential that is on the roadmap (see the roadmap note above). There is no anonymous access path.
+`datasets` is the odd one. The dataset container it was named for is retired; the type survives as an alias and returns exactly what `scenarios` returns — the project's flat Scenarios list. Prefer `scenarios`.
+
+An unrecognized value doesn't fail silently or throw a server error: the tool returns a structured error listing every accepted type, so a calling agent can correct itself on the next turn.
+
+## Who can call what
+
+MCP is not a way around project access. Every tool resolves the caller's role on the target project through the same permission engine the rest of the product uses, and each tool asks for a **different** tier:
+
+- **Reads need Viewer.** All four read tools authorize at the lowest project tier.
+- **Most writes need Editor.** Curating scenarios, updating an item, and starting an evaluation are content writes.
+- **Deletion needs Owner.** `delete_items` authorizes at the project's top tier, so a project Editor cannot delete through MCP even though they can create and update.
+
+Two boundaries are worth stating plainly, because they are not what an older description of this surface implied:
+
+- **A project in another workspace is denied, not adopted.** A caller whose session belongs to a different workspace than the project simply has no membership there and is refused. Nothing is moved or reconciled to make the call succeed.
+- **An authorization outage denies.** If the permission check itself cannot complete, the call fails closed as a temporary, retryable failure rather than resolving to an allow.
+
+A project that doesn't exist and a project you can't see return the same error. Existence is never leaked across workspaces — see [Multi-tenancy](/concepts/multi-tenancy).
 
 ## The approval gate
 
-Write operations pass through a `can_use_tool` confirmation step before they execute:
+Every write goes through the same sequence, and it is the reason a write tool can be exposed at all:
 
-- **Read tools execute immediately.** Querying data, reading a file, and running analysis need no extra approval beyond a valid session.
-- **Write tools pause for confirmation.** When a caller attempts a write — curating Sessions into scenarios, syncing Sessions, starting an Evaluation — Trust AI builds a preview of exactly what would change and holds the operation until it is explicitly approved. Approvals have a short time-to-live; an unanswered request times out rather than executing.
+1. **Preview.** The tool builds a structured description of exactly what would change and validates the request. A preview-only call stops here — nothing is written and no approval is asked for.
+2. **Ask.** The call blocks on a pending approval while the calling agent surfaces the prompt to a person.
+3. **Decide.** An approval runs the write and returns the result. A rejection returns a structured refusal.
+4. **Expire.** An unanswered request **times out after five minutes** and the write never runs. The window is deliberately short because the caller holds an open connection for its whole duration.
 
-This gate exists because a caller — an agent or an IDE — should not silently modify Trust AI data. The same write tools invoked through the Trust Agent inside the product follow the same approval pattern.
+Two details of that gate are easy to miss:
+
+**The decision arrives out of band.** The waiting call cannot prompt anyone itself, so the decision is posted on a separate request, which wakes it. Only the same signed-in user the call was issued under can decide it — one person cannot approve a write another person triggered, and an attempt to do so is indistinguishable from an unknown request. Endpoint shapes live in the [API Reference](/api-reference).
+
+**Batch writes are checked per item kind, not per tool.** `update_items` and `delete_items` are polymorphic: the item type is an argument, and a scenario is the item type these tools reach in the product today. Other item kinds exist for surfaces that are still gated, and those are governed by a separate per-workspace grant that is **denied by default** — the batch tools are not a way in through the side door. An unknown item type comes back as a structured error listing the accepted set.
+
+The same approval pattern applies when you drive these writes through the Trust Agent in the product — see [Approve agent writes](/how-to/approve-agent-writes).
+
+## What is deliberately held back
+
+The exposed eight are a minority of the agent's registry, and the excluded list has grown much faster than the exposed one. Held back today:
+
+- **The agent's own prompt scaffolding** — the reads it uses to assemble its skills and suggest next steps. An external caller brings its own model and prompt; these would expose how the Trust Agent builds a turn without serving any caller need.
+- **Agent Profile reads** — the captured profile, its tool catalog and recorded schemas, and its source manifest. These ship on the in-product runtime first, and MCP exposure is a deliberate later step.
+- **Writes whose shape isn't final** — saving an evaluator, generating scenarios, and simulating a scenario, among others. The surface commits to a stable shape per tool, so a tool that would still change stays off it.
+- **Tools belonging to surfaces that aren't generally available**, and one authoring tool that exists only for Trust AI's internal self-evaluation.
+
+Every held-back tool is named in a conformance test alongside its rationale, so a tool cannot quietly appear on or disappear from the MCP surface: a new tool in the registry fails the build until it is either exposed on purpose or excluded on purpose.
 
 ## Observability
 
-Every MCP tool invocation emits an **OpenInference tool span**:
+Every tool invocation — including a denied one — emits one OpenInference tool span:
 
-- Each call is traced with its tool name, tenant context (project / org / user), input arguments, output, and status
-- Spans follow the OpenTelemetry / OpenInference conventions, so they slot into a Phoenix-style trace view alongside the agent runtime's own tool spans
-- Failed calls (auth, validation, approval rejection or timeout) are traced with error metadata
+- Tool name and tenant context (project, workspace, user) are stamped **before** the access check runs, so a refusal is recorded as "this user attempted this tool on this project", not as silence.
+- Input arguments and results are recorded on the span, truncated with an explicit marker when they are too large to carry rather than dropped.
+- Writes carry the approval state, so runs can be filtered by whether a person approved, rejected, or never answered.
+- Failures carry an error kind, whether they came from the access check or the tool itself.
 
-Every tool call — including a denied one — is recorded, so MCP activity is auditable rather than a black box.
-
-## Conformance
-
-The exposed tool surface is **checked against the Trust Agent's tool registry on every build**:
-
-- A conformance test asserts the MCP-exposed allowlist matches the set actually registered on the transport, so the documented surface can't silently drift from what's live
-- Tools deliberately held back stay out of the external surface by design. That includes the agent's internal prompt-scaffolding, and also some of the Trust Agent's newer write operations — generating scenarios, simulating a scenario, and saving an evaluator — which are excluded until their shapes are final. The exposed subset deliberately lags the agent's newest capabilities.
-
-{/* Verified at the v2026.06.30.1 tag: tests/mcp_server/test_mcp_surface_conformance.py asserts the allowlist matches the registered set, with save_evaluator/generate_scenarios/simulate_scenario in _DOCUMENTED_EXCLUDED_WRITES. Re-confirm at the next release tag. */}
-
-## Supported clients
-
-The server speaks standard MCP, so any conformant client can — in principle — drive it. **Direct external connection (Claude Desktop, Cursor, VS Code) is not yet available**; it ships with the OAuth authentication work described above. Today the agent's capabilities reach you through the product's own Trust Agent.
+Because the spans follow OpenTelemetry and OpenInference conventions, MCP activity sits in the same trace view as the agent runtime's own tool calls.
 
 ## Related concepts
 
-- **[Trust Agent](/concepts/trust-agent)** — the assistant whose tool surface MCP exposes
+- **[Trust Agent](/concepts/trust-agent)** — the assistant this tool surface belongs to
+- **[Approve agent writes](/how-to/approve-agent-writes)** — the same approval pattern, in the product
 - **[Sessions](/concepts/sessions)** — the primary data the read tools query
-- **[Projects](/concepts/projects)** — the workspace boundary; MCP access is scoped to a Project's org
-- **[Scenarios](/concepts/scenarios)** — readable, and curatable through the gated write tools
-- **[Connect an MCP client](/how-to/connect-mcp-client)** — current status and what external connection will require
+- **[Scenarios](/concepts/scenarios)** — what the curation write actually writes
+- **[Multi-tenancy](/concepts/multi-tenancy)** — the workspace boundary the access checks enforce
+- **[Connect an MCP client](/how-to/connect-mcp-client)** — the client-side status of MCP connection
