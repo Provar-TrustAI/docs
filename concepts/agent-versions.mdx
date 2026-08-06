@@ -34,6 +34,8 @@ These two get confused constantly, because both are "about the agent." They answ
 
 A profile is *about* a version and nests under it — one version, one profile, and a second version gets its own. If you are choosing what to evaluate, you want an Agent Version. If you are asking what a given build is capable of, you want its profile.
 
+**Not every build can be profiled.** Capability discovery reaches three of the four connected platforms — Conversational HTTP, Claude Managed Agent, and Salesforce Agentforce. An **AWS Bedrock AgentCore** build has an Agent Version like any other, but no profile: its connection says *"Agent profiling isn't available for this connection yet."* and offers no retry. That is a platform limit, not a failure to work around.
+
 ## What an Agent Version records
 
 An Agent Version record holds:
@@ -43,8 +45,6 @@ An Agent Version record holds:
 - **Who created it and when** — an audit trail only. It does not gate access.
 - **Archived state** — set when the build no longer matches the connected runtime. See [Lifecycle](#lifecycle).
 
-Alongside those, the app shows a rollup: how many Sessions and how many Evaluation runs are pinned to this version, and when it was last active.
-
 That is the whole record. In particular, an Agent Version **does not** store your agent's prompt, its model, its tool schemas, or its retrieval configuration, and it has **no description field and no tags**. Those things are properties of the running agent, and Trust AI reads them by capturing an [Agent Profile](/concepts/agent-profile) against the build — not by copying them into the version row.
 
 <Note>
@@ -53,7 +53,7 @@ That is the whole record. In particular, an Agent Version **does not** store you
 
 ## Where Agent Versions come from
 
-Agent Versions arrive through **connectors**. Four platforms connect today, as peers, from **Project Settings → Connection → Add connection**:
+Agent Versions arrive through **connectors**. Four platforms connect today — none of them flagged or gated — from **Project Settings → Connection → Add connection**. They are peers in that picker, though not in everything that follows: session backfill and Agent Profile capture each reach only some of them, and both limits are stated where they bite.
 
 - **AWS Bedrock AgentCore** — a guided setup flow connects the runtime, and its builds sync into the Project automatically. Discovery stays reconciled with what's deployed: a build that no longer matches the connected runtime is archived, and pointing the connection back at it revives the record.
 - **Salesforce Agentforce** — connect an Agentforce agent in your Salesforce org. See [Connect Salesforce Agentforce](/how-to/connect-agentforce).
@@ -70,10 +70,9 @@ Three older sign-in methods — **External Client App key + secret**, **Certific
 
 Once a connection can reach the platform, **Agent** is a discover-then-pick select rather than a field you type an id into. **Find agents** searches the org, reports how many it found, and lets you choose one by name. A manual-entry escape hatch is there if you already know the identifier.
 
-Two things hold across every connector:
+One thing holds across every connector: **connection secrets stay secret.** Private keys, access keys, and API keys are write-only — once saved, they are never shown back.
 
-- **Sync is on demand and per agent.** The **Sync now** button in the Sessions page header opens a picker grouped by connected system, so you refresh exactly the agent you care about.
-- **Connection secrets stay secret.** Private keys, access keys, and API keys are write-only — once saved, they are never shown back.
+**Pulling in past sessions does not hold across every connector.** The **Sync now** button in the Sessions page header opens a picker grouped by connected system, and that picker lists *every* connected agent — but only an **AWS Bedrock AgentCore** agent actually pulls anything. Pick a Salesforce Agentforce, Claude Managed Agent, or Conversational HTTP agent and the sync returns nothing, reporting that historical session sync is supported only for AWS Bedrock AgentCore. Sessions from those platforms arrive as they are produced — a scenario-driven simulation or a Playground conversation writes one as it runs — rather than by backfill.
 
 The fastest path for the two platforms it covers is to ask the **Trust Agent** to connect your agent: its in-chat connect card handles Claude Managed Agent and Salesforce Agentforce, collecting credentials inside the card so no secret ever reaches the conversation. Every other platform is set up in **Settings → Connection**.
 
@@ -81,7 +80,7 @@ Archiving an Agent Version in Trust AI does not affect the source runtime.
 
 ## Pinned at run time
 
-When you launch a scenario-driven Evaluation, the launcher's **Agent** step asks which connected agent simulates each scenario — the run pins that build, and its results carry the pin. When you drive the run through the Trust Agent instead, it confirms which agent build it will run against before simulating, and tells you plainly if none is connected. **Re-run** on a finished run restores the original run's full configuration, including its pinned agent and judges.
+When you launch a scenario-driven Evaluation, the launcher's **Agent** step asks which connected agent simulates each scenario — the run pins that build, and its results carry the pin. When you drive the run through the Trust Agent instead, it confirms which agent build it will run against before simulating, and tells you plainly if none is connected. **Re-run** on a finished run restores the original run's full configuration, including its pinned agent and Evaluators.
 
 Evaluations launched from Sessions skip this step entirely: grading a recorded transcript needs no agent, so no version is pinned.
 
@@ -116,7 +115,7 @@ The core regression-tracking pattern:
 When the same Scenarios and the same Evaluators are held constant, **the only variable left is the agent itself**. Whatever changes in the Evaluation results between the two runs is attributable to the version change. That's the loop the Agent Version concept exists to make legible.
 
 <Note>
-  There is no dedicated run-vs-run comparison view in the product yet — you compare by opening the two run details. **Re-run** on a finished run restores its full configuration, including the pinned agent and judges, so repeating the same setup against a different version is a one-field change.
+  There is no dedicated run-vs-run comparison view in the product yet — you compare by opening the two run details. **Re-run** on a finished run restores its full configuration, including the pinned agent and Evaluators, so repeating the same setup against a different version is a one-field change.
 </Note>
 
 Hold any of those three constants and you get a different signal:
@@ -141,10 +140,10 @@ You do everything around Agent Versions from the app, usually by asking the Trus
 
 - **See what's connected** — ask the Trust Agent which agent builds are connected in the Project; the manual view is **Project Settings → Connection**, where each connection card names its **Current agent version**.
 - **Connect a new platform** — ask the Trust Agent to connect a Claude Managed Agent or a Salesforce Agentforce agent, or add any of the four platforms yourself from **Connection → Add connection**.
-- **Sync on demand** — click **Sync now** in the Sessions page header and pick the connected agent to refresh.
+- **Backfill past sessions** — click **Sync now** in the Sessions page header and pick the connected agent. AgentCore only; every other platform writes its sessions as they happen.
 - **Pin one at run time** — pick the build in the launcher's **Agent** step, or tell the Trust Agent which build to evaluate.
 - **Check what a session ran on** — open the session's **Details** tab for its Model or Agent row.
-- **See what a build can do** — open its [Agent Profile](/concepts/agent-profile) from the connection card's current-version row.
+- **See what a build can do** — open its [Agent Profile](/concepts/agent-profile) from the connection card's current-version row. Not available for an AgentCore build.
 
 If you need the underlying endpoints — including registering a build for a platform without a connector — the [API Reference](/api-reference) is the authoritative source.
 
