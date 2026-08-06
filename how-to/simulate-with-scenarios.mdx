@@ -28,18 +28,18 @@ The fastest way to persona-and-goal coverage is to let the [Trust Agent](/concep
 
 <Steps>
   <Step title="Open the Scenarios list">
-    *Ask the Trust Agent:* "Show me my scenarios," or open the **Scenarios** nav item on your Project yourself — it lands at `/projects/:id/scenarios` (old dataset links redirect here). Every scenario is one entry in a flat table with a stable **ID** (like `SCN-000123`). Clicking a scenario opens its detail fly-in.
+    *Ask the Trust Agent:* "Show me my scenarios," or open the **Scenarios** nav item on your Project yourself — it lands at `/projects/:id/scenarios` (old dataset links redirect here). Every scenario is one entry in a flat table with a stable **ID** (like `SCN-000123`). Clicking a scenario opens its detail fly-in — with one exception worth learning early: six of the nine visible cells edit in place instead (**Scenario**, **User Goal**, **Personas**, **Evaluators**, **Verdict**, **Tags**), so a click there starts an edit and never opens the fly-in. Click **ID**, **Expected routes**, **Expected actions**, or **Sessions** to open it.
 
     The table defines **eleven** columns. Nine are visible out of the box — **ID**, **Scenario**, **User Goal**, **Personas**, **Expected routes**, **Expected actions**, **Evaluators**, **Verdict**, and **Sessions**. The other two, **Created** and **Tags**, ship hidden; reveal either from the **Add column** control at the right end of the header. **Created** is doing work even while hidden: it is the table's default sort key, descending, so the scenario you just authored is the one at the top.
     {/* CAPTURE-PENDING: scenarios-list screenshot — the flat Scenarios table with ID / Personas / Expected routes / Verdict columns and the header actions */}
 
-    **You should see:** the nine visible headers ending **Verdict** then **Sessions**, an **Add column** control offering **Created** and **Tags**, SCN-prefixed ids, and a fly-in when you click a scenario.
+    **You should see:** the nine visible headers ending **Verdict** then **Sessions**, an **Add column** control offering **Created** and **Tags**, SCN-prefixed ids, and a fly-in when you click a scenario's **ID**.
   </Step>
 
   <Step title="Create one with New scenario">
     Click **New scenario**. The modal collects only three things — a **Name** (required), a **Goal** (required — what the simulated user is trying to achieve), and **Personas** (optional; the label reminds you it's "one session per persona on each run"). Its sub-copy states the deferral outright: "Define how to simulate. You'll set expected output later — usually from a session you like." Click **Create scenario**.
 
-    Two shortcuts worth knowing: **Add recommended scenarios** in the page header adopts a curated starter catalog of ten safety scenarios in one move, and the **Name**, **Goal**, **Personas**, **Evaluators**, **Verdict**, and **Tags** cells are all editable inline on the table — no modal round-trip to adjust a scenario later.
+    Two shortcuts worth knowing. **Add recommended scenarios** in the page header opens a starter catalog of ten adversarial probes — one per OWASP Agentic Top 10 failure mode, grouped by category, each with a **Details** disclosure showing what a safe agent does and which judges pair with it. Nothing is ticked when the modal opens: it says "Pick the ones you want and we'll add them to your scenarios," and the confirm adds only your selection. Scenarios already in the project are shown muted and can't be re-adopted. Separately, the **Name**, **Goal**, **Personas**, **Evaluators**, **Verdict**, and **Tags** cells are all editable inline on the table — no modal round-trip to adjust a scenario later.
 
     **You should see:** your scenario appear in the table with its own ID, personas attached, and no expected output yet.
   </Step>
@@ -121,7 +121,7 @@ Expected Output is the scenario's grading contract, and the loop is designed so 
 
 <Steps>
   <Step title="Review the sessions">
-    Open the scenario's fly-in. Its tabs follow the workflow: **Personas & Goals**, **Expected Output**, then **Sessions**. On the **Sessions** tab, open any session into the nested detail panel to read its full transcript and its evaluations. Find a session that behaved the way you want.
+    Open the scenario's fly-in. Its tabs follow the workflow: **Personas & Goals**, **Expected Output**, **Test Data**, then **Sessions**. On the **Sessions** tab, open any session into the nested detail panel to read its full transcript and its evaluations. Find a session that behaved the way you want.
 
     **You should see:** the scenario fly-in's tabs, and a nested panel showing a single session's transcript.
   </Step>
@@ -155,7 +155,7 @@ Expected Output is the scenario's grading contract, and the loop is designed so 
 </Steps>
 
 <Note>
-  **Test Data is a preview surface.** Projects piloting the **Test Data Management preview** see one more fly-in tab, **Test Data**, and an **Environment** step in the run launcher. Both sit behind a feature flag that is off by default in production, so most projects will not see either.
+  **Expected Output is not the only contract on a scenario.** The **Test Data** tab beside it is the *backend data* setup — which environment the scenario runs against, and the data-plane lifecycle used around each run — where Expected Output is the *agent behavior* contract. Its default state reads **Environment default**: "This scenario uses the environment's default lifecycle. The plan may be neutral, but TrustAI still acquires, resets, and releases the environment for every run." **Configure scenario lifecycle (advanced)** and **Advanced test data** (manual records, state checks, imports, concurrency) sit below it. The matching **Environment** section in the run launcher selects the connected org or data plane, test identity, and cleanup for that run. Deleting a scenario removes its test data along with its expected-output rubric — the delete confirmation says so.
 </Note>
 
 ## Run and evaluate
