@@ -21,12 +21,12 @@ Before you start, it's worth asking the [Trust Agent](/concepts/trust-agent) whe
 
 ### The wizard does not save your place
 
-The setup wizard holds everything in the page: the region you typed, the role ARN you pasted, and which of the three steps you're on. Leaving the Connection tab — opening another settings tab, going to Sessions, closing the browser tab — drops all of it. When you come back you get step one again, empty. There is no draft and no resume.
+The setup wizard holds everything in the page: the region you typed, the role ARN you pasted, and which of the three steps you're on. Leaving the Connection tab — opening another settings tab, going to Sessions, closing the browser tab — drops all of it. When you come back you get step one again, with the region reset to its `us-east-1` default and the role ARN gone. There is no draft and no resume.
 
 That matters because getting a role ARN means waiting on an AWS admin, which can take hours or days. So plan the setup as **two visits**:
 
 1. **First visit.** Open the wizard, enter your region, copy the setup package, and send it to your AWS admin. What survives is the package — it's on your clipboard and in the message you sent, not in the wizard.
-2. **Second visit.** With the role ARN in hand, re-open the wizard, re-enter the region, go to the **Role ARN** step, and finish without leaving the tab. What survives is the saved connection.
+2. **Second visit.** With the role ARN in hand, re-open the wizard, set the region again (the field comes back pre-filled with `us-east-1`, so check it if that isn't yours), go to the **Role ARN** step, and finish without leaving the tab. What survives is the saved connection.
 
 Nothing is lost by walking away after the first visit — the package is the only thing that visit produces. What you must not do is paste a role ARN and wander off before saving.
 
@@ -57,7 +57,7 @@ Nothing is lost by walking away after the first visit — the package is the onl
     - A **cross-account trust policy** that lets Trust AI assume the role, locked to an External ID
     - The **minimum permission policy** the connection needs — five statements: confirm the role assumption worked, discover agents and their versions, endpoints and memories, read conversation history from AgentCore Memory, invoke the agent runtime for evaluations, and run CloudWatch Logs Insights queries to pull session traces
     - A ready-to-use **CloudFormation template** that creates the role in one stack. The package notes that the template body must be pasted into a new CloudFormation stack (or uploaded to an approved S3 bucket) — there is no one-click Quick Create link yet.
-    - Console steps and CLI commands for the optional streaming setup (see [Stream sessions automatically](#optional-stream-sessions-automatically) below)
+    - A **session import** section for the optional streaming setup (see [Stream sessions automatically](#optional-stream-sessions-automatically) below). This one is conditional: the console steps and CLI commands are in the package only once Trust AI has enabled session import for your region. Until then the wizard's **Session import** tile reads **Pending for this region** and the package carries a short note in place of the steps.
 
     The stack creates a role named `TrustAI-AgentCore-<region>` and outputs `TrustAIAgentCoreRoleArn` — that ARN is what your admin sends back to you.
 
@@ -99,11 +99,9 @@ Nothing is lost by walking away after the first visit — the package is the onl
 
 ## What the saved connection shows
 
-{/* ACCURACY-AUDIT-PENDING — described from the shipped implementation; the AgentCore variant of the connection card could not be driven on the verification instance, which has no saved AgentCore connection. */}
-
 Back on the **Connection** tab, the saved connection carries two things worth knowing about.
 
-**Current agent version.** A row on the connection card names the agent version this connection tracks and opens its [Agent Profile](/concepts/agent-profile). For AgentCore, that panel reads *"Agent profiling isn't available for this connection yet."* and offers no retry button. Automatic capability discovery isn't implemented for AgentCore, so a capture could never succeed — this is a platform limit, not a failure to work around. Everything else about the connection works normally.
+**Current agent version.** A row on the connection card names the agent version this connection tracks and opens its [Agent Profile](/concepts/agent-profile). For AgentCore that panel opens on the never-generated empty state — *"No profile has been generated for this agent build yet."* — with a **Generate profile** button, exactly like any other platform. Press it and the capture comes straight back as *"Agent profiling isn't available for this connection yet."*, a plain statement with no retry offered. Automatic capability discovery isn't implemented for AgentCore, so a capture could never succeed — this is a platform limit, not a failure to work around. Nothing else about the connection is affected.
 
 **AgentCore connection.** A panel summarising what's ready now for the project: **Agent connected**, and **Simulations and evaluations** — the second reads **Ready** once the connection has both a runtime and a working sign-in, and **Needs setup** until then. Its next step points you at the Sessions sync, which this panel calls **Sync latest** — the button in the Sessions header is labelled **Sync now**. Same action, two labels.
 
@@ -116,11 +114,11 @@ Back on the **Connection** tab, the saved connection carries two things worth kn
 
 Both are required to reconstruct sessions, and your AWS account keeps control of the subscription filters.
 
-{/* ACCURACY-AUDIT-PENDING — streaming states described from the shipped implementation; see the note above about the AgentCore connection card. */}
+On the saved connection this handoff becomes a card headed **Send sessions to TrustAI**. Until both log groups are delivering, its status reads one of two ways — **Not set up**, or **Partially streaming** when only one of the two log groups is arriving. Once both are delivering, the card gives way to a green **Streaming sessions** chip on the connection header, and you no longer need to sync by hand.
 
-On the saved connection this handoff becomes a card headed **Send sessions to TrustAI**. Until both log groups are delivering, its status reads one of two ways — **Not set up**, or **Partially streaming** when only one of the two log groups is arriving. Each log group is labelled **Receiving logs** or **No logs received yet** so you can see which half is missing. Once both are delivering, the card gives way to a green **Streaming sessions** chip on the connection header, and you no longer need to sync by hand.
+The card lists the two log groups, each labelled **Receiving logs** or **No logs received yet** so you can see which half is missing — but only once Trust AI has a destination for your region. Until then the card names no log groups at all: it shows **Not set up** and points you at **Sync latest** in the meantime.
 
-If Trust AI hasn't enabled session import for your region yet, the wizard says so — **Session import: Pending for this region**. You can still connect the role now, and Trust AI provides the CloudWatch setup steps once the region is enabled.
+If Trust AI hasn't enabled session import for your region yet, the wizard says so too — the **Session import** tile on the **AWS setup** step reads **Pending for this region**. You can still connect the role now, and Trust AI provides the CloudWatch setup steps once the region is enabled.
 
 ## Other sign-in methods
 
