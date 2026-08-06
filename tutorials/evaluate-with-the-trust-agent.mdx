@@ -1,18 +1,18 @@
 ---
 title: "Evaluate with the Trust Agent"
 icon: "sparkles"
-description: "Chat with the Trust Agent to build and run an Evaluation end to end — approving each write it proposes along the way."
+description: "Chat with the Trust Agent to build and run an Evaluation end to end — answering its questions and approving each write it proposes along the way."
 ---
 
-This walkthrough covers the full evaluation flow end to end. Instead of clicking through Scenarios, Evaluators, and Evaluations by hand, you'll **drive a full evaluation through conversation** with the [Trust Agent](/concepts/trust-agent) — the in-app assistant that proposes a plan, generates test scenarios, and runs the evaluation, pausing for your approval before it writes anything.
+This walkthrough covers the full evaluation flow end to end. Instead of clicking through Scenarios, Evaluators, and Evaluations by hand, you'll **drive a full evaluation through conversation** with the [Trust Agent](/concepts/trust-agent) — the in-app assistant that asks what you actually want, generates test scenarios, and runs the evaluation, pausing for your approval before it writes anything.
 
-By the end you'll have done a complete round of the [evaluation loop](/concepts/evaluation-loop) without leaving the chat: answered the agent's clarifying questions, confirmed a plan, approved each write as it landed, watched a batch of **Scenarios** get generated and an **Evaluation** simulate them live against your agent, and read the result — all in the open, with every step legible.
+By the end you'll have done a complete round of the [evaluation loop](/concepts/evaluation-loop) without leaving the chat: answered the agent's clarifying questions, approved each write as it landed, watched a batch of **Scenarios** get generated and an **Evaluation** simulate them live against your agent, and read the result — all in the open, with every step legible.
 
 <Note>
   **The Trust Agent is not an Agent Version.** They share the word "agent," but the **[Trust Agent](/concepts/trust-agent)** is *your* assistant inside Trust AI — the thing you chat with in this tutorial. An **[Agent Version](/concepts/agent-versions)** is the *customer's agent under test* — the pinned snapshot the Evaluation grades. In this tutorial you use the Trust Agent to evaluate an Agent Version; they're distinct concepts.
 </Note>
 
-Allow about 15 minutes. Most of that is the agent thinking and the simulated conversations playing out — your part is answering a few questions and approving the writes.
+Allow about 20 minutes. Most of that is the agent thinking and the simulated conversations playing out — your part is answering a few questions and approving the writes.
 
 ## Before you start
 
@@ -22,130 +22,166 @@ You'll want a Project with something to evaluate against:
 - A connected agent with at least one deployed [Agent Version](/concepts/agent-versions) for the evaluation to simulate against (the demo data ships with pre-seeded versions) — and if nothing is connected yet, you can ask the Trust Agent to walk you through connecting one before you begin
 - Familiarity with the manual path helps but isn't required — this tutorial does through the agent what [Run your first Evaluation](/tutorials/run-first-evaluation) does by hand
 
-This tutorial uses **Plan mode** as its spine — the agent proposes a task list, you confirm it, then it executes — because that's what makes the approval gates legible. The agent has two other modes, **Ask** and **Act**; you don't need them here, and [Work with the Trust Agent](/how-to/work-with-the-trust-agent) covers the full mode reference. It also uses the **default model** throughout; you won't change models in this flow.
+### Which mode this tutorial uses
+
+The Trust Agent has three operating modes — **Ask**, **Plan**, and **Act**. This tutorial runs in **Ask**, and that is not an arbitrary pick:
+
+- **Ask** is the mode every new chat starts in, and it is the mode whose contract is *clarify first*: on an ambiguous request the agent's first move is a question card, not a guess. It then pauses for your approval before every write. That combination — questions up front, an approval gate on each change — is exactly the flow this tutorial shows.
+- **Plan** researches and proposes a task list, and **changes nothing**. In Plan the agent may only read, ask questions, and propose the plan; it is blocked from every write *and* from raising an approval card at all. So you never see a permission card while the toggle is on Plan. Clarifying questions are *optional* in Plan, not guaranteed — a plan can arrive with no question card at all.
+- **Act** works the plan end to end. It still stops for your approval on every write that changes data.
+
+Step 3 shows where Plan fits if you want the task list locked down before anything can happen. This tutorial also uses the **default model** throughout; you won't change models in this flow.
 
 ## The end-to-end flow
 
 <Steps>
-  <Step title="Open the Trust Agent and start a chat">
+  <Step title="Open the Trust Agent and send your brief">
     From your Project, click **New chat** in the left nav — the Trust Agent lives at `/projects/:id/agent`. It's the default experience on every project; there's no flag or setting to opt into.
 
-    A new chat opens on a **Welcome** surface with four starter-prompt pills under the composer, and the set you see depends on how far the project has come. On a brand-new project you get the cold-start set — **Connect agent**, **Explore behaviour**, **Create scenarios**, **Run evaluation** — the guided first-hour arc the agent is built to walk you through. On a project that already holds data, you get a curated set for everyday work instead. Clicking a pill expands its suggested prompts, and clicking a suggestion pre-fills the composer — nothing sends until you press send. The first prompt you submit becomes turn one and starts streaming immediately.
+    A new chat opens on a **Welcome** surface: a greeting, a one-line status about your last evaluation, a composer, and four starter-prompt pills beneath it. The set you see depends on how far the project has come. On a brand-new project you get the cold-start set — **Connect agent**, **Explore behaviour**, **Create scenarios**, **Run evaluation** — the guided first-hour arc the agent is built to walk you through. On a project that already holds sessions or scenarios you get a curated everyday set instead: **Curate data**, **Annotate data**, **Evaluate agent**, **Analyze failures**. Clicking a pill expands its suggested prompts inline, and clicking a suggestion pre-fills the composer — nothing sends until you press send.
 
-    The composer is anchored to the bottom of the content pane, and the project's left nav (**Playground**, **Scenarios**, **Sessions**, **Evaluators**, **Evaluations**, and the rest) stays visible beside the agent. You're chatting *inside* the app, not in a window floating over it.
+    <Note>
+      The Welcome composer has **no mode control**. The Ask / Plan / Act toggle lives on the chat composer, which appears once the thread opens — so your first message always goes out in **Ask**, the safe default. That is the mode this tutorial wants, so there is nothing to change before you send.
+    </Note>
 
-    In the composer, set the mode toggle to **Plan**. The three modes are shown with human labels — **Ask**, **Plan**, **Act** — never raw tokens. In **Plan** the agent researches and proposes a task list for you to confirm; nothing changes until you do.
+    Send an open-ended brief — describe the problem in your words, the way you'd ask a teammate. Something like: *"Our support agent handles refunds, and I need to trust it before Friday's release. Can you build test coverage and run it?"*
 
-    {/* CAPTURE-PENDING: agent-tutorial-open.gif — opening the Trust Agent full view on the Welcome surface with its starter-prompt pills, a pill pre-filling the composer, the mode toggle set to Plan, and the project left nav still beside the agent (this beat shares the clarify GIF slice) */}
+    The chat opens as soon as you send, and the project's left nav (**Playground**, **Scenarios**, **Sessions**, **Evaluators**, **Evaluations**, and the rest) stays visible beside the agent. You're chatting *inside* the app, not in a window floating over it. From here on the composer is anchored to the bottom of the content pane, with the mode toggle and the model picker in its tool row.
 
-    **You should see:** the Trust Agent's full view on the Welcome surface with its starter-prompt pills, the composer pinned to the bottom with the mode toggle on **Plan**, and the project nav still on your left.
+    {/* CAPTURE-PENDING: agent-tutorial-open.gif — the Welcome surface at /projects/:id/agent: greeting, the four starter-prompt pills BELOW the composer, one pill expanding to its suggested prompts and a suggestion pre-filling the composer (nothing sends), then the brief typed and sent. Do NOT show a mode toggle on this surface — the Welcome composer has none; end the slice on the thread opening with the composer's Ask toggle now visible. */}
+
+    **You should see:** the Welcome surface with its four starter-prompt pills, and — once you send — the Trust Agent's full view with your message as turn one, the project nav still on your left, and the composer's mode toggle reading **Ask**.
   </Step>
 
   <Step title="Answer the agent's clarifying questions">
-    Send the agent an open-ended brief — describe the problem in your words, the way you'd ask a teammate. Something like: *"Our support agent handles refunds, and I need to trust it before Friday's release. Can you build test coverage and run it?"*
+    On an open-ended request in Ask mode, the agent's **first move is to clarify** rather than guess. It does a quick grounding read of the project first — you'll see a **Reviewed the project** receipt land in the transcript — and then leads with the question itself. There's no wall of preamble in front of it.
 
-    On an open-ended request, the agent's **first move is to ask a clarifying question** rather than guess — clarify-first. There's no wall of preamble before the question; it leads with the question itself.
-    {/* ACCURACY-AUDIT-PENDING: an ambiguous request surfaces a clarifying question as the agent's first action, with no preamble before the question — verify by sending an ambiguous request on the release tag */}
-
-    The question arrives as a card that **replaces the composer in its slot**. You'll see one of two shapes:
+    The question arrives as a card that **replaces the composer in its slot**, and the chat header switches to **Awaiting your answer**. You'll see one of two shapes:
 
     - A **single-question card** — one question with the drafted choices.
-    - A **multi-question flow card** — a short sequence of questions you move through with **Back** and **Next**, so you can revise an earlier answer before you submit.
+    - A **multi-question flow card** — a short sequence of two to five questions under one framing line. A progress row counts you through them (**Question 1 of 3**, and **Question 3 of 3 · Last** on the final step), and **← Back** / **Next →** step between them, so you can revise an earlier answer before you commit. The last step's button reads **Submit**; nothing runs until you press it.
 
-    Both kinds offer the drafted choices plus a write-in **Other** field for an answer that isn't listed, and both are dismissible. On a multi-question flow, answering one question advances you to the next; nothing runs until you submit the whole flow.
+    Individual questions can be single-select or multi-select. Both card shapes offer the drafted choices plus a write-in **Other** field for an answer that isn't listed, and both carry a **Skip** control — skipping tells the agent to proceed with what it already has rather than cancelling the turn.
 
-    {/* CAPTURE-PENDING: agent-tutorial-clarify.gif — the clarify-first question card replacing the composer (single + multi-question flow), drafted choices plus a write-in Other, advancing step by step, sliced from the autoplay recording */}
+    When you submit, the flow collapses into a resolved row in the transcript that echoes every question and the answer you gave — *"You answered: What should this coverage focus on? Core refund behaviour · How much new coverage should I generate? A focused set (~5 scenarios)"* — so the scoping decision stays readable long after the card is gone.
+
+    {/* CAPTURE-PENDING: agent-tutorial-clarify.gif — the clarify-first card replacing the composer in its slot (the composer is GONE while the card is up, not stacked above it): the "Reviewed the project" receipt above it, the header reading "Awaiting your answer", the "QUESTION 1 OF 3" progress row, drafted choices plus the write-in Other field, "← Back" / "Next →" stepping to the final "QUESTION 3 OF 3 · LAST" and its Submit button, ending on the collapsed "You answered: …" resolved row. Capture in Ask mode (a new chat's default) — this card is Ask's clarify-first contract, not Plan's. The dismiss affordance is labelled Skip. */}
 
     Answer the questions to scope the work the way you want it, then submit. If useful context lives in a file — a requirements doc, a CSV of examples — you can add it with the composer's **Attach files** button once the chat has a first message (PDF, Word, Markdown, text, CSV, and JSON files).
 
-    **You should see:** a question card in place of the composer, your answers captured, and — once you submit — the agent moving on to think and plan.
+    **You should see:** a question card in place of the composer, your answers captured, and — once you submit — a resolved "You answered…" row and the agent moving on to work.
   </Step>
 
-  <Step title="Watch it reason, then confirm the plan">
-    After you answer, the agent thinks in the open. Its reasoning, the reply text, and any tool-call arguments all **stream live, token by token** — a turn doesn't buffer silently and then dump a wall of text. Replies render as markdown-formatted prose (lists, paragraphs, emphasis), with a typing-dots indicator and an accent caret while a turn is still streaming.
-    {/* ACCURACY-AUDIT-PENDING: text/reasoning/tool-args stream incrementally token-by-token; turns render as markdown prose with typing-dots + accent caret while streaming — verify by driving a streaming turn on the release tag */}
+  <Step title="Watch it reason and work">
+    After you answer, the agent works in the open. Its reasoning, the reply text, and any tool-call arguments all **stream live, token by token** — a turn doesn't buffer silently and then dump a wall of text. Replies render as markdown-formatted prose (lists, paragraphs, emphasis), with an accent caret while a turn is still streaming.
 
-    The model's thinking streams into a collapsible **reasoning rail**. While the agent works you see a live **Thinking… *Ns*** timer counting up to fill the wait; when the reasoning resolves it collapses to **Thought for *Xs***, which you can expand to read what the agent considered. The transcript also records each **Model call** as its own step — summarized with a friendly model name and token counts (*N in / N out*), with the raw request and response tucked behind an opt-in **Input** / **Output** disclosure. (How much reasoning you see depends on the model runtime; where it isn't exposed, there's simply no Thinking rail rather than a fabricated one.)
+    Where the model exposes its thinking, it streams into a collapsible **reasoning rail**: a live **Thinking** label with a count-up timer while the pass runs, collapsing to **Thought for *Xs*** when it resolves, which you can expand to read what the agent considered. How much you see depends on the model runtime — where reasoning isn't exposed, there's simply no rail rather than a fabricated one.
 
     <Note>
       Any wait you feel before a response or a card is the **upstream model's thinking time**, surfaced honestly by the Thinking timer and a working indicator — not a runtime delay, an SLA, or a bug. How long it takes depends on the model and the infrastructure it runs on, which is exactly why the agent shows a live timer instead of promising a number.
     </Note>
 
-    Then the agent proposes a **plan** — a task list scoped to your answers — and stops. For this brief, expect two big beats: **generate scenarios**, then **run an evaluation with simulation**. A [Scenario](/concepts/scenarios) is a test case pairing a persona (who the simulated customer is) with a goal (what they're trying to get done) — there's **no transcript yet**. The conversations are played out later, by the automated simulator, when the evaluation runs.
+    Each tool call the agent makes lands in the transcript as its own compact receipt — a verb and a humanised summary, like **Reviewed the project** or **Reviewed evaluators**. Receipts for records you can open are clickable; the next step covers that.
 
-    In **Plan** mode nothing executes until you confirm the plan: tap **Approve & run** on the plan-confirm bar, or type a go-ahead in the composer — either moves planning to execution. If you want to adjust the plan first, send a refinement; the agent **amends the existing plan** rather than throwing it away and starting over.
-    {/* ACCURACY-AUDIT-PENDING: Plan mode proposes a plan and stops; a refinement amends the existing plan rather than replacing it — verify by refining a plan on the release tag */}
+    Once it has a shape for the work, the agent states the plan in a line or two and **the ordered task list renders on the side rail's Progress section** — not in the transcript — with a live **N of M done** counter that ticks as it works. For the brief above, expect a short list along the lines of *generate a focused set of scenarios* → *run them simulated and scored by a named evaluator* → *report the results*. The rail's **Context** section fills in beside it, headed by the **Connected agent** card and its health chip (**Not checked** until something has probed it).
 
-    {/* CAPTURE-PENDING: agent-tutorial-plan.gif — the agent reasoning in the open with a live Thinking… timer, then proposing a task-list plan (generate scenarios → run an evaluation with simulation) and stopping for a typed confirmation, sliced from the autoplay recording */}
+    Watch for the **evaluator beat** in that list. A graded run needs a judge, so before it can propose a run the agent reads your project's evaluators and either picks the one that matches the behaviour under test — you'll see a **Reviewed evaluators** receipt and a sentence naming its choice — or, on a project that has none, adds *build an evaluator* to the plan as its own step. Making each scenario gradable is a prerequisite of the arc, not an optional extra: a scenario with no expected output and no attached evaluator has nothing solid to grade against. [Build your first Evaluator](/tutorials/build-first-evaluator) is the manual version of that same beat.
 
-    Confirm the plan to start execution.
+    <Tip>
+      **Want the plan before anything at all can happen?** Switch the composer's mode toggle to **Plan** and send your go-ahead. In Plan the agent may only read, optionally clarify, and propose the task list — it is blocked from every write *and* from raising an approval card, so no permission card can appear while the toggle is on Plan. A **Plan ready · *N* steps** bar appears above the composer with an **Approve & run** button; approving **switches the mode to Act** and hands the existing plan straight to execution, where each write stops at an approval card as usual. Sending a refinement instead amends the plan you already have rather than starting a new one.
+    </Tip>
 
-    **You should see:** a streaming reasoning rail with a **Thinking… *Ns*** timer, a proposed task list in the transcript, and — once you confirm — the agent beginning to work the plan.
+    {/* CAPTURE-PENDING: agent-tutorial-plan.gif — the ordered task list rendering in the side rail's PROGRESS section with its "0 of 3 done" counter (NEVER in the transcript), the Context section below it headed by the Connected agent card and its "Not checked" health chip. Then the OPTIONAL Plan detour: the composer's mode toggle switched from Ask to Plan and the "Plan ready · N steps" bar with its "Approve & run — switches to Act" button. Do NOT show a permission card anywhere in the Plan slice — Plan mode is blocked from raising one; end on the toggle having flipped to Act. */}
+
+    **You should see:** streaming prose in the transcript, tool receipts landing as the agent works, an ordered task list filling the side rail's **Progress** section, and — where the model exposes it — a reasoning rail you can expand.
   </Step>
 
   <Step title="Approve each write the agent proposes">
-    As the agent works the plan, it stops for you before it does anything consequential. When it reaches a step that **writes** — generating the batch of Scenarios, starting an Evaluation — the run **halts at that tool call** and a **permission card** replaces the composer. The agent does not continue until you decide.
+    The agent stops for you before it does anything consequential. When it reaches a step that **writes** — generating the batch of Scenarios, starting an Evaluation — the run **halts at that tool call** and a **permission card** replaces the composer. The agent does not continue until you decide. Read operations don't gate: fetching sessions, scenarios, evaluator configs, and results all proceed without asking.
 
-    The permission card is a rich preview, not a bare ID to trust blindly. Before you approve, it shows the **diff**, the **dependencies**, and the **proposed end state** of the write — so you can see exactly what's about to change and what depends on it.
+    The card leads with a plain-English question — *"Generate 5 core refund scenarios (happy paths + edge cases) for the support agent?"* — written by the agent, never a tool name or a raw payload. It is **not** a full preview pane. Where the agent attaches structured detail to the write, the body adds a **compact summary line** — *"3 fields changed"* for a create or update, *"12 records removed · 2 downstream dependencies"* for a delete — and a **View proposal** link. That link is where the detail lives: it opens a right-side fly-in with the field-level old-vs-new diff for a create or update, or the itemised record list plus the downstream-dependency callouts for a delete. Dependency callouts are **delete-only**; a create or update proposal has none. On a plain gate with no structured detail attached, there is no summary line and no link — just the question and the agent's supporting sentence.
 
-    Before it proposes the evaluation run, the agent checks its own prerequisites: every scenario it will simulate needs a persona and a goal, and there has to be an Agent Version to run against. It confirms which agent build the run will use — and tells you plainly if either piece is missing, instead of proposing a run that would do nothing.
+    You have **four** ways to answer, not two. The first three are a row of choices on the card; you pick one and press the CTA at the foot, whose label follows your pick.
 
-    Approving a write **actually executes it** on the real agent run path: your **Approve** resumes the run and the mutation lands. It is not a preview that quietly does nothing — the Scenarios are really created, the Evaluation really starts.
+    | Decision | What it does |
+    | -- | -- |
+    | **Approve once** | The default. The choice carries the agent's own label for this write — *"Generate them"* — and the CTA reads **Approve**. The run resumes and the mutation lands. |
+    | **Approve for the chat** | A durable **standing approval** for that action across this chat, so a repetitive series — scenario after scenario — doesn't ask every time. Offered only when the agent has written a specific label for it, and **never** on a delete. |
+    | **Reject** | The chip itself is the note input, prompting *"Reject — and tell me why (optional)"*. The CTA swaps to **Send rejection**. The note is optional; the rejection is not silent either way. |
+    | **Dismiss** | The floating **×** closes the card without approving or rejecting. The agent acknowledges and waits for your next message. |
 
-    Each decision you make is recorded back into the transcript as a **resolved row** that echoes what you chose (and the per-question answers, for a multi-question flow) — an audit trail that persists after the turn finishes and on reload. A pending approval is durable, too: reload mid-decision and the card rehydrates as still answerable, with the composer held until you decide.
+    On a delete card the CTA reads **Delete *N* items** and paints as destructive, and the chat-wide choice is hidden outright — a standing "always delete" is never on offer.
+
+    A standing approval surfaces as a chip above the composer reading *"\<action\> in this chat · Active until \<date\>"*. Its control is **turn off** — use that when you want the per-write gate back.
+
+    Before it proposes the evaluation run itself, the agent works through **four** pre-flight checks. The second is the one most first-timers trip on:
+
+    1. **There are scenarios, and they carry a grading contract.** A scenario with no expected output and no attached evaluator gets scored against a re-inferred guess rather than a real contract.
+    2. **An evaluator exists, and it's calibrated.** If the judge was never calibrated the agent raises it rather than quietly running — you can proceed knowingly, but you'll be told. See [Build your first Evaluator](/tutorials/build-first-evaluator) and [Calibrate an evaluator](/how-to/calibrate-an-evaluator).
+    3. **There's an Agent Version to simulate against**, for persona-and-goal scenarios.
+    4. **The data is fresh enough** — for scenarios curated from real traffic, the agent flags clearly stale sessions and offers to refresh first.
+
+    If a check fails it says so plainly instead of proposing a run that would do nothing.
+
+    Approving a write **actually executes it**: your approval resumes the run and the mutation lands. It is not a preview that quietly does nothing — the Scenarios are really created, the Evaluation really starts.
+
+    Each decision is recorded back into the transcript as a **resolved row** that echoes what you chose — *"You approved: Create it"*, *"You rejected: too narrow"*, *"You dismissed the request. I'll wait for your next message."* — an audit trail that persists after the turn finishes and on reload. A pending approval is durable too: reload mid-decision and the card rehydrates as still answerable, with the composer held until you decide.
 
     <Note>
-      Write execution is **tenant-scoped and server-anchored**: an approved mutation runs only within your own organization and project, bound to the specific approval you gave — the agent cannot act on another organization's records. That boundary is enforced on the server; see [Multi-tenancy](/concepts/multi-tenancy) for the platform side of it.
-      {/* ACCURACY-AUDIT-PENDING: approved writes execute only within the current org/project, bound to the approval, enforced server-side — verify behaviorally (the agent only ever reads/writes the current project's data) on the release tag */}
+      Write execution is **tenant-scoped and server-anchored**: an approved mutation runs only within your own organization and project, bound to the specific approval you gave. That boundary is enforced on the server; see [Multi-tenancy](/concepts/multi-tenancy) for the platform side of it.
+      {/* ACCURACY-AUDIT-PENDING: approved writes execute only within the current org/project, bound to the approval, enforced server-side — a security property, not a reachable surface; verify behaviourally against the release tag rather than from the UI */}
     </Note>
 
-    {/* CAPTURE-PENDING: agent-tutorial-approve.gif — the permission card replacing the composer with the rich write preview (diff, dependencies, proposed end state), then Approve resuming the run and the write actually executing, sliced from the autoplay recording */}
+    {/* CAPTURE-PENDING: agent-tutorial-approve.gif — the permission card replacing the composer (composer GONE while the card is up): the agent's humanised question, the COMPACT summary line ("3 fields changed"), and the "View proposal" link opening the right-side fly-in with the field-level old-vs-new diff — the detail belongs in the fly-in, NOT in the card body. Stage a write that carries structured changes so the summary + link are present; note that a bare gate shows neither. Then show all four decision affordances (the agent-labelled once choice, the chat-wide grant, the reject chip with its "Reject — and tell me why (optional)" note input, the floating × dismiss) and the CTA label swapping Approve → Send rejection as the pick changes. Approve, and land on the resolved "You approved: <label>" row. Do NOT show dependency callouts on a create/update — delete-only. */}
 
-    Approve the writes as they come up. The focused recipe for the approval flow — all three card types, rejecting with a note, and exactly what approving does to your data — lives in [Approve agent writes](/how-to/approve-agent-writes).
+    Approve the writes as they come up. The focused recipe for the approval flow — every card type, rejecting with a note, standing approvals, and exactly what approving does to your data — lives in [Approve agent writes](/how-to/approve-agent-writes).
 
     <Tip>
-      If you've minimized the agent to its docked panel or pill when a write comes up, a **backgrounded-gate indicator** surfaces on the shell so you know a decision is pending, and the docked view auto-expands to the card that needs you. You don't have to keep the full view open to stay in the loop.
-      {/* ACCURACY-AUDIT-PENDING: a backgrounded-gate indicator surfaces on the shell and the docked view auto-expands when a gate hits while minimized — verify by minimizing before a gate on the release tag */}
+      If you've minimized the agent to its docked panel or collapsed pill when a write comes up, the pill switches to a **needs you** state, and the docked view auto-expands so the card that needs you is on screen without a manual tap. You don't have to keep the full view open to stay in the loop.
     </Tip>
 
-    **You should see:** a permission card in place of the composer with a diff/dependencies/proposed-state preview, your **Approve** landing the write for real, and a resolved row in the transcript recording the decision.
+    **You should see:** a permission card in place of the composer with a compact summary and a **View proposal** link, your approval landing the write for real, and a resolved row in the transcript recording the decision.
   </Step>
 
   <Step title="Click into the objects it built">
-    When a step reads records, the agent renders them as clickable record objects in the chat rather than describing them in prose. When a step reads multiple records — the batch of Scenarios it just generated, say — the result renders as a **clickable object table** right in the chat: real, human-readable records, no bare IDs. Click an entry and that record's real **fly-in** opens in context — the same fly-in you'd get from the Scenarios or Evaluations surface.
-    {/* ACCURACY-AUDIT-PENDING: multi-record results render as a clickable object table of human-readable records that deep-link into real record fly-ins — verify by asking the agent for multiple records on the release tag */}
+    When a step reads or writes records, the agent renders them as clickable objects in the chat rather than describing them in prose.
 
-    A single-record result renders a **reference card** with a human label and description — never a bare UUID — and clicking it opens the correct record fly-in. A reference to a sub-entity resolves to its *parent* record's fly-in, so you always land somewhere real, and an evaluator reference opens the real evaluator panel rather than a placeholder.
-    {/* ACCURACY-AUDIT-PENDING: single-object reference cards show label + description (no UUID) and open the real fly-in; sub-entity references resolve to the parent fly-in; an evaluator reference opens the real evaluator panel — verify by driving these reference types on the release tag */}
+    - **One record** — the tool receipt itself becomes the click target. The whole row is clickable, with a link glyph at its end, and opens that record's real **fly-in** in context: the same fly-in you'd get from the Scenarios or Evaluations surface. The receipt *is* the link; nothing extra renders beside it.
+    - **Several records** — the batch of Scenarios it just generated, say — the receipt expands into a **clickable object table** of real, human-readable rows. No bare IDs. Click a row and its fly-in opens.
+
+    A reference to a sub-entity resolves to its *parent* record's fly-in, so you always land somewhere real, and an evaluator reference opens the real evaluator panel rather than a placeholder.
 
     Alongside the transcript, the **side rail** tracks the work in this order:
 
     1. **Progress** — the plan, with live step counts and execution status ticking as the agent works.
-    2. **Context** — the entities the agent is referencing for this task.
-    3. **Outputs** — per-entity records of what it created, updated, or ran — each deep-linking into a fly-in.
+    2. **Context** — the records the agent reviewed, as a humanised count per type ("5 sessions"), expandable to the individual entities where the agent recorded them.
+    3. **Outputs** — one row per entity it created, updated, or ran, each deep-linking into a fly-in, windowed at the first five with a **Show more** disclosure.
 
-    (An **Attachments** section joins the rail when you've attached files, with in-place previews.) The rail persists across the plan and execute phases, so it stays a stable map of the work rather than resetting between steps — and a section only renders when it has something to show.
+    An **Attachments** section joins the rail when you've attached files. The rail persists across the whole task rather than resetting between steps, and a section only renders when it has something to show — a purely conversational turn shows no rail at all.
 
-    The work this tutorial drives lands on real surfaces. The scenarios the agent generated appear in your project's flat **Scenarios** list — click **Scenarios** in the left nav, at `/projects/:id/scenarios` (the older `/datasets` address redirects there, and on the wire `/v1/scenarios` fronts the legacy datasets API). Each one is a first-class scenario with a stable ID like `SCN-000123`; there is no set or folder layer to dig through — if a stray in-app string still says "scenario set," that's a vestige of the old model. The **[Scenarios](/concepts/scenarios)** concept page covers the surface in full. The Evaluation the agent started shows up under **Evaluations** — the same run you could start yourself from the **New evaluation** button on that list.
+    The work this tutorial drives lands on real surfaces. The scenarios the agent generated appear in your project's flat **Scenarios** list — click **Scenarios** in the left nav, at `/projects/:id/scenarios`. Each one is a first-class scenario with a stable ID like `SCN-000123`; there is no set or folder layer to dig through. The **[Scenarios](/concepts/scenarios)** concept page covers the surface in full. The Evaluation the agent started shows up under **Evaluations** — the same run you could start yourself from the **New evaluation** button on that list.
 
-    {/* CAPTURE-PENDING: agent-tutorial-objects.gif — a clickable object table in chat, the Progress / Context / Outputs side rail with the work the agent did, and a record fly-in opening from a clicked entry, sliced from the autoplay recording */}
+    {/* CAPTURE-PENDING: agent-tutorial-objects.gif — a multi-record tool receipt expanded into a clickable object table in the chat, the Progress / Context / Outputs side rail beside it, and a record fly-in opening from a clicked row. Include one single-record receipt so the whole-row click target and its trailing link glyph are visible — do not stage a separate reference card. */}
 
-    Click an entry in the object table — or an **Outputs** row in the side rail — to open the real record and confirm the agent built exactly what you approved.
+    Click a row in the object table — or an **Outputs** row in the side rail — to open the real record and confirm the agent built exactly what you approved.
 
-    **You should see:** a clickable object table in the transcript, the **Progress / Context / Outputs** side rail tracking the work, and a real record fly-in opening when you click an entry.
+    **You should see:** clickable receipts and object tables in the transcript, the **Progress / Context / Outputs** side rail tracking the work, and a real record fly-in opening when you click through.
   </Step>
 
   <Step title="Read the Evaluation result">
     While the Evaluation runs, the simulator holds a **fresh multi-turn conversation for every persona on every scenario** against the pinned Agent Version, then scores each one. Every conversation it plays out is saved as a real [Session](/concepts/sessions), linked back to the scenario that produced it — its **Source** reads **Scenario** — so you can open the exact transcript the judge scored.
 
-    When the run finishes, ask the agent about it — *"What failed?"* For an evaluation result, the transcript renders an **inline failure-analysis widget** rather than a paragraph of prose, and an evaluator reference inside it opens the real evaluator panel.
-    {/* ACCURACY-AUDIT-PENDING: asking the agent about a finished Evaluation's failures renders an inline failure-analysis widget (not prose), and an evaluator reference within it opens the real evaluator panel — verify by asking the agent about failures after a run completes on the release tag */}
+    When the run finishes, ask the agent about it — *"What failed?"* On a completed run the agent's failure analysis renders as an inline **Failure analysis** widget rather than a paragraph of prose:
+
+    - A header counting the failures, and a line naming the run: *"Grouped the failing rows in \<run name\> by root cause."*
+    - One **clickable object table per root-cause cluster**, each headed with a plain-English theme and its share of the failures ("4 of 7 failures"). Every row is a failing result you can click straight into.
+    - A **View the run** link into the full Evaluation results.
 
     After a reply, the agent often attaches up to three one-tap **next-step chips** — plain-English follow-ups like tightening a scenario or digging into a failing session. Clicking one pre-fills the composer with a ready-to-send prompt; it never sends on its own.
 
-    You've now done a full round of the evaluation loop through conversation: the agent generated persona-and-goal Scenarios, ran an Evaluation that simulated a fresh conversation for each one against an Agent Version, and surfaced the result — and you approved every write along the way. For the manual path to the same place (configuring Evaluators, picking the Agent Version, reading the results), see [Run your first Evaluation](/tutorials/run-first-evaluation) and the [Evaluations](/concepts/evaluations) concept page.
+    You've now done a full round of the evaluation loop through conversation: the agent generated persona-and-goal Scenarios, made them gradable, ran an Evaluation that simulated a fresh conversation for each one against an Agent Version, and surfaced the result — and you approved every write along the way. For the manual path to the same place (configuring Evaluators, picking the Agent Version, reading the results), see [Run your first Evaluation](/tutorials/run-first-evaluation) and the [Evaluations](/concepts/evaluations) concept page.
 
-    **You should see:** an inline failure-analysis widget in the transcript summarizing the Evaluation's failures, clickable references into the real evaluator and the failing sessions, and next-step chips offering where to go from here.
+    **You should see:** an inline **Failure analysis** widget clustering the run's failures, clickable rows into the failing results, a **View the run** link, and next-step chips offering where to go from here.
   </Step>
 </Steps>
 
@@ -155,14 +191,16 @@ The whole conversation is durable. The Trust Agent runs as **one app-root-scoped
 
 Transcripts are persisted, too. Navigate away or reload, then reopen the chat, and you get its **real prior history** — not an empty transcript. Smaller comforts hold up the same promise: an unsent draft in the composer survives navigation and even a full reload; a message you send while the agent is mid-reply is queued, not lost; and if a reply is cut off by a disconnect, the chat reopens with a calm "This reply was interrupted." note and a one-tap **Continue** that picks up from saved context.
 
+One thing that does **not** carry over: the mode toggle is per-chat and in-memory. Every new chat starts in **Ask**, whatever you last used.
+
 ## Jump back to a beat
 
 Each beat of this flow stands on its own — scroll back to the step you need:
 
-- **Clarify-first questions** — the agent leads with a question instead of guessing: single- and multi-question cards with a write-in Other.
-- **Plan, then confirm** — streaming reasoning, a proposed task list, and the **Approve & run** confirmation that moves planning to execution.
-- **Approve the writes** — the permission card, the rich write preview, and what "Approve" actually executes.
-- **Click into the objects** — clickable object tables, record fly-ins, and the Progress / Context / Outputs side rail.
+- **Clarify-first questions** — Ask mode leads with a question instead of guessing: single- and multi-question cards with a write-in Other.
+- **The plan on the rail** — the ordered task list on the side rail's **Progress** section, the evaluator beat inside it, and the Plan-mode detour with its **Approve & run** bar.
+- **Approve the writes** — the permission card, its **View proposal** fly-in, and the four ways to answer it.
+- **Click into the objects** — clickable receipts, object tables, record fly-ins, and the Progress / Context / Outputs side rail.
 
 {/* CAPTURE-PENDING: evaluate-with-trust-agent.mp4 (+ .gif fallback + poster) — the full autoplay reel rendered once via pipeline/, click-to-play, gated here at the end inside a "Watch the entire flow end-to-end (optional)" Accordion */}
 
@@ -173,7 +211,7 @@ Each beat of this flow stands on its own — scroll back to the step you need:
     The full concept — the three shells, the transcript anatomy, the side rail, the modes, and the agent-vs-Agent-Version distinction in depth.
   </Card>
   <Card title="Approve agent writes" icon="shield-check" href="/how-to/approve-agent-writes">
-    The focused recipe for the approval flow: all three card types, rejecting with a note, and what approving actually executes.
+    The focused recipe for the approval flow: every card type, rejecting with a note, standing approvals, and what approving actually executes.
   </Card>
   <Card title="Work with the Trust Agent" icon="messages-square" href="/how-to/work-with-the-trust-agent">
     The everyday task recipe — Ask / Plan / Act modes, picking models, mentions and slash commands, and skills.
@@ -189,5 +227,6 @@ Each beat of this flow stands on its own — scroll back to the step you need:
 - **[Agent Versions](/concepts/agent-versions)** — the agent under test the Evaluation grades; not the Trust Agent
 - **[Scenarios](/concepts/scenarios)** — the flat list where the agent's generated scenarios land
 - **[Sessions](/concepts/sessions)** — the simulated conversations the run produced, linked back to their scenarios
+- **[Evaluators](/concepts/evaluators)** — the judge a graded run needs before it can score anything
 - **[Evaluations](/concepts/evaluations)** — the run the agent started, and the manual path to configure one
 - **[Multi-tenancy](/concepts/multi-tenancy)** — the organization boundary the agent's writes are scoped to
