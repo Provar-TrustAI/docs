@@ -1,0 +1,15 @@
+{
+  "title": "Smoke test",
+  "description": "Proves the Playwright -> Remotion handoff. Not a shipped artifact.",
+  "viewportWidth": 1280,
+  "viewportHeight": 800,
+  "totalDurationMs": 5000,
+  "videoFile": "smoke.webm",
+  "beats": [
+    { "timeMs": 0, "action": "navigate", "caption": "Sessions list" },
+    { "timeMs": 2000, "action": "click",
+      "elementBounds": { "x": 460, "y": 300, "width": 800, "height": 48 },
+      "caption": "Open a session" },
+    { "timeMs": 3500, "action": "wait", "caption": "Fly-in opens" }
+  ]
+}
