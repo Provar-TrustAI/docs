@@ -45,13 +45,13 @@ Once an agent is connected, generate an **Agent Profile**: a structured read of 
 
 - The profile card carries a lifecycle pill — **Profile queued**, **Profile in progress**, **Profile available**, **Profile failed**, or **Profile out of date** — plus a never-generated empty state with a **Generate profile** button.
 - Coverage reads **Captured**, **Partial**, or **Limited** — never a percentage.
-- Each source reads **Available**, **Not exposed**, **Not sampled**, or **Not run**. Those are four different absences; the profile keeps them apart rather than flattening them into "unavailable".
+- Each source reads **Available**, **Not exposed**, **Not sampled**, or **Not run**. Only the first is a presence; the other three are three different *absences*, and the profile keeps them apart rather than flattening them into "unavailable".
 - A profile revision goes through review: **Pending review**, then **Approved** or **Changes requested** via the **Approve** and **Request changes** actions.
 - Capability discovery is implemented for **Conversational HTTP**, **Claude Managed Agent**, and **Salesforce Agentforce**. On an AgentCore connection the profile surface reads "Agent profiling isn't available for this connection yet."
 
 Two different pins hang off this: an **Evaluation** pins an *agent version*, while a **Trust Agent session** pins a *profile revision*.
 
-**Read more:** [Agent Versions](/concepts/agent-versions) · [Connect an AWS Bedrock AgentCore agent](/how-to/connect-agentcore)
+**Read more:** [Agent Profile](/concepts/agent-profile) · [Agent Versions](/concepts/agent-versions) · [Connect an AWS Bedrock AgentCore agent](/how-to/connect-agentcore)
 
 ## The seven steps in depth
 
@@ -110,7 +110,7 @@ For quick checks there's also one-off evaluation in place: **Evaluate** on a sin
 **A launch is not unconditional — the launcher can refuse it.** Two refusals you'll meet in normal use:
 
 - **Reference material required.** A targeted scenario binds a Groundedness judge but has no documents attached. The launcher names the blocking scenarios and disables the run button until you attach reference material on each scenario's Expected Output tab.
-- **Credit limit reached.** A run whose estimated cost is over your workspace's credit pool is refused at admission, and the launcher pins a banner reading "This run would exceed your workspace credit limit. Contact your admin to continue." The modal stays open so you can see it. The credit pool resets monthly; raising it is a workspace admin action.
+- **Credit limit reached.** A run whose estimated cost is over your workspace's credit pool is refused at admission, and the launcher pins a persistent banner titled **Credit limit reached** whose body reads "cap reached — contact your admin". The modal stays open so you can see it. The credit pool resets monthly; raising it is a workspace admin action.
 
 Editing a scenario after a run never rewrites that run's history — but the mechanism is per result, not a version stamp on the run. Each result stores a **frozen snapshot** of the scenario's input and expected output, plus a snapshot of the persona's defining attributes, taken at the moment it was evaluated. The run separately pins the exact **evaluator versions** it graded with. Edit a scenario, rename a persona, or revise an evaluator afterwards and the finished run still reads exactly as it was scored.
 
@@ -126,7 +126,7 @@ The split matters. A pass rate is only as trustworthy as the judges producing it
 
 **Results group by scenario.** The default view is **By scenario**: one summary row per scenario, expandable to its individual attempts as **Trial 1**, **Trial 2**, and so on. The summary row carries the scenario's reliability as a fraction — `2/3` means two of three graded attempts passed. The fly-in switcher reads **Trial N of K**. The explicit **Flat** view, in the column menu, drops the grouping and gives you one row per attempt. Persona is a label on the row, not a separate axis: a failing row also carries a plain-English divergence hint describing how the agent's behavior differed from what the scenario expected.
 
-Results are honest about what isn't the agent's fault. Four outcome classes are **excluded from the pass-rate denominator** — never counted as a red **Fail**, never fabricated into a Pass:
+Results are honest about what isn't the agent's fault. Four outcome classes are **excluded from the pass-rate denominator** — never counted as a red **Fail**, never fabricated into a Pass. They surface under three reads, because **Environment problem** covers two of the four:
 
 | Reads as | What happened |
 | --- | --- |
@@ -162,7 +162,7 @@ Then make the judge earn your trust. An LLM judge's **Calibrate** tab runs the e
 
 It does **not** extend to the whole judge family. A **Groundedness judge** decomposes each answer into atomic claims and classifies every claim against the attached reference material as **Supported**, **Contradicted**, **Unsupported**, **Unknown**, or **Conversational**; the metric chip reads **N% grounded**. The model call is temperature 0 and everything downstream of it is a fixed parser and a fixed battery of guards — but the result is still open to a **human**. In the groundedness report a reviewer can override any single claim's verdict, with a note, and the score recomputes on the spot; **revert** puts the judge's verdict back. So the same transcript can carry a different final score after adjudication, by design. Any uncertainty — a truncated response, a fired guard, an `Unknown` claim — collapses to **Needs review** rather than a fabricated pass or fail.
 
-Tightening feeds every earlier step: a judge that over-rejects gets a sharper rule, a scenario that no longer reflects reality gets edited or safely deleted, a gap in coverage gets a new scenario. Then you re-run — **Re-run** on any finished run restores its full configuration.
+Tightening feeds every earlier step: a judge that over-rejects gets a sharper rule, a scenario that no longer reflects reality gets edited or safely deleted, a gap in coverage gets a new scenario. Then you re-run — **Re-run** on any finished run reopens the launcher pre-filled with that run's scenarios or sessions, its evaluators, and its Agent Version, all still editable. One field it does **not** carry over: **Repeat each test case** resets to 1, so a re-run of a repeated run is a single-attempt run unless you raise the picker again. Set it back before you launch if you want the reliability read.
 
 **Read more:** [Evaluators](/concepts/evaluators) · [Calibrate an Evaluator](/how-to/calibrate-an-evaluator) · [Write an effective LLM-judge prompt](/how-to/write-llm-judge-prompt)
 
