@@ -9,7 +9,7 @@ This tutorial continues directly from [Your first 10 minutes in Trust AI](/tutor
 The whole walkthrough should take about 15 minutes. Most of that time is **iterating on the grading rules**, which is also the most important skill you'll develop as an Evaluator author.
 
 <Tip>
-  **You never write a judge prompt.** You state what a passing and a failing response look like as short plain-language rules; Trust AI assembles those rules into the prompt the judge actually runs. That assembly stays visible but read-only, behind a disclosure labelled **Advanced — view the prompt this produces**, so the rules are always the thing you edit. If a rule list genuinely can't express what you need, a saved judge's **Criteria** tab offers **Switch to advanced prompt editing**, which detaches the rules and hands you the prompt directly.
+  **Rules, not prompt engineering.** You state what a passing and a failing response look like as short plain-language rules; Trust AI assembles those rules into the prompt the judge actually runs. That assembly stays visible but read-only, behind a disclosure labelled **Advanced — view the prompt this produces**, so the rules are always the thing you edit. One exception, and it's the path this tutorial takes at create time: a judge you author as a paragraph in the create form's **Judge criteria** box stores that paragraph as its criteria verbatim, until you convert it to rules in step 3. And if a rule list genuinely can't express what you need, a saved judge's **Criteria** tab offers **Switch to advanced prompt editing**, which detaches the rules and hands you the prompt directly.
 </Tip>
 
 ## Before you start
@@ -52,7 +52,7 @@ That last one matters most. Calibration compares the judge's verdicts with yours
       *Ask the Trust Agent:* "Create a pass/fail evaluator called 'Order status — three-part check' that passes when the agent identifies the order the customer asked about and gives its actual current status, and fails when it answers generically. Attach it to my order-status scenario."
     </Note>
 
-    The agent grounds itself against the scenario, then puts up a single approval card — **Create the evaluator … and attach it to SCN-…?** — that both creates the judge and attaches it to the scenario in one write. Nothing is saved until you approve.
+    The agent grounds itself against the scenario, then puts up a single approval card that both creates the judge and attaches it to the scenario in one write. The card leads with **Create**, names the evaluator, and spells the attach out as **· attaching to 1 selected scenario** — it counts the scenarios rather than naming their `SCN-` ids. Nothing is saved until you approve.
 
     Or do it by hand: from the Project home, open **Evaluators → New evaluator**.
 
@@ -119,7 +119,7 @@ That last one matters most. Calibration compares the judge's verdicts with yours
       **The most common rule-writing mistake** is a vague "is this good?" rule. Good rules are testable — each one individually checkable against a single response. If a thoughtful human reviewer couldn't apply your rules and produce the same verdict twice, the LLM judge won't either.
     </Tip>
 
-    You still never author the judge prompt itself. Trust AI assembles your rules into the exact criteria the judge runs, and you can read the assembly behind the read-only **Advanced — view the prompt this produces** disclosure. To change verdicts, change rules.
+    From here on you no longer author the criteria text yourself — saving the rules replaced your paragraph with the prose they generate. Trust AI assembles your rules into the exact criteria the judge runs, and you can read the assembly behind the read-only **Advanced — view the prompt this produces** disclosure. To change verdicts, change rules.
 
     Two things worth knowing before you move on:
 
@@ -171,7 +171,7 @@ A check comes back **Pass**, **Fail**, or an amber **Needs review** — the thir
 
 ## When you don't need a judge at all
 
-If the judgment you're encoding is **exact** — "did the agent route this to order-status?", "did it call the refund tool?" — don't write judge rules for it. Structural checks live on the same **Expected Output** tab, in the **Expected actions** and **Expected routes** sections, where each entry is marked **required** or **disallowed** and picked from vocabulary Trust AI learned from your real sessions rather than typed by hand. They're deterministic, they cost nothing per evaluation, and they need no calibration. **If you find yourself encoding something exact into plain-language rules, move it to the scenario's expected output instead.** See [Scenarios](/concepts/scenarios) for how the expected output defines the grading contract.
+If the judgment you're encoding is **exact** — "did the agent route this to order-status?", "did it call the refund tool?" — don't write judge rules for it. Structural checks live on the same **Expected Output** tab, in the **Expected actions** and **Expected routes** sections, where each entry is marked **required** or **disallowed**. Both sections suggest the action and route names Trust AI has observed across your project's sessions — but those suggestions are an assist, not a gate. The picker's field reads **Search or type a name…**, and typing a name that was never observed offers it back as **Add action “…”**. On a fresh project, where nothing has been observed yet, the menu says so and invites you to type: *"Nothing observed yet. Type a tool name to add it — observed actions will appear here as suggestions once sessions run."* You can declare the contract before you have a single session. They're deterministic, they cost nothing per evaluation, and they need no calibration. **If you find yourself encoding something exact into plain-language rules, move it to the scenario's expected output instead.** See [Scenarios](/concepts/scenarios) for how the expected output defines the grading contract.
 
 ## What's next
 
