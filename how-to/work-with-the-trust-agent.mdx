@@ -128,7 +128,7 @@ This how-to walks you through a working session with the **Trust Agent** — the
   </Step>
 
   <Step title="Approve the writes the agent proposes">
-    When the agent proposes a **write** — creating, updating, or deleting a record — the run stops and a permission card takes the composer slot. The card names the change in plain English (**Create the evaluator 'Docs probe'?**), summarises its size (**3 fields changed**), and offers **View proposal** to read the full before-and-after first. Approving executes the write; the transcript keeps a receipt of what you decided (**You approved: Create it**). You can also refuse, with an optional reason the agent reads.
+    When the agent proposes a **write** — creating, updating, or deleting a record — the run stops and a permission card takes the composer slot, with one exception covered below. The card names the change in plain English (**Create the evaluator 'Docs probe'?**), summarises its size (**3 fields changed**), and offers **View proposal** to read the full before-and-after first. Approving executes the write; the transcript keeps a receipt of what you decided (**You approved: Create it**). You can also refuse, with an optional reason the agent reads.
 
     Some cards offer a second, durable choice as well as the one-time approval: a **for-this-chat** option worded for exactly what the agent would keep doing. Take it and equivalent writes in that conversation stop asking. That grant is visible for as long as it lasts, as a chip above the composer reading `<action> in this chat · Active until <date>`, and you end it with the chip's **turn off** control. Two limits worth knowing: **deletes never offer the chat-wide option** — every delete is approved one at a time — and a standing approval covers only the exact action you granted, so a *create* grant does not silently cover an *update*.
 
@@ -136,15 +136,20 @@ This how-to walks you through a working session with the **Trust Agent** — the
 
     The write-approval flow in full — the permission card, the rich preview, approve-and-execute, and the audit echo — is its own recipe.
 
-    **You should see:** any create / update / delete proposal pause behind a permission card before it runs, and a receipt of your decision left in the transcript. To work through that flow end to end, continue to [Approve agent writes](/how-to/approve-agent-writes).
+    **You should see:** a create / update / delete proposal pause behind a permission card before it runs, and a receipt of your decision left in the transcript. The exception is a write already covered by a standing approval you granted earlier in this chat: that one commits with no card at all, and the chip above the composer is the only thing that tells you why. To work through that flow end to end, continue to [Approve agent writes](/how-to/approve-agent-writes).
   </Step>
 
   <Step title="Connect an agent without leaving the chat">
-    If the Project has nothing connected yet, you can ask the agent to fix that — "connect my agent" is a normal request. For a **Claude Managed Agent** or a **Salesforce Agentforce** agent it opens a secure connection card right in the chat and walks you through it a step at a time (**Step 1 of 3**), with **Not now** to back out. Every other platform is set up in **Project Settings** instead.
+    If the Project has nothing connected yet, you can ask the agent to fix that — "connect my agent" is a normal request. For a **Claude Managed Agent** or a **Salesforce Agentforce** agent it opens a secure connection card right in the chat; every other platform is set up in **Project Settings** instead. The two cards are not the same shape:
+
+    - **Salesforce Agentforce** opens a *stepped* card: progress chips across the top, a counter that opens at **Step 1 of 3**, and the first step headed **Your Salesforce org**. **Continue** advances it, and **Back** appears once you are past the first step.
+    - **Claude Managed Agent** opens a *single form* — no steps and no counter. You enter the API key, AWS region, and workspace, press **Find agents**, then pick your **Agent** and **Environment** from the lists discovery returns and press **Connect**.
+
+    Both cards carry **Not now** to back out.
 
     Credentials typed into that card go straight to Trust AI over a separate call. They are never part of the conversation the model reads and never appear in the transcript — the card says so, and the only thing handed back to the agent when you finish is the outcome: connected or not, which agent, and its health.
 
-    **You should see:** a stepped connection card open inside the chat, the run wait while you complete it, and the new connection lead the side rail's **Context** section as the **Connected agent** card on the next turn that touches your records. For the full platform-by-platform setup, see [Connect Agentforce](/how-to/connect-agentforce) and [Connect a Claude managed agent](/how-to/connect-claude-managed-agent).
+    **You should see:** a connection card open inside the chat — stepped for Agentforce, a single form for a Claude Managed Agent — the run wait while you complete it, and the new connection lead the side rail's **Context** section as the **Connected agent** card on the next turn that touches your records. For the full platform-by-platform setup, see [Connect Agentforce](/how-to/connect-agentforce) and [Connect a Claude managed agent](/how-to/connect-claude-managed-agent).
   </Step>
 </Steps>
 
@@ -156,7 +161,7 @@ This how-to walks you through a working session with the **Trust Agent** — the
   </Accordion>
 
   <Accordion title="The agent asked a question instead of doing what I asked">
-    That is by design. For an ambiguous or open-ended request, the agent clarifies first and pauses until you answer — the question card replaces the composer. Answer the card (or use the write-in row and type your own answer) and the run resumes; **Skip** dismisses it and the agent proceeds with what it has. If you want fewer interruptions for a well-specified task, send it in **Act** mode — though writes still wait for your approval.
+    That is by design. For an ambiguous or open-ended request, the agent clarifies first and pauses until you answer — the question card replaces the composer. Answer the card (or use the write-in row and type your own answer) and the run resumes; **Skip** dismisses it and the agent proceeds with what it has. If you want fewer interruptions for a well-specified task, send it in **Act** mode — though writes still wait for your approval unless a standing approval already covers them.
   </Accordion>
 
   <Accordion title="I asked the agent to change something and nothing happened yet">
