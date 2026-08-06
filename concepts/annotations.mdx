@@ -49,7 +49,9 @@ Annotation happens where the Sessions already are — there is no separate revie
 - **Inline in the Sessions table.** **Verdict** and **Severity** cells are editable directly in the table, so a reviewer can sweep down the list without opening anything. The Verdict column shows by default; other annotation columns can be shown from the column menu.
 - **In the Session fly-in.** The fly-in's **Annotations** tab is the full schema-driven editor for every column, alongside the **Transcript**, **Evaluations**, and **Details** tabs. The same panel appears when you drill into a session from a scenario. An edit made in a table cell repaints any open panel for that Session, so the two never disagree.
 
-{/* CAPTURE-PENDING: sessions-inline-annotation.gif — setting Verdict and Severity inline in the Sessions table, then opening the fly-in's Annotations tab to add a Reviewer note */}
+<Frame caption="One Session, both entry points: the highlighted row's Verdict and Severity cells carry the same Fail and major the fly-in's Annotations tab is showing — an edit in either place repaints the other.">
+  <img src="/images/annotations-two-places.png" alt="The Sessions table with the Verdict and Severity columns shown, and the fly-in open over it on the Annotations tab. The highlighted row RUN-000012 reads Fail and major in its table cells, while the panel shows the same Fail verdict, major severity, and a Reviewer note reading 'Promised a refund without checking the policy window.'" />
+</Frame>
 
 To work through Sessions in volume, filter the list to the slice you care about — the filter offers **Date**, **Routed To**, **Tags**, and **Turn count** — and save the configuration as a [saved view](/concepts/saved-views). To narrow by something outside that set, show the column and sort on it. Selecting multiple Sessions raises the bulk-actions bar (**Evaluate** · **Tag** · **Download**); **Tag** applies tags from a vocabulary shared across Scenarios and Sessions, with autocomplete.
 
