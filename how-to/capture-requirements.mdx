@@ -22,7 +22,7 @@ This page is a task recipe. For what a requirement *is*, and why coverage is com
 ## Capture one
 
 <Note>
-  *Ask the Trust Agent:* "Read the attached PRD and file the requirements it implies." The agent has a built-in **Capture requirements** skill: it checks what is already on file first, offers you a document or an interview, reflects the candidate list back to you before writing anything, then files each requirement behind an approval card. Approved requirements land **active** with their Source recorded as **Chat**. When you are filing several in one sitting, the first approval card offers a chat-wide grant so you approve once rather than once per requirement.
+  *Ask the Trust Agent:* "Read the attached PRD and file the requirements it implies." The agent has a built-in **Capture requirements** skill: it checks what is already on file first, offers you a document or an interview, reflects the candidate list back to you before writing anything, then files each requirement behind an approval card. Every requirement the agent files records its Source as **Chat**. One you approve on its own lands **active** — but a batch mined out of a document lands as **drafts**, exactly like the Extract from document path below, so dozens of unvetted rows never land in your coverage counts at once. When you are filing several in one sitting, the first approval card offers a chat-wide grant so you approve once rather than once per requirement.
 </Note>
 
 The **Requirements** list header carries the two manual paths.
@@ -96,10 +96,10 @@ This is the point of the feature. You never assert that a requirement holds; you
 
 <Steps>
   <Step title="Open the Coverage tab">
-    On a requirement with nothing attached, both sections are empty: *No evaluators are scoped to this requirement yet* and *No scenarios attempt to trigger this behavior yet* — the scenario copy adapts for must-not requirements, since triggering the behaviour is what a test for one has to do.
+    On a requirement with nothing attached, both sections are empty: *No evaluators are scoped to this requirement yet.* and *No scenarios cover this requirement yet.* On a must-not requirement the scenario line reads *No scenarios attempt to trigger this behavior yet.* instead — triggering the behaviour is what a test for one has to do.
   </Step>
   <Step title="Link a scenario">
-    Click **Add scenarios** and pick one. The picker searches over handles and names and shows each option as `SCN-000008 · <name>`. The Status pill moves from **Uncovered** to **Partially covered** as soon as the link lands.
+    Click **Add scenarios** and pick one. The picker searches over handles and names and shows each option as `SCN-000008 · <name>`. The Status pill leaves **Uncovered** as soon as the link lands — but where it goes depends on the scenario. Link one that carries no evaluator of its own and the requirement reads **Partially covered**: the evaluator leg is still open. Link one that already carries an evaluator and that leg is satisfied on its own, so the requirement resolves straight to **Passing**, **Failing**, or **Not yet run** without ever showing **Partially covered**.
   </Step>
   <Step title="Link an evaluator">
     Click **Add evaluator** and pick one. If that evaluator has already scored the linked scenario, the requirement reads **Passing** or **Failing** and a pass rate appears.
@@ -109,7 +109,7 @@ This is the point of the feature. You never assert that a requirement holds; you
   </Step>
 </Steps>
 
-Driven end to end on a seeded project, one requirement moved like this:
+Driven end to end on a seeded project, against a scenario carrying no evaluator of its own, one requirement moved like this:
 
 | After | Scenarios | Evaluators | Status | Pass rate |
 | --- | --- | --- | --- | --- |
