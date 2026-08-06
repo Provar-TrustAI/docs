@@ -69,6 +69,7 @@
               "concepts/evaluators",
               "concepts/evaluations",
               "concepts/agent-versions",
+              "concepts/agent-profile",
               "concepts/evaluation-loop",
               "concepts/saved-views",
               "concepts/tables-and-panels",

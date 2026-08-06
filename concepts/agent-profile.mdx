@@ -1,0 +1,104 @@
+---
+title: "Agent Profile"
+icon: "id-card"
+description: "A versioned, human-reviewable record of what one agent build could actually do — its identity, tools, and knowledge sources, captured at a moment in time."
+---
+
+An Agent Profile answers a question that is surprisingly hard to answer about a deployed agent: **what can this thing actually do?** Not what the spec says, and not what it did on one conversation — what tools it exposes, what knowledge it draws on, how it identifies itself, and how much of that Trust AI was able to see.
+
+A profile is a **record**, not a probe. It was captured at a point in time against one build of your agent, and reading it never re-contacts the platform. That's the property that makes it reviewable: two people opening the same profile a week apart see the same thing.
+
+<Note>
+  **Agent Profile is not [Agent Version](/concepts/agent-versions).** An Agent Version is the agent build itself — the thing you evaluate against. An Agent Profile *describes* one of those builds. One version, one profile; a second version gets its own. If you're choosing what to run an evaluation against, you want an Agent Version. If you're asking what a given build is capable of, you want its profile.
+</Note>
+
+## What a profile captures
+
+A profile records three kinds of fact about a build:
+
+- **Identity and behavior** — how the agent presents itself, and how it's configured to behave.
+- **Tools** — the actions it exposes, each with the schema it advertised at capture time.
+- **Knowledge sources** — the material it can draw on to answer.
+
+Tool schemas are worth a special note. Capture stores the exact bytes it recorded, content-addressed alongside the revision, and reading a schema later serves **those** bytes back. The provider is never re-contacted, so a schema you read today cannot quietly have changed underneath a review you did yesterday.
+
+## The versioned unit is the revision
+
+Capture doesn't overwrite. Each run produces a new **profile revision** — an immutable snapshot — and the build accumulates them.
+
+That distinction shows up in a place that matters: **review is per-revision.** Approving a profile approves the exact revision you read, not the build's moving head. Regenerate afterwards and the new revision is unreviewed, because nobody has looked at it yet. This is deliberate; a review that silently carried forward onto content nobody examined would be worthless.
+
+Your own edits work the other way. A **human overlay** — the corrections and notes you add on top of what capture found — belongs to the **build**, not to a revision, and there's one per build. Regenerating the profile doesn't discard it.
+
+## Two different pins
+
+Two things in Trust AI pin themselves to something in this area, and they pin to different things:
+
+| What | Pins to | Why |
+|---|---|---|
+| An [Evaluation](/concepts/evaluations) | An **Agent Version** | The run grades a specific build's behavior |
+| A [Trust Agent](/concepts/trust-agent) session | A **profile revision** | The session records exactly what it understood the agent to be |
+
+A Trust Agent session resolves one effective revision at creation and holds it for the session's life, so its answers stay consistent even if the profile is regenerated mid-conversation. A build with no captured profile has nothing to pin, and says so plainly.
+
+## Reading the states
+
+The profile surface is built around one commitment: **absence is always a named state.** Nothing is left blank, and nothing collapses several different reasons into a single "unavailable".
+
+### Lifecycle
+
+A capture moves through five states, and the pill reads exactly:
+
+| Pill | Means |
+|---|---|
+| **Profile queued** | Capture is waiting to start |
+| **Profile in progress** | Capture is running |
+| **Profile available** | A profile is ready to read |
+| **Profile failed** | Capture ran and didn't succeed |
+| **Profile out of date** | A profile exists, but the build has moved on |
+
+One label deliberately differs by location. A connection's version row reads **Profile available**, while the profile fly-in's own header reads **Version-pinned profile** — the header names the pinning contract rather than repeating the entry point's status. They're describing the same healthy profile from two vantage points; it isn't an inconsistency to be reconciled.
+
+### Coverage
+
+Each dimension a capture inspects carries a coverage level — **Captured**, **Partial**, or **Limited**. There are no percentages here, and no complete/incomplete. Coverage tells you how thoroughly Trust AI got to look, so you know how much weight the profile can bear.
+
+### The four availabilities
+
+Where a profile can't tell you something, it tells you *which kind* of nothing you're looking at:
+
+| State | Means |
+|---|---|
+| **Available** | The material reached the capture |
+| **Not exposed** | The connector never surfaced this kind of material at all |
+| **Not sampled** | It exists, but no conversations covering it were sampled |
+| **Not run** | The probe that would have found it wasn't run |
+
+These are four different facts and the product never merges them. "The platform doesn't offer this" and "we didn't look" lead to opposite next actions — one is a platform limit you plan around, the other is a gap you can close by capturing again.
+
+### Review
+
+A revision sits in one of three review states — **Pending review**, **Approved**, or **Changes requested** — and the two actions available on it are **Approve** and **Request changes**. This page explains what the states mean; conducting a review is a separate walkthrough.
+
+## Which platforms can be profiled
+
+Capability discovery reaches **three** platforms:
+
+- Conversational HTTP
+- Claude Managed Agent
+- Salesforce Agentforce
+
+Anything else, including **AWS Bedrock AgentCore**, isn't profiled. An AgentCore connection says so directly — *"Agent profiling isn't available for this connection yet."* — and offers no retry, because retrying wouldn't change the answer. That's a platform limit, not a failure to work around.
+
+A connection on a supported platform can still come back unsuccessful — an unreachable endpoint, a half-configured connector, missing credentials. Those are **Profile failed**, they carry a plain-language reason, and they *are* worth retrying.
+
+## Where you find one
+
+- **A connection card's Current agent version row** — the profile's lifecycle pill sits with the version it describes; click through to open it.
+- **The Playground topbar** — the info button opens the profile for the agent you're talking to.
+
+## Related concepts
+
+- **[Agent Versions](/concepts/agent-versions)** — the build a profile describes, and what an Evaluation pins
+- **[Projects](/concepts/projects)** — where the connection being profiled lives
+- **[Trust Agent](/concepts/trust-agent)** — pins a profile revision per session
