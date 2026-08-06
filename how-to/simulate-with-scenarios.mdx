@@ -31,7 +31,9 @@ The fastest way to persona-and-goal coverage is to let the [Trust Agent](/concep
     *Ask the Trust Agent:* "Show me my scenarios," or open the **Scenarios** nav item on your Project yourself — it lands at `/projects/:id/scenarios` (old dataset links redirect here). Every scenario is one entry in a flat table with a stable **ID** (like `SCN-000123`). Clicking a scenario opens its detail fly-in — with one exception worth learning early: six of the nine visible cells edit in place instead (**Scenario**, **User Goal**, **Personas**, **Evaluators**, **Verdict**, **Tags**), so a click there starts an edit and never opens the fly-in. Click **ID**, **Expected routes**, **Expected actions**, or **Sessions** to open it.
 
     The table defines **eleven** columns. Nine are visible out of the box — **ID**, **Scenario**, **User Goal**, **Personas**, **Expected routes**, **Expected actions**, **Evaluators**, **Verdict**, and **Sessions**. The other two, **Created** and **Tags**, ship hidden; reveal either from the **Add column** control at the right end of the header. **Created** is doing work even while hidden: it is the table's default sort key, descending, so the scenario you just authored is the one at the top.
-    {/* CAPTURE-PENDING: scenarios-list screenshot — the flat Scenarios table with ID / Personas / Expected routes / Verdict columns and the header actions */}
+    <Frame caption="The nine default columns run ID → Sessions, with Add column at the right end. The last five rows here were adopted from Add recommended scenarios, so their expected output is still Not set — that deferral is the loop working, not a gap.">
+      <img src="/images/simulate-scenarios-list.png" alt="The flat Scenarios table for a project: fifteen SCN-prefixed rows with scenario names, user goals, persona chips, expected route and expected action chips, evaluator chips, an inline Pass/Fail Verdict toggle and a Sessions count, under header actions for Manage personas, Add recommended scenarios, a Run split-button and New scenario." />
+    </Frame>
 
     **You should see:** the nine visible headers ending **Verdict** then **Sessions**, an **Add column** control offering **Created** and **Tags**, SCN-prefixed ids, and a fly-in when you click a scenario's **ID**.
   </Step>
@@ -82,7 +84,9 @@ A scenario generates sessions by being **run**: each run simulates one fresh per
 
   <Step title="Confirm the fan-out and launch">
     Choosing **Run only** opens the evaluation launcher, titled **Run scenario** for a single target and **Run scenarios** for several. Pick the **connected agent** to drive, and check the **This will run** preview — it counts one simulated conversation per attached persona. A goal-only scenario with no personas still runs one conversation, with the simulated user enacting the goal. The confirm button reads **Run N conversations**.
-    {/* CAPTURE-PENDING: evaluation-launcher screenshot — the Run scenario launcher with the agent picker and the "This will run" fan-out preview */}
+    <Frame caption="Read the middle tile and the confirm button together — three attached personas means three simulated conversations, and Run only grades none of them.">
+      <img src="/images/simulate-run-launcher.png" alt="The Run scenario launcher over the Scenarios list: an Agent picker set to Refunds Concierge, a This will run preview reading 1 scenario then 3 conversations simulated then not graded, an Environment section reporting Ready to run, and a Run 3 conversations confirm button." />
+    </Frame>
 
     **You should see:** the launcher preview one conversation per persona and the button count match it.
   </Step>
@@ -101,7 +105,9 @@ The **Playground** is the hands-on counterpart: drive a connected agent yourself
 <Steps>
   <Step title="Drive a conversation">
     Open the Playground at `/projects/:id/playground` and pick a connected agent — the picker groups agents by source system. A segmented **Chat / Simulate** toggle controls the mode. On **Chat**, you type each message yourself and the connected agent replies live. On **Simulate**, a config modal takes exactly **one goal**, **one persona**, and a run mode — **Full auto** ("Simulates the whole conversation end-to-end") or **Stay in the loop** ("Suggests each user turn as you go") — and the persona-versus-agent conversation auto-drives. The **History** menu lists your real prior sessions so you can reopen an earlier run.
-    {/* CAPTURE-PENDING: playground-simulate-modal screenshot — the Simulate config modal (one goal, one persona, Full auto / Stay in the loop) */}
+    <Frame caption="One goal, one persona, one run mode — the Playground never fans out. Full auto plays the whole conversation; Stay in the loop hands you each user turn to approve.">
+      <img src="/images/simulate-playground-modal.png" alt="The Playground's Simulate a conversation modal: a Goal box reading 'Get a firm date for the refund on the return you already delivered', a single-select Persona field set to Frustrated regular, and two run-mode cards — Full auto selected, Stay in the loop beside it." />
+    </Frame>
 
     **You should see:** the **Chat / Simulate** toggle, and a Simulate run auto-drive the conversation without you typing turns.
   </Step>
@@ -134,7 +140,9 @@ Expected Output is the scenario's grading contract, and the loop is designed so 
     - **Expected routes** — where the conversation should be routed, added with **Add route**, again **Required** or **Disallowed**.
 
     The action and route pickers offer values observed in your project's real sessions, so you choose what "good" looked like rather than typing it from memory.
-    {/* CAPTURE-PENDING: expected-output-editor screenshot — the three sections (Expected behavior / Expected actions / Expected routes) with the learned-vocabulary picker open */}
+    <Frame caption="The Add route picker offers nothing invented: each option is a route the project's own sessions took, with the session count that earns it a place in the list.">
+      <img src="/images/simulate-expected-output.png" alt="The scenario fly-in on its Expected Output tab: an Expected behavior section with Refund timeline accuracy, Tone and Completeness evaluator cards; an Expected actions section with check_refund_status and lookup_order rows toggled to Required; and an open Add route picker listing returns seen in 4 sessions, billing seen in 1 session and orders seen in 1 session." />
+    </Frame>
 
     **You should see:** the three sections, and the action/route pickers offering values seen in your sessions.
   </Step>
@@ -177,7 +185,9 @@ Expected Output is the scenario's grading contract, and the loop is designed so 
 
   <Step title="Read the per-persona results">
     The finished run leads with a dual headline: **Pass rate** grades the *agent*, and **Evaluator accuracy** grades the *judges* — how often the automated evaluators agreed with a person's session-level verdict. Below it, a per-persona matrix scores every attached persona on its own, with plain-English hints where personas diverge. Each result's transcript is badged **Simulated** or **Replayed**, and **Open session** takes you to the exact session that was graded.
-    {/* CAPTURE-PENDING: run-detail screenshot — the dual headline (Pass rate + Evaluator accuracy) over the per-persona matrix */}
+    <Frame caption="Under the headline, every attached persona gets its own row — its transcript, its final verdict, and a column per judge and per structural check. The amber line under each preview is that row's divergence hint.">
+      <img src="/images/simulate-run-detail-personas.png" alt="An evaluation run detail page titled 'Refund status after return · persona sweep': a 0% pass rate headline reading 0 of 3 conversations passed, over a results matrix with one row per persona — Frustrated regular, First-time buyer and Terse power user — each showing a transcript preview, a divergence hint, and Fail chips under the Final verdict, Refund timeline accuracy, Tone, Expected actions and Expected routes columns." />
+    </Frame>
 
     To grade conversations that *already happened* — synced or captured sessions, with no simulation — use the **Evaluate** action on the [Sessions](/concepts/sessions) surface instead.
 
