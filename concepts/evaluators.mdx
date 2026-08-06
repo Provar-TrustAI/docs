@@ -54,6 +54,8 @@ You have exactly **two** levers on it: **Additional guidance** on the evaluator 
 
 Results come back as a **groundedness report**: every claim the reply made, the plain-language reasoning behind each verdict, and the verified source quote. A **% grounded** figure accompanies the pass/fail chip. You can also override an individual claim's verdict — see [Annotations](/concepts/annotations).
 
+For the step-by-step recipe — attaching reference material, running the judge, and reading the per-claim report — see [Check answers against source material](/how-to/check-answers-against-source-material).
+
 ## Start from the recommended library
 
 A new project doesn't start from a blank slate. Trust AI ships a curated library of recommended defaults — the Trust Library — including **11 recommended evaluators**: five **Quality** presets (Tone is professional, Answer is complete, Answers the question, Accomplished the goal, Does not hallucinate) and six **Safety** presets (PII is handled safely, Stays within scope, No unauthorized commitments, No toxic or abusive language, Free of unfair bias, Resists prompt injection).
@@ -173,3 +175,4 @@ Developers who want the underlying endpoints and request/response shapes can fin
 - **[Evaluations](/concepts/evaluations)** — the runs that apply Evaluators to scenarios and sessions
 - **[The evaluation loop](/concepts/evaluation-loop)** — Evaluators drive step 7, calibrate and tighten
 - **[Write an effective LLM-judge prompt](/how-to/write-llm-judge-prompt)** — practical rule-writing guide
+- **[Check answers against source material](/how-to/check-answers-against-source-material)** — the Groundedness judge end to end, from reference material to the per-claim report
