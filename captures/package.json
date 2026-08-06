@@ -4,7 +4,7 @@
   "scripts": {
     "capture:all": "npx playwright test",
     "capture:sessions": "npx playwright test sessions-table sessions-flyin",
-    "capture:datasets": "npx playwright test datasets-bulk-actions",
+    "capture:scenarios": "npx playwright test scenarios-list",
     "capture:evaluations": "npx playwright test evaluations-results-matrix",
     "capture:evaluators": "npx playwright test evaluators-create-flow",
     "capture:welcome": "npx playwright test welcome-surface",
