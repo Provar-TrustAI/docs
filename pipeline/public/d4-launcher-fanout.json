@@ -1,18 +1,72 @@
 {
   "title": "Evaluation launcher fan-out",
-  "description": "Open the launcher, set Repeat each test case, watch the fan-out count respond, commit",
+  "description": "Open the launcher, set Repeat each test case, watch the fan-out count respond",
   "_ticket": "DEV-6219",
   "_blocksPage": "concepts/evaluations.mdx",
-  "_status": "STUB — record the .webm first (see captures/demos/), then fill beats from the real recording",
   "viewportWidth": 1280,
   "viewportHeight": 800,
-  "totalDurationMs": 12000,
+  "totalDurationMs": 17281,
   "videoFile": "d4-launcher-fanout.webm",
   "beats": [
-    { "timeMs": 0, "action": "navigate", "caption": "TODO — first beat" },
-    { "timeMs": 4000, "action": "click",
-      "elementBounds": { "x": 0, "y": 0, "width": 0, "height": 0 },
-      "caption": "TODO — bounds come from the recording, not guesses" },
-    { "timeMs": 9000, "action": "wait", "caption": "TODO — final state" }
+    {
+      "timeMs": 3021,
+      "action": "navigate",
+      "caption": "Evaluations"
+    },
+    {
+      "timeMs": 3057,
+      "action": "click",
+      "elementBounds": {
+        "x": 1118.5,
+        "y": 24,
+        "width": 137.5,
+        "height": 30
+      },
+      "caption": "New evaluation opens the launcher"
+    },
+    {
+      "timeMs": 5155,
+      "action": "click",
+      "elementBounds": {
+        "x": 377,
+        "y": 347.296875,
+        "width": 526,
+        "height": 38
+      },
+      "caption": "Pick the sessions to grade"
+    },
+    {
+      "timeMs": 9461,
+      "action": "hover",
+      "elementBounds": {
+        "x": 377,
+        "y": 489.296875,
+        "width": 526,
+        "height": 12
+      },
+      "caption": "10 sessions × 2 evaluators = 20 grading passes"
+    },
+    {
+      "timeMs": 11270,
+      "action": "click",
+      "elementBounds": {
+        "x": 451,
+        "y": 431.296875,
+        "width": 36,
+        "height": 36
+      },
+      "caption": "Repeat each test case — 3 attempts, not 1"
+    },
+    {
+      "timeMs": 14227,
+      "action": "wait",
+      "elementBounds": {
+        "x": 377,
+        "y": 489.296875,
+        "width": 526,
+        "height": 12
+      },
+      "caption": "The preview counts ONE attempt — at 3 repeats the real cost is 3× this"
+    }
   ]
 }

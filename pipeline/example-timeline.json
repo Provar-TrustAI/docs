@@ -4,7 +4,7 @@
   "viewportWidth": 1280,
   "viewportHeight": 800,
   "totalDurationMs": 8000,
-  "videoFile": "./sample-recording.mp4",
+  "videoFile": "smoke.webm",
   "beats": [
     {
       "timeMs": 0,
@@ -14,7 +14,12 @@
     {
       "timeMs": 1500,
       "action": "click",
-      "elementBounds": { "x": 400, "y": 300, "width": 800, "height": 48 },
+      "elementBounds": {
+        "x": 400,
+        "y": 300,
+        "width": 800,
+        "height": 48
+      },
       "caption": "Click a session row"
     },
     {
@@ -25,13 +30,23 @@
     {
       "timeMs": 5000,
       "action": "click",
-      "elementBounds": { "x": 400, "y": 350, "width": 800, "height": 48 },
+      "elementBounds": {
+        "x": 400,
+        "y": 350,
+        "width": 800,
+        "height": 48
+      },
       "caption": "Press J to move to next session"
     },
     {
       "timeMs": 7000,
       "action": "click",
-      "elementBounds": { "x": 1100, "y": 50, "width": 32, "height": 32 },
+      "elementBounds": {
+        "x": 1100,
+        "y": 50,
+        "width": 32,
+        "height": 32
+      },
       "caption": "Press Esc to close"
     }
   ]
