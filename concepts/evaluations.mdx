@@ -13,7 +13,7 @@ An Evaluation is **the artifact regressions get caught in**. It's also the artif
 An Evaluation targets one of two sources:
 
 - **Scenarios** — Trust AI simulates each selected scenario live against the Agent Version (via the [Project's runtime connection](/concepts/projects)). Every persona attached to a scenario is simulated and scored on its own, so one scenario with three personas produces three results.
-- **Sessions** — Trust AI grades conversations that already happened. The judges read the captured transcript; no agent is invoked and the session is never modified. Because there's no live conversation to steer, session grading uses LLM Judge evaluators only. The result is homed on the session itself, and **Open session** in the result's overflow menu takes you back to the exact session that was graded.
+- **Sessions** — Trust AI grades conversations that already happened. The judges read the captured transcript; no agent is invoked and the session is never modified. Because there's no live conversation to steer, session grading uses **LLM judge** evaluators only. The result is homed on the session itself, and **Open session** in the result's overflow menu takes you back to the exact session that was graded.
 
 The second source is what makes Evaluations more than a synthetic-test tool: yesterday's real production conversations are as gradeable as your authored test cases.
 
@@ -48,7 +48,7 @@ Finished runs offer **Export** (download the results as CSV) and a primary **Re-
 Run detail leads with **two headline numbers**, and they answer different questions:
 
 - **Pass rate** grades the *agent*: of the results that count, how many passed.
-- **Evaluator accuracy** grades the *judges*: how often the automated Evaluators agreed with a human's verdict on the same sessions. Human Pass / Fail verdicts, recorded as [Annotations](/concepts/annotations), are the ground truth here — a human verdict grades the judges, and never overrides the automated verdict.
+- **Evaluator accuracy** grades the *judges*: how often the automated Evaluators agreed with a human's verdict on the same sessions. Human Pass / Fail verdicts, recorded as [Annotations](/concepts/annotations), are the ground truth here — on the **Verdict** annotation column a human verdict grades the judges and never overrides the automated verdict. Scope that to the column: on a Groundedness result a reviewer *can* override a per-claim verdict, and the score recomputes.
 
 A high pass rate means little if evaluator accuracy is low: you'd be trusting judges that a human reviewer routinely disagrees with. The two numbers together tell you whether to believe the run.
 
@@ -91,7 +91,7 @@ A result's verdict is **Pass**, **Fail**, or one of **two** distinct neutral lab
 
 Neither neutral is silently a pass or a fail. **Not graded** is the one worth opening: there's a result behind it, it just didn't yield a gradeable outcome — often because the run was excluded for one of the reasons below.
 
-One more state exists a level down. An individual check can come back **Needs review** when the judge was uncertain. A needs-review check never gates: it is recorded and shown, but it can't flip the result's outcome or push a sibling evaluator's verdict out of the count. Adjudicating it (see [Annotations](/concepts/annotations)) clears the state and lets it gate normally.
+One more state exists a level down. An individual check can come back **Needs review** when the judge was uncertain. A needs-review check never gates: it is recorded and shown, but it can't flip the result's outcome or push a sibling evaluator's verdict out of the count. On a **Groundedness** check specifically, adjudicating the uncertain claims (see [Annotations](/concepts/annotations)) can resolve the needs-review and let the check gate normally — adjudication is scoped to Groundedness and exists nowhere else.
 
 ## When it's not the agent's fault
 
@@ -106,7 +106,7 @@ Not every non-pass means the agent got something wrong, and the results no longe
 | **Environment problem** | The evaluation harness itself errored before it could score the session |
 | **Access blocked** | The platform authenticated the run but refused the selected execution identity |
 
-Each gets its own plain-language explanation rather than one generic guardrail line, because "the network timed out" and "a guardrail fired" are different problems for you to act on. All four render neutral — **Environment problem — not the agent · Excluded from the score** — and never a red Fail. The agent never got a fair shot, so the result is neither a pass nor a fail.
+Each gets its own plain-language explanation rather than one generic guardrail line, because "the network timed out" and "a guardrail fired" are different problems for you to act on. Open the result and the banner is headed by that result's own label — **Guardrail blocked**, **Environment problem**, or **Access blocked**. The per-persona matrix is the one place the three collapse: an excluded row there reads the single neutral keystone **Environment problem — not the agent · Excluded from the score**. All four render neutral in both places, and never a red Fail. The agent never got a fair shot, so the result is neither a pass nor a fail.
 
 The pipeline also defends itself before classifying anything as an environment problem: model-capacity throttling is retried automatically with backoff, one bad result can't fail the whole run, and judge calls run in parallel within a safe bound. A capacity hiccup at 2 a.m. can no longer masquerade as a drop in agent quality.
 
@@ -116,12 +116,12 @@ Open any result to see:
 
 - **Transcript** — the full conversation, labeled **Simulated** (the run drove a live conversation) or **Replayed** (the judges graded a captured session).
 - **Final verdict** — the result's verdict, with per-Evaluator score cards beneath it.
-- **Reasoning** — what you get depends on the kind of evaluator. An **LLM Judge** shows the rubric reasoning behind its score. A **Structured Match** shows the assertion that fired, or didn't. An **Outcome-Grounded** evaluator compares the backend state the run left behind against the expected end state. The **Groundedness judge** doesn't produce rubric reasoning at all — it produces a claim-by-claim report of what the agent asserted and whether the source material supports it.
+- **Reasoning** — what you get depends on the kind of evaluator. An **LLM judge** shows the rubric reasoning behind its score. A **Structured match** shows the assertion that fired, or didn't. An **Outcome grounded** evaluator compares the backend state the run left behind against the expected end state. The **Groundedness judge** doesn't produce rubric reasoning at all — it produces a claim-by-claim report of what the agent asserted and whether the source material supports it.
 - **Open session** — in the header's **⋯** menu, alongside **Open scenario**. Both jump to the record behind the result, and each appears only when it resolves.
 
 ## Evaluation results are Sessions, too
 
-The conversations produced when an Evaluation simulates scenarios are themselves Sessions — structurally the same as production Sessions. They appear in your Sessions list with a **Source** chip of **Scenario** (captured production traffic shows **External**; unsaved Playground conversations show **Playground**, and saving one as a scenario flips it to **Scenario**), and their **Simulated from** provenance shows which scenario and persona produced them.
+The conversations produced when an Evaluation simulates scenarios are themselves Sessions — structurally the same as production Sessions. They appear in your Sessions list with a **Source** chip of **Scenario** (captured production traffic shows **External**; **Playground** is reserved for an interactive capture finalized without a scenario link — the [Playground](/concepts/playground)'s own save flow always attaches one, so a saved Playground conversation reads **Scenario**), and their **Simulated from** provenance shows which scenario and persona produced them.
 
 This is what unlocks:
 
@@ -134,7 +134,7 @@ This is what unlocks:
 The regression-tracking pattern is two runs with one variable changed:
 
 1. Run an Evaluation against **Agent Version A** (say, production).
-2. On the finished run, click **Re-run**, switch the Agent Version to **B** (the candidate), and launch. Everything else carries over: the source, the exact items, the Evaluators, the run-only flag, the environment the run used, and the structural-grading mode. Change one variable and only that variable moves.
+2. On the finished run, click **Re-run**, switch the Agent Version to **B** (the candidate), and launch. Everything else carries over: the source, the exact items, the Evaluators, the run-only flag, the environment the run used, and the structural-grading mode. One field does **not** carry over — **Repeat each test case** resets to 1, so set it back before you launch if the original run was a repeated one. Change one variable and only that variable moves.
 3. Read the two run details side by side: headline deltas first, then the per-persona matrices for where the movement happened.
 
 There is no dedicated run-vs-run comparison view in the app today; the faithful Re-run is what makes the manual comparison trustworthy, because you know the only variable that changed is the agent.
@@ -152,5 +152,5 @@ Developers who want the underlying endpoints and request/response shapes can fin
 - **[Evaluators](/concepts/evaluators)** — the judgment functions applied to each result
 - **[Agent Versions](/concepts/agent-versions)** — what's under test
 - **[Annotations](/concepts/annotations)** — the human verdicts that grade the judges
-- **[Saved views](/concepts/saved-views)** — the launcher's **New evaluation** path scopes a run to a saved view
+- **[Saved views](/concepts/saved-views)** — on the launcher's **Sessions** source only, a saved view scopes the run; the Scenarios source uses a scenario picker instead
 - **[The evaluation loop](/concepts/evaluation-loop)** — Evaluations are the "run" step

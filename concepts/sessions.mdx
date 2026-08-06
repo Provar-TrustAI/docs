@@ -33,7 +33,7 @@ Sessions have three origins, and every session wears a **Source** chip that tell
 | Source | How the session was created |
 |---|---|
 | **Scenario** | Simulated from a scenario — by running it, generating sessions from it, or evaluating it. The session links back to the scenario it came from. |
-| **Playground** | A [Playground](/concepts/playground) conversation you didn't save as a scenario — saving one flips its Source to **Scenario**. |
+| **Playground** | An interactive capture finalized without a scenario link. Note that the [Playground](/concepts/playground)'s own **Save as a scenario** flow always attaches a scenario, so a conversation you save there lands as **Scenario**, not Playground — and one you never save does not become a session at all. |
 | **External** | Synced from a connected agent runtime — a real conversation your agent already had. |
 
 A session linked to a scenario always shows **Scenario**, and its **Details** tab carries a **Simulated from** card naming the scenario and persona behind it.
@@ -42,15 +42,15 @@ Session IDs reflect origin too: sessions generated in-product get `RUN-` ids (`R
 
 ### Connected runtimes
 
-External sessions sync from the agent platforms connected in your [Project](/concepts/projects): AWS Bedrock AgentCore, Claude Managed Agent, and Salesforce Agentforce. For AgentCore, your runtime emits invocation logs to CloudWatch and Trust AI's pipeline pulls them through a cross-account IAM role you grant during [Connect an AWS Bedrock AgentCore agent](/how-to/connect-agentcore); each invocation becomes a Session in your Project.
+**Backfill reaches exactly one platform: AWS Bedrock AgentCore.** Your runtime emits invocation logs to CloudWatch and Trust AI's pipeline pulls them through a cross-account IAM role you grant during [Connect an AWS Bedrock AgentCore agent](/how-to/connect-agentcore); each invocation becomes a Session in your Project.
 
-**Sync now** in the Sessions header opens a picker of your project's connected agents, grouped by platform — pick one to sync that agent on demand instead of waiting for the next scheduled pull. Ingestion is read-only: Trust AI never modifies the source runtime or its logs.
+**Sync now** in the Sessions header opens a picker of your project's connected agents, grouped by platform. The picker lists *every* connected agent, but only an AgentCore agent actually pulls anything — pick a Salesforce Agentforce, Claude Managed Agent, or Conversational HTTP agent and the sync returns nothing and says historical session sync is supported only for AWS Bedrock AgentCore. Sessions from those platforms arrive as they are produced, written by a scenario run or a Playground conversation rather than by backfill. Ingestion is read-only: Trust AI never modifies the source runtime or its logs.
 
 ## In the app
 
 The Sessions list is where you review, grade, and evaluate captured conversations. The table and panel behaviors shared across list surfaces — sorting, the column menu, range selection, the keyboard contract — are described in [Tables and panels](/concepts/tables-and-panels); here is what the surface offers:
 
-- **Sortable table** — six columns show by default: **Session ID** (the readable `RUN-` / `SES-` id), **Transcript**, **Routed To**, **Tools Called**, **Turns**, and **Date**. Four more ship hidden — **User**, **Duration**, **Source**, and **Tags** — one click away in the column menu. Column and filter configurations persist as [saved views](/concepts/saved-views) your team can share.
+- **Sortable table** — six system columns show by default: **Session ID** (the readable `RUN-` / `SES-` id), **Transcript**, **Routed To**, **Tools Called**, **Turns**, and **Date**. Four more ship hidden — **User**, **Duration**, **Source**, and **Tags** — one click away under **Hidden columns** in the **Add column** menu. The reserved **Verdict** annotation column also starts visible alongside the six; every other annotation column starts hidden. Column and filter configurations persist as [saved views](/concepts/saved-views) your team can share.
 - **Filtering** — **Add filter** offers four dimensions: **Date**, **Routed To**, **Tags**, and **Turn count**.
 - **Typed annotation columns** — every project starts with three: **Verdict** (pass / fail), **Severity** (minor / major / blocker), and **Reviewer note**. **Add column → New annotation column** adds your own, typed **Pass / Fail**, **Score** (1–5), **Category** (single choice), **Tags** (multiple from a palette), or **Comment**. Verdict and severity cells edit inline, right in the table.
 - **Column control** — one column menu handles show/hide and drag-to-reorder, and the order is remembered per saved view. Shift-click a second checkbox to select a whole range of sessions at once.
@@ -66,7 +66,7 @@ The four primary workflows:
 
 <CardGroup cols={2}>
   <Card title="Evaluate it" icon="play">
-    Select sessions and click **Evaluate** — or evaluate one session from its fly-in — to have AI-judge evaluators grade the conversation that already happened. Grading is read-only: the session is never changed, and every result carries an **Open session** button back to the exact conversation it judged.
+    Select sessions and click **Evaluate** — or evaluate one session from its fly-in — to have **LLM judge** evaluators grade the conversation that already happened. Grading is read-only: the session is never changed, and every result carries an **Open session** button back to the exact conversation it judged.
   </Card>
   <Card title="Review and annotate" icon="tag">
     Read the transcript, then record your judgment in typed annotation columns — a pass/fail **Verdict**, a severity, a score, tags, or a reviewer note. Your Verdict becomes the ground truth that scores evaluator accuracy; it never overrides the automated verdict. See [Annotations](/concepts/annotations).
@@ -101,7 +101,7 @@ Out of the box, every Session carries:
 - Time: when the conversation happened and when it was captured
 - Routing: the **Routed To** route, plus tool calls made along the way
 - Human signal: annotation column values (Verdict, Severity, and any custom columns) and tags
-- Automated signal: the session's evaluation verdict — **Pass**, **Fail**, or **Not evaluated**
+- Automated signal: the session's evaluation verdict — **Pass**, **Fail**, or one of two distinct neutrals, **Not evaluated** (nothing ran) and **Not graded** (something ran but produced no behavioural score)
 
 Not all of it is filterable. The table filters on **Date**, **Routed To**, **Tags**, and **Turn
 count**; the rest is there to read, sort, and export. To narrow by something the filter set doesn't

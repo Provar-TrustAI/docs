@@ -111,7 +111,7 @@ Project **Owner** is conferred when a Project is created. It is not a grantable 
 
 The Project boundary holds for **Admins** too: a workspace Admin who isn't a member of a Project doesn't automatically see its contents. Content access resolves against the Project's own grants. Managing access is a separate power from having it: an Admin can grant access to any Project in the workspace, including to themselves, but until that grant exists the Project's contents stay closed to them.
 
-The workspace **Owner** is the exception, and it is the only one. The Owner reaches every Project in the workspace — view, edit, delete, and run — without holding a grant on any of them. Read the boundary as "everyone but the Owner".
+**The workspace Owner is not an exception.** An Owner without a grant on a Project is denied that Project's content exactly as anyone else would be, and a Projects list is built from your grants — so an Owner holding no grants sees an empty list rather than the whole workspace. Owning the workspace is the power to *grant* yourself access, not to bypass the check. Read the boundary as "everyone, Owners included". See [Multi-tenancy](/concepts/multi-tenancy) for how that decision is enforced.
 
 ## Importing sessions
 
