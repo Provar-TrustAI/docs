@@ -55,7 +55,7 @@ Viewer and Editor are the only two tiers a grant dialog offers. Project **Owner*
 
 **Project lifecycle is owner-only.** Renaming, archiving, restoring, and deleting a Project require the Project's Owner tier. A workspace Admin without a grant is denied, and so is a project Editor: the gate is stricter than "not ordinary members".
 
-In the product, this reference opens where you need it — a **What can each role do?** link sits beside every role picker, in the invite dialog and in the member sheet, and opens a read-only roles-and-permissions drawer.
+In the product, this reference opens where you need it — a **What can each role do?** link sits beside the *workspace*-role picker, in the invite dialog and in the member sheet, and opens a read-only roles-and-permissions drawer. The project-tier controls on **Project access** — the Viewer/Editor toggle in the grant dialog, and the same picker inline on a grant row — carry no such link; their two grantable tiers are the ones in the table above.
 
 <Note>
   The drawer's matrix is drawn from the shared permission catalog, which models a coarse workspace-Owner allowance for project actions. The platform edge does not use it: every project decision resolves through the per-project membership check instead, so the rule on this page — **project content is always gated by a grant, admins and owners included** — is what the API actually enforces.
@@ -121,8 +121,9 @@ On an HTTP route, the engine's decision is the authoritative access check, and i
 
 The boundary is careful about existence, and the rule differs by what you addressed:
 
-- **A record addressed by its own id** — a Session, a Scenario, a Persona, a simulation, an agent version, an agent profile revision, a Trust Agent task — resolves through a tenant-filtered query. Another organization's id **collapses to a not-found**, byte-identical to an id that never existed. There is no "you're not allowed to see this" response to distinguish the two, so nothing confirms that a foreign record is real.
+- **A record addressed by its own id** — a Session, a Scenario, a Persona, a simulation, an agent version, an agent profile revision — resolves through a tenant-filtered query. Another organization's id **collapses to a not-found**, byte-identical to an id that never existed. There is no "you're not allowed to see this" response to distinguish the two, so nothing confirms that a foreign record is real.
 - **A Project id** is deliberately different. A Project that exists in some tenant but that you have no grant on answers **403**; a Project id that exists nowhere answers **404**. The 403 is what makes "ask your admin for access" a coherent thing to tell someone, and it is the same 403 whether the Project sits in your organization or another one — so it separates *does this id exist somewhere* from *whose tenant is it in*, which is the answer that matters.
+- **A Trust Agent chat** is the exception to the not-found rule. Its task is addressed by id and gated on *who started the chat* — not by a tenant-filtered read — so a chat you did not start is **denied (403)**, whether it belongs to a colleague on your own Project or to another organization entirely. Its slice of the agent audit log is gated as well: the platform resolves the chat's Project first, then requires your grant on it.
 
 This is defense in depth, not a single check: beneath the engine, tenant-scoped repository reads filter on `organization_id` directly, so even a path that skipped the engine would surface an empty result rather than a foreign row.
 
@@ -170,7 +171,7 @@ Masking hides the value, not the fact. The UI still shows a **Configured** statu
 
 ## The Trust Agent runs inside the boundary
 
-The **[Trust Agent](/concepts/trust-agent)** is not an exception to any of this — it runs inside the same tenant boundary as the rest of the platform. An agent session only ever sees and acts on the current organization's Project data, and an approved write executes only within your own organization and Project: **tenant-scoped, server-anchored, and bound to the specific approval you gave.** The agent cannot read or mutate another organization's records. Its tasks and audit log are tenant-anchored exactly like every other domain, so a cross-tenant agent-task id collapses to a not-found like any other foreign record id.
+The **[Trust Agent](/concepts/trust-agent)** is not an exception to any of this — it runs inside the same tenant boundary as the rest of the platform. An agent session only ever sees and acts on the current organization's Project data, and an approved write executes only within your own organization and Project: **tenant-scoped, server-anchored, and bound to the specific approval you gave.** The agent cannot read or mutate another organization's records. Its tasks and audit log are tenant-anchored exactly like every other domain — every row carries the organization it belongs to. What differs is only the *shape* of a refusal: a chat is gated on who started it, so someone else's chat is denied **403** rather than collapsing to a not-found the way a foreign Session or Scenario id does.
 
 The behavioral side of the agent — its shells, transcript, approvals, and what "approve and execute" actually does — lives in **[Trust Agent](/concepts/trust-agent)**. This page only asserts that all of it happens inside the tenant boundary.
 
