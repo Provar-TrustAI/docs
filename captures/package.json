@@ -11,7 +11,8 @@
     "capture:welcome": "npx playwright test welcome-surface",
     "capture:agent-tutorial": "DRIVE=1 npx playwright test agent-tutorial",
     "capture:sidebar": "npx playwright test sidebar-navigation",
-    "capture:skills": "npx playwright test skills-editor"
+    "capture:skills": "npx playwright test skills-editor",
+    "capture:trust-agent": "npx playwright test trust-agent-surface"
   },
   "devDependencies": {
     "@playwright/test": "^1.50.0",

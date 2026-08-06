@@ -34,8 +34,9 @@ pnpm capture:evaluations
 pnpm capture:evaluators
 pnpm capture:welcome
 pnpm capture:sidebar
-pnpm capture:playground   # needs the stub agent below
-pnpm capture:agent-tutorial   # see the warning below — this one is live
+pnpm capture:playground       # needs the stub agent below
+pnpm capture:trust-agent      # slow: drives real agent turns, see below
+pnpm capture:agent-tutorial   # slower, and it writes — see below
 ```
 
 ## One surface needs a connected agent, not just a seed
@@ -59,19 +60,38 @@ Register it once per stack as a connection named **Refunds Concierge** — the e
 `curl` is in that file's header. `base_url` must be `http://host.docker.internal:8397`:
 the API and gateway run in Docker, where `localhost` is not your machine.
 
-## One capture drives a live agent, and it writes
+## Two captures drive the product instead of screenshotting it
 
-`scripts/agent-tutorial.ts` is the exception to everything else here. The beats the Trust Agent
-tutorial documents — the clarify-first question card, the plan on the rail, a write's permission
-gate, the object table of what the run built — exist only as the product of a real agent turn.
-There is no fixture that paints them. So that script sends the tutorial's own brief and answers
-and approves its way through the conversation.
+`scripts/trust-agent-surface.ts` is the odd one out. The Trust Agent's transcript,
+tool-call cards, side rail and permission cards do not exist until a real conversation
+produces them, so that script sends prompts and waits for turns. Consequences:
 
-It costs ten-plus minutes of model calls, and it **really mutates the target project**: it edits
-evaluators, generates scenarios, and starts evaluations. Point it at a demo project only. It is
-skipped unless `DRIVE=1` is set, so `pnpm capture:all` never triggers it by accident.
+- **It is slow and not byte-reproducible.** A turn is upstream model time (20-120s) and
+  the agent's wording differs between runs. Budget minutes, and re-run if a reply comes
+  back badly worded.
+- **`settle()` is not enough.** A network-idle agent surface is usually one that has not
+  started streaming. Use that script's `waitForTurn()`, which waits for the typing
+  indicator to appear *and* go away.
+- **Never reuse a chat from the Recent chats rail.** It is capped at five entries and
+  other sessions push yours off it, so "click the chat I made" silently clicks somebody
+  else's. Each test starts its own chat.
+- **Clean up what a previous run created.** The write capture asks the agent to create a
+  named evaluator. Run it twice without deleting the first one and the agent correctly
+  refuses with a question card instead of a write gate — a valid, useless screenshot.
+  `dropEvaluator()` handles it.
 
-Its Welcome-surface shot is an ordinary capture and always runs.
+`scripts/agent-tutorial.ts` goes further still: it drives the whole tutorial flow — the
+clarify-first question card, the plan on the rail, a write's permission gate, the object
+table of what the run built — by sending the tutorial's own brief and then answering and
+approving its way through the conversation. So on top of everything above:
+
+- **It really mutates the target project.** It edits evaluators, generates scenarios, and
+  starts evaluations. Point it at a demo project only.
+- **It is skipped unless `DRIVE=1`**, so `pnpm capture:all` never spends ten minutes of
+  model calls, or writes to a project, by accident. Its Welcome-surface shot is an
+  ordinary capture and always runs.
+- **It waits on structure, never on a phrase** — a pending HITL card, a plan list in the
+  rail, a multi-record tool-call card — because the wording differs every run.
 
 ## Two traps this harness is built around
 
