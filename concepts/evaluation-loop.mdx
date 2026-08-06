@@ -74,7 +74,7 @@ Defining scenarios is deliberately cheap. The product's opinion: write the test 
 
 Run a scenario and Trust AI simulates it against your connected agent — one conversation per persona per goal. Each simulated conversation is persisted as a real **Session**, linked back to its scenario, sitting alongside the sessions synced from your runtime. Nothing about a generated session is second-class: same transcript view, same annotations, same evaluations.
 
-Sessions arrive from three directions, and the **Source** column tells you which: **Scenario** (simulated from a scenario run or evaluation), **Playground** (an unsaved Playground conversation), or **External** (synced from your connected runtime). Source is hidden by default — show it from the column menu when the mix matters.
+Sessions arrive from three directions, and the **Source** column tells you which: **Scenario** (simulated from a scenario run or evaluation), **Playground** (an interactive capture finalized without a scenario link), or **External** (synced from your connected runtime). A conversation you save in the [Playground](/concepts/playground) reads **Scenario**, because saving there always attaches one. Source is hidden by default — show it from the column menu when the mix matters.
 
 The Scenarios list has a **Run** split button: **Run & evaluate** to simulate and grade in one move, or **Run only** to simulate without grading — useful when you're still learning how the agent behaves. Bulk runs keep you on the list with live per-scenario progress badges.
 
@@ -98,7 +98,7 @@ Reference material is attached **per scenario**, never on the evaluator — the 
 
 ### 4. Run an Evaluation
 
-Every run starts from one place: the **Evaluation Launcher**, opened from **+ New evaluation** on the Evaluations list, from **Run & evaluate** on scenarios, or from **Evaluate** on sessions. The launcher shows a fan-out preview of exactly what will run under **This will run**, and it grades two kinds of source:
+Every run starts from one place: the **Evaluation Launcher**, opened from **New evaluation** on the Evaluations list, from **Run & evaluate** on scenarios, or from **Evaluate** on sessions. The launcher shows a fan-out preview of exactly what will run under **This will run**, and it grades two kinds of source:
 
 - **Scenarios** — live simulation: each persona enacts its goal against the Agent Version you picked, and the judges plus the scenario's Expected Output grade the result.
 - **Sessions** — grade the conversations that **already happened**. The judges read each captured session and score it; nothing is re-sent to your agent, and the session is never modified.
@@ -120,7 +120,7 @@ Editing a scenario after a run never rewrites that run's history — but the mec
 
 Run detail leads with **Pass rate** — how often the agent met the bar. This grades **the agent**.
 
-Beside it, once there is anything to compute it from, sits **Evaluator accuracy** — how often the automated judges' combined verdict agreed with a human's verdict on the same cases. This grades **the judges**. It applies every selected evaluator to each case that carries a human verdict, combines them into one pass-or-fail (any evaluator fail means fail), and counts the matches. Cases with no human verdict can't contribute and are excluded — so on a run with no human verdicts yet, the accuracy headline **isn't shown at all** rather than displaying a misleading zero. A run with no behavioral grade at all reads **Not graded** in the headline slot.
+Beside it, once there is anything to compute it from, sits **Evaluator accuracy** — how often the automated judges' combined verdict agreed with a human's verdict on the same cases. This grades **the judges**. It reads each case that carries a human verdict, combines that case's **LLM judge** scores into one pass-or-fail (any judge fail means fail), and counts the matches. Only LLM judges are compared — structural and outcome-grounded scores are excluded, so a case graded solely by those can't move the number. Cases with no human verdict can't contribute and are excluded — so on a run with no human verdicts yet, the accuracy headline **isn't shown at all** rather than displaying a misleading zero. A run with no behavioral grade at all reads **Not graded** in the headline slot.
 
 The split matters. A pass rate is only as trustworthy as the judges producing it.
 

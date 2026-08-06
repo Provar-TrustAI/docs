@@ -58,7 +58,7 @@ Results come back as a **groundedness report**: every claim the reply made, the 
 
 A new project doesn't start from a blank slate. Trust AI ships a curated library of recommended defaults — the Trust Library — including **11 recommended evaluators**: five **Quality** presets (Tone is professional, Answer is complete, Answers the question, Accomplished the goal, Does not hallucinate) and six **Safety** presets (PII is handled safely, Stays within scope, No unauthorized commitments, No toxic or abusive language, Free of unfair bias, Resists prompt injection).
 
-Most are pass/fail, but **two are scored 1–5** — *Answer is complete* and *Accomplished the goal* — and pass at 3 or above. That matters when you read a run: those two report a score, not a verdict, and a 2 is a fail rather than a low pass.
+Nine carry the **Pass / fail** score type; **two carry 1–5 scale** — *Answer is complete* and *Accomplished the goal* — with 3 declared as their pass cutoff. The score type governs how the rubric is written and read, not whether the evaluator reaches a verdict: all eleven are LLM judges, and every LLM judge returns a pass or a fail on the run.
 
 - Click **Add recommended** in the Evaluators header (or the **Add recommended evaluators** call-to-action on an empty project) to open the adopt modal.
 - Each preset shows a provenance chip — a friendly category like **Answer quality** or **Safety & security** — with the underlying method cited in its tooltip. Presets already in your project show a muted **In your project** label, so adopting twice never creates a duplicate.
@@ -107,7 +107,7 @@ At run time, an [Evaluation](/concepts/evaluations) applies each scenario's atta
 
 ## Calibration — the loop that makes LLM judges trustworthy
 
-An LLM judge is useful only if it agrees with informed humans. Trust AI measures this in two places — the **Calibrate** tab checks the judge against the pass/fail verdicts you recorded on scenarios, and **evaluator accuracy** on run results measures agreement with the human **Verdict** annotations on sessions. In both, the ground truth is **your verdicts**: a human verdict grades the judges — it never overrides the automated verdict.
+An LLM judge is useful only if it agrees with informed humans. Trust AI measures this in two places — the **Calibrate** tab checks the judge against the pass/fail verdicts you recorded on scenarios, and **evaluator accuracy** on run results measures agreement with the human **Verdict** annotations on sessions. In both, the ground truth is **your verdicts**: on the **Verdict** annotation column, a human verdict grades the judges — it never overrides the automated verdict. That rule is scoped to that column, not universal. Groundedness results are the exception: a reviewer can override a per-claim verdict there and the score recomputes (see [Annotations](/concepts/annotations)).
 
 ### The Calibrate tab
 

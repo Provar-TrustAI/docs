@@ -80,7 +80,7 @@ Archiving an Agent Version in Trust AI does not affect the source runtime.
 
 ## Pinned at run time
 
-When you launch a scenario-driven Evaluation, the launcher's **Agent** step asks which connected agent simulates each scenario — the run pins that build, and its results carry the pin. When you drive the run through the Trust Agent instead, it confirms which agent build it will run against before simulating, and tells you plainly if none is connected. **Re-run** on a finished run restores the original run's full configuration, including its pinned agent and Evaluators.
+When you launch a scenario-driven Evaluation, the launcher's **Agent** step asks which connected agent simulates each scenario — the run pins that build, and its results carry the pin. When you drive the run through the Trust Agent instead, it confirms which agent build it will run against before simulating, and tells you plainly if none is connected. **Re-run** on a finished run restores the original run's configuration, including its pinned agent and Evaluators — everything but **Repeat each test case**, which resets to 1.
 
 Evaluations launched from Sessions skip this step entirely: grading a recorded transcript needs no agent, so no version is pinned.
 
@@ -115,7 +115,7 @@ The core regression-tracking pattern:
 When the same Scenarios and the same Evaluators are held constant, **the only variable left is the agent itself**. Whatever changes in the Evaluation results between the two runs is attributable to the version change. That's the loop the Agent Version concept exists to make legible.
 
 <Note>
-  There is no dedicated run-vs-run comparison view in the product yet — you compare by opening the two run details. **Re-run** on a finished run restores its full configuration, including the pinned agent and Evaluators, so repeating the same setup against a different version is a one-field change.
+  There is no dedicated run-vs-run comparison view in the product yet — you compare by opening the two run details. **Re-run** on a finished run restores its configuration, including the pinned agent and Evaluators, so repeating the same setup against a different version is a one-field change. **Repeat each test case** is the one field that does not carry over — it resets to 1.
 </Note>
 
 Hold any of those three constants and you get a different signal:

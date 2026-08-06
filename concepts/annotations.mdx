@@ -66,7 +66,7 @@ The rule: **your Verdict annotation grades the judges — it never overwrites th
 
 That rule is about the **Verdict annotation column**, not about human input generally. The [Groundedness judge](/concepts/evaluators) has a separate mechanism — **adjudication** — where a reviewer's call genuinely rewrites the automated result.
 
-In a Groundedness report, each claim the agent made carries a judged verdict. A reviewer can override one — marking it supported, contradicted, unsupported, or not a claim, with an optional note. The claim counts, the grounded percentage, and the check's pass/fail then recompute, and the parent result's roll-up updates with them. The recompute is deterministic: no model re-runs, and the judge's original verdict is kept alongside yours so the report can still show what it had said.
+In a Groundedness report, each claim the agent made carries a judged verdict — **Supported**, **Contradicted**, **Unsupported**, **Unknown**, or **Conversational**. A reviewer can override one to any of those five, with an optional note, and **revert** puts the judge's verdict back. The claim counts, the **% grounded** figure, and the check's pass/fail then recompute, and the parent result's roll-up updates with them. The recompute is deterministic: no model re-runs, and the judge's original verdict is kept alongside yours so the report can still show what it had said.
 
 <Note>
   Adjudication is a correction to a specific claim, not a global override. It exists because a claim-by-claim judgment is exactly the kind of thing a person can check faster than a model can — and it's scoped to Groundedness. Nowhere else does a human entry move an automated score.
@@ -78,7 +78,7 @@ Annotations and Evaluator scores are structurally similar — a judgment attache
 
 | | Annotation | Evaluator score |
 |---|---|---|
-| **Source** | Human reviewer | Any of the four evaluator kinds — LLM Judge, Structured Match, Outcome-Grounded, or the Groundedness judge |
+| **Source** | Human reviewer | Any of the four evaluator kinds — LLM judge, Structured match, Outcome grounded, or Groundedness judge |
 | **Question answered** | "Was this actually acceptable?" | "Does this pass the rubric, at scale?" |
 | **Cost per Session** | Reviewer minutes | LLM tokens / compute |
 | **When applied** | During review, any time after capture | At Evaluation time, programmatically |
@@ -109,7 +109,7 @@ The common annotation patterns:
 
 Annotations justify their cost downstream:
 
-1. **Evaluator accuracy** — a human Verdict on an evaluated Session sharpens the judge-vs-human agreement number on evaluation results. This is the primary payoff: it tells you whether to trust the automated scores. One qualifier: the comparison uses the combined **LLM Judge** verdict only — any judge failing counts as a fail — and structural scores are excluded, so annotating Sessions graded solely by a Structured Match evaluator won't move the number.
+1. **Evaluator accuracy** — a human Verdict on an evaluated Session sharpens the judge-vs-human agreement number on evaluation results. This is the primary payoff: it tells you whether to trust the automated scores. One qualifier: the comparison uses the combined **LLM judge** verdict only — any judge failing counts as a fail — and structural scores are excluded, so annotating Sessions graded solely by a **Structured match** evaluator won't move the number.
 2. **Evaluator calibration** — when accuracy is low, the disagreeing Sessions show you exactly where the rubric misjudges. Refine the Evaluator and re-run. To drive the Calibrate tab itself, mark verdicts on **scenarios**, not sessions.
 3. **Review-driven evaluation** — filter to the Sessions your review flagged, select them, and hit **Evaluate** to grade them with your judges. Annotation is not a prerequisite: you can evaluate Sessions you haven't annotated at all.
 
