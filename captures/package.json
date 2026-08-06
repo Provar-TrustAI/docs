@@ -8,6 +8,7 @@
     "capture:evaluations": "npx playwright test evaluations-results-matrix",
     "capture:evaluators": "npx playwright test evaluators-create-flow",
     "capture:welcome": "npx playwright test welcome-surface",
+    "capture:agent-tutorial": "DRIVE=1 npx playwright test agent-tutorial",
     "capture:sidebar": "npx playwright test sidebar-navigation"
   },
   "devDependencies": {

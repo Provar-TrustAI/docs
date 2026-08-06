@@ -34,7 +34,22 @@ pnpm capture:evaluations
 pnpm capture:evaluators
 pnpm capture:welcome
 pnpm capture:sidebar
+pnpm capture:agent-tutorial   # see the warning below — this one is live
 ```
+
+## One capture drives a live agent, and it writes
+
+`scripts/agent-tutorial.ts` is the exception to everything else here. The beats the Trust Agent
+tutorial documents — the clarify-first question card, the plan on the rail, a write's permission
+gate, the object table of what the run built — exist only as the product of a real agent turn.
+There is no fixture that paints them. So that script sends the tutorial's own brief and answers
+and approves its way through the conversation.
+
+It costs ten-plus minutes of model calls, and it **really mutates the target project**: it edits
+evaluators, generates scenarios, and starts evaluations. Point it at a demo project only. It is
+skipped unless `DRIVE=1` is set, so `pnpm capture:all` never triggers it by accident.
+
+Its Welcome-surface shot is an ordinary capture and always runs.
 
 ## Two traps this harness is built around
 
