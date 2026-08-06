@@ -36,9 +36,11 @@ Permission cards gate **writes specifically**. A read-only request — "list my 
 </Warning>
 
 <Info>
-  An approved write is **scoped to your tenant and enforced on the server**: the change lands only within your own organization and project, and the execution is bound to the specific approval you gave rather than trusted from the client. The agent cannot act on another organization's records. See [Multi-tenancy](/concepts/multi-tenancy) for the platform detail.
+  **The approval you gave is what authorizes the write.** The server, not your browser, decides whether a write may execute: it only accepts a decision for a gate it raised itself, and it binds that decision to the write the card was actually about. A different write chained into the same turn does not inherit your approval — it asks again.
+
+  A write is also expected to stay inside the project and organization you are working in. See [Multi-tenancy](/concepts/multi-tenancy) for the platform detail.
 </Info>
-{/* ACCURACY-AUDIT-PENDING: write execution is tenant-scoped, server-anchored, and bound to the specific approval. The observable property (a write lands only within the current org/project) cannot be driven on a single-organization local deployment — verify against a multi-organization deployment before asserting the mechanics */}
+{/* ACCURACY-AUDIT-PENDING: the cross-organization isolation property is stated at behavior level only. It cannot be driven on a single-organization local deployment — verify against a multi-organization deployment before asserting the mechanics. The server-anchored approval binding above IS verified (agui/write_gate.py:12-46). */}
 
 ## The permission card
 
@@ -69,7 +71,9 @@ Once you've read the preview, you have three ways to resolve a permission card.
   <Step title="Approve to execute">
     Pick an approval option, then confirm. The agent writes the option labels itself, so they name the actual work — a card filing a requirement offers **File it**, a card generating a scenario offers **Generate it**.
 
-    **Approving once covers the batch that card represented, not one row.** If the agent is partway through a repeated series — filing four requirements, generating a set of scenarios — a single approval lets the rest of that series through **for the remainder of that turn**. It does not carry into your next message: the next turn asks again. Deletes and agent-profile authoring are the exceptions — those are approved strictly one write at a time.
+    **Approving once covers the batch that card represented, not one record.** If the agent is partway through a repeated series — filing four requirements, generating scenarios — a single approval lets the rest of that series through **for the remainder of that turn**. It does not carry into your next message: the next turn asks again.
+
+    Three kinds of write are held back from that batch behavior and are approved strictly one write at a time: a **delete**, **authoring an agent profile**, and a **bulk edit that has a requirement mixed into it**. These are the same three a standing approval can never cover — see the exclusions under [Standing approvals](#standing-approvals).
 
     When the agent expects to keep repeating the same kind of write, the card also offers a **for-this-chat** option, worded for what it would keep doing. That one is a standing approval — see [Standing approvals](#standing-approvals) below. Deletes never offer it.
 
@@ -107,7 +111,7 @@ It is not a session convenience. The grant is recorded on the server against the
 
 Two things change, and the second one is the one to internalize.
 
-1. **A chip appears in the composer.** It reads, for example, **create requirements in this chat · Active until Aug 13**, with an × beside it. It stays visible for as long as the grant is live, in every view of that chat. Screen readers hear it prefixed with "Standing approval active:".
+1. **A chip appears in the composer.** It reads, for example, **create requirements in this chat · Active until Aug 13**, with an × beside it. It stays visible for as long as the grant is live, wherever the chat itself is on screen — the full page and the docked panel both show it. Collapse the agent all the way to the pill and the composer goes with it, so reopen the chat to see (or turn off) the grant. Screen readers hear it prefixed with "Standing approval active:".
 2. **The next matching write raises no card.** The agent performs it and reports the result. There is no gate, no halt, no confirm button — the approval you already gave is what authorized it.
 
 That second point is why the chip exists. A standing approval is deliberately never invisible: if the agent can write without asking, you can always see that it can, and you can always take it back.
