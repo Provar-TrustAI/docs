@@ -1,40 +1,54 @@
 ---
 title: "Connect an MCP client to Trust AI"
 icon: "plug"
-description: "Current status of connecting Claude Desktop, Cursor, or VS Code to Trust AI's MCP server, and what the connection will require."
+description: "Why pointing Claude Desktop, Cursor, or a VS Code MCP extension at Trust AI is not a supported integration, and what to do instead."
 ---
 
-Trust AI runs an [MCP server](/concepts/mcp-integration) that exposes the Trust Agent's tools. This page covers connecting a **standalone external MCP client** — Claude Desktop, Cursor, or a VS Code MCP extension — to it.
+Trust AI runs an [MCP server](/concepts/mcp-integration) that republishes a small, fixed subset of the **Trust Agent's** tools. This page is about the client side of that: pointing a standalone MCP client — Claude Desktop, Cursor, a VS Code MCP extension — at it.
 
 <Warning>
-  **Direct external-client connection is not yet available.** Today the MCP server is reached through your authenticated Trust AI session, which powers the in-product Trust Agent and Trust AI's in-process runtime. A desktop client (Claude Desktop, Cursor) can't present that session, so it can't connect over the internet yet. The standalone-client path ships with the OAuth authentication work described below — this page updates with concrete setup steps when it lands.
+  **Connecting your own MCP client is not yet supported.** There is no supported way to point an external client at Trust AI, and no MCP configuration screen anywhere in the product. The server authenticates every call on a signed-in Trust AI session, and reaching it that way from outside the product is an internal path only — not a customer integration, and not something to build against.
 </Warning>
 
-{/* ACCURACY-AUDIT-PENDING: external-client connection is unbuilt as of the v2026.06.09.2 tag (mcp_server.py authenticates with the wos_session cookie only; no OAuth/token-mint exists). Replace this page with real setup steps once the OAuth flow ships, verified against the running app. */}
+## What "not supported" means here
 
-## What works today
+It is a statement about what Trust AI stands behind, not a claim that the mechanism is missing.
 
-The Trust Agent already drives the MCP tool surface for you **inside the product** — you get its read and write capabilities through the Trust AI UI and the Trust Agent itself, with the same approval gate and observability described on the [MCP Integration](/concepts/mcp-integration) concept page. No client configuration is involved.
+**What is missing is a credential you can hold.** Every authenticated request Trust AI accepts — over MCP and over the REST API alike — is authorized by your signed-in browser session. There is no key Trust AI issues to a client, so there is nothing you could scope to read-only, rotate on a schedule, or revoke when a laptop goes missing. That, not the protocol work, is the gap.
 
-## What external connection will require
+**So there is nothing to configure.** No connection screen, no server address to paste, no per-client snippet for us to publish. A path we supported would need an issued, revocable credential in place of a session. That is a design direction, not a scheduled release, and this page will not guess at a date.
 
-When the standalone-client path ships, it will follow the **standard MCP authorization flow** rather than a hand-pasted token:
+<Note>
+  Earlier versions of this page said the standalone-client path would arrive with an OAuth sign-in flow, and that a client would be handed a short-lived token automatically. That was wrong on both counts. **No OAuth work is planned**, and nothing described here is waiting on it.
+</Note>
 
-1. You add the Trust AI MCP server to your client (Claude Desktop, Cursor, VS Code).
-2. On first use, the client opens a **browser login** — you authenticate with your normal Trust AI **WorkOS SSO**, exactly as you sign in to the app.
-3. The client receives a short-lived, org-scoped token automatically and stores it in its own config. **Nothing is copied and pasted.**
-4. Read tools run immediately; write tools surface the same approval prompt before anything changes.
+## Use the Trust Agent instead
 
-This is the authentication pattern the [Model Context Protocol authorization spec](https://modelcontextprotocol.io/specification/2025-06-18/basic/authorization) defines, with WorkOS as the identity provider. We'll publish the per-client config snippets, the server URL, and the token policy here once they're real.
+Nothing sits behind the unsupported door that the product does not already give you. MCP does not add capability — it republishes the Trust Agent's own tools over a second transport, running the same implementations. The agent inside Trust AI is the full surface, not a subset of it, and it reaches you with no client configuration at all.
 
-## In the meantime
+Open a chat from any project and ask for the work directly:
 
-- Work with your data through the in-product **[Trust Agent](/concepts/trust-agent)** and the UI.
-- Ingest agent traffic with **[Connect an AWS Bedrock AgentCore agent](/how-to/connect-agentcore)**.
-- Read the **[MCP Integration](/concepts/mcp-integration)** concept page for the tool surface, the approval gate, and how access is scoped.
+- **Get oriented** — "Summarize this project" returns entity counts, setup state, and the most recent evaluation run.
+- **Query your data** — "How many sessions are in this project?", "Show me two sessions from this project." One entity type at a time: sessions, scenarios, evaluators, evaluations, personas, or agent versions.
+- **Read an attached file** — attach a document to the chat and ask the agent to read it back.
+- **Analyze a run** — "Analyze the failures in the last evaluation" produces a short note on each failure and then names the themes across them. It typically takes 30 to 60 seconds.
+- **Write, with a checkpoint** — curating conversations into scenarios, editing or deleting an item, and starting an evaluation all preview what would change and then wait for you to approve. See [Approve an agent write](/how-to/approve-agent-writes).
+
+[Work with the Trust Agent](/how-to/work-with-the-trust-agent) covers the chat surface itself — the Ask, Plan, and Act modes and how approvals are granted.
+
+## If what you wanted was to connect your own agent
+
+Connecting the agent you want to evaluate is a different job, and it is supported. It runs through a platform connection, not through MCP:
+
+- [Connect an AWS Bedrock AgentCore agent](/how-to/connect-agentcore)
+- [Connect a Salesforce Agentforce agent](/how-to/connect-agentforce)
+- [Connect a Claude Managed Agent](/how-to/connect-claude-managed-agent)
+
+Your agent under test may itself speak MCP to its own tools. That relationship is between your agent and those tools; it is unaffected by anything on this page.
 
 ## Related reading
 
-- **[MCP Integration](/concepts/mcp-integration)** — the tool surface, authentication, the approval gate, and observability
-- **[Trust Agent](/concepts/trust-agent)** — the assistant whose tools the MCP server exposes
-- **[Connect an AWS Bedrock AgentCore agent](/how-to/connect-agentcore)** — the available integration how-to today
+- **[MCP integration](/concepts/mcp-integration)** — the eight republished tools, the project role each one needs, and the approval gate every write passes through
+- **[Trust Agent](/concepts/trust-agent)** — the assistant whose tools the MCP server republishes
+- **[Work with the Trust Agent](/how-to/work-with-the-trust-agent)** — the in-product path this page points you to
+- **[Approve an agent write](/how-to/approve-agent-writes)** — the approval step in front of every write
