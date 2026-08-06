@@ -13,25 +13,23 @@ An Evaluation is **the artifact regressions get caught in**. It's also the artif
 An Evaluation targets one of two sources:
 
 - **Scenarios** — Trust AI simulates each selected scenario live against the Agent Version (via the [Project's runtime connection](/concepts/projects)). Every persona attached to a scenario is simulated and scored on its own, so one scenario with three personas produces three results.
-- **Sessions** — Trust AI grades conversations that already happened. The judges read the captured transcript; no agent is invoked and the session is never modified. Because there's no live conversation to steer, session grading uses LLM Judge evaluators only. The result is homed on the session itself, and an **Open session** button on the result takes you back to the exact session that was graded.
+- **Sessions** — Trust AI grades conversations that already happened. The judges read the captured transcript; no agent is invoked and the session is never modified. Because there's no live conversation to steer, session grading uses LLM Judge evaluators only. The result is homed on the session itself, and **Open session** in the result's overflow menu takes you back to the exact session that was graded.
 
 The second source is what makes Evaluations more than a synthetic-test tool: yesterday's real production conversations are as gradeable as your authored test cases.
 
 ## Launching a run
 
-One **Evaluation Launcher** drives every run. It opens from five places:
+One **Evaluation Launcher** drives every run, and every entry point leads to the same modal. It opens from at least seven places:
 
 1. **Sessions list** — select sessions and click **Evaluate** (bulk).
 2. **A single session's panel** — **Evaluate** in the header (one-off).
 3. **Scenarios list** — select scenarios and use the **Run** split button (**Run & evaluate**, or **Run only** to simulate without grading).
 4. **A single scenario's fly-in** (one-off).
-5. **Evaluations list** — click **New evaluation** and pick the source yourself: Sessions or Scenarios, then a [saved view](/concepts/saved-views) of that surface to scope the run.
+5. **Evaluations list** — click **New evaluation** and pick the source yourself.
+6. **A finished run's detail page** — **Re-run**.
+7. **An Evaluator's panel** — evaluate with the judge you're looking at.
 
-However you arrive, the launcher shows a **fan-out preview** — exactly what will run, including the per-persona expansion for scenarios — before you commit.
-
-One launcher detail worth knowing:
-
-- **Re-run** — on any finished run, **Re-run** reopens the launcher pre-seeded with the original run's full configuration: same targets, same Evaluators, same Agent Version. Change one variable (usually the Agent Version) and launch.
+Nothing is enqueued by any of those clicks. They open the launcher; the run starts when you confirm inside it. However you arrive, the launcher shows a **fan-out preview** — exactly what will run, including the per-persona expansion for scenarios — before you commit.
 
 ## One-off evaluation in place
 
@@ -41,7 +39,7 @@ You don't need a named run to answer "does this one pass?". Evaluating a single 
 
 - **Launched** — the run records a snapshot of your scenarios as they were at launch, so a finished run stays reproducible even after you edit or delete scenarios later.
 - **In progress** — results fill in as they complete. If you launched a bulk run from the Scenarios list, you stay on the list and watch each scenario's live **Generating…** badge settle as it finishes. You can open the run and watch results arrive, or click **Cancel run** — the run stops at a clean boundary and keeps every result already scored.
-- **Complete** — every result has a verdict, and the aggregate headlines resolve.
+- **Complete** — every result has settled. That doesn't guarantee a number: a run whose results carry no behavioural score — because no behavioural evaluator was attached, or because every result was excluded — completes with its pass-rate headline reading **Not graded** rather than a percentage. A complete run and a graded run are not the same thing.
 
 Finished runs offer **Export** (download the results as CSV) and a primary **Re-run**; the **…** menu offers **Delete run**, which removes the run from your lists without destroying the sessions it produced.
 
@@ -56,22 +54,53 @@ A high pass rate means little if evaluator accuracy is low: you'd be trusting ju
 
 ### Pass^K reliability
 
-A run whose test cases were attempted more than once leads with a **Pass^K** rate instead of a plain pass rate — the share of test cases that passed *every* attempt, rendered literally as `Pass^2`. Hover the headline for the full curve from pass-once to pass-every-time. This is the honest number for non-deterministic agents: an agent that passes 87% of cases on one attempt can pass far fewer on all four. At this release the launcher runs each test case once — repeated-trial runs render Pass^K when present, but the repeat selector isn't exposed on the launcher.
+The launcher's **Repeat each test case** selector chooses how many times each case runs: **1**, **2**, **3**, or **4**. Its own hint says why you'd raise it — *"Repeat each case to measure how reliably the agent passes. More repeats take longer to run."* It appears on every graded, run-minting launch.
 
-### Per-persona results
+Repeat more than once and the run leads with a **Pass^K** rate instead of a plain pass rate: the share of test cases that passed *every* attempt, rendered literally as `Pass^2`. Hover the headline for the full curve from pass-once to pass-every-time.
 
-Because every attached persona is scored separately, run detail includes a per-persona matrix with plain-English divergence hints — when the same scenario passes for one persona and fails for another, the matrix points at it. That divergence is usually the most actionable finding in a run: the agent didn't break everywhere, it broke for a *kind of user*.
+This is the honest number for a non-deterministic agent. One that passes 87% of cases on a single attempt can pass far fewer on all four, and the gap between those two figures *is* the reliability finding. A single-attempt run can't show it — which is the reason to reach for the selector before you conclude an agent is solid.
 
-### Verdicts are three-state
+Raising the repeat count multiplies the work: the launcher shows the resulting fan-out ("*this will run N sessions × M evaluators*") before you commit, so the cost is visible up front.
 
-Every verdict is **Pass**, **Fail**, or **Not evaluated**. The third state is honest bookkeeping — a result that no Evaluator scored is not silently a pass or a fail.
+### Results are grouped by scenario
+
+Run detail opens **By scenario**. Its top-level rows are one summary per scenario, each carrying a rollup verdict and a passed-of-total reliability figure — `2/3` when two of three attempts passed. Click a summary to expand it and see the individual attempts, labelled **Trial 1**, **Trial 2**, and so on. Clicking a summary row expands it; it doesn't open a panel, because there's no single record behind it.
+
+Click a trial and the result fly-in opens. Where a scenario has more than one attempt, the panel header grows a **Trial N of K** switcher so you can step between that scenario's attempts without going back to the table.
+
+The **View** toggle at the top of the column menu switches to **Flat**, where every row is one result and the grouping is gone. Use Flat when you want to sort or scan across scenarios rather than within them.
+
+Because every attached persona is scored separately, divergence between personas shows up in this grouping with plain-English hints — when the same scenario passes for one persona and fails for another, the results point at it. That divergence is usually the most actionable finding in a run: the agent didn't break everywhere, it broke for a *kind of user*.
+
+### Verdict states
+
+A result's verdict is **Pass**, **Fail**, or one of **two** distinct neutral labels — and the difference between the neutrals is the useful part:
+
+| Verdict | Means |
+|---|---|
+| **Pass** | Every gating evaluation passed |
+| **Fail** | At least one gating evaluation failed |
+| **Not evaluated** | Nothing ran against it |
+| **Not graded** | Something ran, but produced no behavioural score |
+
+Neither neutral is silently a pass or a fail. **Not graded** is the one worth opening: there's a result behind it, it just didn't yield a gradeable outcome — often because the run was excluded for one of the reasons below.
+
+One more state exists a level down. An individual check can come back **Needs review** when the judge was uncertain. A needs-review check never gates: it is recorded and shown, but it can't flip the result's outcome or push a sibling evaluator's verdict out of the count. Adjudicating it (see [Annotations](/concepts/annotations)) clears the state and lets it gate normally.
 
 ## When it's not the agent's fault
 
 Not every non-pass means the agent got something wrong, and the results no longer pretend otherwise:
 
-- **Guardrail blocked** — the runtime's guardrails blocked the response before the agent's answer could be judged. The result carries an amber **Guardrail blocked** label and is excluded from the pass-rate denominator.
-- **Environment problem** — the runtime, the harness, or a judge call failed for infrastructure reasons. The result renders as a neutral **Environment problem — not the agent · Excluded from the score** state, never a red Fail.
+**Four** distinct situations are excluded from the pass-rate denominator, under three labels:
+
+| Label | When |
+|---|---|
+| **Guardrail blocked** | A runtime content guardrail suppressed the response before the agent could answer |
+| **Environment problem** | The supporting infrastructure failed — a gateway or network error, or a timeout — before the agent could answer |
+| **Environment problem** | The evaluation harness itself errored before it could score the session |
+| **Access blocked** | The platform authenticated the run but refused the selected execution identity |
+
+Each gets its own plain-language explanation rather than one generic guardrail line, because "the network timed out" and "a guardrail fired" are different problems for you to act on. All four render neutral — **Environment problem — not the agent · Excluded from the score** — and never a red Fail. The agent never got a fair shot, so the result is neither a pass nor a fail.
 
 The pipeline also defends itself before classifying anything as an environment problem: model-capacity throttling is retried automatically with backoff, one bad result can't fail the whole run, and judge calls run in parallel within a safe bound. A capacity hiccup at 2 a.m. can no longer masquerade as a drop in agent quality.
 
@@ -80,9 +109,9 @@ The pipeline also defends itself before classifying anything as an environment p
 Open any result to see:
 
 - **Transcript** — the full conversation, labeled **Simulated** (the run drove a live conversation) or **Replayed** (the judges graded a captured session).
-- **Final verdict** — the three-state verdict, with per-Evaluator score cards beneath it.
-- **Reasoning** — for LLM Judges, the rubric reasoning that led to the score. For Structured Match, the assertion that fired (or didn't).
-- **Open session** — jump to the exact session this result was graded against.
+- **Final verdict** — the result's verdict, with per-Evaluator score cards beneath it.
+- **Reasoning** — what you get depends on the kind of evaluator. An **LLM Judge** shows the rubric reasoning behind its score. A **Structured Match** shows the assertion that fired, or didn't. An **Outcome-Grounded** evaluator compares the backend state the run left behind against the expected end state. The **Groundedness judge** doesn't produce rubric reasoning at all — it produces a claim-by-claim report of what the agent asserted and whether the source material supports it.
+- **Open session** — in the header's **⋯** menu, alongside **Open scenario**. Both jump to the record behind the result, and each appears only when it resolves.
 
 ## Evaluation results are Sessions, too
 
@@ -99,7 +128,7 @@ This is what unlocks:
 The regression-tracking pattern is two runs with one variable changed:
 
 1. Run an Evaluation against **Agent Version A** (say, production).
-2. On the finished run, click **Re-run**, switch the Agent Version to **B** (the candidate), and launch. Everything else — targets, Evaluators, repeat count — carries over faithfully.
+2. On the finished run, click **Re-run**, switch the Agent Version to **B** (the candidate), and launch. Everything else carries over: the source, the exact items, the Evaluators, the run-only flag, the environment the run used, and the structural-grading mode. Change one variable and only that variable moves.
 3. Read the two run details side by side: headline deltas first, then the per-persona matrices for where the movement happened.
 
 There is no dedicated run-vs-run comparison view in the app today; the faithful Re-run is what makes the manual comparison trustworthy, because you know the only variable that changed is the agent.
