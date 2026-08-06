@@ -1,7 +1,7 @@
 ---
 title: "MCP integration"
 icon: "cable"
-description: "The Model Context Protocol server behind the Trust Agent — the eight tools it exposes, the project role each one needs, and the approval gate every write passes through."
+description: "The Model Context Protocol server that republishes a subset of the Trust Agent's tools — the eight it exposes, the project role each one needs, and the approval gate every write passes through."
 ---
 
 Trust AI runs a [Model Context Protocol](https://modelcontextprotocol.io) (MCP) server that publishes a small, fixed subset of the **Trust Agent's** tools — the same read and write operations the agent performs inside the product, reached over a standard protocol instead of a bespoke integration.
@@ -44,7 +44,9 @@ There is **no session-sync tool** on this surface. Syncing conversations from a 
 
 ### What `query_data` accepts
 
-`query_data` takes one `entity_type` per call and returns the same envelope — `items`, `total`, `notes` — whatever you ask for, so one renderer handles every type. The types that map to documented surfaces are `sessions`, `scenarios`, `evaluators`, `evaluations`, `personas`, `agent_versions`, and `datasets`.
+`query_data` takes one `entity_type` per call and returns the same envelope — `items`, `total`, `notes` — whatever you ask for, so one renderer handles every type. It accepts **eight** types: `sessions`, `scenarios`, `datasets`, `evaluators`, `evaluations`, `personas`, `agent_versions`, and `requirements`.
+
+A [`requirements`](/concepts/requirements) read returns each requirement together with its server-computed rollup — health, linked scenario and evaluator counts, pass rate, last evidence — rather than the raw record. A caller never derives a requirement's health itself; the read hands it over already computed, so two clients cannot disagree about it.
 
 `datasets` is the odd one. The dataset container it was named for is retired; the type survives as an alias and returns exactly what `scenarios` returns — the project's flat Scenarios list. Prefer `scenarios`.
 
@@ -69,27 +71,29 @@ A project that doesn't exist and a project you can't see return the same error. 
 
 Every write goes through the same sequence, and it is the reason a write tool can be exposed at all:
 
-1. **Preview.** The tool builds a structured description of exactly what would change and validates the request. A preview-only call stops here — nothing is written and no approval is asked for.
+1. **Preview.** The tool builds a structured description of exactly what would change and validates the request.
 2. **Ask.** The call blocks on a pending approval while the calling agent surfaces the prompt to a person.
 3. **Decide.** An approval runs the write and returns the result. A rejection returns a structured refusal.
 4. **Expire.** An unanswered request **times out after five minutes** and the write never runs. The window is deliberately short because the caller holds an open connection for its whole duration.
 
-Two details of that gate are easy to miss:
+Three details of that gate are easy to miss:
+
+**Only one of the four writes can be dry-run.** `save_dataset` takes a `preview` flag, and it defaults to preview — call it plainly and you get the description of the change back with nothing written and nobody asked. The other three have no such flag: `update_items`, `delete_items`, and `run_evaluation` always build their preview and then always go to approval. There is no way to rehearse a delete.
 
 **The decision arrives out of band.** The waiting call cannot prompt anyone itself, so the decision is posted on a separate request, which wakes it. Only the same signed-in user the call was issued under can decide it — one person cannot approve a write another person triggered, and an attempt to do so is indistinguishable from an unknown request. Endpoint shapes live in the [API Reference](/api-reference).
 
-**Batch writes are checked per item kind, not per tool.** `update_items` and `delete_items` are polymorphic: the item type is an argument, and a scenario is the item type these tools reach in the product today. Other item kinds exist for surfaces that are still gated, and those are governed by a separate per-workspace grant that is **denied by default** — the batch tools are not a way in through the side door. An unknown item type comes back as a structured error listing the accepted set.
+**Batch writes are checked per item kind, not per tool.** `update_items` and `delete_items` are polymorphic: the item type is an argument, and there are exactly two — `dataset_row`, which edits a scenario in your **Scenarios** list, and `requirement`. A `requirement` item is a requirement write, so it is checked against the same workspace tool permission the dedicated requirement tools carry: the batch shape is never a way around a restriction an admin has set on those tools. Deleting a requirement follows the same rule the rest of the product does — a draft is removed, an active one is archived and keeps its history. An unknown item type comes back as a structured error listing the accepted set.
 
 The same approval pattern applies when you drive these writes through the Trust Agent in the product — see [Approve agent writes](/how-to/approve-agent-writes).
 
 ## What is deliberately held back
 
-The exposed eight are a minority of the agent's registry, and the excluded list has grown much faster than the exposed one. Held back today:
+The exposed eight are a minority of the agent's registry. At this release the registry holds 27 tools, so 19 are named exclusions. Held back today:
 
 - **The agent's own prompt scaffolding** — the reads it uses to assemble its skills and suggest next steps. An external caller brings its own model and prompt; these would expose how the Trust Agent builds a turn without serving any caller need.
-- **Agent Profile reads** — the captured profile, its tool catalog and recorded schemas, and its source manifest. These ship on the in-product runtime first, and MCP exposure is a deliberate later step.
-- **Writes whose shape isn't final** — saving an evaluator, generating scenarios, and simulating a scenario, among others. The surface commits to a stable shape per tool, so a tool that would still change stays off it.
-- **Tools belonging to surfaces that aren't generally available**, and one authoring tool that exists only for Trust AI's internal self-evaluation.
+- **Reads and writes that ship on the in-product runtime first** — the Agent Profile reads (the captured profile, its tool catalog and recorded schemas, its source manifest), the data-connection discovery reads, and the writes for [Requirements](/concepts/requirements), expected output, and scenario test data. These are shipped product surfaces; what is held back is the MCP transport for them, which is a deliberate later step once the in-product path is proven. Do not read this list as a list of unreleased features.
+- **Writes whose shape isn't final** — exactly three: saving an evaluator, generating scenarios, and simulating a scenario. The surface commits to a stable shape per tool, so a tool that would still change stays off it.
+- **One authoring tool that exists only for Trust AI's internal self-evaluation.**
 
 Every held-back tool is named in a conformance test alongside its rationale, so a tool cannot quietly appear on or disappear from the MCP surface: a new tool in the registry fails the build until it is either exposed on purpose or excluded on purpose.
 
