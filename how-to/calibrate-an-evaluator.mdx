@@ -39,11 +39,11 @@ Aim for 10–20 marked scenarios spanning both passes and fails — don't label 
   <Step title="Open the Calibrate tab">
     Open **Evaluators** in your Project and click the LLM judge you want to check. Its side panel opens with the tabs **Overview**, **Criteria**, **Calibrate**, and **Runs** — in that order, with **Calibrate** sitting between the rubric editor and the run history. **Runs** appends a count (**Runs · 1**) once the evaluator has been used in an evaluation. Pick **Calibrate**.
 
-    **You should see:** a **Check agreement** section — a one-line explainer, the sample pickers, and a **Calibrate** button. If you see **No verdicts to calibrate against yet** instead, the project carries no pass/fail column at all; the empty state links you to the Scenarios list rather than showing a dead button.
+    **You should see:** a **Check agreement** section — a one-line explainer, the sample pickers, and a **Calibrate** button. If you see **No verdicts to calibrate against yet** instead, the project carries no pass/fail column at all — in practice, a project with no scenarios yet, because the **Verdict** column is created alongside a project's first scenario. The empty state links you to the Scenarios list rather than showing a dead button.
   </Step>
 
   <Step title="Confirm the sample">
-    There is normally nothing to choose here. The **Scenarios** picker resolves to a single option, **All scenarios** — a project has exactly one calibration source, its own scenarios — and it is selected for you. The **Your verdicts** picker holds the project's pass/fail column, auto-picked when there is only one (there is one by default, named **Verdict**).
+    There is normally nothing to choose here. The **Scenarios** picker resolves to a single option, **All scenarios** — a project has exactly one calibration source, its own scenarios — and it is selected for you. The **Your verdicts** picker holds the project's pass/fail column, auto-picked when there is only one (every project that has scenarios has one, named **Verdict**).
 
     Once both picks land, a census line under **Your verdicts** confirms the scope — for example, *"Your pass/fail column on All scenarios — 10 of 10 rows have a verdict."* If the project has a pass/fail column but nothing marked on it yet, that line is replaced by *"None of your scenarios are marked pass or fail yet."* and a link that takes you to the Scenarios list to mark some.
   </Step>
@@ -97,7 +97,7 @@ Aim for 10–20 marked scenarios spanning both passes and fails — don't label 
 
 <AccordionGroup>
   <Accordion title="The tab shows 'No verdicts to calibrate against yet'">
-    This state is about the *column*, not the verdicts: the project carries no pass/fail column for calibration to ground on. The empty state explains that and offers a single link — **Open scenarios to mark verdicts** — with deliberately no picker and no dead **Calibrate** button. A project ships with a **Verdict** column by default, so you'll usually see this only where that column was removed.
+    This state is about the *column*, not the verdicts: the project carries no pass/fail column for calibration to ground on. The empty state explains that and offers a single link — **Open scenarios to mark verdicts** — with deliberately no picker and no dead **Calibrate** button. The **Verdict** column is created alongside a project's first scenario, not at project creation, so this state means the project has no scenarios yet. Add or import one scenario and the column, the pickers, and the button all appear. Nothing in the app deletes that column, so a project that already has scenarios never lands here.
   </Accordion>
 
   <Accordion title="The pickers resolve, but the check button stays disabled">
