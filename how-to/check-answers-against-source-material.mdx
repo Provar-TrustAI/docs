@@ -84,13 +84,21 @@ More than one offending scenario is listed together in one message. The same rul
 
 Fix it on the scenario's **Expected Output** tab, then run again.
 
-{/* ACCURACY-AUDIT-PENDING — everything from here to the end of the page
-    (sections 5, 6 and 7, and the "When claims can't be adjudicated" section)
-    is read from the shipped v2026.08.03.2 source, NOT driven on the local
-    app: that instance has no connected agent, so every run ends
-    harness_failure and none can produce a graded Groundedness score. Re-drive
-    the result card, the report drawer and the override flow when a gradable
-    connection is available. */}
+{/* Sections 5-7 were driven end to end on v2026.08.03.2 (DEV-6218): a scenario
+    with one attached policy document, graded by a Groundedness judge against a
+    simulated conversation, produced a real per-claim adjudication — the result
+    card, the report drawer, the claim/quote highlight linkage and the override
+    recompute are all captured in the recording embedded in section 6.
+
+    ACCURACY-AUDIT-PENDING — four behaviours below are still read from the
+    shipped source rather than driven, because the graded run could not be
+    coerced into producing them: the **Needs review** verdict and its Unknown
+    claim class; the "no scored claims at all -> Pass" row of the verdict
+    table; the ungraded "No reference material attached - not graded." state;
+    and the quote-verification downgrade (and with it the structural
+    non-adjudicable states in "When claims can't be adjudicated"). Each is
+    written at behaviour level and hedged. Re-drive them when a fixture that
+    reproduces an unknown or unverifiable quote exists. */}
 
 ## 5. Read the result
 
@@ -122,6 +130,10 @@ Grading is **strict**: the grounded fraction has to be 1.0. There is no toleranc
 
 **View groundedness report** on the check card opens the evidence surface: claims on the left grouped by reply, the source on the right.
 
+The recording below follows one graded scenario end to end: the policy document attached on its **Expected Output** tab, the check card's **50% grounded** chip and **Fail** verdict, the four adjudicated claims, and a reviewer overriding one of them.
+
+<video controls muted playsInline className="w-full rounded-xl" src="/images/demos/d3-groundedness-report.mp4"></video>
+
 Every claim card carries the judge's **verdict**, its **reasoning in plain language**, and — for a supported or contradicted claim — the **verbatim quote** it was grounded in. Clicking a claim highlights that quote inside the document, and the right pane toggles between **Reference material** and **Agent's replies** so you can read a claim against either the source it was checked against or the sentence it came from.
 
 The five claim verdicts are one vocabulary, used identically in the report and on the evaluator's **Criteria** tab:
@@ -146,7 +158,7 @@ A reviewer can correct an individual claim. Click a claim's verdict chip to open
 
 You may override a claim to **Supported**, **Contradicted**, **Unsupported**, or **Conversational** — **four** options. **Unknown** is deliberately not one of them: it is the judge's uncertainty sink, not a reviewer's call.
 
-Applying an override **recomputes the score** through the same rule the judge used — the counts, the **N% grounded** figure, and the check's Pass / Fail / Needs review verdict all move, and the parent result's roll-up moves with them. Resolving the unknown claims is exactly how a Needs review check re-enters pass/fail gating. No model re-runs; the recompute is deterministic.
+Applying an override **recomputes the score** through the same rule the judge used. The counts and the **N% grounded** figure move immediately; the verdict moves only if your override changes what the rule decides. Overriding the one unsupported claim in a set that also holds a contradiction takes the figure from **50% grounded** to **75% grounded** and leaves the check on **Fail** — a contradiction is a hard violation, and no amount of grounding elsewhere clears it. Resolving the unknown claims is what lets a Needs review check re-enter pass/fail gating. No model re-runs; the recompute is deterministic, and the parent result's roll-up follows it.
 
 An overridden claim keeps a provenance strip reading *"Overridden by reviewer — judge said …"* with your note, plus **Revert**, which restores the judge's verdict and recomputes again.
 
