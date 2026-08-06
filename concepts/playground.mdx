@@ -19,7 +19,7 @@ The Playground is a per-project surface at `/projects/:id/playground`. It is pro
 
 ## In the app
 
-The Playground is a full-screen chat surface — there is no floating dock here. The topbar carries the agent picker on the left and four icon actions on the right: **Agent profile**, **Save this conversation as a scenario**, **Playground history**, and **New session**. The composer sits at the bottom and carries the mode toggle.
+The Playground is a full-screen chat surface — there is no floating dock here. The topbar carries the agent picker on the left and its icon actions on the right: **Agent profile**, **Playground history**, and **New session**, plus **Save this conversation as a scenario**, which only renders once a session has started. So an empty Playground shows three icons and a live conversation shows four. The composer sits at the bottom and carries the mode toggle.
 
 <Tabs>
   <Tab title="Chat mode">
@@ -30,7 +30,7 @@ The Playground is a full-screen chat surface — there is no floating dock here.
   <Tab title="Simulate mode">
     In **Simulate** mode you write a goal and pick a persona, then the persona role-plays the user pursuing that goal against the agent — both sides streaming live while you watch.
 
-    {/* CAPTURE-PENDING: playground-simulate-modal.png — the "Simulate a conversation" dialog, open over the Playground. Capture the fields in shipped order: Goal (a textarea, autofocused, placeholder "What is this person trying to achieve? …"), then Persona (a single-select popover), then Run mode (the Full auto / Stay in the loop pair of cards with their sub-captions). Footer is Cancel + Simulate; Simulate stays disabled until the goal is non-empty. */}
+    {/* CAPTURE-PENDING: playground-simulate-modal.png — the "Simulate a conversation" dialog, open over the Playground. Capture the fields in shipped order: Goal (a textarea, autofocused, placeholder "What is this person trying to achieve? …"), then Persona (a single-select popover), then Run mode (the Full auto / Stay in the loop pair of cards with their sub-captions). Footer is Cancel + Simulate. Capture a project whose persona roster is non-empty, so the picker shows a pre-selected persona rather than the "Choose a persona…" placeholder. */}
   </Tab>
 </Tabs>
 
@@ -62,16 +62,18 @@ Under the surface, a Chat session is a [simulation](#how-the-playground-runs) wi
 
 <Steps>
   <Step title="Write one goal">
-    **Goal** is the first field and takes focus when the dialog opens. Describe what the persona is trying to accomplish — "Get a full refund to the original card." **Simulate** stays disabled until the goal is non-empty.
+    **Goal** is the first field and takes focus when the dialog opens. Describe what the persona is trying to accomplish — "Get a full refund to the original card." An empty goal always keeps **Simulate** disabled.
   </Step>
   <Step title="Pick exactly one persona">
-    A single-select persona picker. A simulation needs a concrete persona to role-play, so the project's default persona is deliberately not offered here — you choose a specific persona, not the implicit fallback. The first persona on the roster is pre-selected, and you can create a new persona inline from the picker; a persona you create is auto-selected for the run.
+    A single-select persona picker. A simulation needs a concrete persona to role-play, so the project's default persona is deliberately not offered here — you choose a specific persona, not the implicit fallback. The first persona on the roster is pre-selected, so on a project that already has personas the goal is the only field you have to fill in.
+
+    **A project with no personas of its own is the exception, and it is the state a new project starts in.** With nothing to pre-select, the picker opens on **Choose a persona…** and **Simulate** stays disabled no matter how complete the goal is — the button needs a goal *and* a selected persona. Create one inline from the picker; a persona you create is auto-selected for the run.
   </Step>
   <Step title="Choose a run mode">
     Two run modes control how much you stay involved:
 
-    - **Full auto** — "Simulates the whole conversation end-to-end." The persona's user turns and the agent's replies alternate automatically until the conversation resolves or hits its turn cap.
-    - **Stay in the loop** — "Suggests each user turn as you go." The persona's next message lands in the composer as a draft; you confirm it or edit it before it sends, so you can steer the conversation as it goes.
+    - **Full auto** — "Simulates the whole conversation end-to-end". The persona's user turns and the agent's replies alternate automatically until the conversation resolves or hits its turn cap.
+    - **Stay in the loop** — "Suggests each user turn as you go". The persona's next message lands in the composer as a draft; you confirm it or edit it before it sends, so you can steer the conversation as it goes.
   </Step>
 </Steps>
 
@@ -130,7 +132,7 @@ So a saved Playground conversation does get a **Simulated from** card. A saved *
 
 ## History — past conversations
 
-The Playground keeps a **History** menu of the project's past Playground runs, newest first, capped at the 30 most recent. A run with no turns yet is left out. When there is nothing to show it reads **No past sessions yet.**
+The Playground keeps a **History** menu of the project's past simulated conversations, newest first, capped at the 30 most recent. A run with no turns yet is left out. When there is nothing to show it reads **No past sessions yet.**
 
 Each entry shows a title, a meta line, and a relative time:
 
@@ -141,7 +143,11 @@ Each entry shows a title, a meta line, and a relative time:
 
 Titles clamp at a word boundary rather than mid-word, and fall back to "Conversation" when there is nothing to derive one from.
 
-History is real, persisted, server-side data — the project's actual Playground runs, not mock entries and not something kept only in your browser. It survives a hard reload and shows up no matter which browser you signed in from. Note what it lists: **Playground runs, not sessions.** A conversation you never saved has no session, and it is still here. Starting a new session clears the current conversation from the surface — past conversations live in History, not in the composer.
+History is real, persisted, server-side data — the project's actual runs, not mock entries and not something kept only in your browser. It survives a hard reload and shows up no matter which browser you signed in from. Note what it lists: **runs, not sessions.** A conversation you never saved has no session, and it is still here. Starting a new session clears the current conversation from the surface — past conversations live in History, not in the composer.
+
+<Note>
+  **History is not filtered to conversations you drove here.** It lists every simulated run in the project that has turns, whoever started it — which includes the conversations the Scenarios surface's **Generate sessions** flow produced and the ones an [evaluation](/concepts/evaluations) drove against a scenario. Those land in the same shape as a Playground **Simulate** run (the run's goal as the title, `{persona} · N turns · simulated`), so a project that has generated sessions or run an evaluation will show entries nobody opened the Playground for. They open read-only like any other past conversation.
+</Note>
 
 {/* CAPTURE-PENDING: playground-history.png — the History menu open under the clock icon, anchored to the topbar, listing several real past runs newest-first. Show at least one Simulate row (goal as title, "{persona} · N turns · simulated") and one Chat row ("{agent} · N turns"), each with its relative timestamp on the right. Not the "No past sessions yet." empty state. */}
 
