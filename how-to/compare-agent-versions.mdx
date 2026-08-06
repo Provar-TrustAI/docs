@@ -1,16 +1,16 @@
 ---
 title: "Compare two Agent Versions"
 icon: "git-branch"
-description: "Run the same scenarios and Evaluators against two pinned builds, then read the two runs against each other and decide whether to ship."
+description: "Run the same scenarios and Evaluators against two pinned builds, hold the repeat count steady, and read the two grouped result sets against each other."
 ---
 
 This how-to walks through the **regression-tracking workflow** Trust AI is built around: evaluating two [Agent Versions](/concepts/agent-versions) on the same scenarios under the same [Evaluators](/concepts/evaluators), so the only variable between the two runs is the build itself.
 
-One honest framing note before you start: **Trust AI does not have a dedicated run-vs-run comparison view today.** There is no Compare button and no side-by-side diff surface. The comparison is a workflow — two evaluation runs with identical configuration except the Agent Version, read against each other on the run detail pages and the Evaluations list. This page shows you how to do that read quickly and trust what it tells you.
+One honest framing note before you start: **Trust AI does not have a dedicated run-vs-run comparison view today.** There is no Compare button and no side-by-side diff surface. The comparison is a workflow — two [Evaluation](/concepts/evaluations) runs with identical configuration except the Agent Version, read against each other on the run detail pages and the Evaluations list. This page shows you how to do that read quickly and trust what it tells you.
 
 Two nouns to keep straight on this page: an **Agent Version** is a pinned snapshot of *your* agent under test — the thing being graded. The **Trust Agent** is the in-app assistant you delegate the work to. They are different things.
 
-It picks up where [Run your first Evaluation](/tutorials/run-first-evaluation) leaves off — you already have at least one finished [Evaluation](/concepts/evaluations) run and a second Agent Version to test against. If you don't, run that tutorial first.
+It picks up where [Run your first Evaluation](/tutorials/run-first-evaluation) leaves off — you already have at least one finished Evaluation run and a second Agent Version to test against. If you don't, run that tutorial first.
 
 ## When to compare versions
 
@@ -20,81 +20,154 @@ The three most common triggers:
 - **After deploying.** A weekly cadence comparing this week's production build against last week's surfaces drift that wasn't visible in the candidate review.
 - **Ranking parallel candidates.** Multiple prompt variants competing for production; run each against the same scenarios and Evaluators and read the results on the same axes.
 
-If you find yourself wanting to compare two runs that **don't share their scenarios or don't share their Evaluators**, stop — the difference isn't apples-to-apples and won't tell you what you think it does. Re-run with matching configuration instead.
+If you find yourself wanting to compare two runs that **don't share their scenarios, don't share their Evaluators, or don't share their repeat count**, stop — the difference isn't apples-to-apples and won't tell you what you think it does. Re-run with matching configuration instead.
+
+## Three decisions to make before you launch
+
+These are the choices that decide whether the comparison is readable a week later. Make them once, on the baseline, and hold them for the candidate.
+
+### Name both runs deliberately
+
+The launcher's first field is **Evaluation name**, and its hint says where the name lands: *"Shown on the Evaluations page."* It arrives pre-filled and editable. Since there is no comparison view, the Evaluations list *is* your comparison index — two runs called "Refunds CSAT audit" and "Refunds CSAT audit (re-run)" are a worse artifact than "Refunds v4.2 baseline" and "Refunds v4.3 candidate". Name both after what changed between them.
+
+### Choose the repeat count once, and keep it
+
+The launcher carries a **Repeat each test case** selector — a `1 | 2 | 3 | 4` picker whose own hint reads *"Repeat each case to measure how reliably the agent passes. More repeats take longer to run."* It appears on **every graded, run-minting launch**, both sources. Repeating test cases is ordinary practice, not an edge case.
+
+The count you pick changes what the run's headline *means*:
+
+| Repeat count | Run headline | What it answers |
+| --- | --- | --- |
+| **1** | `NN% pass rate` | Did the agent pass, once? |
+| **2**–**4** | `Pass^K NN%` | Did the agent pass *every* attempt? |
+
+A `Pass^K` reliability rate and a single-attempt pass rate are different metrics, so **the two runs in a comparison must use the same repeat count.** If the baseline repeated each case three times and the candidate runs once, the delta between their headlines is mostly the metric change, not the build change.
+
+Raising the count is the right move whenever the agent's answer varies between attempts. An intermittent failure that passes on one attempt and fails on the next is invisible at a repeat count of 1, and it is exactly the kind of regression a version bump introduces.
+
+<Note>
+The launcher's **This will run** preview counts the single-attempt fan-out — scenarios, conversations simulated, evaluator runs. It does not multiply by the repeat count. A repeat of 3 does three times the work the preview shows, so budget time and credits accordingly.
+</Note>
+
+### Hold everything else constant
+
+Same scenarios, same Evaluators, same environment. **Re-run** does most of this for you — see step 2.
 
 ## The comparison workflow
 
 <Steps>
   <Step title="Run the baseline against the first Agent Version">
     <Note>
-    *Ask the Trust Agent:* "Run an evaluation of my order-status scenarios against the current production build."
+    *Ask the Trust Agent:* "Run an evaluation of my order-status scenarios against the current production build, repeating each case three times."
     </Note>
 
     The Trust Agent proposes the run — confirming which scenarios, Evaluators, and agent build it will use — and you approve it before anything launches (see [Approve agent writes](/how-to/approve-agent-writes)).
 
-    To do it by hand: from the Project's **Evaluations** list, click **New evaluation**. The evaluation launcher opens; choose your scenarios — their attached Evaluators are inherited automatically — and pick the first build in the **Agent** section — that's the connected agent that simulates each scenario. The launcher previews the fan-out (every persona on every scenario gets its own conversation) before you confirm.
+    To do it by hand: from the Project's **Evaluations** list, click **New evaluation**. The launcher opens as a modal titled **New evaluation**, with its fields in this order:
 
-    **You should see:** the run appear on the Evaluations list, with the Agent Version's label shown under the run name.
+    | Field | What it does |
+    | --- | --- |
+    | **Evaluation name** | Names the run on the Evaluations page. Pre-filled, editable. |
+    | **What to evaluate** | **Sessions** or **Scenarios**. Scenarios simulates fresh conversations; Sessions grades transcripts you already have. |
+    | **Evaluators** | Picked by you on the Sessions source; **inherited from each scenario**, read-only, on the Scenarios source. |
+    | **Agent** | Which connected agent simulates each scenario — this is the Agent Version being pinned. Scenarios source only. |
+    | **Repeat each test case** | The four-option repeat picker: 1, 2, 3, or 4. |
+    | **This will run** | The fan-out preview. |
+    | **Environment** | The connected org or data plane, test identity, and cleanup for this run. Scenarios source only. |
+
+    Pick **Scenarios**, choose your scenarios, pick the first build under **Agent**, set **Repeat each test case**, and launch.
+
+    **You should see:** the run appear on the Evaluations list, with the Agent Version's label rendered as a monospace subtitle beneath the run name.
+
+    <Note>
+    **What to evaluate** appears only on this entry point. Launching from a session, a scenario, or **Re-run** fixes the source from context, and the modal is titled for what it will do — **Run & evaluate scenarios**, **Evaluate sessions**, and so on — with no source toggle.
+    </Note>
   </Step>
 
   <Step title="Re-run the same configuration against the candidate">
-    This is the step that makes the comparison trustworthy. Open the finished baseline run and click **Re-run**. The launcher reopens with the same scenarios — their Evaluators inherited with them — and the original agent. Change **only the Agent** to the candidate build, then launch.
+    This is the step that makes the comparison trustworthy. Open the finished baseline run and click **Re-run**. The same launcher reopens, pre-filled from the original run and fully editable.
 
     <Note>
     *Ask the Trust Agent:* "Run the same evaluation again, but against the new candidate build."
     </Note>
 
-    Because everything except the Agent Version is held constant, any difference between the two runs is attributable to the build — not to a drifted scenario list or a different judge.
+    What **Re-run** restores: the source, the exact scenarios or sessions, the Evaluators, the pinned **Agent**, the run-only flag, the environment, the structural-grading mode, and a suggested name derived from the original.
+
+    What it does **not** restore: **Repeat each test case**, which resets to **1** every time.
 
     <Warning>
-    If your baseline is a repeated-trial run — its headline reads **Pass^K**, for example `Pass^2` — you can't reproduce it from the launcher at this release: launcher runs attempt each case once. A Pass^K reliability rate and a single-attempt pass rate are different metrics and can't be compared directly, so establish a single-attempt baseline instead.
+    If your baseline repeated its test cases, **set the repeat count back before you launch.** A re-run left at 1 is a single-attempt run, and its plain pass rate is not comparable with the baseline's `Pass^K` reliability rate. This is the easiest way to produce a comparison that looks valid and isn't.
     </Warning>
+
+    Then change **only the Agent** to the candidate build and launch. Because everything else is held constant, any difference between the two runs is attributable to the build — not to a drifted scenario selection, a different judge, or a changed repeat count.
   </Step>
 
-  <Step title="Read the two headline pairs">
+  <Step title="Read the two headlines">
     <Note>
     *Ask the Trust Agent:* "Summarize the results of my last two evaluation runs — pass rates and what changed."
     </Note>
 
-    The Trust Agent reads both runs and reports the numbers back in plain language; the same numbers lead each run's detail page for you to check yourself. A finished run's header carries a **dual headline**:
+    The Trust Agent reads both runs and reports the numbers back in plain language; the same numbers lead each run's detail page for you to check yourself. A finished run's subtitle composes its segments in this order:
 
-    - **Pass rate** grades the agent — how often it passed each case. This is the number you're comparing between versions.
-    - **Evaluator accuracy** grades the judges — how often the Evaluators' combined verdict agreed with a human's session verdict. It appears when annotated cases exist to measure against.
+    1. **The behavioral headline** — `Pass^K NN%` on a repeated run, or `NN% pass rate` on a single-attempt one. `Pass^K` is the share of test cases that passed *every* attempt; hover or focus it to reveal the full curve, from passing once to passing every time. A run with nothing behaviorally graded reads **Not graded** instead.
+    2. **Evaluator accuracy** — how often the Evaluators' combined verdict agreed with a human's session verdict. Present only when annotated cases exist to measure against.
+    3. **Completion** — `N of M trials completed` on a repeated run, `N of M completed` on a single-attempt one. Neutral evidence of how much finished, not a pass count.
+    4. **Ran** — the absolute date the run finished.
 
-    Read them together. If pass rate dropped but evaluator accuracy held steady, the agent likely regressed. If evaluator accuracy moved sharply between two runs on the same scenarios, treat the pass-rate delta with suspicion — the judges, not the agent, may be the story. Calibrate the Evaluator before making a ship decision (see below).
+    Read the first two together. If the behavioral headline dropped but evaluator accuracy held steady, the agent likely regressed. If evaluator accuracy moved sharply between two runs on the same scenarios, treat the headline delta with suspicion — the judges, not the agent, may be the story. Calibrate the Evaluator before making a ship decision (see [Calibrate an Evaluator](/how-to/calibrate-an-evaluator)).
 
-    Two things that keep the pass rates honest across runs:
+    Two things keep the numbers honest across runs:
 
-    - **Environment problems never count against the agent.** A result blocked by a guardrail shows a **Guardrail blocked** state, and infrastructure or harness failures show as an environment problem — excluded from the score, never a red fail. A capacity hiccup on one run can't masquerade as a regression.
-    - **Judging is deterministic.** The LLM judges run with no sampling randomness, so the same response gets the same verdict. A case that scored differently across the two runs reflects a different agent response — or a rubric edge the two responses landed on opposite sides of — not judge noise.
+    - **Four classes never count against the agent.** **Guardrail blocked** (the runtime's content guardrail suppressed the response), **Environment problem** (an infrastructure failure, or the evaluation harness erroring before it could score — two separate causes, one label), and **Access blocked** (the execution identity authenticated, but the platform denied it access to the agent) are all excluded from the denominator. Each carries its own banner saying plainly that it doesn't count toward the pass rate. A capacity hiccup on one run can't masquerade as a regression.
+    - **Judging is deterministic.** The LLM judges run at temperature 0, so the same response gets the same verdict. A case that scored differently across the two runs reflects a different agent response — or a rubric edge the two responses landed on opposite sides of — not judge noise.
 
-    **You should see:** each run detail leading with its pass rate (or Pass^K reliability rate) and, where human verdicts exist, an evaluator-accuracy headline beside it.
+    **You should see:** two run details whose headlines are the *same kind of number*, plus a **Conversations passed** tile above each results table reading `N of M conversations`.
   </Step>
 
-  <Step title="Drill into the cases that flipped">
+  <Step title="Drill into what moved">
     <Note>
     *Ask the Trust Agent:* "Which scenarios failed on the candidate run but passed on the baseline? Analyze the failures."
     </Note>
 
-    The Trust Agent can pull both runs' results and run a structured failure analysis on the candidate. To read it yourself, open the two run details (two browser tabs work well) and walk the results tables against each other. Each table scores every scenario-persona pair on its own line, led by the persona's name; failing results carry a plain-English **divergence hint** describing how the actual response diverged from the expected one. Click into a result to read the full transcript — labeled **Simulated** or **Replayed** so you know how it was produced — with the Evaluator's score and reasoning, and use **Open session** to jump to the exact session that was graded.
+    The Trust Agent can pull both runs' results and run a structured failure analysis on the candidate. To read it yourself, open the two run details in two browser tabs and compare them scenario by scenario.
 
-    Reading the flipped cases is the work. Most differences fall into one of three buckets:
+    **Results open grouped, not flat.** The default view is **By scenario**: one summary per scenario, with a chevron to expand it. Each summary carries a **Final verdict** chip plus a reliability quote — `2/3` means two of three graded attempts passed. The rollup is strict: a scenario reads **Pass** only if *every* graded attempt passed, **Fail** otherwise, and **Not graded** when no attempt produced a behavioral score.
 
-    - **Real regression** — the candidate's response is clearly worse. The build change is the problem.
-    - **Calibration edge** — both responses are reasonable; they landed on opposite sides of a subjective rubric line. Tighten the rubric, don't blame the agent. The Evaluator's **Calibrate** tab measures how often the judge agrees with your own verdicts — using the exact judge your runs use — and shows you the disagreements first (see [Write an effective LLM-judge prompt](/how-to/write-llm-judge-prompt)).
+    That strictness is what makes grouped results the better comparison surface. Line the two runs' summaries up and the delta you read is a reliability delta, not a coin flip:
+
+    - `3/3` → `3/3` — unchanged.
+    - `3/3` → `2/3` — **a real regression**, even though the scenario still passes sometimes. This is the movement a single-attempt comparison cannot see.
+    - `2/3` → `3/3` — the candidate stabilized something that was already flaky.
+
+    Expand a summary and its individual attempts appear beneath it, labeled **Trial 1**, **Trial 2**, and so on. Click one to open the result fly-in; where the scenario has more than one attempt, the panel header grows a **Trial N of K** switcher so you can step between that scenario's attempts without going back to the table. The fly-in shows the full transcript — badged **Simulated** (a fresh conversation the run drove) or **Replayed** (the scenario's saved input) — with the Evaluator's score and reasoning. **Open session** in the header's **⋯** menu jumps to the session that was graded.
+
+    A failing entry also carries a plain-English **divergence hint** describing how the actual response diverged from what was expected. An excluded result never paints one — the agent never got a fair shot, so there is no divergence to describe.
+
+    <Tip>
+    Switch to **Flat** when you want to sort or scan *across* scenarios rather than within them: one line per attempt, led by the persona's label, grouping gone. The toggle sits at the top of the **Columns** menu in the results toolbar, under **View** — not in the toolbar itself.
+    </Tip>
+
+    Most differences fall into one of three buckets:
+
+    - **Real regression** — the candidate's response is clearly worse, or reliably worse across attempts. The build change is the problem.
+    - **Calibration edge** — both responses are reasonable; they landed on opposite sides of a subjective rubric line. Tighten the rubric, don't blame the agent. The Evaluator's **Calibrate** tab measures how often the judge agrees with your own verdicts, using the exact judge your runs use.
     - **Stale scenario** — the agent's response is fine but the scenario's premise no longer applies. Update the scenario's goal or expected output.
 
-    **You should see:** the pattern become legible after reading 5–10 flipped cases — regressions cluster by category far more often than they scatter.
+    **You should see:** the pattern become legible after reading 5–10 scenarios that moved — regressions cluster by category far more often than they scatter.
   </Step>
 
   <Step title="Make the call and keep the trend">
-    With the flipped cases read, the decision usually fits one of three shapes:
+    With the moved scenarios read, the decision usually fits one of three shapes:
 
-    - **Ship the candidate.** Regressions are absent or all explainable as calibration edges / stale scenarios.
+    - **Ship the candidate.** Regressions are absent or all explainable as calibration edges or stale scenarios.
     - **Block and investigate.** Real regressions in a category that matters. Hand the failing results to the team owning the agent, with links to the two runs as the artifact.
     - **Ship with caveats.** Improvements in one category, tolerable regressions in low-priority surface area. Document the caveats where your team records deploy decisions, and watch the next cycle's runs.
 
-    Trust AI keeps the evidence durable either way: every run stays pinned to its Agent Version, so the Evaluations list doubles as your trend line. Each run's line shows the Agent Version label under the run name alongside a sortable **Overall pass rate** and **Evaluator accuracy**, and the page header keeps the completed-run count and average pass rate in view. Scanning down the version labels and their pass rates over time is how drift shows up between deliberate comparisons.
+    Trust AI keeps the evidence durable either way: every run stays pinned to its Agent Version, so the Evaluations list doubles as your index of past comparisons. Each run's line shows the Agent Version label beneath the run name alongside a sortable **Overall pass rate** and **Evaluator accuracy**.
+
+    <Warning>
+    The Evaluations page header is **not** a trend line. Its subtitle reads *"N completed runs · N in last 7 days · X% avg pass rate · last 7 days"* — the run count is all-time, but the average is scoped to the last seven days, and the segment disappears entirely when no run completed inside that window. Read drift by scanning down the version labels and their pass rates in the table, not from the header average.
+    </Warning>
 
     Note that the decision itself lives with your team: Trust AI doesn't have a promote-to-production action or a notes field on Agent Versions today, so record the rationale in your deploy process, linking the two runs.
   </Step>
@@ -102,26 +175,30 @@ If you find yourself wanting to compare two runs that **don't share their scenar
 
 ## A worked example
 
-A team evaluates an order-status agent: 120 scenarios, one three-part rubric Evaluator, baseline build at an 87% pass rate. They **Re-run** with only the Agent changed to the candidate, which lands at 84%.
+A team evaluates an order-status agent: 120 scenarios, one three-part rubric Evaluator, **Repeat each test case** set to 3. The baseline build lands at `Pass^3 81%` — 81% of scenarios passed all three attempts.
 
-Walking the two results tables against each other:
+They click **Re-run**, set the repeat count back to **3** (it had reset to 1), change only the **Agent** to the candidate, and launch. The candidate lands at `Pass^3 74%`.
 
-- **5 real regressions**, all in scenarios where the customer gives a partial order ID. The candidate's prompt tightened its confidence threshold, and it now refuses legitimate partial-match requests. **Action:** block; fix the threshold on the partial-match path.
-- **2 calibration edges** — both builds' responses were reasonable; the rubric's "confirms the order before answering" clause is ambiguous for one-message conversations. **Action:** tighten the rubric and check it on the Evaluator's Calibrate tab; not a build problem.
+Reading the two grouped result sets against each other:
+
+- **5 scenarios went `3/3` → `0/3`**, all where the customer gives a partial order ID. The candidate's prompt tightened its confidence threshold, and it now refuses legitimate partial-match requests every time. **Action:** block; fix the threshold on the partial-match path.
+- **4 scenarios went `3/3` → `2/3`.** The candidate still passes them usually, but not always — an intermittent regression a single-attempt comparison would have scored as a clean pass. **Action:** flag with the same fix; these share the partial-match path.
+- **2 calibration edges** — both builds' responses were reasonable across all attempts; the rubric's "confirms the order before answering" clause is ambiguous for one-message conversations. **Action:** tighten the rubric and check it on the Evaluator's **Calibrate** tab; not a build problem.
 - **2 stale scenarios** — order IDs from a retired test environment. **Action:** update those scenarios' expected output.
 
-The call: **block and investigate**. The regressions are localized and fixable; the next candidate reverts the threshold change on the partial-match path and re-runs the same configuration.
+The call: **block and investigate**. Note which finding justified the repeat count: at a repeat of 1, the four `3/3` → `2/3` scenarios would most likely have passed on both runs, and the regression would have shipped at roughly half its true size.
 
-This read takes about 15 minutes once you're fluent. Most of it is the flipped-case drilldown; the headline-level read is usually under a minute.
+This read takes about 20 minutes once you're fluent. Most of it is the drilldown; the headline-level read is under a minute.
 
 ## Comparing programmatically
 
-There is no run-vs-run diff endpoint today. What ships: each run's results are readable individually, and the evaluations API includes a per-Agent-Version aggregate — run counts and average pass rate grouped by version — that a deploy pipeline can read as a coarse cross-version signal. Full request and response shapes live in the [API Reference](/api-reference).
+There is no run-vs-run diff endpoint today. What ships: each run's results are readable individually, and the evaluations API includes a per-Agent-Version aggregate — run counts, summed totals, and average pass rate grouped by version — that a deploy pipeline can read as a coarse cross-version signal. Runs that were never pinned to a version collapse into a single unlabeled bucket. Full request and response shapes live in the [API Reference](/api-reference).
 
 ## Related reading
 
 - **[Agent Versions](/concepts/agent-versions)** — what's being compared, and how builds get pinned
-- **[Evaluations](/concepts/evaluations)** — the runs the comparison is built from
+- **[Evaluations](/concepts/evaluations)** — the runs the comparison is built from, and the `Pass^K` headline in full
 - **[Run your first Evaluation](/tutorials/run-first-evaluation)** — the tutorial that produces your baseline run
-- **[Write an effective LLM-judge prompt](/how-to/write-llm-judge-prompt)** — for when the comparison reveals calibration edges, not agent regressions
+- **[Calibrate an Evaluator](/how-to/calibrate-an-evaluator)** — for when the comparison reveals calibration edges, not agent regressions
+- **[Write an effective LLM-judge prompt](/how-to/write-llm-judge-prompt)** — tightening the rubric a calibration edge exposed
 - **[The evaluation loop](/concepts/evaluation-loop)** — where version comparison sits in the larger loop
