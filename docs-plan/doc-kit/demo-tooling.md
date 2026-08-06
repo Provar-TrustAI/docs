@@ -30,11 +30,11 @@ cd captures && pnpm install && npx playwright install chromium   # first time
 pnpm capture:<surface>          # e.g. pnpm capture:sessions — writes to /images at 2× DPI
 ```
 
-Naming convention: `{concept}-{surface}-{variant}.{ext}` → `images/sessions-flyin-panel.png`. Embed:
+Naming convention: `{concept}-{surface}-{variant}.{ext}` → `images/session-fly-in-annotations.png`. Embed:
 
 ```mdx
 <Frame caption="The Sessions table with a row fly-in open">
-  <img src="/images/sessions-flyin-panel.png" alt="Sessions table fly-in" />
+  <img src="/images/session-fly-in-annotations.png" alt="Sessions table fly-in" />
 </Frame>
 ```
 
