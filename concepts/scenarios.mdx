@@ -39,7 +39,9 @@ Open **Scenarios** in the left nav to get the flat table, newest first: an **ID*
 
 It exists for one specific job: **calibration**. The Calibrate tab in an Evaluator's panel compares that judge against your scenario verdicts on the same material, and it has nothing to sample until some scenarios are marked. If you have wondered where to record the labels a calibration run needs, this column is the answer — not the Verdict [annotation](/concepts/annotations) on Sessions, which feeds the separate evaluator-accuracy figure on run results.
 
-{/* CAPTURE-PENDING: scenarios-list.png — the flat Scenarios table at /projects/:id/scenarios with SCN ids, persona pills, and Expected routes chips */}
+<Frame caption="One row per test case: the SCN handle is the stable id, and everything to the right of it — goal, personas, expected routes, verdict — is editable where you see it.">
+  <img src="/images/scenarios-list.png" alt="The Scenarios table sorted by ID, showing SCN-000001 through SCN-000010 with their names, user goals, persona pills such as First-time buyer and Terse power user, expected-route chips like returns and human_escalation, and a Pass/Fail verdict toggle on each row." />
+</Frame>
 
 The page ships with two built-in [saved views](/concepts/saved-views): **All scenarios** and **Missing expected output** — the second is your worklist of scenarios that can simulate but don't yet say what "good" means. The header carries the page's four actions: **Manage personas**, **Add recommended scenarios**, a **Run** split-button, and **New scenario**.
 
@@ -70,7 +72,9 @@ Click a scenario to open a two-level fly-in over the list. The first level is th
 
 The panel's **More** menu carries **Run & evaluate**, **Run only**, and **Delete scenario**.
 
-{/* CAPTURE-PENDING: scenario-flyin.png — the two-level fly-in: L1 scenario panel on the Expected Output tab, with the nested session panel stacked over it */}
+<Frame caption="Level two, opened from the scenario's Sessions tab. The second panel covers the first rather than sitting beside it — the chevron chip at top left, carrying the scenario's goal, is what walks you back, and the list underneath never moved.">
+  <img src="/images/scenario-flyin-session.png" alt="The Scenarios list with a session panel open over it: the header shows a back chip reading the parent scenario's goal, the session id RUN-000013 and a Fail verdict, above Transcript, Annotations, Evaluations and Details tabs, with the transcript showing a user turn, Routed to and Tool used chips, and the agent's reply. The SCN-000002 row stays highlighted in the list behind." />
+</Frame>
 
 ### Test Data is about the environment first
 
@@ -94,7 +98,9 @@ That list is an assist, not a gate. Type a name that hasn't been observed and th
 
 This is why the recommended order is to define the scenario cheaply first and author expected output *after* you have sessions: run the scenario, read the conversations, find one that went the way you want, and write the contract from what you see. The **Missing expected output** saved view keeps track of the scenarios still waiting for that step.
 
-{/* CAPTURE-PENDING: expected-output-editor.png — the Expected Output tab with the Expected behavior, Expected actions, and Expected routes sections */}
+<Frame caption="The three sections read top to bottom as one contract: which judges grade the conversation, which tools must or must not be called (and with what arguments), and where it must or must not be routed.">
+  <img src="/images/scenario-expected-output-editor.png" alt="The Expected Output tab of scenario SCN-000002. Expected behavior lists two pass/fail evaluator cards and an attached reference document; Expected actions lists check_refund_status as Required and lookup_order as Required with a pinned param assertion order_id: AC-88421; Expected routes lists human_escalation as Disallowed and refunds as Required." />
+</Frame>
 
 ## Running a scenario
 

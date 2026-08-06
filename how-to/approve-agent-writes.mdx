@@ -52,7 +52,9 @@ When a write is proposed, the permission card greets you with a **write preview*
 
 The interactive prototype below lets you click through the permission card to feel the interaction.
 
-{/* CAPTURE-PENDING: shipped write-preview (diff/dependencies/proposed state) #1722 */}
+<Frame caption="The card halts the run in the composer slot and summarises the blast radius — 2 fields changed; the proposal panel behind View proposal spells out each field's before and after. Note the badge: pending approval, so nothing has run.">
+  <img src="/images/approve-writes-preview.png" alt="The Trust Agent asking 'Update the evaluator Tone?' on a permission card in the composer slot, reading '2 fields changed' above a View proposal link and the Update it / Reject scope options. The proposal panel is open on the right, headed 'Proposed changes to Tone' with a Pending approval badge, showing NAME with 'Tone' struck through above 'Tone and empathy', and DESCRIPTION with the old sentence struck through above the proposed one." />
+</Frame>
 
 <Frame caption="Interactive prototype — approval cards: create, delete, reject. Design reference.">
   <iframe src="https://provar-trustai.github.io/docs/permission-card.html" width="100%" height="600" style={{border:0}}
@@ -148,13 +150,17 @@ Sometimes the agent doesn't have enough to act yet. Instead of a permission card
 
 For one open-ended clarification, you get a single-question card. It offers the **drafted choices** the agent thinks are likely, plus a write-in field ("Or type your own answer…") so you're never boxed into the offered answers. The card is dismissible if you'd rather steer the agent a different way.
 
-{/* CAPTURE-PENDING: shipped single-question card with drafted choices + write-in Other #1393 #1431 */}
+<Frame caption="The agent drafts the answers it thinks are likely — but the last row is always a write-in, so the offered choices never become the only ones. The composer is gone; the card holds its slot until you answer or dismiss it.">
+  <img src="/images/approve-writes-question-card.png" alt="A single-question card in the Trust Agent composer slot asking 'For refund answers, what should the evaluator judge most?' with four radio choices — policy compliance, accuracy, task completion, tone — a final 'Or type your own answer…' row, a dismiss X, and a Submit button. The chat header reads 'Awaiting your answer'." />
+</Frame>
 
 ### A multi-question flow card
 
 When the agent needs several inputs, it raises a **multi-question flow card**. It's stepped: questions come one at a time with a progress row ("Question N of M"), and you can go **back** to a previous question to change an earlier answer before submitting. Nothing is sent until you submit the batch — then all your answers go to the agent together. Each question carries the same drafted choices and write-in option as the single-question card.
 
-{/* CAPTURE-PENDING: shipped multi-question flow card with progress row + back navigation #1397 #1408 #1435 */}
+<Frame caption="Mid-flow, on question two of three: the progress row counts the steps, Back is live so you can revise the answer you already gave, and nothing has reached the agent yet — Next, not Submit.">
+  <img src="/images/approve-writes-question-flow.png" alt="A multi-question flow card in the Trust Agent composer slot. Above the question, a progress row reads 'QUESTION 2 OF 3' with three step dots, the first filled and the second current. The question 'Which kind of evaluator fits?' offers LLM judge, document-faithfulness, structured match, a 'let me recommend' option and an 'Or type your own answer…' row, with an enabled Back button on the left of the footer and Next on the right." />
+</Frame>
 
 For a clickable walkthrough of the multi-question flow end to end, see the live demo in [Work with the Trust Agent](/how-to/work-with-the-trust-agent).
 

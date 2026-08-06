@@ -34,8 +34,30 @@ pnpm capture:evaluations
 pnpm capture:evaluators
 pnpm capture:welcome
 pnpm capture:sidebar
+pnpm capture:playground    # needs the stub agent below
 pnpm capture:trust-agent   # slow: drives real agent turns, see below
 ```
+
+## One surface needs a connected agent, not just a seed
+
+Every other capture reads data. The **Playground** drives it: the save-as-scenario
+action only unlocks after a real user turn *and* a real agent reply, and History only
+lists runs that produced turns. `acme-refunds-csat` connects no runnable agent, so
+`playground-surfaces.ts` cannot capture anything on a bare seed.
+
+`fixtures/refunds-concierge-stub.mjs` is that agent. It speaks the
+`conversational_http` connector's AG-UI SSE dialect, so the product drives it down the
+same path it drives a customer's HTTP agent down — nothing about the Playground is
+faked, only the far end of the connection. It emits a route decision and a tool call
+per turn, so transcripts carry the "Routed to" / "Tool used" peek.
+
+```bash
+node fixtures/refunds-concierge-stub.mjs      # serves :8397
+```
+
+Register it once per stack as a connection named **Refunds Concierge** — the exact
+`curl` is in that file's header. `base_url` must be `http://host.docker.internal:8397`:
+the API and gateway run in Docker, where `localhost` is not your machine.
 
 ## One capture drives the product instead of screenshotting it
 

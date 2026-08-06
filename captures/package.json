@@ -7,8 +7,10 @@
     "capture:scenarios": "npx playwright test scenarios-list",
     "capture:evaluations": "npx playwright test evaluations-results-matrix",
     "capture:evaluators": "npx playwright test evaluators-create-flow",
+    "capture:playground": "npx playwright test playground-surfaces",
     "capture:welcome": "npx playwright test welcome-surface",
     "capture:sidebar": "npx playwright test sidebar-navigation",
+    "capture:skills": "npx playwright test skills-editor",
     "capture:trust-agent": "npx playwright test trust-agent-surface"
   },
   "devDependencies": {

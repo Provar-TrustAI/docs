@@ -133,7 +133,9 @@ A tool's `parameters` schema is stored byte-for-byte alongside the profile revis
 
     The **Add a connection** picker shows four platform cards: **AWS Bedrock AgentCore**, **Salesforce Agentforce**, **Claude Managed Agent**, and — fourth — **Conversational HTTP agent**. Choose the last one.
 
-    {/* CAPTURE-PENDING: the Add-a-connection picker, all four platform cards */}
+    <Frame caption="Four cards, one per connectable platform — Conversational HTTP agent is the last of them, and the only one that isn't a named vendor.">
+      <img src="/images/connect-http-platform-picker.png" alt="The Connection tab of Project Settings showing the Add a connection picker: four platform cards laid out two by two — AWS Bedrock AgentCore, Salesforce Agentforce, Claude Managed Agent, and Conversational HTTP agent, the last described as connecting any agent that accepts AG-UI run requests and streams AG-UI events over SSE." />
+    </Frame>
 
     **You should see:** the connection form, headed **Conversational HTTP agent**, with the platform's one-line description under it: *"Connect any agent that accepts AG-UI run requests and streams AG-UI events over SSE."*
   </Step>
@@ -152,7 +154,9 @@ A tool's `parameters` schema is stored byte-for-byte alongside the profile revis
     | **Bearer token** | Appears only once you choose **Bearer token**. |
     | **Agent mode** | **Act** (the default), **Plan**, or **Ask**. |
 
-    {/* CAPTURE-PENDING: the Conversational HTTP agent connection form, Sign-in method set to Bearer token */}
+    <Frame caption="Choosing Bearer token is what makes the Bearer token field appear — it isn't on the form until then. Run and Health endpoints arrive already filled in, and Remote project is left blank.">
+      <img src="/images/connect-http-connection-form.png" alt="The Conversational HTTP agent connection form: Connection Name 'Refunds agent (staging)', an https Agent base URL, Run endpoint pre-filled with /agui/run, Health endpoint with /health, Sign-in method set to Bearer token, a masked Bearer token field reading 'Entered once and stored securely — it is never shown back.', an empty Remote project box, Agent mode on Act, and the Test Connection, Cancel and Save connection controls." />
+    </Frame>
 
     <Note>
       **Agent mode is not the Trust Agent's mode.** The Trust Agent's own **Ask / Plan / Act** modes govern the in-app assistant. This field is a value Trust AI forwards to *your* agent as `forwardedProps.mode` on every run, and Trust AI does not interpret it. If your agent ignores `forwardedProps`, the setting has no effect.
