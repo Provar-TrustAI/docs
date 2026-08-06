@@ -60,7 +60,18 @@ The fastest route is to ask the [Trust Agent](/concepts/trust-agent) — try *"C
   </Step>
 </Steps>
 
-{/* CAPTURE-PENDING: walkthrough of the admin-authorize wizard — org URL, authorize, the populated agent picker, the readout. Not yet recorded. */}
+{/* CAPTURE-BLOCKED: a motion walkthrough of the admin-authorize round-trip is not
+    recordable. Only the first leg is drivable without a live org — the org-URL form,
+    the sandbox caution, the authorize button, and the "We've opened Salesforce in a
+    new tab" status line. Everything past that (the Salesforce approve screen, the
+    automatic return to step 2, Find agents, the three-check readout) is gated on a
+    real administrator consenting in a real Salesforce org: the callback needs a
+    genuine single-use OAuth code and the server hands it to the internal gateway,
+    which deploys metadata into the org. There is no local stub for either. The one
+    already-bootstrapped org on the dev instance is a real sandbox, so its frames
+    carry a real host, admin username, and External Client App name and cannot be
+    used either. Re-attempt only with a disposable sandbox whose identifiers are safe
+    to publish. Do not stage or composite the hand-off. */}
 
 ## Connect from Project Settings
 
