@@ -104,7 +104,9 @@ If you're chasing a regression between [Agent Versions](/concepts/agent-versions
   </Step>
 </Steps>
 
-{/* CAPTURE-PENDING: evaluation-launcher sessions mode — the "Evaluate sessions" modal with judge multi-select, repeat selector, and fan-out preview */}
+<Frame caption="Four fields and no agent picker. The fan-out does the arithmetic before you commit — five sessions × three judges is fifteen evaluator runs. Read its closing line precisely: no conversations are *simulated* means no scenario is played out, and the replay still calls your connected agent once per session.">
+  <img src="/images/evaluate-sessions-launcher.png" alt="The Evaluate sessions launcher open over the Sessions list, with five rows ticked and the bulk-actions bar reading '5 selected'. The modal shows an Evaluation name pre-filled '5 selected · 3 evaluators · Aug 6', an Evaluators multi-select holding Refund timeline accuracy, Tone and Completeness chips, a 1–2–3–4 Repeat each test case selector set to 1, and a This will run panel reading 5 sessions × 3 evaluators, 15 evaluator runs. The primary button is Run evaluation." />
+</Frame>
 
 ## Evaluate one session
 

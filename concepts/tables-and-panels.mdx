@@ -10,7 +10,9 @@ Trust AI's list surfaces are built from one kit. The table you learn on [Session
 
 Every entity list is the same data table: sortable columns, a column menu, row selection, and cells you can often edit in place. Columns are fixed-width by default, so one long value never blows out the layout — resize a column instead.
 
-{/* CAPTURE-PENDING: shared-table-header-menu.png — a column header's click-to-open menu on the Sessions table, showing Sort ascending / Sort descending / Hide column */}
+<Frame caption="Sort ascending, Sort descending and Hide column are the three items nearly every column offers. The tick marks the direction already applied, and the header carries the matching chevron.">
+  <img src="/images/tables-panels-header-menu.png" alt="The Sessions table with the Routed To column menu open over the rows, listing Sort ascending, Sort descending and Hide column; Sort descending is ticked and the Routed To header shows a downward sort chevron." />
+</Frame>
 
 ### Column headers
 
@@ -72,7 +74,15 @@ Click a **Trial** row and the fly-in behaves normally. Switch the **View** toggl
   Grouped run results are the only place a row expands. If a row expands instead of opening a panel, it's a scenario summary, not a record.
 </Note>
 
-{/* CAPTURE-PENDING: scenario-two-level-fly-in.png — the two-level fly-in on Scenarios: the scenario panel with the nested session panel stacked over it */}
+The two-level fly-in on Scenarios, one level at a time:
+
+<Frame caption="Level one — the scenario panel, open on its Sessions tab. Its footer offers J / K and Esc only: this is the one fly-in without a fullscreen mode.">
+  <img src="/images/tables-panels-scenario-panel.png" alt="The Scenarios list with the scenario fly-in open on SCN-000010, Refund status after return, showing 3 personas, 6 sessions and 2 evaluators, with the Sessions tab listing six linked sessions by readable id." />
+</Frame>
+
+<Frame caption="Level two — clicking a linked session stacks the session panel over the scenario panel. Both are the same width against the same edge, so the top one covers the one beneath: the ‹ chip naming the scenario is how you tell you are two levels deep, and Esc takes you back to it.">
+  <img src="/images/tables-panels-stacked-fly-in.png" alt="The nested session panel stacked over the scenario panel, its header carrying a back chip that names the parent scenario, the id RUN-000019, a red Fail verdict pill, the Transcript, Annotations, Evaluations and Details tabs, and a footer that now also offers F for fullscreen." />
+</Frame>
 
 ### Keyboard contract
 

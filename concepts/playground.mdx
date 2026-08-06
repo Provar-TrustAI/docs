@@ -25,12 +25,16 @@ The Playground is a full-screen chat surface — there is no floating dock here.
   <Tab title="Chat mode">
     In **Chat** mode you type messages and the connected agent streams a real reply back, token by token. A follow-up continues the same conversation against the same agent.
 
-    {/* CAPTURE-PENDING: playground-shell.png — the Chat greeting empty state at 1440px: topbar with the grouped agent picker breadcrumb (system / agent name) plus the icon actions on the right, the centered "Chat with {agent}" heading and its "You're connected to {agent} via {system}" subtitle, and the composer carrying the Chat / Simulate segmented toggle. Note the save action only renders once a session has started, so this frame shows three icons, not four. */}
+    <Frame caption="Three icon actions, not four — the save action only appears once a session has started. The composer carries the mode toggle until you send.">
+      <img src="/images/playground-shell.png" alt="The Playground's Chat empty state: a 'Conversational Http / Refunds Concierge' breadcrumb in the topbar with agent-profile, history and new-session icons on the right, a centred 'Chat with Refunds Concierge' heading over a 'You're connected to Refunds Concierge via Conversational Http' subtitle, and a composer carrying a Chat / Simulate segmented toggle." />
+    </Frame>
   </Tab>
   <Tab title="Simulate mode">
     In **Simulate** mode you write a goal and pick a persona, then the persona role-plays the user pursuing that goal against the agent — both sides streaming live while you watch.
 
-    {/* CAPTURE-PENDING: playground-simulate-modal.png — the "Simulate a conversation" dialog, open over the Playground. Capture the fields in shipped order: Goal (a textarea, autofocused, placeholder "What is this person trying to achieve? …"), then Persona (a single-select popover), then Run mode (the Full auto / Stay in the loop pair of cards with their sub-captions). Footer is Cancel + Simulate. Capture a project whose persona roster is non-empty, so the picker shows a pre-selected persona rather than the "Choose a persona…" placeholder. */}
+    <Frame caption="The dialog as it opens on a project that already has personas: the first one is pre-selected, so the goal is the only field left to fill — and Simulate stays disabled until it is.">
+      <img src="/images/playground-simulate-modal.png" alt="The 'Simulate a conversation' dialog over the Playground: an autofocused Goal textarea showing its 'What is this person trying to achieve?' placeholder, a Persona picker already set to 'Terse power user', a Run mode pair of cards with Full auto selected and Stay in the loop beside it, and a Cancel button next to a disabled Simulate button." />
+    </Frame>
   </Tab>
 </Tabs>
 
@@ -100,7 +104,9 @@ Trigger it and a **Save as a scenario** dialog opens — the same lightweight in
 - **Goal** (required) — what the user was trying to achieve. A Simulate session pre-fills this with the run's goal; for a Chat you write it yourself.
 - **Personas** (optional) — a Simulate session pre-selects the persona that drove the run; a Chat starts empty. Each attached persona means one simulated session per run later.
 
-{/* CAPTURE-PENDING: playground-save-scenario-modal.png — the "Save as a scenario" dialog over a completed Chat. Include the turn-count summary strip at the top ("N turns · N from the user · N from the agent"), the Name input (autofocused), the Goal textarea, the Personas tag row with its "one session per persona on each run" helper, and the Cancel / Save scenario footer. */}
+<Frame caption="The dialog counts exactly what it is capturing, and asks for nothing but a name, a goal and optional personas — no expected output.">
+  <img src="/images/playground-save-scenario-modal.png" alt="The 'Save as a scenario' dialog over a finished Chat: a summary strip reading '4 turns · 2 from the user · 2 from the agent', a filled Name field, a filled Goal textarea, one persona pill under the 'one session per persona on each run' helper, and Cancel next to Save scenario. Behind the dialog the transcript shows an agent turn with 'Routed to Refunds & Returns' and 'Tool used lookup_return' peeks." />
+</Frame>
 
 The dialog summarizes what you're capturing as a turn count — total turns, how many from you, how many from the agent — and **Save scenario** does two things at once: it creates a flat scenario in the project's Scenarios list, and it finalizes the conversation you just ran as that scenario's linked [session](/concepts/sessions). Nothing is copied or re-typed — the live conversation itself becomes the scenario's session, with its **Source** shown as **Scenario**.
 
@@ -149,7 +155,9 @@ History is real, persisted, server-side data — the project's actual runs, not 
   **History is not filtered to conversations you drove here.** It lists every simulated run in the project that has turns, whoever started it — which includes the conversations the Scenarios surface's **Generate sessions** flow produced and the ones an [evaluation](/concepts/evaluations) drove against a scenario. Those land in the same shape as a Playground **Simulate** run (the run's goal as the title, `{persona} · N turns · simulated`), so a project that has generated sessions or run an evaluation will show entries nobody opened the Playground for. They open read-only like any other past conversation.
 </Note>
 
-{/* CAPTURE-PENDING: playground-history.png — the History menu open under the clock icon, anchored to the topbar, listing several real past runs newest-first. Show at least one Simulate row (goal as title, "{persona} · N turns · simulated") and one Chat row ("{agent} · N turns"), each with its relative timestamp on the right. Not the "No past sessions yet." empty state. */}
+<Frame caption="Two row shapes in one list: a Simulate run titled by its goal and metered by its persona, and a Chat run titled by its first message and metered by its agent.">
+  <img src="/images/playground-history.png" alt="The Playground history menu open under the topbar's clock icon, listing past runs newest-first. Simulated rows read 'Terse power user · 6 turns · simulated' and 'First-time buyer · 16 turns · simulated' under a goal; chat rows read 'Refunds Concierge · 2 turns' under the conversation's first message. Each row carries a relative timestamp on the right." />
+</Frame>
 
 ### Reopening a past conversation
 

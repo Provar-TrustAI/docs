@@ -41,7 +41,9 @@ Each tab is a stable, bookmarkable route, so a refresh or a shared link lands on
   A June 2026 release note describes this surface consolidating "six tabs into four". That was true of that release; **Credits** and **Connections** landed afterwards. Six is the current count.
 </Note>
 
-{/* CAPTURE-PENDING: workspace-settings-members screenshot — the Workspace settings page on the Members tab (six-tab strip + roster + Invite button) */}
+<Frame caption="Every administration job on this page starts from the tab strip. Members opens first, and its two actions — Invite and View access history — sit above the roster.">
+  <img src="/images/workspace-settings-members.png" alt="Workspace settings on the Members tab. A six-tab strip reads Members, Teams, Project access, Credits, Connections, General. Below it a roster of five people, each row showing name and email, an Admin or Member role badge, team chips such as Risk & Compliance and Support QA, and a joined date. A Search members field, a View access history button and a blue Invite button sit above the table." />
+</Frame>
 
 ## Two role vocabularies, one rule
 
@@ -149,7 +151,9 @@ Teams exist so you can grant project access once instead of per person.
 
     Candidates are filtered by whether they already hold a grant **at all**, not by the tier you have selected: someone with any direct grant on the project is absent from **People** even when you switch the toggle to the other tier. To change an existing grant, use the inline role control on its row rather than looking for the person here.
 
-    {/* CAPTURE-PENDING: grant-access-dialog screenshot — the Grant access dialog (Viewer/Editor toggle + People/Teams candidate list) */}
+    <Frame caption="Editor is preselected, and the candidate list is shorter than the roster: Marcus and Priya are missing from it because they already hold a grant, visible in the panel behind.">
+      <img src="/images/workspace-grant-access-dialog.png" alt="The Grant access to Acme refunds CSAT dialog: a Role toggle offering Viewer and Editor with Editor selected, a People / Teams tab pair, a search field, and two candidate rows each with an add button. Behind it the project's access panel lists the Risk & Compliance team under Teams with access and three people under People with access, each tagged Direct." />
+    </Frame>
 
     **You should see:** the new grant appear in the panel's **People with access** or **Teams with access** section with its role badge.
   </Step>
@@ -174,7 +178,9 @@ The feed is a table of **Person · Action · Resource · Outcome · When**, newe
 
 So a grant you just handed out does not appear as "Allowed"; it appears as a **Change** row, tinted by what it did. Behind the feed, every access decision and permission change is written to a durable, append-only audit trail; a permission change that can't be audited doesn't happen.
 
-{/* CAPTURE-PENDING: access-history-drawer screenshot — the access history drawer opened from the Members tab */}
+<Frame caption="One newest-first stream for the whole workspace: routine project reads by four different members interleaved with the grants and revokes an admin made moments earlier. Outcome and time are two further columns, off to the right of the drawer.">
+  <img src="/images/workspace-access-history-drawer.png" alt="The access history drawer anchored to the right of the Members tab, headed View access history, with an All events filter chip, a count reading 550 of 677 events, and a table whose Person, Action and Resource columns show four different members viewing the project, interleaved with Revoked access and Share project rows attributed to the admin." />
+</Frame>
 
 ## The Credits tab
 
