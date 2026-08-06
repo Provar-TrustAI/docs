@@ -34,8 +34,9 @@ pnpm capture:evaluations
 pnpm capture:evaluators
 pnpm capture:welcome
 pnpm capture:sidebar
-pnpm capture:playground    # needs the stub agent below
-pnpm capture:trust-agent   # slow: drives real agent turns, see below
+pnpm capture:playground       # needs the stub agent below
+pnpm capture:trust-agent      # slow: drives real agent turns, see below
+pnpm capture:agent-tutorial   # slower, and it writes — see below
 ```
 
 ## One surface needs a connected agent, not just a seed
@@ -59,7 +60,7 @@ Register it once per stack as a connection named **Refunds Concierge** — the e
 `curl` is in that file's header. `base_url` must be `http://host.docker.internal:8397`:
 the API and gateway run in Docker, where `localhost` is not your machine.
 
-## One capture drives the product instead of screenshotting it
+## Two captures drive the product instead of screenshotting it
 
 `scripts/trust-agent-surface.ts` is the odd one out. The Trust Agent's transcript,
 tool-call cards, side rail and permission cards do not exist until a real conversation
@@ -78,6 +79,19 @@ produces them, so that script sends prompts and waits for turns. Consequences:
   named evaluator. Run it twice without deleting the first one and the agent correctly
   refuses with a question card instead of a write gate — a valid, useless screenshot.
   `dropEvaluator()` handles it.
+
+`scripts/agent-tutorial.ts` goes further still: it drives the whole tutorial flow — the
+clarify-first question card, the plan on the rail, a write's permission gate, the object
+table of what the run built — by sending the tutorial's own brief and then answering and
+approving its way through the conversation. So on top of everything above:
+
+- **It really mutates the target project.** It edits evaluators, generates scenarios, and
+  starts evaluations. Point it at a demo project only.
+- **It is skipped unless `DRIVE=1`**, so `pnpm capture:all` never spends ten minutes of
+  model calls, or writes to a project, by accident. Its Welcome-surface shot is an
+  ordinary capture and always runs.
+- **It waits on structure, never on a phrase** — a pending HITL card, a plan list in the
+  rail, a multi-record tool-call card — because the wording differs every run.
 
 ## Two traps this harness is built around
 
