@@ -13,7 +13,16 @@ A Session is a tree of nested structures:
 - **The Session itself** — top-level metadata: its Source, timestamps, the Model and agent version it ran against, and where it was simulated from.
 - **Turns** — each message exchange between the user and the agent, with an optional response-latency readout per turn.
 - **Tool calls inside a Turn** — function name, arguments, return value. Often the most diagnostic data in a Session.
-- **Agent steps** — the trace between question and answer: **Thinking** steps show the model's reasoning in plain language, and **Model call** steps summarize each underlying model request ("Model call · 1,180 in / 142 out") with the raw payload behind an opt-in **Input** / **Output** disclosure. Reasoning is provider-dependent — where a runtime can't emit it, the transcript simply shows no Thinking steps rather than a blank frame.
+- **Agent steps** — the trace between question and answer. The transcript labels four kinds:
+
+  | Step | What it shows |
+  |---|---|
+  | **Thinking** | The model's reasoning in plain language |
+  | **Model call** | A summary of one underlying model request ("Model call · 1,180 in / 142 out"), raw payload behind an opt-in **Input** / **Output** disclosure |
+  | **Tool used** | A function the agent invoked mid-turn |
+  | **Routed to** | A routing decision — which downstream agent or skill took the turn |
+
+  Reasoning is provider-dependent — where a runtime can't emit it, the transcript simply shows no Thinking steps rather than a blank frame.
 
 Think of a Session as a fully-resolved record: not just what the user said and what the agent said back, but every decision the agent made on the way to its response. Annotations and evaluation results attach to the Session as a whole — you grade the conversation, not an individual Turn.
 
@@ -41,13 +50,14 @@ External sessions sync from the agent platforms connected in your [Project](/con
 
 The Sessions list is where you review, grade, and evaluate captured conversations. The table and panel behaviors shared across list surfaces — sorting, the column menu, range selection, the keyboard contract — are described in [Tables and panels](/concepts/tables-and-panels); here is what the surface offers:
 
-- **Sortable, filterable table** — the ID column shows the readable `RUN-` / `SES-` id, **Source** shows the origin chip, **Routed To** shows where the agent routed the conversation, and annotation columns (starting with a default **Verdict**) sit alongside the session data. Filter configurations persist as [saved views](/concepts/saved-views) your team can share.
-- **Typed annotation columns** — a default **Verdict** (pass / fail) column ships on every project, and **+ New annotation column** adds custom columns typed **Pass / Fail**, **Score**, **Category**, **Tags**, or **Comment**. Verdict and severity cells edit inline, right in the table.
+- **Sortable table** — six columns show by default: **Session ID** (the readable `RUN-` / `SES-` id), **Transcript**, **Routed To**, **Tools Called**, **Turns**, and **Date**. Four more ship hidden — **User**, **Duration**, **Source**, and **Tags** — one click away in the column menu. Column and filter configurations persist as [saved views](/concepts/saved-views) your team can share.
+- **Filtering** — **Add filter** offers four dimensions: **Date**, **Routed To**, **Tags**, and **Turn count**.
+- **Typed annotation columns** — every project starts with three: **Verdict** (pass / fail), **Severity** (minor / major / blocker), and **Reviewer note**. **Add column → New annotation column** adds your own, typed **Pass / Fail**, **Score** (1–5), **Category** (single choice), **Tags** (multiple from a palette), or **Comment**. Verdict and severity cells edit inline, right in the table.
 - **Column control** — one column menu handles show/hide and drag-to-reorder, and the order is remembered per saved view. Shift-click a second checkbox to select a whole range of sessions at once.
-- **Bulk actions** — selecting sessions raises a bar with **Evaluate** (the primary action), **Tag**, and **Download** (CSV export of the selection).
-- **Fly-in detail panel** — click any session to open a panel with four tabs: **Transcript** (default), **Annotations**, **Evaluations**, and **Details**. The header carries a one-off **Evaluate** button, and the overflow menu offers **Download transcript** and **Copy session ID**.
+- **Bulk actions** — selecting sessions raises a bar with **Evaluate** (the primary action), **Tag**, **Download** (CSV export of the selection), and **Clear selection**.
+- **Fly-in detail panel** — click any session to open a panel with four tabs: **Transcript** (default), **Annotations**, **Evaluations**, and **Details**. The header carries the session's evaluation verdict as a pill and a one-off **Evaluate** button; the overflow menu offers **Download transcript**, **Copy session ID**, and **Copy link**.
 - **Keyboard navigation** — <kbd>J</kbd> / <kbd>K</kbd> cycles through sessions, <kbd>F</kbd> toggles fullscreen, <kbd>Esc</kbd> exits fullscreen first and then closes the panel.
-- **Details tab** — the session's Source, **Simulated from** provenance, **Model**, agent version, and **Routed to** route in one place.
+- **Details tab** — a **Session properties** block of ten rows: Session ID, Run date, Triggered by, Source, Model, Turn count, Duration, Routed to, Tools called, and Tags. Simulated sessions carry a **Simulated from** provenance card above it.
 - **Transcripts are immutable** — there is no Delete Session action, and a session's conversation can't be edited. What you *can* write are the annotation values and tags layered on top; tags autocomplete from one vocabulary shared with Scenarios.
 
 ## What you do with a Session
@@ -64,8 +74,8 @@ The four primary workflows:
   <Card title="Trace it to its scenario" icon="git-branch">
     A simulated session's **Simulated from** card links back to the scenario and persona that produced it, so you can jump from a bad conversation to the test case behind it — and tighten the scenario's expected output.
   </Card>
-  <Card title="Search + filter" icon="search">
-    Filter by Source, verdict, route, tags, time window, and more — then save the configuration as a named view so you can return to it instantly.
+  <Card title="Filter and save the view" icon="search">
+    Narrow the table by date, route, tags, or turn count — then save the configuration as a named view so you and your team can return to it instantly.
   </Card>
 </CardGroup>
 
@@ -82,7 +92,7 @@ If you've used observability tools (Langfuse, Phoenix, LangSmith) you may have h
 
 The distinction matters because the workflows differ. Traces are for engineers reading logs. Sessions are for **QA Practitioners** grading behavior and authoring scenarios, and **Agent Owners** judging results. Both are valid lenses; Trust AI deliberately picks the term that maps to its core users.
 
-## Session metadata you can filter on
+## What a Session carries
 
 Out of the box, every Session carries:
 
@@ -90,10 +100,13 @@ Out of the box, every Session carries:
 - Provenance: the linked scenario and persona (for simulated sessions), Model, and agent version
 - Time: when the conversation happened and when it was captured
 - Routing: the **Routed To** route, plus tool calls made along the way
-- Human signal: annotation column values (Verdict, severity, and any custom columns) and tags
+- Human signal: annotation column values (Verdict, Severity, and any custom columns) and tags
 - Automated signal: the session's evaluation verdict — **Pass**, **Fail**, or **Not evaluated**
 
-Custom metadata your agent emits also surfaces — anything in an AgentCore invocation's `attributes` block flows through to the Session. {/* ACCURACY-AUDIT-PENDING */}
+Not all of it is filterable. The table filters on **Date**, **Routed To**, **Tags**, and **Turn
+count**; the rest is there to read, sort, and export. To narrow by something the filter set doesn't
+cover — Source, say, or a verdict — show that column, sort on it, or ask the
+[Trust Agent](/concepts/trust-agent) for the sessions you want.
 
 ## Working with Sessions
 
