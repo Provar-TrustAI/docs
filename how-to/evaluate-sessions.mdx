@@ -20,6 +20,7 @@ There are two ways in, and they are **not** the same job:
 |  | **Bulk run** — Sessions list → **Evaluate** | **One-off** — session fly-in → **Evaluate** |
 |---|---|---|
 | What the judges read | A **fresh answer**. The session's user message is replayed to your connected agent and the reply it gives *now* is what gets graded. | The **stored transcript**, exactly as recorded. |
+| Which sessions it can target | Only a session that has a **scenario made from it** — the launcher resolves each selected session to that scenario and replays it. Anything else is refused. See [Not every session can be bulk-evaluated](#not-every-session-can-be-bulk-evaluated). | **Any** stored session, including one no scenario was ever made from. |
 | Is your agent invoked? | Yes — once per session. | No. Nothing is called; grading is a read. |
 | Does it need a connected agent? | Yes. Without one every row fails as a rig problem, not an agent fail. | No. |
 | What it produces | A named run on the [Evaluations](/concepts/evaluations) list. | Nothing on the Evaluations list — the verdict homes on the session. |
@@ -31,6 +32,23 @@ Neither path edits the conversation you selected. The stored transcript, its tur
 <Note>
   Session grading is **judge-only**. The launcher's evaluator picker offers [LLM judges](/concepts/evaluators) exclusively — a captured conversation carries no authored expected output to check structurally. Sessions that came from a scenario also run that scenario's automatic routing and tool checks, per the launcher's own helper text.
 </Note>
+
+### Not every session can be bulk-evaluated
+
+A bulk run does not target the session directly. Because it replays rather than reads, it needs something to replay — and that something is a [scenario](/concepts/scenarios) made from the session. The launcher resolves every session you selected to the scenario it was created from, and replays those.
+
+A session no scenario was ever made from — a conversation that only ever arrived from your runtime and was never turned into a test case — has nothing to resolve to, and the launch is **refused before anything is created**. You get no run and no partial result, just this message on the launcher:
+
+> There's nothing to evaluate yet. Pick at least one scenario or session and try again.
+
+It reads like you selected nothing, which is the confusing part: you did select sessions, and they are real. What they lack is a scenario.
+
+**The check is all-or-nothing.** One unresolvable session in the selection refuses the whole launch — the rest are not run, and nothing is partially graded.
+
+Two ways out, and they answer different questions:
+
+- **Grade the recorded words** — use the one-off path on each session. It has no such requirement, needs no connected agent, and works on any stored session.
+- **Measure the live agent** — give those conversations a scenario first, then bulk-evaluate. *Ask the [Trust Agent](/concepts/trust-agent):* "Turn these sessions into scenarios." It drafts them and pauses for your approval before writing anything.
 
 ## Sessions or scenarios — which to launch
 
@@ -50,6 +68,7 @@ If you're chasing a regression between [Agent Versions](/concepts/agent-versions
 - A **Trust AI account** with access to a [Project](/concepts/projects) that has sessions — synced, generated, or run in the Playground
 - At least one **LLM judge** evaluator in the project. If your Evaluators list is empty, **Add recommended evaluators** on the [Evaluators](/concepts/evaluators) surface gives you a curated starting roster in one step.
 - For a **bulk** run only: a connected agent on the project. The replay needs something to call.
+- For a **bulk** run only: a scenario made from every session you select. See [Not every session can be bulk-evaluated](#not-every-session-can-be-bulk-evaluated).
 - Credit headroom in your workspace pool. See [Credits and the launch gate](#credits-and-the-launch-gate).
 
 ## Evaluate sessions in bulk
@@ -59,6 +78,8 @@ If you're chasing a regression between [Agent Versions](/concepts/agent-versions
     Open **Sessions** in the project nav and select the conversations you want graded — tick their checkboxes, and shift-click a second checkbox to select the whole range between. A bulk-actions bar appears reading "*N* selected", with **Evaluate** as its primary action alongside **Tag**, **Download**, and **Clear selection**.
 
     You can also skip selecting: the **Evaluate** button in the Sessions page header targets the rows **already loaded** in the list. That is not the same as "everything matching your filter" — Sessions loads 50 at a time and pulls more as you scroll, so on a large [saved view](/concepts/saved-views) the header button captures the first page plus however far you have scrolled. When the exact set matters, select the rows.
+
+    Select only sessions that have a scenario made from them — one that doesn't refuses the whole launch. [Not every session can be bulk-evaluated](#not-every-session-can-be-bulk-evaluated) covers what that looks like and what to do instead.
 
     **You should see:** the bulk-actions bar rise when sessions are selected, with **Evaluate** as the primary button.
   </Step>
@@ -136,7 +157,7 @@ A finished single-attempt run leads with up to two headline numbers, and they an
 
 Evaluator accuracy only resolves when humans have recorded verdicts: it compares the judges against the pass/fail **Verdict** [annotations](/concepts/annotations) people set on those sessions, and sessions without a human verdict are excluded. If nobody has verdicted anything, that headline simply doesn't render — record human verdicts ([Annotate sessions](/how-to/annotate-sessions) covers this) and accuracy starts resolving. A human verdict grades the judges; on this surface it never overrides the automated one.
 
-If you raised **Repeat each test case**, the headline changes shape: the standalone pass rate is replaced by a reliability read written `Pass^K` — how often a case passed across *all* K attempts — with the full `Pass^1 … Pass^K` curve revealed on hover. Evaluator accuracy still sits beside it. And a run where nothing was behaviourally scored leads with a plain **Not graded** rather than a fabricated 0%.
+If you raised **Repeat each test case**, the headline changes shape: the standalone pass rate is replaced by a reliability read written `Pass^K` — how often a case passed across *every* attempt, not just one — with the full `Pass^1 … Pass^K` curve revealed on hover. Evaluator accuracy still sits beside it. And a run where nothing was behaviourally scored leads with a plain **Not graded** rather than a fabricated 0%.
 
 The results table itself opens with a **Transcript** column and a **Final verdict** column — **Pass**, **Fail**, or **Not graded** — followed by one column per judge, headed with that judge's name. There is no separate score column; the per-judge columns *are* the breakdown.
 
@@ -149,7 +170,7 @@ Open any result and use **Open session** — in the fly-in header's **⋯** menu
 Every graded session carries its results with it:
 
 - The fly-in header shows the automated verdict pill. It has four labels across three states: **Pass**, **Fail**, and two distinct neutrals — **Not evaluated** when nothing has graded this session, **Not graded** when an evaluation exists but produced no behavioural score. They are not interchangeable, and writing a human annotation does not change either.
-- The fly-in's **Evaluations** tab lists every evaluation that graded this session, newest first, above a count line reading "*N* evaluations". Each one is a **card**, not a disclosure — the run's rollup verdict, its name, when it ran, and its individual checks with their reasoning, all visible without expanding anything. A still-grading run appears above the finished ones as a **Queued** or **Running** card.
+- The fly-in's **Evaluations** tab opens with a count line reading "*N* evaluations", and lists every evaluation that graded this session below it, newest first. Each one is a **card**, not a disclosure — the run's rollup verdict, its name, when it ran, and its individual checks with their reasoning, all visible without expanding anything. A still-grading run leads the tab as a **Queued** or **Running** card, above even the count line — which counts finished evaluations only.
 
 *Ask the [Trust Agent](/concepts/trust-agent):* "Analyze the failures in that run." On a completed run it open-codes each failing result and groups the notes into ranked failure themes — a fast first pass before you read transcripts yourself.
 
@@ -166,6 +187,10 @@ Every graded session carries its results with it:
 
   <Accordion title="The launcher's Run evaluation button won't click">
     A sessions launch needs at least one judge. With the picker empty the button is simply **disabled** — there is no error message to look for, and the fan-out panel reads "Pick at least one evaluator to see how many runs this will produce." Pick a judge and the button enables. If the picker itself is empty, your project has no LLM judge evaluators yet — create one, or adopt the recommended set from the Evaluators surface.
+  </Accordion>
+
+  <Accordion title="My bulk launch says there's nothing to evaluate, but I selected sessions">
+    You did, and they are real — but a bulk run replays a [scenario](/concepts/scenarios), so it needs a scenario made from each session you picked, and at least one of yours has none. The message is generic ("There's nothing to evaluate yet. Pick at least one scenario or session and try again.") and does not name the session that failed to resolve. It is also all-or-nothing: one unresolvable session refuses the whole selection. Grade those conversations with the one-off path instead, or turn them into scenarios first — [Not every session can be bulk-evaluated](#not-every-session-can-be-bulk-evaluated) has both routes.
   </Accordion>
 
   <Accordion title="The launch was refused with a credit message">
