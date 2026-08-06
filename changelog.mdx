@@ -99,9 +99,9 @@ description: "Trust AI release notes."
 
   **Scenarios absorb the last of the dataset container.** The legacy `/v1/datasets` API is retired; scenarios carry their own columns, rows, tag vocabulary, and CSV import and export directly. See [Scenarios](/concepts/scenarios).
 
-  **Preview — Requirements.** Business-language requirements that link to the scenarios and evaluators proving them, with a coverage rollup. This is behind a flag and off in every environment, including production — it is not reachable yet. It is noted here so the vocabulary is stable when it ships.
+  **Requirements.** Capture what your agent must do — and must never do — in business language, then link each requirement to the scenarios and evaluators that prove it. Every requirement carries a plain handle like `REQ-12` and a computed health rollup: **Passing**, **Failing**, **Partially covered**, **Uncovered**, or **Not yet run**. Gaps are the requirements nothing covers yet, so you can see where your test suite is thin rather than guessing. Requirements can be written by hand, extracted from a document, or captured from a conversation with the [Trust Agent](/concepts/trust-agent).
 
-  **Preview — Test Data Management.** The state-grounded evaluation track continued, still behind a preview flag and off by default in production.
+  **Test Data Management.** Grade an agent on the backend state it actually leaves behind, not just what it said. Register environments and data connections, author the starting data a scenario runs against and the end state it should reach, then read a per-record expected-versus-actual diff and a change ledger alongside the conversation. Proven across Salesforce Agentforce, AWS AgentCore, and Claude-managed runtimes.
 </Update>
 
 <Update label="v2026.06.30.1 — June 2026">
@@ -125,7 +125,7 @@ description: "Trust AI release notes."
 
   **Access Center, refined.** The workspace admin surface consolidates six tabs into four (Members, Teams, Project access, General); the full roles-and-permissions matrix now appears inline at the moment you assign a role, and access history is an in-context drawer.
 
-  **Test Data Management (preview, off by default).** Behind a preview flag: register environments and data connections, author per-scenario starting data and the end state a run should reach, then grade the agent on the backend state it actually leaves behind — a five-dimension verdict matrix (Safety, Outcome, Quality, Behavior, End state) with a per-record expected-vs-actual diff and a change ledger. The loop is proven across Salesforce Agentforce, AWS AgentCore, and Claude-managed runtimes. Preview surfaces are flag-gated and off by default in production builds.
+  **Test Data Management (preview, off by default).** Behind a preview flag: register environments and data connections, author per-scenario starting data and the end state a run should reach, then grade the agent on the backend state it actually leaves behind — a five-dimension verdict matrix (Safety, Outcome, Quality, Behavior, End state) with a per-record expected-vs-actual diff and a change ledger. The loop is proven across Salesforce Agentforce, AWS AgentCore, and Claude-managed runtimes. Preview surfaces are flag-gated and off by default in production builds. *(Superseded: Test Data Management is no longer a preview — it is enabled and generally available. See the v2026.07.08.1 entry above.)*
 </Update>
 
 <Update label="v2026.06.22.1 — June 2026">
