@@ -113,17 +113,17 @@ The Credits tab is the slow signal. The fast one arrives where you are working.
   </Step>
 
   <Step title="At the limit — the run is refused, not degraded">
-    Once a run would take you to or past the pool, it is **refused outright**. Nothing partial happens: no rows are graded, no conversation is simulated, nothing is queued to resume later. You get a persistent banner titled **Credit limit reached** at the point you tried to act.
+    Once a run would take you to or past the pool, it is **refused outright**. Nothing partial happens: no rows are graded, no conversation is simulated, nothing is queued to resume later. On the two surfaces that name the reason — the evaluation launcher and a Trust Agent chat — you get a persistent banner titled **Credit limit reached**. Everywhere else the refusal is just as real, but the screen does not say the word "credit"; see below.
   </Step>
 
   <Step title="Clear the banner, or get the pool raised">
-    The banner does not time out. Dismiss it yourself, or — in chat — send another turn and it clears when that turn starts streaming. Dismissing changes nothing about the limit: the next attempt is refused the same way until the pool is raised or the month rolls over.
+    Where the banner appears it does not time out. Dismiss it yourself, or — in chat — send another turn and it clears when that turn starts streaming. Dismissing changes nothing about the limit: the next attempt is refused the same way until the pool is raised or the month rolls over.
   </Step>
 </Steps>
 
 ### Where the block appears, and what it says
 
-The banner's **title is the same in both places — "Credit limit reached" — and the sentence under it is not**. The two surfaces refuse over different paths, so they word the refusal differently. Both mean the same thing:
+**Exactly two surfaces raise the named banner** — the evaluation launcher and the Trust Agent chat. On both the title is the same, **Credit limit reached**, and the sentence under it is not: the two refuse over different paths, so they word the refusal differently. Both mean the same thing:
 
 | Where | What the banner says under the title |
 |---|---|
@@ -134,9 +134,13 @@ The banner's **title is the same in both places — "Credit limit reached" — a
   Neither is a form error and neither is a transient toast. The banner announces itself to assistive technology and holds its place until it is dismissed — a refused run is something you have to act on, not something to catch as it goes past.
 </Note>
 
+<Warning>
+  **Calibration is the exception, and it does not say "credit".** Calibration is metered and refused at the limit like everything else, but the evaluator panel has no credit-cap banner of its own. A refused calibration shows the panel's ordinary failure banner instead — **Calibration didn't finish**, "The check ran into a problem partway through. Your last result is unchanged — try again." — with a **Try again** button that will be refused exactly the same way. If a calibration fails with that message and nothing else explains it, read the Credits tab before you retry.
+</Warning>
+
 ## Raising the pool is not self-serve
 
-There is no control on the Credits tab that changes anything — no edit, no raise-cap, no top-up, not for an Owner and not for an Admin. The card is entirely read-only, and no other screen in the app raises a pool either. That is why every block message ends in "contact your admin": pools are provisioned and adjusted for you, outside the app, and a new ceiling applies to the current month as soon as it lands — there is nothing to accept or apply on your side.
+There is no control on the Credits tab that changes anything — no edit, no raise-cap, no top-up, not for an Owner and not for an Admin. The card is entirely read-only, and no other screen in the app raises a pool either. That is why both block messages end in "contact your admin": pools are provisioned and adjusted for you, outside the app, and a new ceiling applies to the current month as soon as it lands — there is nothing to accept or apply on your side.
 
 <Note>
   Your workspace's credit snapshot is also readable on the wire — the pool, the month's usage, what is left, and the same per-activity breakdown the card renders. Request and response shapes live in the [API Reference](/api-reference).
