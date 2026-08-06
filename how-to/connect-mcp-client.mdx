@@ -29,20 +29,22 @@ Nothing sits behind the unsupported door that the product does not already give 
 Open a chat from any project and ask for the work directly:
 
 - **Get oriented** — "Summarize this project" returns entity counts, setup state, and the most recent evaluation run.
-- **Query your data** — "How many sessions are in this project?", "Show me two sessions from this project." One entity type at a time: sessions, scenarios, evaluators, evaluations, personas, or agent versions.
+- **Query your data** — "How many sessions are in this project?", "Show me two sessions from this project." One entity type at a time: sessions, scenarios, evaluators, evaluations, personas, agent versions, or [requirements](/concepts/requirements).
 - **Read an attached file** — attach a document to the chat and ask the agent to read it back.
 - **Analyze a run** — "Analyze the failures in the last evaluation" produces a short note on each failure and then names the themes across them. It typically takes 30 to 60 seconds.
-- **Write, with a checkpoint** — curating conversations into scenarios, editing or deleting an item, and starting an evaluation all preview what would change and then wait for you to approve. See [Approve an agent write](/how-to/approve-agent-writes).
+- **Write, with a checkpoint** — curating conversations into scenarios, editing or deleting an item, and starting an evaluation each preview what would change and then wait for you to approve. A one-time approval covers that write alone. Where the card also offers a for-this-chat scope, approving it grants a standing pass and the agent repeats that kind of write for the rest of the conversation without stopping again — deletes never offer it, so every delete is approved on its own. See [Approve an agent write](/how-to/approve-agent-writes).
 
 [Work with the Trust Agent](/how-to/work-with-the-trust-agent) covers the chat surface itself — the Ask, Plan, and Act modes and how approvals are granted.
 
 ## If what you wanted was to connect your own agent
 
-Connecting the agent you want to evaluate is a different job, and it is supported. It runs through a platform connection, not through MCP:
+Connecting the agent you want to evaluate is a different job, and it is supported. It runs through a platform connection, not through MCP. **Four platforms are connectable.** Three have a guide of their own:
 
 - [Connect an AWS Bedrock AgentCore agent](/how-to/connect-agentcore)
 - [Connect a Salesforce Agentforce agent](/how-to/connect-agentforce)
 - [Connect a Claude Managed Agent](/how-to/connect-claude-managed-agent)
+
+The fourth is the **Conversational HTTP agent** — any agent that accepts run requests and streams responses back over HTTP, on no named vendor platform at all. It has no guide of its own yet. Add it the same way as the three above: **Project settings → Connection → Add connection**, then pick it from the platform list. If you came here because your agent does not run on one of the named platforms, this is your path, and it is the closest thing to "point your own thing at Trust AI" that is supported today.
 
 Your agent under test may itself speak MCP to its own tools. That relationship is between your agent and those tools; it is unaffected by anything on this page.
 
