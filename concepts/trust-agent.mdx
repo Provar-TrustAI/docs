@@ -58,7 +58,9 @@ The agent thinks and answers in the open. Reasoning, text, and tool-call argumen
 
     Long messages keep the transcript readable: a long message *you* send collapses behind a **Show more** / **Show less** toggle, which appears only when the content actually overflows. The agent's replies stay fully expanded — the reply is the thing you came to read.
 
-    {/* CAPTURE-PENDING: trust-agent-transcript.png — a streaming turn with markdown prose, reasoning rail, and a tool-call card */}
+    <Frame caption="One landed turn, top to bottom. Notice that the tool-call card names the records the agent read — the reply below it is a summary of those records, not a substitute for them.">
+      <img src="/images/trust-agent-transcript.png" alt="The Trust Agent full view. The user's question sits at the top of the transcript, followed by the agent's one-line 'I'll pull the project's evaluators', a 'Reviewed evaluators' tool-call card listing five named evaluators with their descriptions, and a markdown bullet list summarising what each one checks. Two next-step chips sit under the reply, and the composer at the bottom carries the Ask mode toggle and the Claude Opus 4.8 model chip." />
+    </Frame>
   </Tab>
   <Tab title="Reasoning and model calls">
     The model's thinking streams into a collapsible **reasoning rail**. While the agent is working you see a live **Thinking… *Ns*** timer filling the wait; when the reasoning resolves it collapses to **Thought for *Xs***, expandable if you want to read what the agent considered. Reasoning is persisted with the chat, so a reopened conversation rebuilds its Thinking rails rather than losing them.
@@ -90,7 +92,9 @@ References carry their live state with them. A finished evaluation that produced
 <Accordion title="Single references, sub-entities, and evaluation results">
   A single-object reference carries a human label and description instead of a UUID. A reference to a sub-entity resolves to its *parent* record, so you always land somewhere real. For an evaluation result, the transcript renders an inline failure-analysis widget; opening an evaluator reference opens the real evaluator panel — not a placeholder.
 
-  {/* CAPTURE-PENDING: trust-agent-object-table.png — a clickable multi-object table in chat with a record fly-in */}
+  <Frame caption="The highlighted row in the chat is the record open on the right. The fly-in is the real session panel — its own tabs, its own verdict chip, its own transcript — not a rendering of what the agent said about it.">
+    <img src="/images/trust-agent-object-table.png" alt="A 'Reviewed sessions' object table in the Trust Agent transcript with RUN-000019 highlighted, and the session fly-in open over the right half of the screen showing that record's Fail verdict chip, its Transcript / Annotations / Evaluations / Details tabs, and the customer-and-agent turns of the conversation." />
+  </Frame>
 </Accordion>
 
 ### The in-chat scenario workspace
@@ -112,7 +116,11 @@ Context rows are compact by default: a row like **10 scenarios** is an **expand 
 
 The rail stays visible across the whole conversation — it doesn't reset or vanish when you send a follow-up — so it remains a stable map of the work from planning through execution. Counts in the rail show the latest count per item type, not a confusing running sum.
 
-{/* CAPTURE-PENDING: trust-agent-side-rail.png — the Progress / Context / Outputs / Attachments side rail (re-add inside an Accordion titled "See the side rail" once captured) */}
+<Accordion title="See the side rail">
+  <Frame caption="All four sections after one multi-step task. Read it top to bottom and you have the whole job: what the agent set out to do, what it read, what it changed, and what you gave it.">
+    <img src="/images/trust-agent-side-rail.png" alt="The Trust Agent side rail. Progress reads '3 of 3 done' over three ticked, struck-through plan steps. Context leads with a Refunds Concierge connected-agent card carrying a Not checked health chip and its endpoints, then an expandable '7 requirements' count row. Outputs reads '1 change' and lists the 'Refund receipt confirmation' evaluator the agent created. Attachments reads '1 file' and lists refund-policy-note.md." />
+  </Frame>
+</Accordion>
 
 ## Human-in-the-loop approvals
 
@@ -155,7 +163,11 @@ Two limits are deliberate:
 - **Deletes never offer the chat scope.** An irreversible delete is confirmed every single time, whatever else you have granted.
 - **A one-time approval still covers the batch the card represented.** If the card asked about saving twelve scenarios, approving once commits all twelve in that turn rather than stalling on the second one — but that coverage ends with the turn.
 
-{/* CAPTURE-PENDING: trust-agent-permission-card.png — a permission/write-preview interrupt card in the composer slot (re-add inside an Accordion titled "See a permission card" once captured) */}
+<Accordion title="See a permission card">
+  <Frame caption="Look at where the card is: the composer is gone. The run is halted at the tool call, the header says Awaiting your answer, and there is nothing to type into until you decide.">
+    <img src="/images/trust-agent-permission-card.png" alt="The Trust Agent full view with a permission card standing in the composer's place at the bottom of the screen. It reads 'Create the LLM-judge evaluator Refund policy window?', '3 fields changed', a View proposal link, a selected 'Create it' option, a 'Reject — and tell me why (optional)' option, and an Approve button. Above it are the user's request and the agent's line 'I have everything needed — the rubric criteria are fully specified. Let me set up the approval for this evaluator.', and the chat header is badged 'Awaiting your answer'." />
+  </Frame>
+</Accordion>
 
 ### Connecting an agent from inside the chat
 
@@ -171,7 +183,9 @@ The full approval flow — the card types, the rich previews, and what "approve 
 
 The composer is where you drive the agent, and it's rich: an **Attach files** chip for pulling in documents, an **@** picker for mentions, a **/** palette for slash commands and skills, an inline model selector chip, an **Ask** / **Plan** / **Act** mode toggle, and a plan-confirm bar. It's also forgiving: the textarea auto-grows as you type, an unsent draft survives navigating away — even leaving the project or reloading — and a message you send while the agent is mid-reply is queued for the next turn, not dropped.
 
-{/* CAPTURE-PENDING: trust-agent-composer.png — the composer with mode toggle, model selector, attach chip, and @/slash pickers */}
+<Frame caption="Typing a slash opens the palette over the composer. The chassis underneath keeps its controls in view — attach on the left, then the mode toggle and the model chip — so nothing you need is hidden behind a menu.">
+  <img src="/images/trust-agent-composer.png" alt="The Trust Agent composer with the slash palette open above it, listing the commands /acme-refund-review, /analyze-failures, /analyze-patterns and /author-adapter-lifecycle, each with a one-line description. The composer below holds a single '/' character, and its control row shows the plus attach chip, the Ask mode toggle and the Claude Opus 4.8 model selector." />
+</Frame>
 
 ### Attach files
 
