@@ -1,0 +1,19 @@
+{/* Shared deprecation callout: a path that still works but is no longer the way to do
+    something. Use it once, near the alternative it points at — not repeated per step.
+
+    Usage:
+      import { DeprecatedNotice } from "/snippets/deprecated-notice.mdx";
+      <DeprecatedNotice
+        what="Certificate-based JWT sign-in"
+        instead="Authorize TrustAI as an admin"
+        who="connections that already use it" />
+
+    Voice: matter-of-fact. A reader on the old path is not doing anything wrong, and the
+    product's own picker says "(legacy)" — match that word rather than escalating it. */}
+
+export const DeprecatedNotice = ({ what, instead, who }) => (
+  <Info>
+    **{what} is no longer the recommended path.** New setups use {instead}.
+    {who ? ` It remains available for ${who}.` : ""}
+  </Info>
+);
