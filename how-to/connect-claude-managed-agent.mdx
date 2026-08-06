@@ -64,9 +64,9 @@ You'll also need a **Trust AI Project**. If you don't have one yet, start with [
   <Step title="Connect">
     Click **Connect**. Trust AI saves the connection and immediately runs a real check against it — see [The check that runs on save](#the-check-that-runs-on-save).
 
-    The Trust Agent then reports the result in plain language — **Connected to** followed by your agent's name when the check came back healthy, or *"Connection set up — the health check came back …"* with the reason when it didn't. Nothing raw — no identifier, no key — is written back to the conversation.
+    The Trust Agent then reports the result in plain language — **Connected to** followed by your agent's name when the check came back healthy, or *"Connection set up — the health check came back …"* naming the health outcome — *unreachable*, for example — when it didn't. The reason behind an unhealthy result is recorded on the connection itself, not written into the chat; you read it on the connection's health. No key and no secret go back into the conversation.
 
-    **Not now** closes the card without connecting; the Trust Agent replies *"You closed the connection card. I'll wait for your next message."* and offers **Reopen connection card**.
+    **Not now** closes the card without connecting; the Trust Agent replies *"You closed the connection card. I'll wait for your next message."* A closed card leaves that line and nothing else — there is no button on it to bring it back. Ask the Trust Agent to connect again and it opens a fresh card.
   </Step>
 </Steps>
 
@@ -76,7 +76,7 @@ This is the reason the card exists, and it is worth being precise about.
 
 - The Trust Agent opens the card by calling a tool whose arguments carry only the platform and the project. There is no field on that call a secret could travel in.
 - Your key is typed into the card and sent straight to Trust AI's backend. It is not part of the conversation, so the model that is helping you never sees it.
-- What comes back to the conversation when you finish is the **outcome only** — whether the connection is live, the human names of the agent and environment you picked, and the health result. No key, no secret.
+- What comes back to the conversation when you finish is the **outcome only** — whether the connection is live, the human names of the agent and environment you picked, and the health result. The saved connection's own id rides along as a routing key and is never rendered anywhere you can see it. No key, no secret.
 - If you paste something that looks like an API key into the chat by mistake, Trust AI strips it before it is stored; the Trust Agent sees `[redacted API key]` and will ask you to use the card instead.
 
 <Note>
