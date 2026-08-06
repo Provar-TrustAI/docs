@@ -80,7 +80,7 @@ Same scenarios, same Evaluators, same environment. **Re-run** does most of this 
     **You should see:** the run appear on the Evaluations list, with the Agent Version's label rendered as a monospace subtitle beneath the run name.
 
     <Note>
-    **What to evaluate** appears only on this entry point. Launching from a session, a scenario, or **Re-run** fixes the source from context, and the modal is titled for what it will do — **Run & evaluate scenarios**, **Evaluate sessions**, and so on — with no source toggle.
+    **What to evaluate** appears whenever the launcher opens without a source already decided — from **New evaluation** here, and from an Evaluator's **⋯** menu via **Use in new run**, which opens the same **New evaluation** modal. Launching from a session, a scenario, or **Re-run** fixes the source from context instead, and the modal is titled for what it will do — **Run & evaluate scenarios**, **Evaluate sessions**, and so on — with no source toggle.
     </Note>
   </Step>
 
@@ -150,7 +150,7 @@ Same scenarios, same Evaluators, same environment. **Re-run** does most of this 
     Most differences fall into one of three buckets:
 
     - **Real regression** — the candidate's response is clearly worse, or reliably worse across attempts. The build change is the problem.
-    - **Calibration edge** — both responses are reasonable; they landed on opposite sides of a subjective rubric line. Tighten the rubric, don't blame the agent. The Evaluator's **Calibrate** tab measures how often the judge agrees with your own verdicts, using the exact judge your runs use.
+    - **Calibration edge** — both responses are reasonable; they landed on opposite sides of a subjective rubric line. Tighten the rubric, don't blame the agent. The Evaluator's **Calibrate** tab measures how often the judge agrees with the pass/fail verdict column on your scenarios, using the exact judge your runs use. (That is a different human input from the session **Verdict** annotations behind evaluator accuracy above.)
     - **Stale scenario** — the agent's response is fine but the scenario's premise no longer applies. Update the scenario's goal or expected output.
 
     **You should see:** the pattern become legible after reading 5–10 scenarios that moved — regressions cluster by category far more often than they scatter.
@@ -166,7 +166,7 @@ Same scenarios, same Evaluators, same environment. **Re-run** does most of this 
     Trust AI keeps the evidence durable either way: every run stays pinned to its Agent Version, so the Evaluations list doubles as your index of past comparisons. Each run's line shows the Agent Version label beneath the run name alongside a sortable **Overall pass rate** and **Evaluator accuracy**.
 
     <Warning>
-    The Evaluations page header is **not** a trend line. Its subtitle reads *"N completed runs · N in last 7 days · X% avg pass rate · last 7 days"* — the run count is all-time, but the average is scoped to the last seven days, and the segment disappears entirely when no run completed inside that window. Read drift by scanning down the version labels and their pass rates in the table, not from the header average.
+    The Evaluations page header is **not** a trend line. Its subtitle reads *"N completed runs · N in last 7 days · X% avg pass rate · last 7 days"*, and every segment of it is computed in the browser over the runs the page has already loaded — the most recent 100 — counting only the completed ones. The average narrows further, to runs that completed inside the last seven days, and its segment disappears entirely when none did. Read drift by scanning down the version labels and their pass rates in the table, not from the header average.
     </Warning>
 
     Note that the decision itself lives with your team: Trust AI doesn't have a promote-to-production action or a notes field on Agent Versions today, so record the rationale in your deploy process, linking the two runs.
