@@ -1,34 +1,40 @@
 ---
 title: "Glossary"
 icon: "book-marked"
-description: "Trust AI domain terms, with core-entity icons matching the app's navigation."
+description: "Trust AI domain terms — what each one means, and the page that owns it."
 ---
 
-The vocabulary of Trust AI. Core-entity icons match the Trust AI app's navigation, so the concept you read about here is the same concept you'll click on in product. Cards link through to dedicated concept pages where they exist.
+The vocabulary of Trust AI. Each entry is short on purpose: it fixes the term and points at the page that owns it. Where a term names something with its own row in the project sidebar — **Sessions**, **Scenarios**, **Evaluators**, **Evaluations**, **Playground** — the card carries the icon you'll click on in product; the rest are chosen for reading, not for matching the app.
 
 ## Core entities
 
 <CardGroup cols={2}>
   <Card title="Project" icon="sliders-horizontal" href="/concepts/projects">
-    The top-level workspace container. Owns members, runtime connection config (AgentCore, Salesforce Agentforce, and similar), and every Session, Scenario, Evaluator, Evaluation, and Agent Version under it.
+    The top-level workspace container. Owns members, runtime connection config (AWS Bedrock AgentCore, Salesforce Agentforce, Claude Managed Agent, Conversational HTTP), and every Session, Scenario, Evaluator, Evaluation, and Agent Version under it. Every surface in the product is project-scoped.
   </Card>
   <Card title="Session" icon="database" href="/concepts/sessions">
     One conversation between a user and an agent — a sequence of Turns and Tool Calls. Sessions arrive from three places, shown as a [Source](#session-internals) chip: synced from your connected runtime, run in the Playground, or simulated from a Scenario. Each carries a readable id (`SES-` for synced sessions, `RUN-` for sessions created in-product) and is a first-class evaluation target in its own right.
   </Card>
   <Card title="Annotation" icon="tag" href="/concepts/annotations">
-    A human-authored signal recorded on a Session through typed annotation columns. Every project starts with three — **Verdict** (pass/fail), **Severity** (minor / major / blocker), and **Reviewer note** — and you can add your own (pass/fail, 1–5 score, category, tags, or comment). The human Verdict is the ground truth that grades your automated judges: it feeds [evaluator accuracy](#running-and-scoring-evaluations) and never overrides the automated verdict.
+    A human-authored signal recorded on a Session through typed annotation columns. Every project starts with three — **Verdict** (pass/fail), **Severity** (minor / major / blocker), and **Reviewer note** — and you can add your own (pass/fail, 1–5 score, category, tags, or comment). On the Verdict column the human judgment is the ground truth that grades your automated judges: it feeds [evaluator accuracy](#running-and-scoring-evaluations) and never overrides the automated verdict.
   </Card>
   <Card title="Scenario" icon="flask-conical" href="/concepts/scenarios">
-    A first-class test case — name, goal, personas, expected output, and linked sessions — with a stable id like `SCN-000022`. Every project keeps one flat **Scenarios** list; there are no scenario sets to manage. Curate scenarios from real Sessions, save them from the Playground, or adopt starter safety scenarios from the [Trust Library](#running-and-scoring-evaluations). The API serves scenarios at `/v1/scenarios`, with the legacy `/v1/datasets` naming still on the wire underneath — see the API note on the [Scenarios](/concepts/scenarios) concept page for the mapping.
+    A first-class test case — name, goal, personas, expected output, and linked sessions — with a stable id like `SCN-000022`. Every project keeps one flat **Scenarios** list; there are no scenario sets to manage. Curate scenarios from real Sessions, save them from the Playground, or adopt starter safety scenarios from the [Trust Library](#running-and-scoring-evaluations). `/v1/scenarios` is the whole API surface — a scenario belongs directly to its project, with no container above it.
   </Card>
   <Card title="Evaluator" icon="ruler" href="/concepts/evaluators">
-    A reusable judgment function that measures a session against your criteria — an **LLM Judge** (a no-code rubric of "Passes when… / Fails when…" rules, or fixed anchors for a 1–5 scale) or a **Structured Match** (a deterministic **Routing match** or **Tool match** check on what the agent actually did).
+    A reusable judgment function that measures a session against your criteria. Two kinds are creatable today: an **LLM judge** (a no-code rubric of "Passes when… / Fails when…" rules, or fixed anchors for a 1–5 scale) and a **[Groundedness judge](#judging-against-source-material)**. Kind names are sentence case throughout.
+  </Card>
+  <Card title="Structured match" icon="check-square" href="/concepts/evaluators">
+    The deterministic **Routing match** / **Tool match** kind. **You no longer create one** — structural expectations are authored on a scenario's [Expected Output](#scenarios-and-simulation) instead, where they belong to the test case being graded. Evaluators created before the change keep working, stay editable, and keep scoring.
   </Card>
   <Card title="Evaluation" icon="chart-line" href="/concepts/evaluations">
     A single run of one or more Evaluators, scoped to a specific Agent Version and launched from the [Evaluation Launcher](#running-and-scoring-evaluations) — against the scenarios you selected (simulated live) or against already-captured Sessions (graded as they are). The output is a scored, reviewable result per persona per scenario, or per session.
   </Card>
   <Card title="Agent Version" icon="git-branch" href="/concepts/agent-versions">
     A pinned, immutable snapshot of the agent **under test** — prompt, model, tool set, deployment. Comparing two Agent Versions on the same scenarios under the same Evaluators is the core regression-testing loop. Not to be confused with the [Trust Agent](#the-trust-agent), which is your assistant inside Trust AI.
+  </Card>
+  <Card title="Agent Profile" icon="id-card" href="/concepts/agent-profile">
+    A versioned, human-reviewable record of what one Agent Version could actually do — its identity, the tools it exposes, and the knowledge sources it draws on, captured at a moment in time. A profile *describes* a version; it is never itself a version. Its versioned unit is the **profile revision**, and review is per-revision: approving one approves the exact revision you read.
   </Card>
 </CardGroup>
 
@@ -39,7 +45,7 @@ The vocabulary of Trust AI. Core-entity icons match the Trust AI app's navigatio
     One message exchange inside a Session — the user message and the agent's response. The smallest unit an Evaluator can score.
   </Card>
   <Card title="Tool Call" icon="terminal">
-    An invocation of an agent tool inside a Turn — function name, arguments, and the returned value. Structured Match Evaluators commonly assert on these.
+    An invocation of an agent tool inside a Turn — function name, arguments, and the returned value. A scenario's **Expected actions** assert on these.
   </Card>
   <Card title="Source" icon="signpost">
     Where a session came from — exactly one of **Scenario** (created by simulating or generating from a scenario), **Playground** (a Playground conversation not saved as a scenario), or **External** (synced from your connected agent runtime). Every session shows its source as a chip on the Sessions list, and scenario-born sessions add a **Simulated from** provenance card.
@@ -56,7 +62,10 @@ The in-app assistant that does evaluation work alongside you. Everything in this
 
 <CardGroup cols={2}>
   <Card title="Trust Agent" icon="sparkles" href="/concepts/trust-agent">
-    The in-app AI assistant that helps you do evaluation work. It lives at `/projects/:id/agent`, streams its reasoning and replies in the open, surfaces real records you can click into, and pauses for your approval before it writes. Available by default on every project, with no feature flag required.
+    The in-app AI assistant that helps you do evaluation work. It lives at `/projects/:id/agent`, streams its reasoning and replies in the open, surfaces real records you can click into, and asks before it writes. Available by default on every project, with no feature flag required.
+  </Card>
+  <Card title="Ask, Plan, Act" icon="messages-square" href="/concepts/trust-agent">
+    The three modes on the composer's toggle. **Ask** clarifies real ambiguity first, then asks before each write. **Plan** researches and proposes a task list to confirm — it performs no writes at all. **Act** plans and executes end to end without the optional back-and-forth. Act does **not** skip approvals: every mutating write still stops for you unless a standing approval covers it. (The Playground's **Chat / Simulate** toggle is a different control.)
   </Card>
   <Card title="Shell" icon="layout-panel-left" href="/concepts/trust-agent">
     One of the three forms the Trust Agent takes from a single instance — **full page**, **docked panel**, or **collapsed pill** — with your conversation state preserved as you switch between them. When a project has no active agent task, the Trust Agent resolves to the minimized pill.
@@ -65,16 +74,19 @@ The in-app assistant that does evaluation work alongside you. Everything in this
     The running record of a Trust Agent conversation. Markdown-formatted turns stream token by token with a typing indicator and an accent caret, alongside a collapsible reasoning rail, tool-call cards, and a history-compaction marker. Transcripts are persisted, so reopening a chat shows its real prior history.
   </Card>
   <Card title="Side rail" icon="panel-right-open" href="/concepts/trust-agent">
-    The Trust Agent's contextual panel, in four sections: **Progress** (the live plan and step counts), **Context** (referenced entities), **Outputs** (per-entity rows of what the agent created, updated, or ran, each deep-linking to a real record fly-in), and **Attachments** (files on the task). The rail stays up for the whole conversation; each section hides itself when it has nothing to show.
+    The Trust Agent's contextual panel, in four sections: **Progress** (the live plan and step counts), **Context** (referenced entities, led by a **Connected agent** card and its health chip), **Outputs** (per-entity rows of what the agent created, updated, or ran, each deep-linking to a real record fly-in), and **Attachments** (files on the task). The rail stays up for the whole conversation; each section hides itself when it has nothing to show.
   </Card>
-  <Card title="HITL approval" icon="hand" href="/concepts/trust-agent">
-    A human-in-the-loop approval — an interrupt card that replaces the composer and pauses the agent run until you decide. **Permission cards** gate writes; **single-** and **multi-question cards** gather clarification. Approving a write executes it on the real run path, and the resolved decision is recorded in the transcript as an audit trail.
+  <Card title="HITL approval" icon="hand" href="/how-to/approve-agent-writes">
+    A human-in-the-loop decision the agent surfaces as a card that replaces the composer and **halts the run** until you answer. **Permission cards** gate writes; **single-** and **multi-question cards** gather clarification. Approving a write executes it on the real run path, and the resolved decision is recorded in the transcript as an audit trail.
+  </Card>
+  <Card title="Standing approval" icon="shield-check" href="/how-to/approve-agent-writes">
+    The durable, chat-wide version of a write approval, granted from a card's for-this-chat option. From then on the same **kind** of write commits with **no card at all** — you see the result, not a request. A chip in the composer shows the grant while it is live, and its **turn off** control takes it back. Deletes never offer it.
   </Card>
   <Card title="Write preview" icon="file-diff" href="/concepts/trust-agent">
     The rich preview on a permission card that shows a proposed write before you approve it — the **diff**, the **dependencies**, and the **proposed end state** — not a bare ID you'd have to trust blindly. Pairs with the [Approve agent writes](/how-to/approve-agent-writes) guide.
   </Card>
-  <Card title="Skill" icon="puzzle" href="/concepts/trust-agent">
-    A reusable capability the Trust Agent can invoke — for example, drafting an LLM Judge rubric or summarizing Sessions that match a filter. Skills are first-class: a registry backs the composer's **/** palette, and a skills editor lets you create, edit, and delete them.
+  <Card title="Skill" icon="puzzle" href="/how-to/manage-trust-agent-skills">
+    A reusable recipe the Trust Agent can invoke — for example, drafting an LLM judge rubric or summarizing Sessions that match a filter. **Built-in skills** ship with the product and are read-only; **workspace skills** are the ones your team writes. Both are workspace-scoped, both back the composer's **/** palette, and a transcript receipt reads **Reviewed *&lt;skill name&gt;***.
   </Card>
   <Card title="Task" icon="list-checks" href="/concepts/trust-agent">
     A unit of work the Trust Agent plans and executes by composing Skills — how the assistant gets things done without you leaving the product. Each conversation is backed by a task, and recent chats live on the project's canonical task list.
@@ -93,13 +105,30 @@ A **scenario** — one goal-driven test case — is defined under [Core entities
     The objective the synthetic user is trying to accomplish in a scenario or simulation. A non-empty goal is what makes a scenario simulatable: personas shape who the simulated user is, but a goal-only scenario still simulates when you run it in an evaluation.
   </Card>
   <Card title="Expected Output" icon="clipboard-check" href="/concepts/scenarios">
-    A scenario's grading contract, edited on the **Expected Output** tab of its fly-in: **Expected behavior** (the LLM Judge evaluators that score it), **Expected actions** (the tool calls the agent should make), and **Expected routes** (where the conversation should land). You pick options from vocabulary the product learned from your real sessions instead of typing free text.
+    A scenario's grading contract, edited on the **Expected Output** tab of its fly-in, in three sections: **Expected behavior** (the judges that score it), **Expected actions** (tool calls the agent must or must not make), and **Expected routes** (where the conversation should land). Actions and routes are **required** or **disallowed** — there is no third state — and you pick from vocabulary the product learned from your real sessions.
+  </Card>
+  <Card title="Reference material" icon="book-open" href="/how-to/check-answers-against-source-material">
+    The source documents a [Groundedness judge](#judging-against-source-material) grades answers against — a policy, an article, the knowledge the agent is meant to stay inside. It attaches **per scenario**, as a subsection nested under Expected behavior, and it appears only once a judge that needs it is attached. A scenario bound to a Groundedness judge with no material attached will not run.
   </Card>
   <Card title="Playground" icon="play" href="/concepts/playground">
     A per-project surface at `/projects/:id/playground` for chatting with and simulating against a connected agent. An agent picker and a **Chat / Simulate** mode toggle: **Chat** is live manual conversation; **Simulate** auto-drives a persona-to-agent conversation from one persona and one goal. **Save as a scenario** turns a conversation you like into a project Scenario, with the conversation attached as its first Session.
   </Card>
   <Card title="Simulation" icon="messages-square" href="/concepts/playground">
     An automated persona-to-agent conversation. The same primitive powers the Playground's **Simulate** mode and every scenario-sourced evaluation — running scenarios always simulates a fresh conversation per scenario. The captured transcript is saved as a real scenario-linked Session and renders in the [evaluation](/concepts/evaluations) result detail fly-in.
+  </Card>
+</CardGroup>
+
+## Judging against source material
+
+<CardGroup cols={2}>
+  <Card title="Groundedness judge" icon="file-check" href="/concepts/evaluators">
+    The evaluator kind that checks every factual claim in a reply against the scenario's [Reference material](#scenarios-and-simulation), catching hallucinated and contradicted answers with quoted evidence. It never penalises leaving something out, and it never judges tone or style — use an LLM judge for those. Its metric chip reads **N% grounded**.
+  </Card>
+  <Card title="Groundedness report" icon="search" href="/how-to/check-answers-against-source-material">
+    What a Groundedness check returns: every claim the reply made, the plain-language reasoning behind each verdict, and the verified source quote. A reviewer can **adjudicate** an individual claim — overriding its verdict with a note — and the score recomputes. This is the one place a human judgment changes an automated result.
+  </Card>
+  <Card title="Needs review" icon="triangle-alert" href="/concepts/evaluators">
+    The amber third verdict on a single check, used when the grade can't be trusted as-is rather than guessing — an unverifiable claim, a truncated response. It is recorded and shown, and it is **excluded from pass/fail gating**: it can never quietly become a pass or read as a red fail. Adjudicating the claim behind it returns the check to the gate.
   </Card>
 </CardGroup>
 
@@ -115,14 +144,17 @@ A **scenario** — one goal-driven test case — is defined under [Core entities
   <Card title="Evaluator accuracy" icon="gauge" href="/concepts/evaluations">
     How often your automated judges agreed with a person's session-level **Verdict** annotation. Run detail leads with two numbers: **Pass rate** grades the agent; evaluator accuracy grades the judges. A human verdict is the ground truth here — it never overrides the automated verdict.
   </Card>
-  <Card title="Pass^K" icon="repeat" href="/concepts/evaluations">
-    The reliability headline on a run whose test cases were attempted more than once: the share of test cases the agent passed on every repeat, so a flaky agent that passes once but fails on retry can't hide behind a single lucky run. The launcher currently runs each case once; Pass^K renders where repeated-trial runs exist.
+  <Card title="Repeat each test case" icon="repeat" href="/concepts/evaluations">
+    The launcher control that runs every test case more than once — **1**, **2**, **3**, or **4** — to measure how reliably the agent passes rather than whether it passed once. It shows on a graded run that mints a run record; a one-off grade and a simulate-only run have nothing to repeat, so they don't offer it. Repeats read as **Trial 1**, **Trial 2**, and so on under their scenario.
+  </Card>
+  <Card title="Pass^K" icon="refresh-cw" href="/concepts/evaluations">
+    The reliability headline on a run whose cases were repeated: the share of cases the agent passed on **every** repeat, so an agent that passes once and fails on retry can't hide behind a lucky attempt. It replaces the plain pass-rate headline on a repeated run; a single-attempt run doesn't show it.
   </Card>
   <Card title="Calibration" icon="scale" href="/concepts/evaluators">
-    A check of an LLM Judge against scenarios you already marked pass or fail, run from the evaluator's **Calibrate** tab. It uses the exact judge that runs in production, reports a plain-language agreement headline with disagreements listed first, and keeps a calibration history so you can see whether rubric edits helped.
+    A check of an LLM judge against scenarios you already marked pass or fail, run from the evaluator's **Calibrate** tab. It uses the exact judge that runs in production, reports a plain-language agreement headline with disagreements listed first, and keeps a calibration history so you can see whether rubric edits helped. The tab is offered for LLM judges and withheld everywhere else.
   </Card>
   <Card title="Trust Library" icon="library" href="/concepts/evaluators">
-    The curated starter catalog, so a new project never begins from a blank slate: 12 recommended evaluators (grouped Quality and Safety) and 10 starter safety scenarios mapped to the OWASP Agentic AI Top 10, adopted through **Add recommended evaluators** and **Add recommended scenarios**. Adopted items become ordinary, fully editable records that keep a **Recommended** provenance chip, and **Tailor with AI** drafts grading rules for your agent from a one-sentence description when you create an evaluator.
+    The curated starter catalog, so a new project never begins from a blank slate: **11 recommended evaluators** — five **Quality** and six **Safety**, all LLM judges, nine scored pass/fail and two on a 1–5 scale — and 10 starter safety scenarios mapped to the OWASP Agentic AI Top 10. Adopt them with **Add recommended** and **Add recommended scenarios**. Adopted items are ordinary, fully editable records that keep a **Recommended** provenance chip.
   </Card>
 </CardGroup>
 
@@ -138,16 +170,16 @@ A **scenario** — one goal-driven test case — is defined under [Core entities
 
 <CardGroup cols={2}>
   <Card title="Saved View" icon="bookmark" href="/concepts/saved-views">
-    A named, persisted combination of filters, sort order, and column configuration for a list surface. Views can be saved per user and shared with the team.
+    A named, persisted combination of filters, sort order, and column configuration for a list surface. **Every saved view belongs to the project, not to you**: anyone on the project sees all of them, and anyone who can edit project content can rename, reconfigure, or delete any of them. The only per-person part is which view opens by default for you. Name views accordingly.
   </Card>
   <Card title="Fly-in panel" icon="panel-right" href="/concepts/tables-and-panels">
     A slide-out detail panel that opens from the right when you click a record in Sessions, Scenarios, Evaluators, or Evaluations. Shows the full transcript, metadata, and contextual actions without leaving the list. On Scenarios it stacks two levels: the scenario panel (tabs **Personas & Goals**, **Expected Output**, and **Sessions**), with a nested session-detail panel over it for one linked session. **J**/**K** step between records; **Esc** closes the top panel first.
   </Card>
   <Card title="Verdict pill" icon="badge-check" href="/concepts/tables-and-panels">
-    A three-state badge on results and sessions: **pass** (green), **fail** (red), or a neutral **Not evaluated** — never blank. Judge or infrastructure failures render as a neutral environment problem that is excluded from the score, never as a red fail.
+    The badge on results and sessions, never blank. A green **pass** leg, a red **fail** leg, and a neutral leg carrying **two different labels**: **Not evaluated** (nothing ran) and **Not graded** (something ran but produced no behavioural score). The two are not interchangeable. A judge or infrastructure failure renders neutral and is excluded from the score, never as a red fail; while a run is scoring, the pill shows **Scoring…**.
   </Card>
-  <Card title="Results matrix" icon="grid-3x3">
-    The grid view on a run's detail page. Columns are the run's pinned evaluators; rows are scored conversations — one result per attached persona per scenario, plus session-graded results. Each cell is a verdict pill, beneath the run's dual **Pass rate** and **Evaluator accuracy** headline.
+  <Card title="Results matrix" icon="grid-3x3" href="/concepts/evaluations">
+    The grid on a run's detail page. Two pinned columns lead and cannot be hidden — **Transcript** (the conversation preview) and **Final verdict** (the row's overall result) — followed by one column per evaluator the run pinned. Rows are scored conversations: one per attached persona per scenario, plus session-graded results. Results default to a **By scenario** grouping that expands to each repeat; **Flat** lists every result on its own row.
   </Card>
 </CardGroup>
 
@@ -155,6 +187,6 @@ A **scenario** — one goal-driven test case — is defined under [Core entities
 
 <CardGroup cols={2}>
   <Card title="MCP Server" icon="cable" href="/concepts/mcp-integration">
-    The Model Context Protocol endpoint that exposes a curated subset of the Trust Agent's tools — today the tool layer behind the in-product Trust Agent, reached through your authenticated Trust AI session. Standalone external clients (Claude Desktop, Cursor, IDEs) are on the roadmap pending OAuth; write operations require approval.
+    The Model Context Protocol endpoint that republishes a small, fixed allowlist of the Trust Agent's tools, authenticated on your signed-in Trust AI session. **Connecting your own MCP client is not yet supported** — there is no configuration screen, and no credential Trust AI issues you to hold. A supported path would need issued, revocable MCP tokens; no OAuth work is planned. Use the [Trust Agent](/concepts/trust-agent) instead — MCP republishes its tools, it does not add any.
   </Card>
 </CardGroup>
