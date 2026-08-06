@@ -1,0 +1,248 @@
+---
+title: "Connect a Conversational HTTP agent"
+icon: "plug"
+description: "Connect any agent that accepts AG-UI run requests and streams AG-UI events over SSE — the contract your endpoint must implement, the connection form, and what Trust AI does with it."
+---
+
+This how-to connects a **Conversational HTTP agent** — any agent you host yourself that speaks the AG-UI wire protocol over HTTP — to a Trust AI [Project](/concepts/projects). It is the connector for an agent that isn't on a named vendor platform: your own service, a framework runtime, an internal gateway.
+
+When you're done:
+
+- The agent is registered as an [Agent Version](/concepts/agent-versions) you can pick when you launch an Evaluation
+- Trust AI can drive conversations against it from the [Playground](/concepts/playground), and each one is a conversation you can save and reuse
+- Trust AI can capture an [Agent Profile](/concepts/agent-profile) for it — the identity, tool catalog, and knowledge sources your agent publishes
+
+This is the one connector where **you may control the agent on the other end**. So this page states the contract precisely enough to build against, before it walks the form.
+
+<Note>
+  Two different "agents" meet on this page. The **Conversational HTTP agent** you're connecting is *your* agent — the one under test, tracked as an [Agent Version](/concepts/agent-versions). The **Trust Agent** is the in-app assistant that helps you do the connecting. They share a word and nothing else.
+</Note>
+
+## Where the Trust Agent helps, and where it doesn't
+
+Connecting an agent is normally a task you hand to the Trust Agent. For this platform its help stops short of the form. Ask it *"Connect my agent"* and it will check what's already connected, ask which platform yours runs on, and — for anything other than a Claude-managed or Salesforce Agentforce agent — point you at the connection form in Project Settings and wait while you fill it in. There is no in-chat setup card for a Conversational HTTP agent.
+
+It is still worth asking afterwards. *"Which agent version is connected now?"* is the quickest confirmation that the connection took.
+
+## What your agent must implement
+
+Trust AI is a **client** of your agent. It never deploys, reconfigures, or hosts anything — it makes outbound HTTP calls to endpoints you already run. Your agent runs its own tools; Trust AI observes and records.
+
+Three endpoints matter, all relative to the **Agent base URL** you'll enter on the form:
+
+| Endpoint | Method | Path | Used for |
+|---|---|---|---|
+| Run | `POST` | the **Run endpoint** you configure (default `/agui/run`) | Every conversation turn |
+| Health | `GET` | the **Health endpoint** you configure (default `/health`) | **Test Connection** |
+| Capabilities | `GET` | `/agui/capabilities` — **fixed, not configurable** | [Agent Profile](/concepts/agent-profile) capture |
+
+<Warning>
+  The capabilities path is **not** derived from the Run endpoint field. Whatever you set as the Run endpoint, profile capture always reads `/agui/capabilities` under the base URL. An agent that serves runs but not that path connects and converses normally — it just can't be profiled.
+</Warning>
+
+### The run endpoint
+
+Trust AI posts one AG-UI `RunAgentInput` document per turn and reads back a Server-Sent Events stream.
+
+The request body carries the conversation so far, plus a small fixed frame:
+
+```json
+{
+  "threadId": "05213e84-7037-4dfa-a375-415156a3f8a8",
+  "runId": "ee86b932-4cee-416a-a312-440c9c11908c",
+  "messages": [
+    { "id": "user-3a7ce00d", "role": "user", "content": "Please refund order 123." }
+  ],
+  "tools": [{ "name": "request_permission", "parameters": { "…": "…" } }],
+  "context": [],
+  "state": {},
+  "forwardedProps": { "mode": "act" }
+}
+```
+
+- **`threadId`** is stable for the life of one conversation, so your agent can keep its own thread state. Trust AI mints it on the first turn and replays it afterwards.
+- **`messages`** is the full history Trust AI holds, ending with the new user turn. A persona's system prompt, when a simulation supplies one, is prepended as a `system` message.
+- **`tools`** always advertises one front-end tool, `request_permission`. See [Approvals](#approvals-and-request-permission) below.
+- **`forwardedProps.mode`** carries the **Agent mode** you pick on the form.
+
+The response must be `text/event-stream` with standard `data: {json}` frames — one JSON object per event, blank-line separated. Lines beginning with `:` are treated as keep-alives and ignored. A frame whose payload isn't valid JSON ends the run with *"The HTTP agent returned a malformed SSE event."*
+
+### The events Trust AI reads
+
+Emit AG-UI events. Trust AI projects these onto its own taxonomy and ignores the rest:
+
+| Event | What Trust AI does with it |
+|---|---|
+| `TEXT_MESSAGE_CONTENT` | Appends `delta` to the visible reply |
+| `REASONING_MESSAGE_CONTENT` / `REASONING_MESSAGE_END` | Records reasoning separately from the reply |
+| `TOOL_CALL_START` / `TOOL_CALL_ARGS` / `TOOL_CALL_END` | Records a tool call, assembling streamed arguments |
+| `TOOL_CALL_RESULT` | Records the tool's result against that call |
+| `CUSTOM` named `route_decision` or `routed_to` | Records the turn's routing target |
+| `RUN_ERROR` | Ends the run and records the message |
+| `RUN_FINISHED` | **Terminates the turn.** Required |
+
+`RUN_FINISHED` is not optional. A stream that simply stops fails the turn with *"The HTTP agent stream ended before RUN_FINISHED."*
+
+### Approvals and `request_permission`
+
+Trust AI advertises a `request_permission` tool on every run. If your agent calls it and the run finishes without a result for that call, Trust AI holds the turn open as an approval gate rather than treating it as a completed reply. Resolving the gate sends a `role: "tool"` result message on the next run against the same `threadId`, so your agent can resume the same thread.
+
+You don't have to use it. An agent that never calls `request_permission` simply never raises a gate. See [Approve agent writes](/how-to/approve-agent-writes) for the reviewer's side of that flow.
+
+### The capabilities endpoint
+
+`GET /agui/capabilities` returns one JSON manifest describing what your agent can do. Everything in it is optional — each block that's missing is recorded as an honest gap rather than a failure:
+
+```json
+{
+  "agent": { "name": "Refunds assistant", "description": "…", "version": "0.1.0" },
+  "tools": [
+    {
+      "name": "issue_refund",
+      "actor": "agent",
+      "description": "Issue a refund for an order.",
+      "parameters": { "type": "object", "properties": { "order_id": { "type": "string" } } }
+    }
+  ],
+  "prompts": { "supported": true, "items": [{ "name": "system", "content": "…" }] },
+  "sources": { "supported": true, "items": [{ "name": "Refund policy", "kind": "knowledge_base" }] }
+}
+```
+
+A tool's `parameters` schema is stored byte-for-byte alongside the profile revision, so a schema you read in a review next week is the one that was captured — your agent is never re-contacted to render a profile.
+
+## Prerequisites
+
+- A **Trust AI Project**. If you don't have one, start with [Your first 10 minutes in Trust AI](/tutorials/quickstart).
+- Your agent's **base URL**, reachable from Trust AI. It must be an absolute `http://` or `https://` URL with no query string, no fragment, and no embedded credentials — Trust AI rejects anything else with *"Base URL must be an absolute HTTP or HTTPS URL"*.
+- The **run** and **health** paths, if they differ from the defaults. Both must start with `/`.
+- A **bearer token**, if your agent requires one.
+
+## Connect the agent
+
+<Steps>
+  <Step title="Open the connection form">
+    In your Project, open **Project Settings**, select the **Connection** tab, and click **Add connection**.
+
+    The **Add a connection** picker shows four platform cards: **AWS Bedrock AgentCore**, **Salesforce Agentforce**, **Claude Managed Agent**, and — fourth — **Conversational HTTP agent**. Choose the last one.
+
+    {/* capture-needed: the Add-a-connection picker, all four platform cards */}
+
+    **You should see:** the connection form, headed **Conversational HTTP agent**, with the platform's one-line description under it: *"Connect any agent that accepts AG-UI run requests and streams AG-UI events over SSE."*
+  </Step>
+
+  <Step title="Fill in the connection">
+    Give the connection a **Connection Name** you'll recognize later — it becomes the label of the Agent Version, so "Refunds agent (staging)" beats "HTTP 1".
+
+    Then the platform fields:
+
+    | Field | Notes |
+    |---|---|
+    | **Agent base URL** | Required. Absolute `http://` or `https://`. |
+    | **Run endpoint** | Pre-filled `/agui/run`. |
+    | **Health endpoint** | Pre-filled `/health`. |
+    | **Sign-in method** | **No authentication** (the default) or **Bearer token**. |
+    | **Bearer token** | Appears only once you choose **Bearer token**. |
+    | **Agent mode** | **Act** (the default), **Plan**, or **Ask**. |
+
+    {/* capture-needed: the Conversational HTTP agent connection form, Sign-in method set to Bearer token */}
+
+    <Note>
+      **Agent mode is not the Trust Agent's mode.** The Trust Agent's own **Ask / Plan / Act** modes govern the in-app assistant. This field is a value Trust AI forwards to *your* agent as `forwardedProps.mode` on every run, and Trust AI does not interpret it. If your agent ignores `forwardedProps`, the setting has no effect.
+    </Note>
+
+    <Warning>
+      The form also shows a **Remote project (optional)** box. **Leave it blank.** It is not part of the saved connection — a value typed here is dropped when you save, and nothing is forwarded to your agent. Reopening the connection shows it empty again.
+    </Warning>
+  </Step>
+
+  <Step title="Test the connection">
+    Click **Test Connection**. Trust AI makes one `GET` to your **Health endpoint** under the base URL — with the `Authorization: Bearer …` header attached when the sign-in method is **Bearer token**, and no auth header when it isn't. Nothing is saved by the test, and your run endpoint is not called.
+
+    **You should see:** *"TrustAI reached the conversational agent successfully."*
+
+    The test is optional. It is also the cheapest way to turn a wrong path or an unreachable host into a ten-second fix instead of a failed first conversation.
+  </Step>
+
+  <Step title="Save the connection">
+    Click **Save connection**.
+
+    **You should see:** the new connection listed in the Connection tab, showing its name and **Conversational HTTP agent**, with **Edit** to reopen the form.
+
+    Saving also registers the agent as an Agent Version labeled with your connection name — that's what you pick in the evaluation launcher.
+  </Step>
+
+  <Step title="Confirm it end to end">
+    Open the **Playground**. The header names the connection you just saved, and **Chat** sends a real turn to your run endpoint; your agent's reply streams back into the transcript. The shipped copy sums it up: *"Send a message, or switch to Simulate to auto-play a persona — then save the conversation as a scenario."*
+
+    Connections and Agent Versions are also readable on the wire; request and response shapes live in the [API Reference](/api-reference).
+  </Step>
+</Steps>
+
+## Sign-in and the bearer token
+
+**Sign-in method** offers exactly two choices.
+
+- **No authentication** — the default. Trust AI sends no `Authorization` header on runs, health checks, or capability reads. Use it only where the network already restricts who can reach the agent.
+- **Bearer token** — reveals a **Bearer token** field. Trust AI sends `Authorization: Bearer <token>` on every call it makes to your agent: runs, health checks, and capability reads alike. Choosing this without entering a token is rejected.
+
+The token is **write-only**. On a new connection the help text reads *"Entered once and stored securely — it is never shown back."* Once saved, reopening the connection shows a **Configured** status pill, the placeholder `•••• configured — leave blank to keep existing`, and *"A value is already saved and is never shown. Leave blank to keep it, or type a new value to replace it."*
+
+That means editing a connection never requires you to re-enter the token. Save with the field blank and the stored token is kept; type a new value only when you're rotating it.
+
+## Capture an Agent Profile
+
+Conversational HTTP is one of three platforms whose capability discovery is implemented — alongside **Claude Managed Agent** and **Salesforce Agentforce**. (AWS Bedrock AgentCore is not: it reports *"Agent profiling isn't available for this connection yet."*)
+
+On the connection card, the **Current agent version** row opens the profile fly-in. With no profile yet it reads *"No profile has been generated for this agent build yet."* — click **Generate profile**.
+
+Capture reads `/agui/capabilities` once and builds an immutable **profile revision** from what it finds. A profile built from the manifest above renders:
+
+- The agent's **name**, **description**, and **version** as its identity
+- The **Tools** tab, one entry per published tool, each with the exact schema bytes it advertised
+- The **Sources** tab, one entry per published prompt and knowledge source
+- **Discovery coverage** per area — **Captured** where the manifest published a block, **Partial** where it published some of one
+
+The row's pill then reads **Profile available**, and the fly-in header reads **Version-pinned profile**. Reviewing is per-revision: **Approve** or **Request changes**. See [Agent Profile](/concepts/agent-profile) for what a revision is and why review doesn't carry forward.
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Test Connection says it could not reach the agent health endpoint">
+    *"TrustAI could not reach the agent health endpoint. Check the URL and network access, then retry."* means the request never got an HTTP response — wrong host, wrong port, or a network path that doesn't exist from Trust AI's side. Confirm the base URL resolves and is reachable **from Trust AI**, not just from your laptop: a `localhost` URL points at Trust AI's own runtime, not yours.
+  </Accordion>
+
+  <Accordion title="Test Connection reports a status code">
+    *"The agent health endpoint returned status 404."* means your agent answered, but the health path is wrong or unprotected paths are being rejected. The probe follows no redirects and needs a success status. Check the **Health endpoint** value against what your service actually serves, and — if the sign-in method is **Bearer token** — that your health route accepts the same token your run route does.
+  </Accordion>
+
+  <Accordion title="Test Connection passes but conversations fail">
+    The health probe only proves the host is reachable. Runs exercise a different path, and each failure names itself:
+
+    | Message | Cause |
+    |---|---|
+    | *"The HTTP agent returned status N."* | The run endpoint answered non-2xx |
+    | *"The HTTP agent is unreachable …"* | The run request never got a response |
+    | *"The HTTP agent returned a malformed SSE event."* | A `data:` frame wasn't valid JSON |
+    | *"The HTTP agent stream ended before RUN_FINISHED."* | The stream closed without the terminating event |
+
+    The last one is the common first-integration mistake: emit `RUN_FINISHED`.
+  </Accordion>
+
+  <Accordion title="The profile says it isn't available, or captures nothing">
+    Profile capture reads `/agui/capabilities` under the base URL — a fixed path the **Run endpoint** field does not control. If that route 404s, or returns something that isn't a JSON object, capture fails while ordinary conversations keep working. Serve the manifest at that exact path, then use **Generate profile** again.
+  </Accordion>
+
+  <Accordion title="The saved connection card shows a masked 'Secret Access Key'">
+    That summary card is shared with the AWS connectors and mislabels the Conversational HTTP secret. It does not mean an AWS key was stored — your bearer token is what's masked there. Click **Edit** to see the connection's real values; the token itself is never shown back on any surface.
+  </Accordion>
+</AccordionGroup>
+
+## Related reading
+
+- **[Projects](/concepts/projects)** — the Project that owns the connection
+- **[Agent Versions](/concepts/agent-versions)** — how the connected agent is tracked
+- **[Agent Profile](/concepts/agent-profile)** — what capture records, and how review works
+- **[Playground](/concepts/playground)** — driving the agent by hand, and simulating personas
+- **[Approve agent writes](/how-to/approve-agent-writes)** — the reviewer's side of an approval gate
+- **[Connect a Claude Managed Agent](/how-to/connect-claude-managed-agent)** · **[Connect an AWS Bedrock AgentCore agent](/how-to/connect-agentcore)** · **[Connect a Salesforce Agentforce agent](/how-to/connect-agentforce)** — the other three platforms in the picker
