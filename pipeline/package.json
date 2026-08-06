@@ -2,11 +2,11 @@
   "name": "provar-demo-pipeline",
   "version": "0.1.0",
   "private": true,
-  "description": "Remotion compositor pipeline: raw Playwright recordings + timeline JSON → polished demo GIFs/MP4s",
+  "description": "Remotion compositor pipeline: raw Playwright recordings + timeline JSON \u2192 polished demo GIFs/MP4s",
   "scripts": {
-    "preview": "npx remotion studio src/Root.tsx",
-    "render": "npx remotion render src/Root.tsx DemoComposition out/demo.mp4",
-    "render:gif": "npx remotion render src/Root.tsx DemoComposition out/demo.mp4 && ffmpeg -i out/demo.mp4 -vf \"fps=15,scale=1200:-1\" -loop 0 out/demo.gif"
+    "preview": "npx remotion studio src/index.ts",
+    "render": "npx remotion render src/index.ts DemoComposition",
+    "render:gif": "echo 'GIF export needs ffmpeg on PATH. Render an mp4 first, then: ffmpeg -i out/<name>.mp4 -vf \"fps=15,scale=1200:-1\" -loop 0 out/<name>.gif'"
   },
   "dependencies": {
     "react": "^18.3.1",

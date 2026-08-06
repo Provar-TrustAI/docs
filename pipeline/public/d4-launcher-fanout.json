@@ -1,0 +1,18 @@
+{
+  "title": "Evaluation launcher fan-out",
+  "description": "Open the launcher, set Repeat each test case, watch the fan-out count respond, commit",
+  "_ticket": "DEV-6219",
+  "_blocksPage": "concepts/evaluations.mdx",
+  "_status": "STUB — record the .webm first (see captures/demos/), then fill beats from the real recording",
+  "viewportWidth": 1280,
+  "viewportHeight": 800,
+  "totalDurationMs": 12000,
+  "videoFile": "d4-launcher-fanout.webm",
+  "beats": [
+    { "timeMs": 0, "action": "navigate", "caption": "TODO — first beat" },
+    { "timeMs": 4000, "action": "click",
+      "elementBounds": { "x": 0, "y": 0, "width": 0, "height": 0 },
+      "caption": "TODO — bounds come from the recording, not guesses" },
+    { "timeMs": 9000, "action": "wait", "caption": "TODO — final state" }
+  ]
+}
