@@ -1,18 +1,235 @@
 {
   "title": "Agent Profile review loop",
-  "description": "Generate, read coverage, drill into a tool schema, correct with the overlay, approve",
+  "description": "Generate a first profile, read the discovery coverage, drill a tool to its recorded schema, correct it with the overlay editor, record Approve, then regenerate and watch the approval reset while the correction survives",
   "_ticket": "DEV-6217",
   "_blocksPage": "how-to/review-an-agent-profile.mdx",
-  "_status": "STUB — record the .webm first (see captures/demos/), then fill beats from the real recording",
   "viewportWidth": 1280,
   "viewportHeight": 800,
-  "totalDurationMs": 12000,
+  "totalDurationMs": 68595,
   "videoFile": "d2-agent-profile-review.webm",
   "beats": [
-    { "timeMs": 0, "action": "navigate", "caption": "TODO — first beat" },
-    { "timeMs": 4000, "action": "click",
-      "elementBounds": { "x": 0, "y": 0, "width": 0, "height": 0 },
-      "caption": "TODO — bounds come from the recording, not guesses" },
-    { "timeMs": 9000, "action": "wait", "caption": "TODO — final state" }
+    {
+      "timeMs": 2987,
+      "action": "navigate",
+      "caption": "The Playground topbar opens the profile of the agent you are talking to"
+    },
+    {
+      "timeMs": 5302,
+      "action": "click",
+      "elementBounds": {
+        "x": 908,
+        "y": 12.5,
+        "width": 28,
+        "height": 28
+      },
+      "caption": "Agent profile"
+    },
+    {
+      "timeMs": 6261,
+      "action": "wait",
+      "caption": "A build nobody has captured says so — absence is a named state, never a blank panel"
+    },
+    {
+      "timeMs": 9172,
+      "action": "click",
+      "elementBounds": {
+        "x": 940.3125,
+        "y": 193.5,
+        "width": 120.375,
+        "height": 30
+      },
+      "caption": "Generate profile"
+    },
+    {
+      "timeMs": 9967,
+      "action": "hover",
+      "elementBounds": {
+        "x": 739,
+        "y": 56,
+        "width": 116.265625,
+        "height": 21.25
+      },
+      "caption": "Profile in progress — the panel follows the capture without a reload",
+      "durationMs": 5200
+    },
+    {
+      "timeMs": 18991,
+      "action": "hover",
+      "elementBounds": {
+        "x": 882.078125,
+        "y": 56,
+        "width": 141.15625,
+        "height": 21.25
+      },
+      "caption": "Capture lands. The header pill reads Version-pinned profile"
+    },
+    {
+      "timeMs": 22415,
+      "action": "hover",
+      "elementBounds": {
+        "x": 739,
+        "y": 413.578125,
+        "width": 523,
+        "height": 235.8125
+      },
+      "caption": "Discovery coverage is one of three words per dimension — never a percentage"
+    },
+    {
+      "timeMs": 25824,
+      "action": "click",
+      "elementBounds": {
+        "x": 820,
+        "y": 90.25,
+        "width": 82.6875,
+        "height": 42.25
+      },
+      "caption": "The Tools tab is the catalog: actor, availability, parameter count"
+    },
+    {
+      "timeMs": 27973,
+      "action": "click",
+      "elementBounds": {
+        "x": 740,
+        "y": 279.5,
+        "width": 521,
+        "height": 54
+      },
+      "caption": "Open a tool for the schema recorded at capture time"
+    },
+    {
+      "timeMs": 29510,
+      "action": "hover",
+      "elementBounds": {
+        "x": 739,
+        "y": 148.5,
+        "width": 523,
+        "height": 426.34375
+      },
+      "caption": "order_id and amount are required; reason accepts three recorded values"
+    },
+    {
+      "timeMs": 32918,
+      "action": "click",
+      "elementBounds": {
+        "x": 1157,
+        "y": 16,
+        "width": 28,
+        "height": 28
+      },
+      "caption": "Capture reports what the platform said. Edit profile is where a person corrects it"
+    },
+    {
+      "timeMs": 34369,
+      "action": "type",
+      "elementBounds": {
+        "x": 377,
+        "y": 498.296875,
+        "width": 443.578125,
+        "height": 32
+      },
+      "caption": "Add a rule in your own words"
+    },
+    {
+      "timeMs": 38095,
+      "action": "click",
+      "elementBounds": {
+        "x": 818.84375,
+        "y": 570.296875,
+        "width": 84.15625,
+        "height": 30
+      },
+      "caption": "Edits belong to the build, so regenerating the profile keeps them"
+    },
+    {
+      "timeMs": 39757,
+      "action": "click",
+      "elementBounds": {
+        "x": 739,
+        "y": 91.125,
+        "width": 79,
+        "height": 40.5
+      },
+      "caption": ""
+    },
+    {
+      "timeMs": 40714,
+      "action": "hover",
+      "elementBounds": {
+        "x": 739,
+        "y": 312.21875,
+        "width": 523,
+        "height": 21
+      },
+      "caption": "Your rule now sits alongside the generated behavioral rules"
+    },
+    {
+      "timeMs": 44540,
+      "action": "click",
+      "elementBounds": {
+        "x": 752,
+        "y": 586.375,
+        "width": 74.546875,
+        "height": 30
+      },
+      "caption": "Approve signs this revision. Request changes is the other verdict"
+    },
+    {
+      "timeMs": 47380,
+      "action": "hover",
+      "elementBounds": {
+        "x": 739,
+        "y": 544.625,
+        "width": 523,
+        "height": 84.75
+      },
+      "caption": "The decision names the reviewer and the moment",
+      "durationMs": 3000
+    },
+    {
+      "timeMs": 50386,
+      "action": "click",
+      "elementBounds": {
+        "x": 1189,
+        "y": 16,
+        "width": 28,
+        "height": 28
+      },
+      "caption": "Refresh profile asks the connector for a fresh capture"
+    },
+    {
+      "timeMs": 51093,
+      "action": "hover",
+      "elementBounds": {
+        "x": 739,
+        "y": 56,
+        "width": 116.265625,
+        "height": 21.25
+      },
+      "caption": "The pill walks the same path again",
+      "durationMs": 3200
+    },
+    {
+      "timeMs": 60643,
+      "action": "hover",
+      "elementBounds": {
+        "x": 739,
+        "y": 312.21875,
+        "width": 523,
+        "height": 21
+      },
+      "caption": "Your rule survived the regeneration — edits belong to the build"
+    },
+    {
+      "timeMs": 64570,
+      "action": "hover",
+      "elementBounds": {
+        "x": 739,
+        "y": 544.625,
+        "width": 523,
+        "height": 84.75
+      },
+      "caption": "The approval did not. A new revision is unreviewed until someone reads it",
+      "durationMs": 3800
+    }
   ]
 }
