@@ -28,11 +28,10 @@ Default target is `http://localhost:3000`. Override the API base with `TRUSTAI_A
 
 ```bash
 pnpm capture:all          # everything
-pnpm capture:sessions     # sessions list + fly-in
+pnpm capture:sessions     # the two annotation surfaces
 pnpm capture:scenarios
 pnpm capture:evaluations
 pnpm capture:evaluators
-pnpm capture:welcome
 pnpm capture:sidebar
 pnpm capture:playground       # needs the stub agent below
 pnpm capture:trust-agent      # slow: drives real agent turns, see below
@@ -137,10 +136,35 @@ silently loses its leftmost column — usually the id a reader needs to orient.
 Hide the columns your fixture has no data for, then assert `scrollLeft === 0`
 before shooting. `scripts/sessions-annotations.ts` does both.
 
+## Never target a row by its index
+
+A row position is not a record. `sessions-annotations.ts` used to click
+`tbody tr` nth(1) because row two carried a verdict on the seed of the day; new
+simulator runs then landed at the top of the date-sorted table, nth(1) became an
+un-annotated row, and the shipped fly-in screenshot was a picture of an empty
+Verdict, an empty Severity and the literal placeholder "Add a note…". The test
+still passed. Resolve the record you mean from the API and locate the row by its
+readable id — and assert the value you came to photograph is actually on screen
+(`expect(note).not.toHaveValue("")`), because no selector in the file will notice
+placeholder grey.
+
+The same rule applies to sort order: if the shot is about annotated rows, assert
+that annotated ids are in the top of the frame, don't assume the default order
+puts them there.
+
 ## Verify by looking
 
 **Open every screenshot before committing it.** Exit code is not evidence — every failure mode
 above produces a passing test and a useless image.
+
+This has now been enforced once as a sweep across every shipped image, which
+found three classes of rot that no capture script can catch on its own: shots
+carrying junk from a shared fixture (chat threads titled "hi" and "hello there"
+in the Recent chats rail — archive them through
+`POST /paddington/projects/:id/tasks/:id/archive` before shooting), shots clipped
+by the right edge of the viewport rather than by the app, and images left in
+`images/` after the page that embedded them was rewritten. Check for the last one
+with a diff of `images/` against every `src="/images/…"` in the `.mdx` files.
 
 ## Fixture quality is per-surface
 

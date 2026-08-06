@@ -44,21 +44,34 @@ import { firstProjectId, gotoSurface, assertTableHasRows, settle } from "../lib/
 const API = process.env.TRUSTAI_API_URL ?? "http://localhost:8000";
 const VIEWPORT = { width: 1440, height: 900 };
 
+/**
+ * The header-menu shot alone is taken wider.
+ *
+ * The Sessions table wants ~1460px of columns and gets ~1094 at 1440, so the
+ * DATE column ran off the right edge and the shipped image ended mid-timestamp
+ * ("Aug 6, 11:4"). Nothing in the frame told the reader that was a fold rather
+ * than the app truncating its own data. 1800 fits every column plus the trailing
+ * Add column affordance, and the assertion below proves it rather than assuming
+ * it — 1600 was tried first and still cut the last header at x=1613.
+ */
+const WIDE_VIEWPORT = { width: 1800, height: 900 };
+
 /** Assert an element is wholly inside the viewport before it is photographed. */
 async function assertFullyVisible(
   locator: import("@playwright/test").Locator,
-  what: string
+  what: string,
+  viewport: { width: number; height: number } = VIEWPORT
 ): Promise<void> {
   const box = await locator.boundingBox();
   if (!box) throw new Error(`${what} has no box — it is not rendered.`);
   const ok =
     box.x >= 0 &&
     box.y >= 0 &&
-    box.x + box.width <= VIEWPORT.width &&
-    box.y + box.height <= VIEWPORT.height;
+    box.x + box.width <= viewport.width &&
+    box.y + box.height <= viewport.height;
   if (!ok) {
     throw new Error(
-      `${what} is clipped by the viewport: ${JSON.stringify(box)} vs ${JSON.stringify(VIEWPORT)}`
+      `${what} is clipped by the viewport: ${JSON.stringify(box)} vs ${JSON.stringify(viewport)}`
     );
   }
 }
@@ -93,7 +106,7 @@ async function scenarioWithMostSessions(projectId: string): Promise<string> {
 const MENU_COLUMN = "Routed To";
 
 test("shared column header menu", async ({ page }) => {
-  await page.setViewportSize(VIEWPORT);
+  await page.setViewportSize(WIDE_VIEWPORT);
   await gotoSurface(page, "sessions", "table");
   await assertTableHasRows(page, 5);
   await settle(page);
@@ -105,14 +118,15 @@ test("shared column header menu", async ({ page }) => {
   });
   await assertFullyVisible(
     page.locator("table thead th").filter({ hasText: "SESSION ID" }).first(),
-    "The SESSION ID header"
+    "The SESSION ID header",
+    WIDE_VIEWPORT
   );
 
   const trigger = page.getByRole("button", {
     name: `Column actions for ${MENU_COLUMN}`,
     exact: true,
   });
-  await assertFullyVisible(trigger, `The "${MENU_COLUMN}" header menu trigger`);
+  await assertFullyVisible(trigger, `The "${MENU_COLUMN}" header menu trigger`, WIDE_VIEWPORT);
 
   // Sort first, then reopen the menu, so the shot also carries the page's
   // claim that the active direction is marked in the menu and the header
@@ -153,7 +167,16 @@ test("shared column header menu", async ({ page }) => {
       `The ${MENU_COLUMN} column menu is missing "${item}" — this is no longer the three-item menu the page describes`
     ).toBeVisible();
   }
-  await assertFullyVisible(menu, "The open column menu");
+  await assertFullyVisible(menu, "The open column menu", WIDE_VIEWPORT);
+
+  // The last column must be whole. A shot that ends on "Aug 6, 11:4" reads as
+  // the product truncating a timestamp, not as a viewport edge — which is the
+  // clipping failure captures/README warns about, arriving from the right.
+  await assertFullyVisible(
+    page.locator("table thead th").last(),
+    "The last column header",
+    WIDE_VIEWPORT
+  );
 
   await settle(page);
   await page.screenshot({ path: "../images/tables-panels-header-menu.png" });
