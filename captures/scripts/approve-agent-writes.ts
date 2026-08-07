@@ -73,9 +73,58 @@ async function waitForCard(
   await settle(page);
 }
 
+/**
+ * Make sure the evaluator this test asks the agent to rename actually exists.
+ *
+ * The fixture is shared and mutating: another capture pass deletes its own
+ * leftover evaluators between runs, and it took 'Tone' with it. The symptom is
+ * confusing rather than obvious — the agent answers in prose or asks a question
+ * instead of raising a write gate, and the failure reads as model flakiness.
+ * Seeding the target makes this test reproducible against a drifting fixture.
+ */
+async function ensureToneEvaluator(): Promise<void> {
+  const API = process.env.TRUSTAI_API_URL ?? "http://localhost:8000";
+  const projectId = await firstProjectId();
+  const res = await fetch(`${API}/v1/projects/${projectId}/evaluators`);
+  const body = await res.json();
+  const items = Array.isArray(body) ? body : (body.items ?? []);
+  if (items.some((e: { name?: string }) => e.name === "Tone")) return;
+
+  const created = await fetch(`${API}/v1/evaluators?project_id=${projectId}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      name: "Tone",
+      description: "Empathy and acknowledgement on refund-related conversations.",
+      kind: "llm_judge",
+      scoring_type: "pass_fail",
+      // An LLM judge is rejected without a non-empty prompt, even when a rubric
+      // is supplied — the create path validates the assembled criteria, not the
+      // structured rules.
+      prompt:
+        "Judge whether the reply acknowledges the customer's frustration before it explains policy. " +
+        "Pass when it does. Fail when it states policy with no acknowledgement.",
+      rubric: {
+        lead_in: "Judge the reply's tone on a refund-related conversation.",
+        pass_rules: ["The reply acknowledges the customer's frustration before explaining policy."],
+        fail_rules: ["The reply states policy without any acknowledgement."],
+      },
+    }),
+  });
+  if (!created.ok) {
+    throw new Error(
+      `Could not seed the 'Tone' evaluator (HTTP ${created.status}). This test renames it, ` +
+        `so without it the agent has nothing to write to and will answer in prose instead.`
+    );
+  }
+}
+
 test("permission card write preview", async ({ page }) => {
   test.setTimeout(400_000);
-  await page.setViewportSize({ width: 1280, height: 800 });
+  // Taller than the sibling shots: this one must fit a transcript turn, the
+  // card, AND the card footer without scrolling.
+  await ensureToneEvaluator();
+  await page.setViewportSize({ width: 1720, height: 1000 });
 
   await askTrustAgent(
     page,
@@ -109,6 +158,35 @@ test("permission card write preview", async ({ page }) => {
   expect(before.length, "Diff 'before' value is empty").toBeGreaterThan(0);
   expect(after.length, "Diff 'after' value is empty").toBeGreaterThan(0);
   expect(before, "Diff before and after are identical — that is not a change").not.toEqual(after);
+
+  // The card FOOTER — the Approve CTA — has to be in frame. The first cut of
+  // this shot was sliced by the bottom edge: it showed the diff, the radios,
+  // then an empty grey strip where the approve button should be, on the one
+  // page whose entire subject is approving a write. A taller viewport is not a
+  // guarantee (the transcript above the card grows with the reply), so assert.
+  const cta = page.getByTestId("permission-card-cta");
+  await expect(cta, "No CTA on the card — this is not a write gate.").toHaveCount(1);
+  await expect(
+    cta,
+    "The approve CTA is outside the viewport — the shot would cut the card off at the " +
+      "bottom edge, exactly the defect this assertion exists to catch."
+  ).toBeInViewport();
+
+  // toBeInViewport() is necessary but NOT sufficient: the proposal drawer
+  // overlays the right-hand side of the page, and the first re-shoot put the
+  // CTA "in viewport" while the drawer sat on top of it. A reader would see
+  // radios and a grey strip where the approve button should be. Prove the card
+  // clears the drawer horizontally.
+  const ctaBox = await cta.boundingBox();
+  const drawerBox = await page.getByTestId("proposal-panel-body").boundingBox();
+  if (!ctaBox || !drawerBox) throw new Error("Could not measure the CTA or the proposal drawer.");
+  if (ctaBox.x + ctaBox.width > drawerBox.x) {
+    throw new Error(
+      `The approve CTA (ends x=${Math.round(ctaBox.x + ctaBox.width)}) is underneath the ` +
+        `proposal drawer (starts x=${Math.round(drawerBox.x)}). The shot would show radios and ` +
+        `an empty strip instead of the approve control. Widen the viewport.`
+    );
+  }
 
   await page.screenshot({ path: "../images/approve-writes-preview.png" });
 });
