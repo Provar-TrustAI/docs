@@ -1,34 +1,81 @@
 ---
 title: "Multi-tenancy"
 icon: "shield-check"
-description: "The organization boundary the platform enforces beneath every Project: how the authorization engine, its append-only audit trail, org-scoped repositories, and cross-tenant not-found responses keep one customer's data from reaching another."
+description: "The organization boundary the platform enforces beneath every Project: how the authorization engine, its append-only audit trail, org-scoped repositories, and per-project grants keep one customer's data — and one project's data — from reaching another."
 ---
 
 A **[Project](/concepts/projects)** is the workspace boundary you see in the product. **Multi-tenancy** is the boundary the platform enforces *beneath* it: the guarantee that your data never crosses into another customer's tenant, and theirs never crosses into yours.
 
-This page is a security and data-model concept, not a workflow. The claims here are architectural — properties of the schema, the authorization engine, and the repository layer — rather than buttons you click. They were checked against the application source at the shipped release. Where a claim rests on code inspection rather than observed behavior, the page says so.
+This page is a security and data-model concept, not a workflow. Two boundaries run through it, and they are separate guarantees: the **tenant** boundary between organizations, and the **grant** boundary between projects inside one organization. Neither one implies the other.
 
 ## The organization is the tenant boundary
 
-In Trust AI, an **organization** is the tenant. An organization owns many Projects, and every Project — together with all of its **[Sessions](/concepts/sessions)**, **[Scenarios](/concepts/scenarios)**, **[Personas](/concepts/scenarios)**, **[Evaluators](/concepts/evaluators)**, **[Evaluations](/concepts/evaluations)**, simulations, and **[Trust Agent](/concepts/trust-agent)** tasks — belongs to exactly one organization. Identity, and the organization itself, are federated through **WorkOS SSO**: your company's single sign-on is the source of truth for who you are and which tenant you belong to.
-{/* ACCURACY-AUDIT-PENDING: an organization owns many Projects and every Project + its artifacts belongs to exactly one org; identity + org federated via WorkOS SSO — ADR/code + concepts/projects.mdx framing, not UI-drivable on this page. WorkOS is the sole active sign-in path at v2026.06.30.1 (the OIDC/Keycloak seam is scaffolding, off by default — do not document it as a capability) */}
+In Trust AI, an **organization** is the tenant. An organization owns many Projects, and every Project — together with all of its **[Sessions](/concepts/sessions)**, **[Scenarios](/concepts/scenarios)**, **[Evaluators](/concepts/evaluators)**, **[Evaluations](/concepts/evaluations)**, simulations, and **[Trust Agent](/concepts/trust-agent)** tasks — belongs to exactly one organization. Identity, and the organization itself, are federated through your workspace's SSO identity provider: your company's single sign-on is the source of truth for who you are and which tenant you belong to.
 
 <Info>
   **Organization vs. Project — two different boundaries.** A **Project** is the *workspace* boundary: members, runtime credentials, and the artifacts under evaluation, all in one place (see **[Projects](/concepts/projects)**). An **organization** is the *tenant* boundary: the security perimeter the platform enforces so one customer's data can never reach another's. A Project lives inside exactly one organization; an organization holds many Projects.
 </Info>
 
-## organization_id, on every tenant-anchored row
+## Access is granted, never inherited
 
-The tenant boundary is carried in the data itself. Every tenant-anchored table has a required `organization_id` column — `NOT NULL`, never optional. That holds across the project-scoped anchor tables (the tables behind scenarios, personas, evaluations, sessions, and simulations) and the agent-core anchor tables (the Trust Agent's tasks and its audit log). Every tenant-anchored row carries a non-null `organization_id`, so the tenant a row belongs to is never ambiguous.
-{/* ACCURACY-AUDIT-PENDING: organization_id is NOT NULL on the scenario container/personas/evaluations/sessions/simulations tables + agent-core tasks & audit log — schema property verified in models.py at the tag, not UI-drivable */}
+Access to a Project is granted per person — directly, or through a **Team** — and nothing else confers it. A workspace role is not a project grant. **A workspace Owner or Admin who has not been granted access to a Project is denied that Project's content**, exactly as an unrelated member would be: the request comes back **403**, not a partial view.
 
-`organization_id` is **denormalized onto each row from the parent Project at create time**. The platform derives the tenant from the row's Project and stamps it on every child write, so list and index queries can filter by tenant directly instead of joining through the Projects table. This is a performance property of the schema, not something you configure.
-{/* ACCURACY-AUDIT-PENDING: organization_id denormalized from the parent project at write time so list/index queries filter by tenant without joining through projects — code property (tenancy-anchor model comments; the worker-context tenant helper), not UI-drivable */}
+Grants, teams, members, and invites are administered in **Workspace settings** — see **[Administer workspace access](/how-to/administer-workspace-access)**. Every grant, role change, and removal there is enforced by the same authorization engine described below and written to the same audit trail, which you can read in the **access history** drawer on the **Members** and **Project access** tabs.
+
+The same rule shapes what you can *see*, not just what you can open. The Projects list is built from your grants inside the workspace you are signed in to — direct grants and team-mediated grants, unioned — so a workspace Owner with no grant on any Project sees an empty list rather than the whole workspace.
+
+<Warning>
+  **An organization mismatch is denied. It does not repair itself.** If your login organization does not match a Project's stored organization — a multi-org account signed in to the wrong tenant, a stale record left by a migration — the request is **denied (403)** and the Project's organization is left untouched.
+
+  Earlier releases auto-reconciled that mismatch by *moving the Project* into the caller's organization. That behavior was removed in **v2026.07.13.1** as a cross-tenant hazard: it let anyone holding a grant drag a Project between tenants simply by logging in to the other one. Authorization is tenant-isolated now — a grant stamped in one tenant is invisible from another.
+</Warning>
+
+## Roles and permissions
+
+Two vocabularies meet here, and they are not the same list. Keep them apart.
+
+**Workspace roles** describe your standing in the workspace:
+
+| Workspace role | What it governs |
+| --- | --- |
+| **Owner** | Full administrative control of the workspace, its members, and its teams. Conferred, never offered in the invite dialog. |
+| **Admin** | Manages members, teams, and access. |
+| **Member** | Ordinary standing in the workspace; the default for a new invite. |
+| **Guest** | External and project-scoped. Not added to teams. |
+
+**Project access tiers** describe what a grant on one Project confers:
+
+| Project tier | Confers | How you get it |
+| --- | --- | --- |
+| **Viewer** | Read the Project's content. | Granted — directly or through a team. |
+| **Editor** | Read and change the Project's content. | Granted — directly or through a team. |
+| **Owner** | Everything, including the Project's lifecycle. | Conferred at creation. Never grantable, never transferable. |
+
+Viewer and Editor are the only two tiers a grant dialog offers. Project **Owner** is not on that menu at all — it belongs to whoever created the Project.
+
+**Project lifecycle is owner-only.** Renaming, archiving, restoring, and deleting a Project require the Project's Owner tier. A workspace Admin without a grant is denied, and so is a project Editor: the gate is stricter than "not ordinary members".
+
+In the product, this reference opens where you need it — a **What can each role do?** link sits beside the *workspace*-role picker, in the invite dialog and in the member sheet, and opens a read-only roles-and-permissions drawer. The project-tier controls on **Project access** — the Viewer/Editor toggle in the grant dialog, and the same picker inline on a grant row — carry no such link; their two grantable tiers are the ones in the table above.
+
+<Note>
+  The drawer's matrix is drawn from the shared permission catalog, which models a coarse workspace-Owner allowance for project actions. The platform edge does not use it: every project decision resolves through the per-project membership check instead, so the rule on this page — **project content is always gated by a grant, admins and owners included** — is what the API actually enforces.
+</Note>
+
+## organization_id, on tenant-anchored rows
+
+The tenant boundary is carried in the data itself. Tenant-anchored tables carry an `organization_id` column, foreign-keyed to the organization and indexed for tenant-filtered queries, and it is required on the tables behind scenarios, personas, evaluations, sessions, simulations, agent versions, agent profiles, saved views, and the Trust Agent's tasks and audit log. The tenant a row belongs to is not ambiguous.
+
+`organization_id` is **denormalized onto each row from the parent Project at write time**. The platform derives the tenant from the row's Project and stamps it on every child write, so list and index queries filter by tenant directly instead of joining through the Projects table. This is a performance property of the schema, not something you configure.
+
+Deletion is restricted: an organization cannot be deleted out from under rows that still reference it. The database refuses rather than silently orphaning tenant-anchored data.
+
+<Note>
+  **One table is still catching up.** The `test_runs` table's `organization_id` is nullable at this release — it is stamped where the writing path is plumbed for it, and is scheduled to become required once every writer is. Treat the "required on every tenant-anchored table" statement as true of the domain tables listed above, not as a schema-wide invariant.
+</Note>
 
 ## One authorization engine, fail closed
 
-As of v2026.06.22.1, access decisions are not scattered across per-route checks. A single, shared **authorization engine** — Postgres-backed, running inside the platform's own boundary — governs every project-scoped request: who can see and act on every Project, Session, Evaluation, and connected agent. Every domain routes its access decision through the same resolver, so the rule is enforced in one audited place instead of being re-derived inconsistently across the codebase. The legacy per-route tenancy gate this page used to describe was fully retired in that release; the cutover deliberately preserved every allow/deny outcome, so who can do what did not change.
-{/* ACCURACY-AUDIT-PENDING: single Postgres-backed authorization engine over project membership governs every project-scoped HTTP request; legacy gate retired behavior-preservingly in v2026.06.22.1 — code property (shipped tenancy module docstring: "fully strangled onto the shared trustai_core.authz resolver"; require_project_access) + relnotes v2026.06.22.1 #1956/#1970, not UI-drivable */}
+Access decisions are not scattered across per-route checks. A single, shared **authorization engine** — Postgres-backed, running inside the platform's own boundary — governs every project-scoped request: who can see and act on every Project, Session, Evaluation, and connected agent. Every domain routes its access decision through the same resolver, so the rule is enforced in one audited place instead of being re-derived inconsistently across the codebase.
 
 ```mermaid
 flowchart TB
@@ -42,16 +89,16 @@ flowchart TB
 
     REPO["<b>Org-scoped repository</b><br/>WHERE organization_id = caller's org"]
     ROW["<b>Tenant-scoped row</b><br/><i>only your org's data</i>"]
-    DENY404["<b>404 not-found</b><br/><i>missing, malformed, or<br/>foreign id reads as missing</i>"]
-    DENY403["<b>403 denied</b><br/><i>no access granted</i>"]
+    DENY404["<b>404 not-found</b><br/><i>no such project, in any tenant</i>"]
+    DENY403["<b>403 denied</b><br/><i>no grant in your tenant</i>"]
     FAULT["<b>503 retryable</b><br/><i>engine fault fails closed</i>"]
 
     REQ --> EXISTS
     EXISTS -->|"missing or malformed"| DENY404
     EXISTS -->|"exists"| ENGINE
     ENGINE --> AUDIT
-    ENGINE -->|"access granted"| REPO
-    ENGINE -->|"no access"| DENY403
+    ENGINE -->|"grant found"| REPO
+    ENGINE -->|"no grant"| DENY403
     ENGINE -->|"engine fault"| FAULT
 
     WRK --> RESOLVE
@@ -64,76 +111,71 @@ flowchart TB
 On an HTTP route, the engine's decision is the authoritative access check, and it **fails closed** at every step:
 
 - The Project **doesn't exist** — or the id is **malformed** — → an honest **not-found (404)**, never a server error.
-- You have **no access** to the Project → the request is **denied (403)**.
-- You have access → the request proceeds.
+- You have **no grant** on the Project, in the tenant you are signed in to → the request is **denied (403)**.
+- You have a grant → the request proceeds.
 - The engine itself **can't reach its database** → the request fails closed as a **retryable 503** rather than proceeding or surfacing an uncaught error. An unavailable check is a denial, not a pass.
 
-{/* ACCURACY-AUDIT-PENDING: member allowed / non-member 403 / missing-or-malformed id 404 / DB fault during the check = fail-closed retryable 503 (the one intentional behavior change of the cutover, was an uncaught 500) — code property (require_project_access docstring + body at the tag; v2026.06.15.1 malformed-id 404 sweep #1785/#1800), drive as non-member vs member on the release tag to confirm */}
+**Every decision is audited.** Each access decision and each permission change is written to a durable, **append-only** audit trail — the sink can only insert, never update or delete, so a record, once written, cannot be changed or removed through it. A denial is committed in its own transaction, so the deny that unwinds a request still leaves its audit row behind; a permission change whose audit record fails to write is rolled back, so there is no unaudited mutation.
 
-Two properties of the engine matter beyond the individual decision:
+### What a denial tells you
 
-- **Every decision is audited.** Each access decision and each permission change is written to a durable, **append-only** audit trail — the sink can only insert, never update or delete, so a record, once written, cannot be changed or removed through it. A permission change that fails to write its audit record is rolled back: there is no unaudited mutation. This is the platform's FedRAMP-ready authorization and audit foundation.
-{/* ACCURACY-AUDIT-PENDING: durable append-only audit trail of every access decision + permission change; management writes roll back if the audit row fails — code property (authz audit sink module: INSERT-only, record_management participates in the write's transaction) + relnotes v2026.06.22.1 #1957, not UI-drivable */}
-- **Project access is granted, not inherited.** Access to a Project is granted per person — directly, or through a team — with **Viewer** or **Editor** roles, and an organization-level admin who has not been granted access to a Project is still denied. Grants, teams, members, and invites are managed in **Workspace settings**, the workspace administration surface ([Administer workspace access](/how-to/administer-workspace-access)); every grant, role change, and removal there is enforced by the same engine and written to the same audit trail.
-{/* ACCURACY-AUDIT-PENDING: per-project grants direct or via team with Viewer/Editor; workspace-role short-circuit deliberately floored so an org owner/admin who is not a project member is still denied; Workspace settings (4 tabs at v30) is the admin surface — code property (behavior-preserving role floor docstring; access-center shell/tabs) + relnotes v22 #2026 / v30 #2052; no docs page for Workspace settings exists yet — prose only, no link */}
+The boundary is careful about existence, and the rule differs by what you addressed:
 
-<Warning>
-  **Access is the gate — an org mismatch on a valid grant self-heals, it does not hard-reject.** If you have access to a Project but your current login organization doesn't match the Project's stored `organization_id`, the platform **auto-reconciles**: it updates the Project's organization (and the tenant stamp on its membership records) to your organization rather than rejecting you. This is deliberate self-healing for stale data left by data migrations, organization switches, and backfills — the authorization engine preserved it through the cutover. The thing that *denies* a request is **lack of access**, not a stale org value on the row.
-</Warning>
-{/* ACCURACY-AUDIT-PENDING: for a valid member whose login org != the project's stored organization_id, the platform auto-reconciles (project + denormalized membership tenant moved to the caller's org) before the engine decides, rather than rejecting; reconcile against an unprovisioned tenant returns a clean 403, not a 500 — code property (require_project_access org-reconcile-before-engine block at the tag; relnotes v22 #2035), not UI-drivable; do NOT frame as a hard org-id reject */}
+- **A record addressed by its own id** — a Session, a Scenario, a Persona, a simulation, an agent version, an agent profile revision — resolves through a tenant-filtered query. Another organization's id **collapses to a not-found**, byte-identical to an id that never existed. There is no "you're not allowed to see this" response to distinguish the two, so nothing confirms that a foreign record is real.
+- **A Project id** is deliberately different. A Project that exists in some tenant but that you have no grant on answers **403**; a Project id that exists nowhere answers **404**. The 403 is what makes "ask your admin for access" a coherent thing to tell someone, and it is the same 403 whether the Project sits in your organization or another one — so it separates *does this id exist somewhere* from *whose tenant is it in*, which is the answer that matters.
+- **A Trust Agent chat** is the exception to the not-found rule. Its task is addressed by id and gated on *who started the chat* — not by a tenant-filtered read — so a chat you did not start is **denied (403)**, whether it belongs to a colleague on your own Project or to another organization entirely. Its slice of the agent audit log is gated as well: the platform resolves the chat's Project first, then requires your grant on it.
+
+This is defense in depth, not a single check: beneath the engine, tenant-scoped repository reads filter on `organization_id` directly, so even a path that skipped the engine would surface an empty result rather than a foreign row.
+
+### Isolation inside one organization
+
+Framing everything as cross-customer would understate the boundary. Several reads that were correctly tenant-scoped still returned more than they should have *within* one organization, and **v2026.07.13.1** closed four of them:
+
+| Read | What it returned | What it does now |
+| --- | --- | --- |
+| A project's connected agents and their stats | Any authenticated user of any organization could read them by Project id. | Requires a grant on that Project, checked before the agent runtime is contacted. |
+| A project's dashboard rollup | The same gap. | Requires a grant on that Project, checked before any aggregation runs. |
+| A bulk fetch of sessions by id | Every session in your organization, including projects you hold no grant on — a same-organization, cross-project leak. | Membership is verified once per distinct Project the ids span, and sessions in projects you can't reach are dropped from the result. |
+| Workspace usage and caching figures | Deployment-wide totals, identical for every workspace. | Caching figures are now genuinely per-organization. |
+
+The usage summary is the honest exception. Its numbers come from the model gateway's own request logs, which carry no per-organization attribution to filter on, so a truthful per-tenant figure cannot be produced today. Rather than fabricate one, the read is **restricted to workspace Owners and Admins** — everyone else is denied. That is *containment*, not tenant isolation: an Owner or Admin still sees deployment-wide totals. The per-tenant fix belongs in the model gateway's logging.
+
+**v2026.07.16.1** closed one more, on the Agent Profile path: a capability profile addressed by a revision or agent-version id is now resolved inside the caller's tenant, and a foreign id collapses to not-found like every other record. See **[Agent Versions](/concepts/agent-versions)**.
 
 ### Workers and background writes
 
-Not every write has a user behind it. Session imports, agent sync receipts and checkpoints, and the evaluation-time simulation driver all run in background or internal contexts with a project id but no user identity. Those callers derive the tenant from the Project record itself — the Project is authoritative for tenancy — so every background write still stamps the correct `organization_id`. There is no path where a tenant-anchored row is written without a tenant, and a missing or malformed project id fails closed as a not-found here too.
-{/* ACCURACY-AUDIT-PENDING: worker/internal (no-user) contexts derive tenancy from the project FK via the surviving tenancy helper (resolve_project_org_id), which fails closed on missing AND malformed project ids — code property (shipped tenancy module at the tag), not UI-drivable */}
+Not every write has a user behind it. Session imports, agent sync receipts and checkpoints, and the evaluation-time simulation driver all run in background or internal contexts with a Project id but no user identity. Those callers derive the tenant from the Project record itself — the Project is authoritative for tenancy — so every background write still stamps the correct `organization_id`. There is no path where a tenant-anchored row is written without a tenant, and a missing or malformed Project id fails closed as a not-found here too.
 
-## Denied a second time, at the repository layer
+## The agent runtime is internal only
 
-The engine is the first line, not the only one. Beneath it, tenant-scoped repository reads filter on `organization_id` directly, so a cross-tenant id **collapses to a not-found**: ask for another organization's record by id and the query returns nothing, exactly as if the id never existed. This is **defense in depth** — a deliberate belt-and-braces second check so that even a future bug that skipped the engine would surface an empty result rather than a foreign row.
-{/* ACCURACY-AUDIT-PENDING: tenant-scoped repository reads filter on organization_id so a cross-tenant id collapses to None (not-found) — code property (container/personas repository org filters at the tag), not UI-drivable here */}
+The service that drives your connected agents does not sit on the public edge. Every one of its routes requires a shared internal service token that only the API attaches; the browser never calls it. A caller that reaches the runtime's origin without that token is rejected **401** before any handler runs, and a deployment that has not configured the token rejects *everything* rather than silently opening the surface. The single unguarded route is the health check, which carries no tenant data.
 
-Because the foreign id collapses to a not-found, **a cross-tenant request returns the same response as a non-existent one.** The boundary never confirms that a foreign record exists — there's no "you're not allowed to see this" leak that would tell an attacker the record is real. Addressing another organization's Scenario, Persona, simulation, or agent task id directly returns a **403 / 404**, indistinguishable from a missing id. The same scoping applies to list surfaces: the Projects list shows only the signed-in workspace's Projects, and bulk operations like session tagging and export are tenant-scoped.
-{/* ACCURACY-AUDIT-PENDING: a foreign-tenant id returns the same 403/404 as a non-existent id (no existence leak) — drive Org A → Org B id on the release tag; verified by tenant-denial/isolation test suites at the tag. Projects list scoped to the signed-in workspace (v22 #2040); sessions bulk-tag/export + cohort-breakdown lookups tenant-scoped (v15 #1786/#1816) */}
+The tenant follows the request across that boundary too. When the runtime looks up a simulation, the organization travels in the lookup response, and the runtime **fails closed if it is absent** — it refuses to run a turn rather than proceeding with an unknown tenant and persisting events without a tenant stamp.
 
-### Across the API ↔ gateway boundary
+## Connection credentials never come back out
 
-The tenant follows the request even when it leaves the API. When the gateway looks up a simulation, `organization_id` travels in the lookup response body, and the gateway **fails closed if it is absent** — it refuses to run a turn rather than proceeding with an unknown tenant. A missing tenant is treated as a stop condition, not a default.
-{/* ACCURACY-AUDIT-PENDING: organization_id travels in the simulation-lookup response body and the gateway fails closed when it is missing — integration property (gateway test_api_round_trip.py fail-closed lookup tests, verified present at the tag), not UI-drivable */}
+The credentials you give a connection are write-only on the read path. Every secret field is masked in API responses, across all four connectable platforms:
 
-<Accordion title="The data-model detail, for the curious">
-  You don't need any of this to use Trust AI, but here is the precise shape of the boundary:
+| Platform | Masked in responses |
+| --- | --- |
+| **Salesforce Agentforce** | Consumer key, consumer secret, private key, client id, client secret, password |
+| **AWS Bedrock AgentCore** | Secret access key, session token, bearer token, OAuth client secret, JWT |
+| **Claude-managed agent** | API key |
+| **Conversational HTTP agent** | Bearer token |
 
-  - **The column.** On every tenant-anchored table, `organization_id` is non-null, indexed for tenant-filtered queries, and foreign-keyed to the organization's workspace settings record.
-  - **Deletion is restricted.** An organization can't be deleted out from under rows that still reference it — the database refuses, rather than silently orphaning tenant-anchored data.
-  - **Denormalized, not joined.** The org is copied from the parent Project onto each child row at write time, so list and index queries filter by tenant without joining through the Projects table.
-  - **The representative anchor tables.** The tables behind scenarios, personas, evaluations, sessions, simulations, and the Trust Agent's tasks and audit log each carry the column. This is the representative set, not an exhaustive enumeration — the schema is the authority for the full list.
+Non-secret configuration — URLs, ids, regions, ARNs — stays visible, because hiding it would cost you the ability to check what a connection points at. A platform the allowlist doesn't yet classify is masked by a conservative name heuristic instead, so a newly added connector is protected by default rather than by someone remembering to update a table.
 
-  {/* ACCURACY-AUDIT-PENDING: organization_id column = FK to the workspace-settings org record, ondelete=RESTRICT, nullable=False, index=True, denormalized from parent project — schema property verified across models.py at the tag; anchor tables are the scenario container, personas, evaluations, sessions, simulations + the agent's tasks and audit log, not UI-drivable */}
-</Accordion>
+Masking hides the value, not the fact. The UI still shows a **Configured** status pill and the placeholder `•••• configured — leave blank to keep existing`, so you can tell "a credential is set" from "no credential set" without ever reading one back.
+
+**Destination pinning** completes the pair: a saved credential only ever travels to a saved destination. If a request would repoint a connection at a new URL while re-using the stored secret, the platform refuses — *"For your security, TrustAI will not send this connection's saved credentials to a different Salesforce URL. Re-enter the credentials to point this connection at a new Salesforce URL."* Fields that are signed claims rather than network targets, such as a JWT audience, stay freely editable, and a cosmetic re-send of the same URL is never mistaken for a redirect.
 
 ## The Trust Agent runs inside the boundary
 
-The **[Trust Agent](/concepts/trust-agent)** is not an exception to any of this — it runs inside the same tenant boundary as the rest of the platform. An agent session only ever sees and acts on the current organization's Project data, and an approved write executes only within your own organization and Project: **tenant-scoped, server-anchored, and bound to the specific approval you gave.** The agent cannot read or mutate another organization's records. Its tasks and audit log are tenant-anchored exactly like every other domain, so a cross-tenant agent-task id returns the same 403 / 404 as any other foreign id.
-{/* ACCURACY-AUDIT-PENDING: an agent session only sees/acts on the current org's project data; approved writes execute only within the user's org/project (tenant-scoped, server-anchored, approval-bound); cross-tenant agent task/audit id = 403/404 — observable property (agent tasks/audit organization_id NOT NULL + tenant-denial tests; agent surfaces cut over to the authorization engine in v22 #1967), verify by driving the agent on Org A on the release tag */}
+The **[Trust Agent](/concepts/trust-agent)** is not an exception to any of this — it runs inside the same tenant boundary as the rest of the platform. An agent session only ever sees and acts on the current organization's Project data, and an approved write executes only within your own organization and Project: **tenant-scoped, server-anchored, and bound to the specific approval you gave.** The agent cannot read or mutate another organization's records. Its tasks and audit log are tenant-anchored exactly like every other domain — every row carries the organization it belongs to. What differs is only the *shape* of a refusal: a chat is gated on who started it, so someone else's chat is denied **403** rather than collapsing to a not-found the way a foreign Session or Scenario id does.
 
 The behavioral side of the agent — its shells, transcript, approvals, and what "approve and execute" actually does — lives in **[Trust Agent](/concepts/trust-agent)**. This page only asserts that all of it happens inside the tenant boundary.
 
-## Production infrastructure
-
-Beneath the tenant model sits a production-infrastructure foundation. This is a security and operations *posture*, stated for completeness — not a deployment runbook, and not something you configure as a user of Trust AI:
-
-- Application **secrets are externalized** from the application image, with an in-cluster network policy fronting the shared Redis.
-- Host connection **secrets are masked in API responses** — Salesforce private keys, AWS access keys, and managed-agent API keys are redacted rather than returned in plain text, while the UI still shows whether a connection is configured.
-- Real **IRSA** (IAM Roles for Service Accounts) role ARNs are wired, so each service assumes only the AWS permissions it needs.
-- The **Envoy HTTPRoute cutover** is complete across the ingress path.
-- **Helm values are complete** across the services (API, agent gateway, model gateway, web, worker).
-- Database **migrations run via a pre-upgrade hook**, so the schema is brought current before new application code starts.
-
-{/* ACCURACY-AUDIT-PENDING: production-infra posture — externalized secrets + Redis network policy, IRSA role ARNs, Envoy HTTPRoute cutover, complete Helm values, pre-upgrade migration hook — infra property, verify against charts/manifests on the release tag, NOT against the UI. Secret masking is response-path only (relnotes v22 #1954); at-rest envelope encryption is a separate follow-up — never vouch for at-rest encryption */}
-
-<Note>
-  The deployment mechanics behind this posture — Helm chart values, IRSA role setup, the Envoy route config, network-policy authoring, and the migration hook — are platform operations, not a user-facing surface. If a deployment runbook is ever needed it will live in its own how-to; this page intentionally stays at the level of *what the boundary guarantees*, not *how it is deployed*.
-</Note>
+Developers who want the underlying request and response shapes can find them in the [API Reference](/api-reference).
 
 ## Related concepts
 
@@ -141,11 +183,11 @@ Beneath the tenant model sits a production-infrastructure foundation. This is a 
   <Card title="Projects" icon="sliders-horizontal" href="/concepts/projects">
     The workspace boundary you see in the product — members, runtime credentials, and artifacts. Multi-tenancy is the organization boundary enforced beneath it.
   </Card>
+  <Card title="Administer workspace access" icon="users" href="/how-to/administer-workspace-access">
+    The admin surface behind this page: invite members, build teams, and grant per-project Viewer or Editor access.
+  </Card>
   <Card title="Trust Agent" icon="sparkles" href="/concepts/trust-agent">
     The in-app assistant whose writes are tenant-scoped and server-anchored — it runs inside the boundary this page describes.
-  </Card>
-  <Card title="Playground" icon="play" href="/concepts/playground">
-    The chat-and-simulate surface; its simulations are a tenant-anchored domain like every other.
   </Card>
   <Card title="Glossary" icon="book" href="/glossary">
     Quick definitions for organization, Project, tenant, and the rest of the Trust AI vocabulary.

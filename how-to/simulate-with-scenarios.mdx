@@ -23,31 +23,47 @@ This page is a task recipe. For what scenarios, personas, goals, and the Playgro
 The fastest way to persona-and-goal coverage is to let the [Trust Agent](/concepts/trust-agent) draft it for you; or create scenarios yourself from the **Scenarios** list.
 
 <Note>
-  *Ask the Trust Agent:* "Create scenarios covering my churn-risk and new-trial personas for the goals 'check order status' and 'request a refund.'" It proposes persona-and-goal test cases — no transcripts, just the definitions — and adds the ones you confirm to your Scenarios list.
+  *Ask the Trust Agent:* "Create scenarios covering my churn-risk and new-trial personas for the goals 'check order status' and 'request a refund.'" It pauses for your approval, then writes for real: for each scenario it drafts **a new persona** and creates the scenario with the goal attached. No conversation is simulated — the scenarios arrive with no transcript. By default it also drafts each scenario's **expected output** where it can, so review what it wrote before you treat those contracts as yours. Ask for personas and goals only if you want the grading contract left empty.
 </Note>
 
 <Steps>
   <Step title="Open the Scenarios list">
-    *Ask the Trust Agent:* "Show me my scenarios," or open the **Scenarios** nav item on your Project yourself — it lands at `/projects/:id/scenarios` (old dataset links redirect here). Every scenario is one entry in a flat table with a stable **ID** (like `SCN-000123`) plus **Scenario**, **User Goal**, **Personas**, **Expected routes**, **Expected actions**, **Evaluators**, **Sessions**, and **Tags** columns. Clicking a scenario opens its detail fly-in.
-    {/* CAPTURE-PENDING: scenarios-list screenshot — the flat Scenarios table with ID / Personas / Expected routes columns and the header actions */}
+    *Ask the Trust Agent:* "Show me my scenarios," or open the **Scenarios** nav item on your Project yourself — it lands at `/projects/:id/scenarios` (old dataset links redirect here). Every scenario is one entry in a flat table with a stable **ID** (like `SCN-000123`). Clicking a scenario opens its detail fly-in — with one exception worth learning early: six of the nine visible cells edit in place instead (**Scenario**, **User Goal**, **Personas**, **Evaluators**, **Verdict**, **Tags**), so a click there starts an edit and never opens the fly-in. Click **ID**, **Expected routes**, **Expected actions**, or **Sessions** to open it.
 
-    **You should see:** the Scenarios table render with SCN-prefixed ids, and clicking any scenario open a fly-in panel.
+    The table defines **eleven** columns. Nine are visible out of the box — **ID**, **Scenario**, **User Goal**, **Personas**, **Expected routes**, **Expected actions**, **Evaluators**, **Verdict**, and **Sessions**. The other two, **Created** and **Tags**, ship hidden; reveal either from the **Add column** control at the right end of the header. **Created** is doing work even while hidden: it is the table's default sort key, descending, so the scenario you just authored is the one at the top.
+    <Frame caption="The nine default columns run ID → Sessions, with Add column at the right end. The last five rows here were adopted from Add recommended scenarios, so their expected output is still Not set — that deferral is the loop working, not a gap.">
+      <img src="/images/simulate-scenarios-list.png" alt="The flat Scenarios table for a project: fifteen SCN-prefixed rows with scenario names, user goals, persona chips, expected route and expected action chips, evaluator chips, an inline Pass/Fail Verdict toggle and a Sessions cell reading None on every row, under header actions for Manage personas, Add recommended scenarios, a Run split-button and New scenario." />
+    </Frame>
+
+    **You should see:** the nine visible headers ending **Verdict** then **Sessions**, an **Add column** control offering **Created** and **Tags**, SCN-prefixed ids, and a fly-in when you click a scenario's **ID**.
   </Step>
 
   <Step title="Create one with New scenario">
-    Click **New scenario**. The modal collects only three things — a **Name** (required), a **Goal** (required — what the simulated user is trying to achieve), and **Personas** (optional; the label reminds you it's one session per persona on each run). It also tells you expected output comes later, usually from a session you like — that deferral is the point of the loop. Click **Create scenario**.
+    Click **New scenario**. The modal collects only three things — a **Name** (required), a **Goal** (required — what the simulated user is trying to achieve), and **Personas** (optional; the label reminds you it's "one session per persona on each run"). Its sub-copy states the deferral outright: "Define how to simulate. You'll set expected output later — usually from a session you like." Click **Create scenario**.
 
-    Two shortcuts worth knowing: **Add recommended scenarios** in the page header adopts curated starter scenarios in one move, and the **Name**, **Goal**, **Personas**, **Evaluators**, and **Tags** cells are all editable inline on the table — no modal round-trip to adjust a scenario later.
+    Two shortcuts worth knowing. **Add recommended scenarios** in the page header opens a starter catalog of ten adversarial probes — one per OWASP Agentic Top 10 failure mode, grouped by category, each with a **Details** disclosure showing what a safe agent does and which judges pair with it. Nothing is ticked when the modal opens: it says "Pick the ones you want and we'll add them to your scenarios," and the confirm adds only your selection. Scenarios already in the project are shown muted and can't be re-adopted. Separately, the **Name**, **Goal**, **Personas**, **Evaluators**, **Verdict**, and **Tags** cells are all editable inline on the table — no modal round-trip to adjust a scenario later.
 
     **You should see:** your scenario appear in the table with its own ID, personas attached, and no expected output yet.
   </Step>
 
   <Step title="Manage your personas (once)">
-    *Ask the Trust Agent:* "List my personas and tell me which one is the default." To review them yourself, open **Manage personas** from the Scenarios page header (the same modal also opens from any **Personas** cell's popover footer). Each persona shows a **usage count**, at most one persona is the **project default** at a time, and personas are referenced by **name** everywhere — chips, columns, and pickers.
+    Open **Manage personas** from the Scenarios page header (the same modal also opens from any **Personas** cell's popover footer). The list is deliberately spare — a **Persona** column and a **Description** column — and at most one persona carries a **Default** badge. The default persona is the one you can't delete; its row is not selectable. Open a persona to edit it and you get the number that matters for blast radius: "Used in *N* scenarios across this project," repeated in the delete confirmation.
 
-    **You should see:** a persona list with usage counts and exactly one persona marked default.
+    Personas are referenced by **name** everywhere — chips, columns, and pickers. A scenario with no persona attached still runs, and its results are labelled **Default persona**.
+
+    **You should see:** a persona list with a single **Default** badge, and a usage count on the persona editor rather than on the list.
   </Step>
 </Steps>
+
+## Mark a scenario Pass or Fail
+
+The **Verdict** column is an inline **Pass** / **Fail** toggle on each scenario, sitting between **Evaluators** and **Sessions**. It is not a run result and no judge writes to it — it is *your* call on whether this test case is one the agent ought to be passing. Clicking it never opens the fly-in, so you can sweep down the list marking verdicts without losing your place.
+
+Mark them because something downstream consumes them: these verdicts are the ground truth an evaluator's **Calibrate** tab samples when it checks how well a judge agrees with a person. With nothing marked, calibration has nothing to sample. See [Calibrate an evaluator](/how-to/calibrate-an-evaluator).
+
+<Note>
+  This is a different surface from the session-level **Verdict** [annotation](/concepts/annotations), which grounds the **Evaluator accuracy** figure on a finished run. Two verdicts, two jobs — don't reach for one expecting the other.
+</Note>
 
 ## Generate sessions by running the scenario
 
@@ -58,21 +74,25 @@ A scenario generates sessions by being **run**: each run simulates one fresh per
 </Note>
 
 <Steps>
-  <Step title="Start a run">
-    Select your scenario and use the **Run** split-button. The primary **Run** action simulates *and* grades (the menu spells it out: **Run & evaluate** — "Simulate + grade → creates an evaluation"); the chevron also offers **Run only** — "Simulate without grading." The same two actions live on the scenario fly-in's **More** menu, and the fly-in's empty **Sessions** tab leads with them: run the scenario to simulate one session per persona, review them, then set expected output from a good one.
+  <Step title="Choose what the run targets">
+    The **Run** split-button lives in the page header. Selecting scenarios first is **optional, and it changes the target**: with a selection active, Run targets exactly the scenarios you ticked; with nothing selected, it targets **every scenario in the saved view you are looking at**. So on **All scenarios** with an empty selection, Run means "run all of them" — check the launcher's count before you confirm.
+
+    The primary **Run** action simulates *and* grades. The chevron spells both modes out: **Run only** — "Simulate without grading" — and **Run & evaluate** — "Simulate + grade → creates an evaluation". The same two actions live on the scenario fly-in's **More** menu (alongside **Delete scenario**), and the fly-in's empty **Sessions** tab leads with them: "Run this scenario to simulate one session per persona. Review them, then set expected output from a good one."
 
     **You should see:** a **Run** split-button whose chevron offers **Run only** and **Run & evaluate**.
   </Step>
 
   <Step title="Confirm the fan-out and launch">
-    Choosing **Run only** opens the evaluation launcher titled **Run scenario**. Pick the **connected agent** to drive, and check the **This will run** preview — it counts one simulated conversation per attached persona. A goal-only scenario with no personas still runs one conversation, with the simulated user enacting the goal. The confirm button reads **Run N conversations**.
-    {/* CAPTURE-PENDING: evaluation-launcher screenshot — the Run scenario launcher with the agent picker and the "This will run" fan-out preview */}
+    Choosing **Run only** opens the evaluation launcher, titled **Run scenario** for a single target and **Run scenarios** for several. Pick the **connected agent** to drive, and check the **This will run** preview — it counts one simulated conversation per attached persona. A goal-only scenario with no personas still runs one conversation, with the simulated user enacting the goal. The confirm button reads **Run N conversations**.
+    <Frame caption="Read the middle tile and the confirm button together — three attached personas means three simulated conversations, and Run only grades none of them.">
+      <img src="/images/simulate-run-launcher.png" alt="The Run scenario launcher over the Scenarios list: an Agent picker set to Refunds Concierge, a This will run preview reading 1 scenario then 3 conversations simulated then not graded, an Environment section reporting Ready to run, and a Run 3 conversations confirm button." />
+    </Frame>
 
     **You should see:** the launcher preview one conversation per persona and the button count match it.
   </Step>
 
   <Step title="Watch the sessions land">
-    You stay on the Scenarios list while the run is in flight — the scenario shows a live **Generating…** badge that settles when it finishes. The finished conversations appear on the scenario's **Sessions** tab (the tab shows a live count), each carrying the **Scenario** source chip. A **Run only** run creates no entry in your Evaluations list — it exists to produce sessions, not grades.
+    A **Run only** launch keeps you on the Scenarios list on purpose — the scenario shows a live **Generating…** badge that settles when it finishes. The finished conversations appear on the scenario's **Sessions** tab (the tab shows a live count), each carrying the **Scenario** source chip. A **Run only** run creates no entry in your Evaluations list — it exists to produce sessions, not grades.
 
     **You should see:** a **Generating…** badge during the run, then new sessions under the scenario's **Sessions** tab with Source **Scenario**.
   </Step>
@@ -84,16 +104,20 @@ The **Playground** is the hands-on counterpart: drive a connected agent yourself
 
 <Steps>
   <Step title="Drive a conversation">
-    Open the Playground at `/projects/:id/playground` and pick a connected agent — the picker groups agents by source system. A segmented **Chat / Simulate** toggle controls the mode. On **Chat**, you type each message yourself and the connected agent replies live. On **Simulate**, a config modal takes exactly **one persona**, **one goal**, and a run mode — **Full auto** ("Simulates the whole conversation end-to-end") or **Stay in the loop** ("Suggests each user turn as you go") — and the persona-versus-agent conversation auto-drives. The **History** menu lists your real prior sessions so you can reopen an earlier run.
-    {/* CAPTURE-PENDING: playground-simulate-modal screenshot — the Simulate config modal (one persona, one goal, Full auto / Stay in the loop) */}
+    Open the Playground at `/projects/:id/playground` and pick a connected agent — the picker groups agents by source system. A segmented **Chat / Simulate** toggle controls the mode. On **Chat**, you type each message yourself and the connected agent replies live. On **Simulate**, a config modal takes exactly **one goal**, **one persona**, and a run mode — **Full auto** ("Simulates the whole conversation end-to-end") or **Stay in the loop** ("Suggests each user turn as you go") — and the persona-versus-agent conversation auto-drives. The **History** menu lists your real prior sessions so you can reopen an earlier run.
+    <Frame caption="One goal, one persona, one run mode — the Playground never fans out. Full auto plays the whole conversation; Stay in the loop hands you each user turn to approve.">
+      <img src="/images/simulate-playground-modal.png" alt="The Playground's Simulate a conversation modal: a Goal box reading 'Get a firm date for the refund on the return you already delivered', a single-select Persona field set to Frustrated regular, and two run-mode cards — Full auto selected, Stay in the loop beside it." />
+    </Frame>
 
     **You should see:** the **Chat / Simulate** toggle, and a Simulate run auto-drive the conversation without you typing turns.
   </Step>
 
   <Step title="Save it as a scenario">
-    When a conversation is worth keeping, choose **Save as a scenario** (available once the conversation has at least one exchange). The form is the same lightweight intake as **New scenario** — **Name**, **Goal**, **Personas** — and saving creates a new scenario with the conversation you just ran attached as its session, Source **Scenario**. Expected output is deliberately deferred: the fresh scenario reads as missing expected output until you author it.
+    The save control is the database icon in the Playground toolbar — **Save this conversation as a scenario**. It appears the moment you start a session and then stays there for the rest of it: it is never hidden mid-conversation and never greyed out. What it does depends on where the conversation has got to. Once there has been a real exchange, it opens the save form; before that, it tells you what's missing — the tooltip reads "Send a message and get a reply first," and clicking gives you "Send a message and get a reply before saving as a scenario."
 
-    **You should see:** a new scenario on the Scenarios list whose **Sessions** tab already holds the captured conversation.
+    The form is the same lightweight intake as **New scenario** — **Name**, **Goal**, **Personas** — and saving creates a new scenario with the conversation you just ran attached as its session, Source **Scenario**. Expected output is deliberately deferred: the fresh scenario reads as missing expected output until you author it, and the Playground starts a clean session so the same run can't be saved twice.
+
+    **You should see:** the save control present but non-committal before the first reply, and afterwards a new scenario on the Scenarios list whose **Sessions** tab already holds the captured conversation.
   </Step>
 </Steps>
 
@@ -103,24 +127,44 @@ Expected Output is the scenario's grading contract, and the loop is designed so 
 
 <Steps>
   <Step title="Review the sessions">
-    Open the scenario's fly-in. Its tabs follow the workflow: **Personas & Goals**, **Expected Output**, then **Sessions**. On the **Sessions** tab, open any session into the nested detail panel to read its full transcript and its evaluations. Find a session that behaved the way you want.
+    Open the scenario's fly-in. Its tabs follow the workflow: **Personas & Goals**, **Expected Output**, **Test Data**, then **Sessions**. On the **Sessions** tab, open any session into the nested detail panel to read its full transcript and its evaluations. Find a session that behaved the way you want.
 
     **You should see:** the scenario fly-in's tabs, and a nested panel showing a single session's transcript.
   </Step>
 
   <Step title="Author the Expected Output">
-    On the **Expected Output** tab, define the contract in three sections: **Expected behavior** (LLM-judge evaluator cards, with a **Recommended for this scenario** group surfaced first), **Expected actions** (**Add action**, with parameter checks), and **Expected routes** (**Add route**). The pickers offer options observed in real sessions, so you choose what "good" looked like rather than typing it from memory.
-    {/* CAPTURE-PENDING: expected-output-editor screenshot — the three sections (Expected behavior / Expected actions / Expected routes) with the learned-vocabulary picker open */}
+    On the **Expected Output** tab, define the contract in three sections:
+
+    - **Expected behavior** — the judges that grade the transcript, added from one searchable **Add evaluator** menu. Two evaluator kinds can be attached here: an **LLM judge** and a **Groundedness judge**. The menu groups the recommended starter catalog under **Recommended · Quality** and **Recommended · Safety**, then your project's own judges under **Your evaluators**, with **Create new evaluator** in the footer. Picking a recommended preset adopts it into the project and attaches it in one move. A scenario adopted from **Add recommended scenarios** gets one extra group ahead of the rest — **Recommended for this scenario** — pairing it with the judges that score its failure mode. Section sub-copy: "Evaluators used to grade the scenario. All must pass for the session to pass."
+    - **Expected actions** — the tools the agent must call, added with **Add action**. Each is **Required** or **Disallowed**; there is no third state. Add `key: value` pairs to also check the arguments.
+    - **Expected routes** — where the conversation should be routed, added with **Add route**, again **Required** or **Disallowed**.
+
+    The action and route pickers offer values observed in your project's real sessions, so you choose what "good" looked like rather than typing it from memory.
+    <Frame caption="The Add route picker offers nothing invented: each option is a route the project's own sessions took, with the session count that earns it a place in the list.">
+      <img src="/images/simulate-expected-output.png" alt="The scenario fly-in on its Expected Output tab: an Expected behavior section with Refund timeline accuracy, Tone and Completeness evaluator cards; an Expected actions section with check_refund_status and lookup_order rows toggled to Required; and an open Add route picker listing returns seen in 4 sessions, billing seen in 1 session and orders seen in 1 session." />
+    </Frame>
 
     **You should see:** the three sections, and the action/route pickers offering values seen in your sessions.
   </Step>
 
-  <Step title="Find the scenarios still missing one">
-    The Scenarios list ships a built-in **Missing expected output** saved view — use it to sweep the scenarios (including freshly saved Playground captures) that can't be graded structurally yet.
+  <Step title="Attach reference material if you added a Groundedness judge">
+    A **Groundedness judge** checks each claim in the agent's answer against source documents you supply — the way you catch hallucinated or contradicted answers. Those documents are attached **per scenario**, not to the judge: bind one and a **Reference material** subsection appears nested under **Expected behavior**, with **Add reference material**. Up to five documents per scenario; each row shows its title, an optional source link, and a human-readable size.
 
-    **You should see:** the saved view filter the table down to scenarios without a contract.
+    Until you attach one, the subsection is a blocker, not a suggestion. It reads **Reference material required**, names the judge, and says the scenario can't run — and the run launcher repeats the block and disables its confirm button.
+
+    **You should see:** the **Reference material** subsection appear when a Groundedness judge is attached, warning-toned and empty until you add a document.
+  </Step>
+
+  <Step title="Find the scenarios still missing one">
+    The Scenarios list ships a built-in **Missing expected output** saved view. Its rule is stricter than it sounds: a scenario appears there only when it asserts **nothing at all** — no expected routes, no expected actions, and no evaluators. Attach a single judge, or a single route, and it drops out of the view even though the rest of the contract is empty. Treat it as "hasn't been started," not "isn't finished."
+
+    **You should see:** the saved view filter the table down to the scenarios that assert nothing.
   </Step>
 </Steps>
+
+<Note>
+  **Expected Output is not the only contract on a scenario.** The **Test Data** tab beside it is the *backend data* setup — which environment the scenario runs against, and the data-plane lifecycle used around each run — where Expected Output is the *agent behavior* contract. Its default state reads **Environment default**: "This scenario uses the environment's default lifecycle. The plan may be neutral, but TrustAI still acquires, resets, and releases the environment for every run." **Configure scenario lifecycle (advanced)** and **Advanced test data** (manual records, state checks, imports, concurrency) sit below it. The matching **Environment** section in the run launcher selects the connected org or data plane, test identity, and cleanup for that run. Deleting a scenario removes its test data along with its expected-output rubric — the delete confirmation says so.
+</Note>
 
 ## Run and evaluate
 
@@ -130,23 +174,29 @@ Expected Output is the scenario's grading contract, and the loop is designed so 
 
 <Steps>
   <Step title="Launch a graded run">
-    Use **Run & evaluate** — from the **Run** split-button, the fly-in **More** menu, or the Sessions tab. The launcher opens as **Run & evaluate scenario** (or **scenarios** for a bulk selection): pick the connected agent, check the fan-out preview, and launch. The evaluators come from each scenario's Expected Output — they're inherited into the run, not re-picked. A scenario run **always simulates** fresh conversations; there is no replay opt-in to remember.
+    Use **Run & evaluate** — from the **Run** split-button, the fly-in **More** menu, or the Sessions tab. The launcher opens as **Run & evaluate scenario**, or **Run & evaluate scenarios** when more than one is targeted. Name the run, check the fan-out preview, pick the connected agent, and launch with **Run evaluation**. The evaluators come from each scenario's Expected Output — they're inherited into the run, read-only, not re-picked. A scenario run **always simulates** fresh conversations; there is no replay opt-in to remember.
 
-    **You should see:** the launcher show your agent, the inherited evaluators, and the persona fan-out before you confirm.
+    A graded launch also offers **Repeat each test case**: a **1 / 2 / 3 / 4** selector that reruns every case that many times so the run can report how *reliably* the agent passes, not just whether it passed once. More repeats take longer. The selector is deliberately absent on **Run only** and on a single-scenario one-off — neither produces the graded results a reliability read is built from.
+
+    Unlike **Run only**, a graded launch from the page header takes you straight to the new run's detail page. Launch the same run from a scenario fly-in and you stay where you are, with the fly-in open.
+
+    **You should see:** the launcher show your agent, the inherited evaluators, the repeat selector, and the persona fan-out before you confirm.
   </Step>
 
   <Step title="Read the per-persona results">
-    The finished run leads with a dual headline: **Pass rate** grades the *agent*, and **Evaluator accuracy** grades the *judges* — how often the automated evaluators agreed with a person's session-level verdict. Below it, a per-persona matrix scores every attached persona on its own, with plain-English hints where personas diverge. Each result's **Transcript** tab labels itself **Simulated** or **Replayed**, and **Open session** takes you to the exact session that was graded.
-    {/* CAPTURE-PENDING: run-detail screenshot — the dual headline (Pass rate + Evaluator accuracy) over the per-persona matrix */}
+    The finished run leads with a dual headline: **Pass rate** grades the *agent*, and **Evaluator accuracy** grades the *judges* — how often the automated evaluators agreed with a person's session-level verdict. Below it, a per-persona matrix scores every attached persona on its own, with plain-English hints where personas diverge. Each result's transcript is badged **Simulated** or **Replayed**, and **Open session** takes you to the exact session that was graded.
+    <Frame caption="Under the headline, every attached persona gets its own row — its transcript, its final verdict, and a column per judge and per structural check. The amber line under each preview is that row's divergence hint.">
+      <img src="/images/simulate-run-detail-personas.png" alt="An evaluation run detail page titled 'Refund status after return · persona sweep': a 0% pass rate headline reading 0 of 3 conversations passed, over a results matrix with one row per persona — Frustrated regular, First-time buyer and Terse power user — each showing a transcript preview, a divergence hint, and Fail chips under the Final verdict, Refund timeline accuracy, Tone, Expected actions and Expected routes columns." />
+    </Frame>
 
     To grade conversations that *already happened* — synced or captured sessions, with no simulation — use the **Evaluate** action on the [Sessions](/concepts/sessions) surface instead.
 
-    **You should see:** two headline numbers, one result per persona, and a **Simulated** label on the transcripts this run produced.
+    **You should see:** two headline numbers, one result per persona, and a **Simulated** badge on the transcripts this run produced.
   </Step>
 </Steps>
 
 <Note>
-  **The wire surface behind the flow.** Scenario reads and edits go through the `/v1/scenarios` API family (the legacy `/v1/datasets` container API survives underneath — the re-root is a rename over existing storage). Request and response shapes live in the [API Reference](/api-reference). All of your scenario and simulation data is **scoped to your organization** (see [Multi-tenancy](/concepts/multi-tenancy)).
+  **The wire surface behind the flow.** Scenario reads and edits go through the `/v1/scenarios` API family, and that family is the whole surface — there is no `/v1/datasets` API to fall back to. Request and response shapes live in the [API Reference](/api-reference). All of your scenario and simulation data is **scoped to your organization** (see [Multi-tenancy](/concepts/multi-tenancy)).
 </Note>
 
 ## Common stumbles
@@ -154,6 +204,10 @@ Expected Output is the scenario's grading contract, and the loop is designed so 
 <AccordionGroup>
   <Accordion title="Where did scenario sets go?">
     They're gone as of v2026.06.30.1. Every project has one flat **Scenarios** list — there is no set to pick, and old dataset links redirect to `/projects/:id/scenarios`. A few vestigial in-app strings still say "scenario set"; the surface itself has no sets. See [Scenarios](/concepts/scenarios) for the current model.
+  </Accordion>
+
+  <Accordion title="I clicked Run without selecting anything and it queued everything">
+    That's the designed behavior, and it's worth knowing before you click. Selection is optional: with scenarios ticked, **Run** targets the selection; with nothing ticked, it targets the whole saved view you're on. The launcher always states the real count in **This will run** and on its confirm button — read that line before you launch.
   </Accordion>
 
   <Accordion title="I can't find the Simulate at eval time toggle">
@@ -164,12 +218,16 @@ Expected Output is the scenario's grading contract, and the loop is designed so 
     That is correct — the Playground's **Simulate** modal drives exactly one persona against the agent per run, so you can watch it turn by turn. For persona coverage, attach multiple personas to a scenario and run it: the run fans out one session per persona in a single launch.
   </Accordion>
 
+  <Accordion title="My scenario won't run — it says reference material is required">
+    A **Groundedness judge** is attached to it and the scenario has no documents. That judge grades claims against reference material, so with none attached there is nothing to grade against, and the run is blocked rather than silently scored. Open the scenario's **Expected Output** tab and use **Add reference material**, or remove the judge. The launcher names the blocking scenarios so a multi-scenario run is fixable in one pass.
+  </Accordion>
+
   <Accordion title="My saved scenario says it's missing expected output">
     By design. **Save as a scenario** and **New scenario** deliberately defer the grading contract — the loop is define cheap, run, then set expected output from a session you like. Open the scenario's **Expected Output** tab to author it; until then the scenario shows up in the **Missing expected output** saved view.
   </Accordion>
 
   <Accordion title="I can't delete a scenario">
-    A scenario referenced by evaluations is blocked from deletion, and the app tells you so ("Can't delete: used in N evaluations."). When a delete *is* allowed but the scenario has generated sessions, the confirm discloses what happens: the sessions are **kept** as frozen records (only their link to the scenario is removed), while the scenario's expected-output rubric goes away with it.
+    A scenario referenced by evaluations is blocked from deletion, and the app tells you so ("Can't delete: used in N evaluations."). When a delete *is* allowed but the scenario has generated sessions, the confirm discloses exactly what goes and what stays: "This scenario generated N sessions. Those sessions are kept (they retain a frozen snapshot); only the link is removed. Deleting also removes this scenario's expected-output rubric and test data." A scenario with no evaluations and no sessions deletes with no confirmation at all.
   </Accordion>
 </AccordionGroup>
 
@@ -178,6 +236,8 @@ Expected Output is the scenario's grading contract, and the loop is designed so 
 - **[Scenarios](/concepts/scenarios)** — the concept page: what a scenario is, the flat list, the fly-in, and the Expected Output contract
 - **[Playground](/concepts/playground)** — the concept page: Chat vs Simulate, the connected-agent picker, and capture in depth
 - **[Evaluations](/concepts/evaluations)** — the evaluation model behind **Run & evaluate** and the dual-headline results
+- **[Evaluators](/concepts/evaluators)** — the LLM judge and Groundedness judge kinds the Expected behavior section attaches
+- **[Calibrate an evaluator](/how-to/calibrate-an-evaluator)** — what the **Verdict** column you mark here is sampled for
 - **[Run your first evaluation](/tutorials/run-first-evaluation)** — the end-to-end evaluation flow this page feeds scenarios into
 - **[Sessions](/concepts/sessions)** — where generated and captured conversations live, and how to evaluate the ones that already happened
 - **[Work with the Trust Agent](/how-to/work-with-the-trust-agent)** — the *other* in-app agent surface; the Playground's connected-agent chat is not the Trust Agent

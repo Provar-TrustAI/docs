@@ -1,15 +1,15 @@
 ---
 title: "Build your first Evaluator"
 icon: "ruler"
-description: "Adopt a recommended Evaluator, draft plain-language grading rules with Tailor with AI, and calibrate the judge against your own pass/fail verdicts."
+description: "Adopt from the recommended catalog, author your own LLM judge, and calibrate it against the pass/fail verdicts you recorded on your scenarios."
 ---
 
-This tutorial continues directly from [Your first 10 minutes in Trust AI](/tutorials/quickstart). You'll set up your first [Evaluators](/concepts/evaluators) — LLM judges that grade sessions against plain-language rules — in two ways: adopting from the recommended catalog, and creating your own with AI-drafted rules. Then you'll **calibrate** the judge against the pass/fail verdicts you recorded on your scenarios. By the end you'll have an Evaluator that agrees with you on the cases you care about.
+This tutorial continues directly from [Your first 10 minutes in Trust AI](/tutorials/quickstart). You'll set up your first [Evaluators](/concepts/evaluators) — judges that grade sessions against plain-language rules — in two ways: adopting from the recommended catalog, and creating your own. Then you'll **calibrate** the judge against the pass/fail verdicts you recorded on your scenarios. By the end you'll have an Evaluator that agrees with you on the cases you care about.
 
 The whole walkthrough should take about 15 minutes. Most of that time is **iterating on the grading rules**, which is also the most important skill you'll develop as an Evaluator author.
 
 <Tip>
-  **You never write a judge prompt.** You state what a passing and a failing response look like as short plain-language rules; Trust AI assembles those rules into the prompt the judge actually runs. The assembled prompt stays visible — read-only — behind an **Advanced** disclosure, so the rules are always the thing you edit.
+  **Rules, not prompt engineering.** You state what a passing and a failing response look like as short plain-language rules; Trust AI assembles those rules into the prompt the judge actually runs. That assembly stays visible but read-only, behind a disclosure labelled **Advanced — view the prompt this produces**, so the rules are always the thing you edit. One exception, and it's the path this tutorial takes at create time: a judge you author as a paragraph in the create form's **Judge criteria** box stores that paragraph as its criteria verbatim, until you convert it to rules in step 3. And if a rule list genuinely can't express what you need, a saved judge's **Criteria** tab offers **Switch to advanced prompt editing**, which detaches the rules and hands you the prompt directly.
 </Tip>
 
 ## Before you start
@@ -21,60 +21,86 @@ You should have, from [the quickstart](/tutorials/quickstart):
 
 And one thing the quickstart didn't set up — the small extra step this tutorial adds:
 
-- Your own **pass/fail verdicts** on some of those scenarios, recorded in a pass/fail verdict column on the scenario data, with a few scenarios marked
+- Your own **pass/fail verdicts** on some of those scenarios
 
-That last one matters most. Calibration compares the judge's verdicts with yours, so it only works against verdicts you actually recorded. If you haven't marked any scenarios yet, open **Scenarios**, add a pass/fail column, and mark a handful before you start.
+That last one matters most. Calibration compares the judge's verdicts with yours, so it only works against verdicts you actually recorded. You don't have to create a column for them: a **Verdict** column is created on the Scenarios list alongside a project's first scenario, so if you finished the quickstart you already have one. Open **Scenarios**, mark a handful of scenarios **Pass** or **Fail** in that column, and you're ready.
 
 ## The five steps
 
 <Steps>
   <Step title="Adopt the recommended evaluators">
-    <Note>
-      *Ask the Trust Agent:* "Add the recommended evaluators to this project."
-    </Note>
+    This first step is a UI action. The Trust Agent can create an evaluator for you — that's step 2 — but it has **no tool that adopts the recommended catalog**, so asking it to "add the recommended evaluators" won't get you there.
 
-    Then confirm the result on the Evaluators list; or do it by hand: open **Evaluators** and click **Add recommended** (on a brand-new project, the empty state leads with the same **Add recommended evaluators** call to action).
+    Open **Evaluators** and click **Add recommended** (on a brand-new project, the empty state leads with the same **Add recommended evaluators** call to action).
 
-    The catalog offers 12 curated LLM-judge presets — Quality checks first, then Safety — each with a name, a chip showing where its grading method comes from, and a one-line description. Check the ones that fit your agent and click the footer button, which counts your picks (**Add 3 evaluators**).
+    The catalog offers **11 curated LLM-judge presets** — five under **Quality**, six under **Safety**. Nine score pass/fail; two — *Answer is complete* and *Accomplished the goal* — score on a 1–5 scale. Each row shows a name, a one-line description, and a provenance chip naming a friendly category (**Answer quality**, **Task success**, **Factual accuracy**, **Safety & security**, **Stays in bounds**, **Fairness**), with the underlying method cited in the chip's tooltip.
+
+    **Seven of the eleven arrive pre-checked.** The footer button counts whatever is currently selected, so it opens reading **Add 7 evaluators** — uncheck the ones that don't fit your agent before you confirm, and the count follows.
 
     Two things to notice as you pick:
 
-    - A few presets carry a **Tailor first** badge. They're written against a generic agent — add a rule about *your* agent (what it's allowed to promise, what's in scope) before relying on them. The badge is a nudge, not a blocker.
+    - Three presets carry a **Tailor first** badge — *Accomplished the goal*, *Stays within scope*, and *No unauthorized commitments*. They're written against a generic agent; add a rule about *your* agent (what it's allowed to promise, what's in scope) before relying on them. The badge is a nudge, not a blocker.
     - Presets already in your project show a muted **In your project** label instead of a checkbox, so you can't adopt duplicates.
 
-    Everything you adopt becomes an ordinary, fully editable Evaluator in your project — it just keeps a **Recommended** chip so its origin stays clear.
+    Everything you adopt becomes an ordinary, fully editable Evaluator in your project — it just keeps a **Recommended** chip so its origin stays clear. Adopted presets arrive with their grading rules already in list form, which is what you'll be editing in step 3.
 
-    **You should see:** the Evaluators list with your adopted presets, each carrying a **Recommended** chip.
+    **You should see:** an "Added N evaluators" confirmation, and the Evaluators list with your adopted presets, each carrying a **Recommended** chip.
   </Step>
 
-  <Step title="Start your own Evaluator">
+  <Step title="Start your own Evaluator — Kind is the first decision">
     <Note>
-      *Ask the Trust Agent:* "Start a new pass/fail evaluator for the order-status flow."
+      *Ask the Trust Agent:* "Create a pass/fail evaluator called 'Order status — three-part check' that passes when the agent identifies the order the customer asked about and gives its actual current status, and fails when it answers generically. Attach it to my order-status scenario."
     </Note>
 
-    {/* ACCURACY-AUDIT-PENDING: exact Trust Agent conversational handling of evaluator-create requests not verified at the tag */}
+    The agent grounds itself against the scenario, then puts up a single approval card that both creates the judge and attaches it to the scenario in one write. The card leads with **Create**, names the evaluator, and spells the attach out as **· attaching to 1 selected scenario** — it counts the scenarios rather than naming their `SCN-` ids. Nothing is saved until you approve.
+
     Or do it by hand: from the Project home, open **Evaluators → New evaluator**.
 
-    The form asks for:
+    The form's first question is **Kind**, and it's a two-card choice:
 
-    - **Name** and **Description** — e.g., "Order status — three-part check" with a one-liner on what it's for.
-    - **Score type** — **Pass / fail** (a binary verdict per example) or **1–5 scale** (with a **Pass threshold** control: scores at or above the threshold count as a pass). Start with pass/fail; it's the easiest to calibrate.
+    - **LLM judge** — "Write freeform criteria; another model grades each response against them." The right pick for qualitative judgment, and what the rest of this tutorial builds.
+    - **Groundedness judge** — checks every claim in a reply against the **reference material** attached to the scenario, catching hallucinated or contradicted answers with quoted evidence.
 
-    Instead of typing grading criteria from scratch, use the **Tailor with AI** box at the top of the form. Describe what the Evaluator should check in a sentence:
+    Pick deliberately: **kind is fixed once the Evaluator exists.** The chooser doesn't reappear when you edit.
+
+    What the form asks for next depends on that choice:
+
+    | Field | LLM judge | Groundedness judge |
+    | --- | --- | --- |
+    | Name, Description | Asked | Asked |
+    | Score type | **Pass / fail**, or **1–5 scale** with a **Pass threshold** (≥2 to ≥5) | Not asked — always pass/fail |
+    | Criteria | **Judge criteria**, required | **Additional guidance**, optional |
+    | Reason step by step | Available | Not applicable |
+
+    A Groundedness judge's rubric is built in and can't be edited; **Additional guidance** is appended to it. Its source documents live on each scenario, not on the evaluator.
+
+    Start with an **LLM judge** on **Pass / fail**; it's the easiest to calibrate. Name it something a teammate would recognise — "Order status — three-part check" — and write what a passing and failing response look like into **Judge criteria**:
 
     ```
-    The agent should identify which order the customer is asking about, give
-    that order's actual current status — never a generic "we'll look into it" —
-    and explain the next step if the order isn't delivered yet.
+    Pass when the agent identifies which order the customer is asking about,
+    gives that order's actual current status, and explains the next step if
+    the order isn't delivered yet. Fail when the agent answers with a generic
+    "we'll look into it" instead of the real status, or states an order number
+    or status that doesn't match the conversation.
     ```
 
-    Click **Draft for my agent**. Draft grading rules appear in the form below as **Passes when…** and **Fails when…** lists, prefilled for you to review and edit. Nothing is saved until you create the Evaluator.
+    Then click **Create evaluator**.
 
-    **You should see:** the New evaluator form with drafted rules under **Passes when…** and **Fails when…**, ready to edit.
+    <Warning>
+      **Don't create this one through Tailor with AI.** The **Tailor with AI** box at the top of the form does draft for you — describe the check in a sentence, click **Draft for my agent**, and it fills in a name, a description, and **Passes when… / Fails when…** rule lists. But at this release, saving a judge whose criteria came from that draft fails: the create is rejected, an inline *"Something went wrong creating this evaluator. Check your details and try again."* appears above the buttons, and the toast reads **Couldn't create evaluator**. Write the criteria yourself as above, create the Evaluator, and convert it to rule lists in step 3 — the outcome is identical. [Write grading rules and judge prompts](/how-to/write-llm-judge-prompt#draft-with-tailor-with-ai) covers using the draft as a copy-out aid.
+    </Warning>
+
+    <Note>
+      Picking **Groundedness judge** instead? There's nothing to calibrate and no rules to write — its rubric is built in. Skip to step 5, attach it to a scenario, and give that scenario some **Reference material**.
+    </Note>
+
+    **You should see:** an "Evaluator created" confirmation, with the new Evaluator's detail panel open over the Evaluators list.
   </Step>
 
-  <Step title="Review and tighten the grading rules">
-    The rule lists are your rubric. For the order-status flow we curated in the quickstart, a solid set looks like:
+  <Step title="Turn the criteria into grading rules, then tighten them">
+    Open your Evaluator and switch to its **Criteria** tab. A judge created from a paragraph of criteria shows that paragraph, plus one action: **Switch to structured rules**.
+
+    Click it. Two empty lists appear — **Passes when…** ("All of these must be true for the session to pass") and **Fails when…** ("Any one of these makes the session fail") — under a note that saving replaces the current prompt with the prose these rules generate. Add one rule per line. For the order-status flow we curated in the quickstart, a solid set looks like:
 
     **Passes when…**
 
@@ -87,51 +113,51 @@ That last one matters most. Calibration compares the judge's verdicts with yours
     - The agent answers with a generic "we'll check on it" instead of the real status
     - The agent states an order number or status that doesn't match the conversation
 
+    Click **Save grading rules**. From now on this judge is rule-driven, and the tab shows the lists instead of the paragraph. (An evaluator you adopted in step 1 arrives in this state already — open its **Criteria** tab and the lists are waiting.)
+
     <Tip>
       **The most common rule-writing mistake** is a vague "is this good?" rule. Good rules are testable — each one individually checkable against a single response. If a thoughtful human reviewer couldn't apply your rules and produce the same verdict twice, the LLM judge won't either.
     </Tip>
 
-    You never author the judge prompt itself. Trust AI assembles your rules into the exact criteria the judge runs; on the saved Evaluator you can read the assembled prompt behind **Advanced — view the prompt this produces**, but it's read-only — to change verdicts, you change rules.
+    From here on you no longer author the criteria text yourself — saving the rules replaced your paragraph with the prose they generate. Trust AI assembles your rules into the exact criteria the judge runs, and you can read the assembly behind the read-only **Advanced — view the prompt this produces** disclosure. To change verdicts, change rules.
 
-    Two options worth knowing before you save:
+    Two things worth knowing before you move on:
 
-    - If you picked the **1–5 scale**, the rule lists become three anchors — **Rate 5 when…**, **Rate 3 when…**, **Rate 1 when…** — one sentence each.
-    - **Reason step by step** makes the judge work through each rule before deciding. Slower, but better at catching subtle failures; leave it off for your first pass.
+    - If you picked the **1–5 scale**, the rule lists become three anchors instead — **Rate 5 when…**, **Rate 3 when…**, **Rate 1 when…** — one sentence each.
+    - **Switch to advanced prompt editing** sits next to the Advanced disclosure. It detaches the rules and lets you edit the generated prompt directly. It's reversible — you can rebuild structured rules later — but rebuilding replaces whatever prompt you've edited by then, and the confirm dialog says so.
 
-    When the rules read right, click **Create evaluator**.
-
-    **You should see:** an "Evaluator created" confirmation, with the new Evaluator's detail panel open over the Evaluators list.
+    **You should see:** your rules under **Passes when…** and **Fails when…** on the Criteria tab, with the Advanced disclosure below them.
   </Step>
 
   <Step title="Calibrate against your verdicts">
-    <Note>
-      *Ask the Trust Agent:* "Check how well my order-status evaluator agrees with my own verdicts."
-    </Note>
+    Calibration is a UI step. The Trust Agent has **no standalone calibrate tool** — the only way it calibrates is as a chained side-effect when you ask it to save an evaluator, which runs the check against a sample on the same approval. To calibrate a judge you already have, use the tab.
 
-    Or do it by hand: open your Evaluator and switch to its **Calibrate** tab (LLM judges only). Calibration runs this judge — the same model, rules, and settings production uses — against scenarios you already marked pass or fail, and reports the **agreement**.
+    Open your Evaluator and switch to its **Calibrate** tab. It only exists on LLM judges — a Groundedness judge has no Calibrate tab. Calibration runs this judge — the same model, rules, and settings production uses — against scenarios you already marked pass or fail, and reports the **agreement**.
 
-    In the **Check agreement** section, pick the scenarios to check against and, under **Your verdicts**, the pass/fail column you marked — it counts the marked scenarios it found — then click **Calibrate**. The check covers up to 20 marked scenarios and takes about a minute.
+    In the **Check agreement** section, pick the scenarios to check against and, under **Your verdicts**, your pass/fail column — the caption counts what it found ("10 of 10 rows have a verdict") — then click **Calibrate**. The section's own caption states the bounds: "Checks up to 20 rows — takes about a minute."
 
-    **You should see:** an agreement headline for the latest check, and a **Row by row — disagreements first** table comparing the judge's verdict with yours on each scenario.
+    **You should see:** a **Latest check** headline with the agreement percentage, a **How the verdicts break down** panel, and a **Row by row — disagreements first** table comparing the judge's verdict with yours on each scenario.
 
-    The disagreements are the data — they show exactly where the rules are wrong. Common patterns:
+    The breakdown counts four buckets — both said pass, both said fail, the judge passed it and you failed it, the judge failed it and you passed it — and the two directional rates underneath tell you *which way* the judge is wrong. The disagreements are the data:
 
     - The judge passed something you failed → the rules are too lenient. Add a **Fails when…** rule naming that failure.
     - The judge failed something you passed → the rules are too strict. Loosen or remove an over-specified **Passes when…** rule.
 
-    To iterate: edit the rules on the Evaluator's **Criteria** tab and click **Save grading rules**. The Calibrate tab then warns that the criteria changed since the last check — click **Re-calibrate** and watch the agreement move. **Calibration history** keeps every check, newest first, so you can see whether your edits are helping.
+    To iterate: edit the rules on the **Criteria** tab and click **Save grading rules**. The Calibrate tab then raises **Criteria changed since this check** — your last agreement number reflects the old rules — so click **Re-calibrate** and watch it move. **Calibration history** keeps every check, newest first, so you can see whether your edits are helping.
 
-    **The goal is roughly 90% agreement** on a small set. Don't chase 100% — perfect agreement on a handful of scenarios usually means the rules over-fit those exact cases.
+    **The bar Trust AI sets is above 85% agreement** on a small set. Don't chase 100% — the tab says so itself, and perfect agreement on a handful of scenarios usually means the rules over-fit those exact cases.
 
     Iterate. This is the work. When you come back to it outside the tutorial, [Calibrate an evaluator](/how-to/calibrate-an-evaluator) is the focused recipe for this loop.
   </Step>
 
   <Step title="Put the Evaluator to work">
-    <Note>
-      *Ask the Trust Agent:* "Attach my order-status evaluator to the order-status scenario."
-    </Note>
+    If you used the Trust Agent in step 2, this is already done — the approval card attached the judge as it created it. Otherwise: open the scenario, switch to its **Expected Output** tab, and add your Evaluator from the **Expected behavior** section with **Add evaluator**.
 
-    Or do it by hand: open the scenario, switch to its **Expected Output** tab, and add your Evaluator with the **+ Add evaluator** picker. The picker lists your project's Evaluators alongside the recommended catalog, with the presets best suited to that scenario surfaced first under **Recommended for this scenario** — adopting one from here attaches it in the same step.
+    The picker lists your project's Evaluators under **Your evaluators**, above them the full catalog grouped as **Recommended · Quality** and **Recommended · Safety** — and adopting a preset from here attaches it in the same step. When a scenario carries presets paired to it, those are hoisted into a leading **Recommended for this scenario** group.
+
+    <Note>
+      Attach a **Groundedness judge** and a **Reference material** subsection appears beneath the evaluator list. While it's empty the scenario is blocked: **Reference material required**, naming the judge, and the scenario can't run until you **Add reference material**. Attach up to five documents, each up to 64 KB. Source material always belongs to the scenario, never to the evaluator — the same judge grades different scenarios against different sources.
+    </Note>
 
     The Evaluator also lives in your project's Evaluators list, ready for any future [Evaluation](/concepts/evaluations) — it grades scenario runs you launch, and AI judges like this one are also what grade already-captured sessions. It's reusable; that's the whole point. If you'd rather manage Evaluators programmatically, the endpoints are in the [API Reference](/api-reference).
 
@@ -139,9 +165,13 @@ That last one matters most. Calibration compares the judge's verdicts with yours
   </Step>
 </Steps>
 
+## Three verdicts, not two
+
+A check comes back **Pass**, **Fail**, or an amber **Needs review** — the third verdict, for a grade that can't be trusted as-is. A Groundedness judge returns it when the evidence can't be verified either way, rather than guessing. **Needs review** never gates: it can't flip a result to fail, and it's excluded from pass/fail counting. Treat it as a queue of things to look at, not as a failure.
+
 ## When you don't need a judge at all
 
-If the judgment you're encoding is **exact** — "did the agent route this to order-status?", "did it call the refund tool?" — don't write judge rules for it. Structural checks like expected routes, required or disallowed actions, and parameter checks are authored directly on a scenario's expected output, picked from vocabulary Trust AI learned from your real sessions rather than typed by hand. They're deterministic, they cost nothing per evaluation, and they need no calibration. **If you find yourself encoding something exact into plain-language rules, move it to the scenario's expected output instead.** See [Scenarios](/concepts/scenarios) for how the expected output defines the grading contract.
+If the judgment you're encoding is **exact** — "did the agent route this to order-status?", "did it call the refund tool?" — don't write judge rules for it. Structural checks live on the same **Expected Output** tab, in the **Expected actions** and **Expected routes** sections, where each entry is marked **required** or **disallowed**. Both sections suggest the action and route names Trust AI has observed across your project's sessions — but those suggestions are an assist, not a gate. The picker's field reads **Search or type a name…**, and typing a name that was never observed offers it back as **Add action “…”**. On a fresh project, where nothing has been observed yet, the menu says so and invites you to type: *"Nothing observed yet. Type a tool name to add it — observed actions will appear here as suggestions once sessions run."* You can declare the contract before you have a single session. They're deterministic, they cost nothing per evaluation, and they need no calibration. **If you find yourself encoding something exact into plain-language rules, move it to the scenario's expected output instead.** See [Scenarios](/concepts/scenarios) for how the expected output defines the grading contract.
 
 ## What's next
 

@@ -1,0 +1,167 @@
+---
+title: "Track credit usage"
+icon: "chart-line"
+description: "Read your workspace's Credit usage card, understand what draws on the credit pool, and know exactly what happens as you approach — and reach — the limit."
+---
+
+Simulating a conversation, grading an output, and chatting with the Trust Agent all draw on one shared balance: your workspace's **credit pool**. **Workspace settings → Credits** is where you read it.
+
+**The pool is measured over the calendar month, and it starts again each month.** Every string on the surface says so — the tab's own subtitle reads "Track how much of your workspace credit pool you have used this billing month" — and the usage behind it is rolled up over the current calendar month in UTC. Older releases described a one-off lifetime allowance; that is not how the shipped product behaves.
+
+Credits are **workspace-scoped**: every project in the workspace spends from the same pool, and a run is admitted or refused on the workspace's balance, not the project's. See [Multi-tenancy](/concepts/multi-tenancy) for how your workspace boundary works.
+
+This is a read-only observation surface, so you work in the UI directly.
+
+## Prerequisites
+
+- A **workspace role of Owner or Admin**. Workspace settings is admin-only: someone with a lower role who follows a link here gets a card reading "Workspace management is admin-only" instead of the tab strip.
+- Nothing else. The Credits tab reads what has already been metered — there is nothing to switch on.
+
+## Open the Credits tab
+
+Click **Workspace Settings** in the sidebar footer. The page is titled **Workspace settings** and carries six tabs:
+
+| Tab | What it holds |
+|---|---|
+| **Members** | People in this workspace, their roles, and their teams. |
+| **Teams** | Groups that bundle project access. |
+| **Project access** | Who can open each project. |
+| **Credits** | Your credit pool, how much you have used this billing month, and where it went. |
+| **Connections** | The Salesforce orgs your workspace is connected to. |
+| **General** | Settings that apply across every project in this workspace. |
+
+Open **Credits**. Each tab is its own route, so this one is bookmarkable and survives a refresh.
+
+**You should see:** a section headed **Credits**, and under it a single card headed **Credit usage**.
+
+## Read the Credit usage card
+
+The card is a snapshot of the current billing month, in four parts, top to bottom.
+
+| Part | What it shows |
+|---|---|
+| **Used this billing month** | A percentage, right-aligned on the same line, and a meter bar beneath it. |
+| **Used / Pool / Remaining** | Three figures side by side: what you have spent this month, the size of the pool, and what is left. |
+| **Where your credits went** | One row per kind of activity, each with how many times it happened and how many credits it accounted for. |
+| **As of …** | When the snapshot was read. |
+
+Three things about those numbers are worth knowing before you act on them:
+
+- **The percentage is the true figure, even past 100%.** The bar fills and stops; the number keeps going. A workspace that has spent 20% more than its pool reads "120%" over a full bar.
+- **Remaining goes negative** once you are past the pool. That is the real overage, not a display error.
+- **The card is the authority on your pool size.** These docs deliberately print no credit figures — pool sizes and the cost of each activity are set per workspace and have already changed materially between releases. Any number written here would be wrong for someone. Read yours off the card.
+
+### The colour is the signal
+
+The percentage and the meter change tone together as the month goes on:
+
+| Usage | Meter and percentage | Extra |
+|---|---|---|
+| Below 80% | Neutral | — |
+| **80% up to and including 100%** | **Amber** | — |
+| **Above 100%** | **Red** | The line "You have gone past your credit pool for this billing month." appears under the bar |
+
+The tone follows the exact value, not the rounded label — at 79.6% the label already reads "80%" while the meter is still neutral.
+
+### Reading the breakdown
+
+**Where your credits went** groups the month's activity by kind, so you can see whether a big month came from simulation, from grading, or from chat. **Scenario simulations** and **Evaluator checks** are named plainly. Some other rows are not yet given a friendly name and render an internal identifier in Title Case instead — treat those labels as cosmetic and unfinished; the count and the credits on the row are correct.
+
+## If your workspace has no pool yet
+
+Not every workspace is provisioned with a pool. When yours is not, the card drops the meter, the percentage, and the three figures, and says so plainly:
+
+> This workspace does not have a credit pool yet, so nothing is capped — we are only metering usage. You have used *N* credits this billing month.
+
+This is the useful state, not a broken one: usage is still being recorded, **Where your credits went** still fills in, and nothing can be refused for cost while you are in it.
+
+## What consumes credits
+
+Four categories of work draw on the pool. Everything below is metered per operation, and the weights are not published — they are set centrally, they differ per activity, and they are still being tuned. The breakdown on the card is where you see what your own month actually cost.
+
+<AccordionGroup>
+  <Accordion title="Simulated conversations">
+    Each scenario simulated or replayed against your connected agent is one metered unit — **per persona**. A scenario run against three personas meters three, not one. Grading sessions that already exist does not meter this category at all; see [Evaluate captured sessions](/how-to/evaluate-sessions) for that path and [Simulate agents with scenarios](/how-to/simulate-with-scenarios) for this one.
+  </Accordion>
+
+  <Accordion title="Evaluator checks">
+    Each evaluator grading one output is one metered check. They multiply the way the launcher's own summary line says they do: sessions × evaluators. Raising **Repeat each test case** multiplies the whole run with them — three repeats is three times the checks.
+
+    **Calibration is metered too**, and this is easy to miss because it is not a run. Pressing **Calibrate** (or **Re-calibrate**) on an evaluator runs the production judge once per sampled scenario, synchronously — and each of those is a check, priced exactly like a check inside an evaluation. The sample is capped at twenty, so a calibration costs at most twenty checks. See [Calibrate an evaluator](/how-to/calibrate-an-evaluator).
+  </Accordion>
+
+  <Accordion title="Trust Agent turns">
+    Every turn you send in a Trust Agent chat is metered — one per turn, regardless of how much work the agent does inside it. See [Work with the Trust Agent](/how-to/work-with-the-trust-agent).
+  </Accordion>
+
+  <Accordion title="AI drafting helpers">
+    The places where the product writes a first draft for you each meter their own call: drafting an evaluator's scoring rules, drafting a persona, generating a set of scenarios, and running an analysis pass over sessions. Two small ambient helpers meter as well, at a much lower weight — naming a chat after its first turn, and summarising a file you upload into a chat.
+  </Accordion>
+</AccordionGroup>
+
+## What happens near the limit, and at it
+
+The Credits tab is the slow signal. The fast one arrives where you are working.
+
+<Steps>
+  <Step title="Approaching the limit — a toast, and the run still starts">
+    Start work that would leave your workspace at or above 80% of the pool — an evaluation, a simulation, a calibration, or a Trust Agent turn — and you get a single-line amber toast:
+
+    > You're approaching your credit limit (90%)
+
+    The work goes ahead normally. The percentage in the message is how much of the pool you had *already* used; the warning itself is decided on where the thing you just started would leave you, so the first toast can arrive while the Credits tab is still neutral.
+  </Step>
+
+  <Step title="At the limit — the run is refused, not degraded">
+    Once a run would take you to or past the pool, it is **refused outright**. Nothing partial happens: no rows are graded, no conversation is simulated, nothing is queued to resume later. On the two surfaces that name the reason — the evaluation launcher and a Trust Agent chat — you get a persistent banner titled **Credit limit reached**. Everywhere else the refusal is just as real, but the screen does not say the word "credit"; see below.
+  </Step>
+
+  <Step title="Clear the banner, or get the pool raised">
+    Where the banner appears it does not time out. Dismiss it yourself, or — in chat — send another turn and it clears when that turn starts streaming. Dismissing changes nothing about the limit: the next attempt is refused the same way until the pool is raised or the month rolls over.
+  </Step>
+</Steps>
+
+### Where the block appears, and what it says
+
+**Exactly two surfaces raise the named banner** — the evaluation launcher and the Trust Agent chat. On both the title is the same, **Credit limit reached**, and the sentence under it is not: the two refuse over different paths, so they word the refusal differently. Both mean the same thing:
+
+| Where | What the banner says under the title |
+|---|---|
+| **Evaluation launcher** — pinned to the top of the dialog, which stays open so you can read it | "This run would exceed your workspace credit limit. Contact your admin to continue." |
+| **Trust Agent chat** — pinned across the top of the screen, over the conversation | "cap reached — contact your admin" |
+
+<Note>
+  Neither is a form error and neither is a transient toast. The banner announces itself to assistive technology and holds its place until it is dismissed — a refused run is something you have to act on, not something to catch as it goes past.
+</Note>
+
+<Warning>
+  **Calibration is the exception, and it does not say "credit".** Calibration is metered and refused at the limit like everything else, but the evaluator panel has no credit-cap banner of its own. A refused calibration shows the panel's ordinary failure banner instead — **Calibration didn't finish**, "The check ran into a problem partway through. Your last result is unchanged — try again." — with a **Try again** button that will be refused exactly the same way. If a calibration fails with that message and nothing else explains it, read the Credits tab before you retry.
+</Warning>
+
+## Raising the pool is not self-serve
+
+There is no control on the Credits tab that changes anything — no edit, no raise-cap, no top-up, not for an Owner and not for an Admin. The card is entirely read-only, and no other screen in the app raises a pool either. That is why both block messages end in "contact your admin": pools are provisioned and adjusted for you, outside the app, and a new ceiling applies to the current month as soon as it lands — there is nothing to accept or apply on your side.
+
+<Note>
+  Your workspace's credit snapshot is also readable on the wire — the pool, the month's usage, what is left, and the same per-activity breakdown the card renders. Request and response shapes live in the [API Reference](/api-reference).
+</Note>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="The card says we couldn't load your credit usage">
+    A transient read failure shows a muted line and a **Try again** button that re-runs the read in place. It is not a billing state and it does not mean anything about your pool.
+  </Accordion>
+
+  <Accordion title="The numbers look lower than the work we did">
+    Check the **As of** timestamp at the foot of the card — it is a snapshot, and a run that finished seconds ago may not be in it yet. Reload the tab to take a fresh one.
+  </Accordion>
+
+  <Accordion title="Usage dropped to almost nothing overnight">
+    Check the date. The window is the calendar month: on the 1st, the month's usage starts from zero again and the meter empties, even though the pool itself has not changed.
+  </Accordion>
+
+  <Accordion title="A run was refused but the tab shows us under 100%">
+    The gate decides on the projected total — your current usage plus what the run it just estimated would cost. A large run can be refused while the card still reads under the limit. Launch a smaller one, or get the pool raised.
+  </Accordion>
+</AccordionGroup>

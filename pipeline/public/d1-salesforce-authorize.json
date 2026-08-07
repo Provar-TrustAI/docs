@@ -1,0 +1,18 @@
+{
+  "title": "Salesforce admin-authorize wizard",
+  "description": "Org URL, authorize in Salesforce, return to a populated agent picker, three-step test readout",
+  "_ticket": "DEV-6216",
+  "_blocksPage": "how-to/connect-agentforce.mdx",
+  "_status": "STUB — record the .webm first (see captures/demos/), then fill beats from the real recording",
+  "viewportWidth": 1280,
+  "viewportHeight": 800,
+  "totalDurationMs": 12000,
+  "videoFile": "d1-salesforce-authorize.webm",
+  "beats": [
+    { "timeMs": 0, "action": "navigate", "caption": "TODO — first beat" },
+    { "timeMs": 4000, "action": "click",
+      "elementBounds": { "x": 0, "y": 0, "width": 0, "height": 0 },
+      "caption": "TODO — bounds come from the recording, not guesses" },
+    { "timeMs": 9000, "action": "wait", "caption": "TODO — final state" }
+  ]
+}

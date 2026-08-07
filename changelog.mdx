@@ -99,9 +99,9 @@ description: "Trust AI release notes."
 
   **Scenarios absorb the last of the dataset container.** The legacy `/v1/datasets` API is retired; scenarios carry their own columns, rows, tag vocabulary, and CSV import and export directly. See [Scenarios](/concepts/scenarios).
 
-  **Preview — Requirements.** Business-language requirements that link to the scenarios and evaluators proving them, with a coverage rollup. This is behind a flag and off in every environment, including production — it is not reachable yet. It is noted here so the vocabulary is stable when it ships.
+  **Requirements.** Capture what your agent must do — and must never do — in business language, then link each requirement to the scenarios and evaluators that prove it. Every requirement carries a plain handle like `REQ-12` and a computed health rollup: **Passing**, **Failing**, **Partially covered**, **Uncovered**, or **Not yet run**. Gaps are the requirements nothing covers yet, so you can see where your test suite is thin rather than guessing. Requirements can be written by hand, extracted from a document, or captured from a conversation with the [Trust Agent](/concepts/trust-agent).
 
-  **Preview — Test Data Management.** The state-grounded evaluation track continued, still behind a preview flag and off by default in production.
+  **Test Data Management.** Grade an agent on the backend state it actually leaves behind, not just what it said. Register environments and data connections, author the starting data a scenario runs against and the end state it should reach, then read a per-record expected-versus-actual diff and a change ledger alongside the conversation. Proven across Salesforce Agentforce, AWS AgentCore, and Claude-managed runtimes.
 </Update>
 
 <Update label="v2026.06.30.1 — June 2026">
@@ -125,7 +125,7 @@ description: "Trust AI release notes."
 
   **Access Center, refined.** The workspace admin surface consolidates six tabs into four (Members, Teams, Project access, General); the full roles-and-permissions matrix now appears inline at the moment you assign a role, and access history is an in-context drawer.
 
-  **Test Data Management (preview, off by default).** Behind a preview flag: register environments and data connections, author per-scenario starting data and the end state a run should reach, then grade the agent on the backend state it actually leaves behind — a five-dimension verdict matrix (Safety, Outcome, Quality, Behavior, End state) with a per-record expected-vs-actual diff and a change ledger. The loop is proven across Salesforce Agentforce, AWS AgentCore, and Claude-managed runtimes. Preview surfaces are flag-gated and off by default in production builds.
+  **Test Data Management (preview, off by default).** Behind a preview flag: register environments and data connections, author per-scenario starting data and the end state a run should reach, then grade the agent on the backend state it actually leaves behind — a five-dimension verdict matrix (Safety, Outcome, Quality, Behavior, End state) with a per-record expected-vs-actual diff and a change ledger. The loop is proven across Salesforce Agentforce, AWS AgentCore, and Claude-managed runtimes. Preview surfaces are flag-gated and off by default in production builds. *(Superseded: Test Data Management is no longer a preview — it is enabled and generally available. See the v2026.07.08.1 entry above.)*
 </Update>
 
 <Update label="v2026.06.22.1 — June 2026">
@@ -179,11 +179,11 @@ description: "Trust AI release notes."
 </Update>
 
 <Update label="v2026.05.26 — May 2026">
-  **Core surfaces redesigned.** Every core surface has been redesigned and reimplemented: [Sessions](/concepts/sessions) (sortable/filterable table, fly-in detail panel with transcript viewer, keyboard navigation via J/K/F/Esc, on-demand Sync Now import), [Datasets](/concepts/datasets) (bulk actions toolbar, inline annotation editing, fly-in panel with io_split divider and tag picker), [Evaluators](/concepts/evaluators) (create/edit flow with LLM Judge and Structured Match kind selection, score type picker, criteria editor, side panel with trend and run history), and [Evaluations](/concepts/evaluations) (New Run flow with dataset picker and evaluator multi-select, results matrix with per-evaluator verdict chips, CSV export). A new Welcome surface greets users with contextual suggestion prompts, and the sidebar now includes a project switcher with search, collapsible icon-rail mode, and count badges.
+  **Core surfaces redesigned.** Every core surface has been redesigned and reimplemented: [Sessions](/concepts/sessions) (sortable/filterable table, fly-in detail panel with transcript viewer, keyboard navigation via J/K/F/Esc, on-demand Sync Now import), [Datasets](/concepts/datasets) (bulk actions toolbar, inline annotation editing, fly-in panel with io_split divider and tag picker), [Evaluators](/concepts/evaluators) (create/edit flow with LLM judge and Structured match kind selection, score type picker, criteria editor, side panel with trend and run history), and [Evaluations](/concepts/evaluations) (New Run flow with dataset picker and evaluator multi-select, results matrix with per-evaluator verdict chips, CSV export). A new Welcome surface greets users with contextual suggestion prompts, and the sidebar now includes a project switcher with search, collapsible icon-rail mode, and count badges.
 
   **Placeholder buttons now functional.** Eleven previously placeholder buttons are now fully functional: Sync Now, Export CSV, Upload CSV, Run Evaluation, Remove Rows, Copy Sharing Link, Add to Dataset, Tag Row, Download Transcript, Export Sessions CSV, and Export Run Results CSV.
 
-  **MCP server for AI agents and IDEs.** A new MCP server lets external AI agents (Claude Desktop, Cursor, VS Code) query and act on Trust AI data directly. Read tools surface sessions, evaluations, and project data; write tools wrap Trust Agent operations with an approval gate. WorkOS authentication enforces per-tenant access.
+  **MCP server for AI agents and IDEs.** A new MCP server lets external AI agents (Claude Desktop, Cursor, VS Code) query and act on Trust AI data directly. Read tools surface sessions, evaluations, and project data; write tools wrap Trust Agent operations with an approval gate. Authentication through your workspace's SSO identity provider enforces per-tenant access.
 
   **Multi-tenant security.** Organization ID enforcement is now complete across all domain entities — datasets, agent versions, personas, simulations, saved views, and budgets all carry a NOT NULL `organization_id` with cross-tenant denial enforced at the repository layer.
 

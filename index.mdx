@@ -5,9 +5,9 @@ description: "Agent evaluation platform — test, validate, and monitor AI agent
 
 import LatestRelease from "/snippets/latest-release.mdx";
 
-<LatestRelease />
+Provar Trust AI is an **agent evaluation platform** for the teams building, integrating, and operating production AI agents. Connect your agent, read what it can actually do, and define scenarios — persona-and-goal test cases with an authored expected output. Simulate those scenarios against the live agent, grade the conversations they produce alongside the real ones your agent already had, record your own verdicts, and calibrate the automated judges until they agree with you — all before a change ships to customers.
 
-Provar Trust AI is an **agent evaluation platform** for the teams building, integrating, and operating production AI agents. Connect your agent, define scenarios — persona-and-goal test cases with an authored expected output — run evaluations that score every persona, grade the real conversations your agent already had, and check the automated judges against your own verdicts — all before a change ships to customers. A built-in Trust Agent drives this loop for you in plain language, guiding you from an empty project to a first scored evaluation, and pausing for your approval before any write.
+A built-in **Trust Agent** drives that loop for you in plain language, from an empty project to a first scored evaluation. It stops and asks before it writes anything; grant it a standing approval for a repeated write and that one kind of write commits without asking again, with a chip in the composer showing the grant is live.
 
 <Frame caption="Interactive prototype — the Trust Agent across the full, docked, and pill shells. Design reference.">
   <iframe src="https://provar-trustai.github.io/docs/floating-chat.html" width="100%" height="640" style={{border:0}}
@@ -18,14 +18,17 @@ Provar Trust AI is an **agent evaluation platform** for the teams building, inte
    frame repo-served /demos/*.html. See .github/workflows/deploy-demos.yml and demo-tooling.md. */}
 
 <CardGroup cols={2}>
+  <Card title="Get started" icon="rocket" href="/get-started/connect-your-agentforce-agent">
+    New here? From an empty workspace to chatting with your connected Agentforce agent — org prep, the one-time admin authorization, and a three-minute walkthrough video.
+  </Card>
   <Card title="Concepts" icon="book-open" href="/concepts/overview">
     The seven nouns — Project, Session, Annotation, Scenario, Evaluator, Evaluation, Agent Version — and how they connect in the evaluation loop.
   </Card>
-  <Card title="Tutorials" icon="rocket" href="/tutorials/quickstart">
+  <Card title="Tutorials" icon="graduation-cap" href="/tutorials/quickstart">
     Step-by-step walkthroughs — from your first 10 minutes in the product to running a full evaluation with the Trust Agent.
   </Card>
   <Card title="How-to guides" icon="wrench" href="/how-to/work-with-the-trust-agent">
-    Work with the Trust Agent, approve its writes, simulate with scenarios — plus runtime connection guides.
+    Work with the Trust Agent, approve its writes, simulate with scenarios — plus a connection guide for each supported platform.
   </Card>
   <Card title="API Reference" icon="code" href="/api-reference">
     The full `/v1` HTTP API — rendered from the release's OpenAPI spec. Every endpoint, schema, and request/response shape.
@@ -34,18 +37,21 @@ Provar Trust AI is an **agent evaluation platform** for the teams building, inte
 
 ## The evaluation loop in 60 seconds
 
-Trust AI is built around one core workflow: **connect → annotate → define → run → review → ship**.
+Trust AI is built around one loop: **connect → define → simulate → author → run → read → calibrate**. It closes back on itself — the last step tightens the tests the first one defined.
 
-1. **Connect** your agent — AWS Bedrock AgentCore, Salesforce Agentforce, or a Claude-managed agent — and ingest its real [Sessions](/concepts/sessions), including the agent's reasoning and model calls where the runtime provides them.
-2. **Annotate** sessions with pass/fail verdicts, severity, and notes — human judgment becomes the ground truth the automated judges are measured against.
-3. **Define** [Scenarios](/concepts/scenarios) — each one a named persona-and-goal test case with an authored expected output. Every project has one flat, searchable Scenarios list.
-4. **Pick** [Evaluators](/concepts/evaluators) — plain-language LLM judges you tailor with Passes-when / Fails-when rules — or adopt the Trust Library's recommended evaluators and OWASP-aligned starter safety scenarios in one move. Deterministic checks (expected actions and routes) live on each scenario's Expected Output.
-5. **Run** an [Evaluation](/concepts/evaluations) against a specific Agent Version — scenarios simulate one conversation per persona, and captured sessions can be graded directly.
-6. **Review** the dual-headline results — how often the agent passed, and how often the evaluators agreed with a human verdict — persona by persona, then refine and run again.
+**Before the loop: connect and profile.** Trust AI connects to **four** agent platforms, each with its own setup: [AWS Bedrock AgentCore](/how-to/connect-agentcore), [Salesforce Agentforce](/how-to/connect-agentforce), a [Claude Managed Agent](/how-to/connect-claude-managed-agent), and the [Conversational HTTP agent](/how-to/connect-http-agent) — any agent that accepts AG-UI run requests and streams AG-UI events back. Agentforce is the one that works differently: instead of handing over a key, a secret, or a certificate, a Salesforce administrator signs in once and approves TrustAI, which then deploys its own External Client App into the org and keeps the credentials server-side. Once an agent is connected, generate an [Agent Profile](/concepts/agent-profile) — a structured, reviewable read of what a specific [Agent Version](/concepts/agent-versions) can do, its tools, routes, and knowledge sources — so you write tests against the real surface instead of guessing at it.
 
-Then ingest the next batch of sessions and the loop continues. Read the full narrative at [The evaluation loop](/concepts/evaluation-loop). Starting from an empty project? Ask the Trust Agent — it takes you from connecting your agent, through an observe-only look at its behavior, to your first scored evaluation, all in one conversation. Work through the capstone tutorial: [Evaluate with the Trust Agent](/tutorials/evaluate-with-the-trust-agent).
+1. **Define** [Scenarios](/concepts/scenarios) — each one a named persona-and-goal test case with a stable id like `SCN-000123`. Author them by hand, save one from a [Playground](/concepts/playground) conversation, adopt the curated starters with **Add recommended scenarios**, or ask the Trust Agent to draft them. Every project keeps them in one flat, searchable Scenarios list.
+2. **Simulate** them against your connected agent. Each persona runs one conversation, and every simulated conversation lands as a real [Session](/concepts/sessions) beside the ones synced from your runtime.
+3. **Author** each scenario's **Expected Output** — the grading contract. Attach the evaluators that grade it, and set the deterministic checks: **Expected actions** and **Expected routes**, both picked from vocabulary Trust AI learned from your own sessions. Two kinds of [Evaluator](/concepts/evaluators) are yours to create, and the create form opens on a **Kind** chooser: an **LLM judge**, which grades against plain-language criteria you write, and a **Groundedness judge**, which [checks every claim against source material](/how-to/check-answers-against-source-material) and quotes the evidence. Attach a Groundedness judge and a **Reference material** section appears on the same tab, holding the documents that scenario's answers must be grounded in.
+4. **Run** an [Evaluation](/concepts/evaluations) from one launcher, scoped to a specific Agent Version — against scenarios, which simulate fresh conversations, or against sessions that already happened, which are graded as recorded. Repeat each test case up to four times for a reliability read.
+5. **Read** the results, grouped **by scenario**. The headline leads with **Pass rate** — how often the agent passed. **Evaluator accuracy** — how often the judges' combined verdict matched a human's — joins it as a second headline, but only once human verdicts exist to grade the judges against. Each leg stands down when it has nothing to report: a run with no behavioral grading reads **Not graded**, and the accuracy headline is simply absent rather than showing a zero.
+6. **Record** human [verdicts](/concepts/annotations) on the conversations — pass or fail, severity, notes. This is the ground truth the automated judges are measured against, and it is never a prerequisite for running an evaluation.
+7. **Calibrate** each judge against those verdicts until it agrees with your reviewers, then tighten the scenarios and run again.
 
-Administering the workspace? Manage members, teams, and per-project Viewer and Editor access from **Workspace settings** — no code required.
+Read the full narrative at [The evaluation loop](/concepts/evaluation-loop). Starting from an empty project? Ask the Trust Agent — it takes you from connecting your agent, through an observe-only look at its behavior, to your first scored evaluation, all in one conversation. Work through the capstone tutorial: [Evaluate with the Trust Agent](/tutorials/evaluate-with-the-trust-agent).
+
+Administering the workspace? Manage members, teams, and per-project Viewer and Editor access from **Workspace settings** — no code required. See [Administer workspace access](/how-to/administer-workspace-access).
 
 ## What's new
 

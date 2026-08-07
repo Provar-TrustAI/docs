@@ -22,11 +22,11 @@ That's one complete pass through [the evaluation loop](/concepts/evaluation-loop
 You'll need:
 
 - A Trust AI account with access to a workspace where you can create projects
-- An agent on one of the three platforms Trust AI connects to — **AWS Bedrock AgentCore**, **Salesforce Agentforce**, or **Claude Managed Agent** — plus its connection credentials, or an admin who has them
+- An agent on one of the four platforms Trust AI connects to — **AWS Bedrock AgentCore**, **Salesforce Agentforce**, **Claude Managed Agent**, or a **Conversational HTTP agent** — plus its connection credentials, or an admin who has them
 - About 10 minutes
 
 <Tip>
-  **No credentials at hand?** Start anyway. When you ask the Trust Agent to connect your agent, it hands you a plain-English, per-platform checklist of exactly what to gather — something you can forward to your admin. For AgentCore, the setup wizard produces an admin handoff package your AWS admin can deploy without you.
+  **No credentials at hand?** Start anyway. When you ask the Trust Agent to connect your agent, it hands you a plain-English checklist of exactly what to gather — something you can forward to your admin. For AgentCore, the setup wizard produces an admin handoff package your AWS admin can deploy without you.
 </Tip>
 
 ## The six steps
@@ -37,25 +37,34 @@ You'll need:
 
     Creating a Project is the one setup step you do before the Trust Agent comes into play — the conversation lives *inside* a Project, so you need one first. Open the project switcher at the top of the sidebar and click **Create new project** (on a workspace with no projects yet, you'll land on a **Create your first project** screen with a **New project** button instead). Name it after the agent under evaluation (e.g., "Acme Support Agent") — a description is optional — and click **Create project**.
 
-    **You should see:** you land inside the new Project. The left nav shows its surfaces: **New chat**, **Playground**, **Scenarios**, **Sessions**, **Evaluators**, **Evaluations**, **Requirements**, and **Project Settings** — all empty for now.
+    **You should see:** you land inside the new Project. The left nav shows its surfaces, top to bottom: **New chat**, **Playground**, **Requirements**, **Scenarios**, **Sessions**, **Evaluators**, **Evaluations**, and **Project Settings** — all empty for now. Requirements, Scenarios, Sessions, Evaluators, and Evaluations each carry a count badge, reading 0 on a new project.
   </Step>
 
   <Step title="Connect your agent">
-    Click **New chat**. On a brand-new project, the welcome screen greets you with four starter prompts that trace this exact tutorial: **Connect agent**, **Explore behaviour**, **Create scenarios**, and **Run evaluation**. Clicking one pre-fills the message box — nothing sends until you do.
+    Click **New chat**. On a brand-new project, the welcome screen shows four category pills that trace this exact tutorial: **Connect agent**, **Explore behaviour**, **Create scenarios**, and **Run evaluation**. Clicking a pill expands three suggested prompts underneath it; clicking one of those pre-fills the message box — nothing sends until you do.
 
     <Note>
       *Ask the Trust Agent:* "Help me connect the agent I want to test."
     </Note>
 
-    The agent first checks whether a build is already connected. If not, its guided connect flow covers **Salesforce Agentforce** and **Claude Managed Agent**: it asks which platform you're on, gives you a plain-English checklist of the credentials to gather, then sends you to the connection form to enter them. Secrets are write-only — once saved, Trust AI never displays them back.
+    The agent first checks whether an agent is already connected. If not, it opens a secure connection card **inside the chat** for either **Salesforce Agentforce** or **Claude Managed Agent**, and the connection completes there — you never leave the conversation. The card collects credentials directly; your key or secret is never shown to the model and never appears in the transcript. Once it resolves, the card's receipt names the agent you connected.
 
-    Prefer the manual path, or connecting an **AWS Bedrock AgentCore** agent? Open **Project Settings**, switch to the **Connection** tab, and click **Add connection**. You'll pick from the three platforms:
+    For Salesforce, that card is a short guided wizard: confirm your org, choose **Authorize TrustAI (recommended)**, approve TrustAI in Salesforce with an administrator account, then pick the agent to test.
+
+    Prefer the manual path, or connecting **AWS Bedrock AgentCore** or a **Conversational HTTP agent**? Open **Project Settings**, switch to the **Connection** tab, and click **Add connection**. The picker offers four platforms:
 
     - **AWS Bedrock AgentCore** — a guided setup wizard: prepare an admin handoff package, have your AWS admin deploy the cross-account role, then paste the role ARN back. Full walkthrough: [Connect an AWS Bedrock AgentCore agent](/how-to/connect-agentcore).
-    - **Salesforce Agentforce** — a form pointing at your Salesforce org (JWT sign-in via an External Client App is the recommended method). Full walkthrough: [Connect a Salesforce Agentforce agent](/how-to/connect-agentforce).
+    - **Salesforce Agentforce** — a two-step flow. Enter your org's URL, then click **Authorize in Salesforce with an administrator account**; Salesforce opens in a new tab and the connection is set up for you when the admin approves. Step two is picking the agent to test. Full walkthrough: [Connect a Salesforce Agentforce agent](/how-to/connect-agentforce).
     - **Claude Managed Agent** — a form for an Anthropic Managed Agent on Claude Platform on AWS. Full walkthrough: [Connect a Claude Managed Agent](/how-to/connect-claude-managed-agent).
+    - **Conversational HTTP agent** — for any agent that accepts AG-UI run requests and streams AG-UI events over SSE. Use this when your agent isn't on one of the named platforms. Full walkthrough: [Connect a Conversational HTTP agent](/how-to/connect-http-agent).
 
-    **You should see:** your agent listed as a connection on the **Connection** tab.
+    <Warning>
+      The Salesforce authorize step deploys a connected app into whichever org you sign in to. Point it at a Sandbox, not production.
+    </Warning>
+
+    Secrets are write-only throughout — once saved, Trust AI shows a **Configured** pill and the placeholder `•••• configured — leave blank to keep existing`, never the value back.
+
+    **You should see:** your agent listed as a connection on the **Connection** tab, with its current agent version named underneath.
   </Step>
 
   <Step title="Observe real sessions">
@@ -65,12 +74,12 @@ You'll need:
       *Ask the Trust Agent:* "Pull in some of my real conversations so we have material to work from."
     </Note>
 
-    Or do it by hand: open **Sessions** and click **Sync now** — it's a per-agent dropdown, so pick your connected agent. Conversations pulled from your platform land in the list with Source **External** (a Session's [Source](/concepts/sessions) is always one of **Scenario**, **Playground**, or **External**). Alongside Source, the list shows things like **Routed To**, turn count, and date.
+    Or do it by hand: open **Sessions** and click **Sync now** — it opens a per-agent picker, so choose your connected agent. Conversations pulled from your platform land in the list. By default the list shows **Session ID**, **Transcript**, **Routed To**, **Tools Called**, **Turns**, **Date**, and **Verdict** — the reserved human Pass/Fail column every project starts with. **Source** is one of the columns you add from **Add column**, and it reads exactly one of **Scenario**, **Playground**, or **External** (see [Sessions](/concepts/sessions)).
 
-    Click any Session to open it. The fly-in leads with the full **Transcript** — every turn, tool calls included — plus tabs for **Annotations**, **Evaluations**, and **Details**. Read one end to end; this is the raw material everything downstream grades.
+    Click any Session to open it. The fly-in leads with the full **Transcript** — every turn, tool calls included — plus tabs for **Annotations**, **Evaluations**, and **Details**. Read one end to end; this is the raw material everything downstream grades. A session nothing has scored yet reads **Not evaluated**.
 
     <Tip>
-      **Agent has no traffic yet?** Ask the Trust Agent: "Try my agent with a few example questions and show me how it responds." It runs an observe-only exploration — a real conversation with your connected agent, watched but not scored — so you can see its behavior before you define what "good" means.
+      **Agent has no traffic yet?** Ask the Trust Agent: "Try my agent with a few example questions and show me how it responds." It runs one open-ended conversation against the live agent and summarises what the agent is for, what it can do, the tone it takes, and where its guardrails sit. Nothing is graded — the point is to understand the agent first-hand before you define what "good" means.
     </Tip>
 
     **You should see:** the Sessions list populated, and at least one Session you've read end to end.
@@ -87,10 +96,14 @@ You'll need:
 
     The manual path is the Trust Library:
 
-    - On **Evaluators**, click **Add recommended** to adopt from the 12 recommended [Evaluators](/concepts/evaluators) — six Quality and six Safety presets, each a plain-language pass/fail judge.
-    - On **Scenarios**, click **Add recommended scenarios** to adopt from the 10 starter safety scenarios — one per failure mode in the OWASP Agentic AI Top 10.
+    - On **Evaluators**, click **Add recommended** to adopt from the 11 recommended [Evaluators](/concepts/evaluators) — **5 Quality** and **6 Safety** presets. Most return a pass/fail verdict; two of the Quality presets ("Answer is complete" and "Accomplished the goal") score on a 1–5 scale instead. Tick the ones you want; the confirm button names how many you've picked.
+    - On **Scenarios**, click **Add recommended scenarios** to adopt from the 10 starter safety scenarios — one per failure mode in the OWASP Top 10 for Agentic Applications.
 
     Everything you adopt becomes an ordinary, fully editable evaluator or scenario — no special status.
+
+    <Tip>
+      Writing one from scratch instead? **New evaluator** offers two kinds: **LLM judge** (freeform criteria another model grades against) and **Groundedness judge** (checks every claim against the reference material attached to a scenario's **Expected Output**). Structural checks — **Expected routes** and **Expected actions** — are no longer something you create as an evaluator; they live on each scenario's **Expected Output** tab.
+    </Tip>
 
     **You should see:** the Scenarios list populated, each scenario carrying a stable id like `SCN-000022`, and the Evaluators list showing your adopted judges.
   </Step>
@@ -102,7 +115,16 @@ You'll need:
       *Ask the Trust Agent:* "Run my first evaluation against the connected agent."
     </Note>
 
-    By hand: on **Scenarios**, click **Run** (select specific scenarios first, or leave the selection empty to run the current view). The evaluation launcher opens with a fan-out preview — one conversation per persona per scenario, simulated live against your connected agent, then graded by your evaluators. Confirm to launch. The same launcher also opens from **New evaluation** on the **Evaluations** page.
+    By hand: on **Scenarios**, use the **Run** split button (select specific scenarios first, or leave the selection empty to run the current view). Clicking **Run** launches **Run & evaluate**; the chevron beside it exposes both modes explicitly:
+
+    | Mode | What it does |
+    | --- | --- |
+    | **Run only** | Simulate without grading |
+    | **Run & evaluate** | Simulate + grade → creates an evaluation |
+
+    Either opens the launcher, which previews the fan-out before anything starts — how many scenarios, how many conversations will be simulated, and how many evaluator runs that adds up to. Each scenario is simulated once per attached persona, then graded by the evaluators inherited from that scenario. **Repeat each test case** (1–4) reruns every case so you can see how reliably the agent passes. Confirm with **Run evaluation**.
+
+    The same launcher opens from **New evaluation** on the **Evaluations** page, where you additionally choose what to evaluate — **Sessions** (grade conversations that already exist, no simulation) or **Scenarios**.
 
     You stay on the Scenarios list while the run executes: each scenario shows a live progress badge that settles as it finishes.
 
@@ -112,13 +134,25 @@ You'll need:
   <Step title="Read the results">
     Open the run from **Evaluations**.
 
-    The headline is the **pass rate** — how the agent did across the run. Every persona is scored on its own, so the per-persona matrix shows you *who* the agent struggles with, not just whether it struggles. A second headline, **evaluator accuracy**, fills in once you've recorded human Pass/Fail verdicts on sessions — it measures how often the automated judges agree with a person, grading the judges rather than the agent.
+    The run header carries the completed count and the date it ran, led by the pass rate — or by **Not graded**, when the run carries no behavioural grade at all. The results body then leads with a single headline stat, **Conversations passed**, e.g. "6 of 10 conversations". That stat reads **Not graded** too, captioned "No conversation has been scored yet", whenever nothing on the run was behaviourally graded — which is exactly what a **Run only** run looks like. Neither place ever shows a fabricated number.
 
-    Open any result to read the full conversation — the transcript labels itself **Simulated**. And if something outside the agent broke — a guardrail block, an infrastructure hiccup — that result is marked an environment problem and excluded from the score, never counted as an agent failure.
+    A second headline, **evaluator accuracy**, appears once you've recorded human Pass/Fail verdicts on sessions — it measures how often the automated judges agree with a person, grading the judges rather than the agent. Until then it is absent from the header entirely, and the **Evaluator accuracy** column on the **Evaluations** list reads as empty.
 
-    **You should see:** a scored run with a pass rate, per-persona results, and readable transcripts behind every verdict.
+    Below that is the results table. It opens **By scenario** — one summary per scenario and persona, expandable to its individual attempts. To flatten it, open the **Columns** menu in the results toolbar: the **View** toggle sits at the very top, offering **By scenario** and **Flat**. Each row names the persona that drove the conversation, and carries the **Final verdict** plus one column per evaluator, so you can see *which* check failed and *who* the agent struggled with.
+
+    Open any result to read the full conversation. The transcript labels how the result was produced, and there are exactly two labels: **Simulated** (the run drove a fresh conversation with your agent and scored that) or **Replayed** (the run replayed the scenario's saved input and scored the agent against it).
+
+    And if something outside the agent broke, that result is excluded from the score rather than counted as an agent failure — **Guardrail blocked**, **Environment problem**, and **Access blocked** all sit outside the denominator.
+
+    **You should see:** a scored run with a headline stat, a per-scenario results table, and readable transcripts behind every verdict.
   </Step>
 </Steps>
+
+## What Trust AI knows about your agent
+
+Alongside the loop above, Trust AI keeps a read of the agent itself — its **Agent Profile**. Open it from the current agent version row on **Project Settings → Connection**, or from the profile button in the **Playground** topbar. It has three tabs — **Overview**, **Tools**, and **Sources** — and a freshly connected agent starts with none of it: the panel reads "No profile has been generated for this agent build yet" with a **Generate profile** button.
+
+The profile is what makes the Trust Agent's exploration and scenario drafting specific to your agent instead of generic. Note the platform limit: profiling is available for Conversational HTTP, Claude Managed Agent, and Salesforce Agentforce connections. On an AgentCore connection the panel reports that agent profiling isn't available for this connection yet.
 
 ## You've walked the loop once
 
@@ -131,10 +165,10 @@ Connect, observe, define coverage, run, read — that's [the evaluation loop](/c
     Drive the whole loop by conversation — find sessions, generate scenarios, run an evaluation, approving each write.
   </Card>
   <Card title="Build your first Evaluator" icon="wand-sparkles" href="/tutorials/build-first-evaluator">
-    Author an LLM Judge or Structured Match Evaluator — or tailor a recommended one — and calibrate it against human verdicts.
+    Author an LLM judge or Groundedness judge — or tailor a recommended one — and calibrate it against human verdicts.
   </Card>
   <Card title="Run your first Evaluation" icon="chart-line" href="/tutorials/run-first-evaluation">
-    A deeper pass on the launcher: sources, fan-out, repeat trials, and reading run detail.
+    A deeper pass on the launcher: sources, fan-out, repeating each test case, and reading run detail.
   </Card>
   <Card title="Read the conceptual model" icon="book-open" href="/concepts/overview">
     The nouns and verbs Trust AI is built around, in one place. Worth ten minutes if anything in this tutorial felt under-explained.

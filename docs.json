@@ -56,6 +56,13 @@
             ]
           },
           {
+            "group": "Get started",
+            "icon": "rocket",
+            "pages": [
+              "get-started/connect-your-agentforce-agent"
+            ]
+          },
+          {
             "group": "Concepts",
             "icon": "book-open",
             "pages": [
@@ -69,6 +76,8 @@
               "concepts/evaluators",
               "concepts/evaluations",
               "concepts/agent-versions",
+              "concepts/agent-profile",
+              "concepts/requirements",
               "concepts/evaluation-loop",
               "concepts/saved-views",
               "concepts/tables-and-panels",
@@ -92,17 +101,25 @@
             "pages": [
               "how-to/work-with-the-trust-agent",
               "how-to/approve-agent-writes",
+              "how-to/manage-trust-agent-skills",
               "how-to/simulate-with-scenarios",
+              "how-to/author-expected-output-with-the-trust-agent",
+              "how-to/capture-requirements",
               "how-to/annotate-sessions",
               "how-to/evaluate-sessions",
               "how-to/connect-agentcore",
               "how-to/connect-agentforce",
               "how-to/connect-claude-managed-agent",
+              "how-to/connect-http-agent",
+              "how-to/manage-salesforce-connections",
               "how-to/connect-mcp-client",
               "how-to/write-llm-judge-prompt",
+              "how-to/check-answers-against-source-material",
               "how-to/calibrate-an-evaluator",
               "how-to/compare-agent-versions",
-              "how-to/administer-workspace-access"
+              "how-to/review-an-agent-profile",
+              "how-to/administer-workspace-access",
+              "how-to/track-credit-usage"
             ]
           },
           {

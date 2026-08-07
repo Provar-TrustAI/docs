@@ -1690,6 +1690,292 @@
     }
    }
   },
+  "/v1/connect/environments/data-connections/test": {
+   "post": {
+    "tags": [
+     "connect",
+     "connect"
+    ],
+    "summary": "Connect Test Data Connection",
+    "operationId": "connect_test_data_connection_v1_connect_environments_data_connections_test_post",
+    "parameters": [
+     {
+      "name": "wos_session",
+      "in": "cookie",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Wos Session"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/connect/environments": {
+   "post": {
+    "tags": [
+     "connect",
+     "connect"
+    ],
+    "summary": "Connect Create Environment",
+    "operationId": "connect_create_environment_v1_connect_environments_post",
+    "parameters": [
+     {
+      "name": "wos_session",
+      "in": "cookie",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Wos Session"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   },
+   "get": {
+    "tags": [
+     "connect",
+     "connect"
+    ],
+    "summary": "Connect List Environments",
+    "operationId": "connect_list_environments_v1_connect_environments_get",
+    "parameters": [
+     {
+      "name": "wos_session",
+      "in": "cookie",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Wos Session"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/connect/environments/{environment_id}/diagnostics": {
+   "get": {
+    "tags": [
+     "connect",
+     "connect"
+    ],
+    "summary": "Connect Environment Diagnostics",
+    "operationId": "connect_environment_diagnostics_v1_connect_environments__environment_id__diagnostics_get",
+    "parameters": [
+     {
+      "name": "wos_session",
+      "in": "cookie",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Wos Session"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/connect/environments/{environment_id}": {
+   "patch": {
+    "tags": [
+     "connect",
+     "connect"
+    ],
+    "summary": "Connect Update Environment",
+    "operationId": "connect_update_environment_v1_connect_environments__environment_id__patch",
+    "parameters": [
+     {
+      "name": "wos_session",
+      "in": "cookie",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Wos Session"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/connect/readiness/environments/{environment_id}": {
+   "get": {
+    "tags": [
+     "connect",
+     "connect"
+    ],
+    "summary": "Connect Environment Readiness",
+    "operationId": "connect_environment_readiness_v1_connect_readiness_environments__environment_id__get",
+    "parameters": [
+     {
+      "name": "wos_session",
+      "in": "cookie",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Wos Session"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
   "/v1/connect/agents": {
    "post": {
     "tags": [
@@ -10557,6 +10843,270 @@
     }
    }
   },
+  "/v1/scenarios/{scenario_id}/test-data": {
+   "get": {
+    "tags": [
+     "scenarios"
+    ],
+    "summary": "Get Test Data",
+    "description": "Return the scenario's stored test data (starting, expected, concurrency).",
+    "operationId": "get_test_data_v1_scenarios__scenario_id__test_data_get",
+    "parameters": [
+     {
+      "name": "scenario_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Scenario Id"
+      }
+     },
+     {
+      "name": "wos_session",
+      "in": "cookie",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Wos Session"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/TestDataResponse"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   },
+   "put": {
+    "tags": [
+     "scenarios"
+    ],
+    "summary": "Replace Test Data",
+    "description": "Replace the scenario's test data wholesale and return the result.",
+    "operationId": "replace_test_data_v1_scenarios__scenario_id__test_data_put",
+    "parameters": [
+     {
+      "name": "scenario_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Scenario Id"
+      }
+     },
+     {
+      "name": "wos_session",
+      "in": "cookie",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Wos Session"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/TestDataInput"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/TestDataResponse"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/scenarios/{scenario_id}/test-data/suggestions": {
+   "post": {
+    "tags": [
+     "scenarios"
+    ],
+    "summary": "Suggest Test Data",
+    "description": "Draft starting and/or expected records for the scenario from its environment.\n\nReturns review-only drafts in the saved-record shape; the author saves\nthe ones they want through the test-data PUT. Nothing is persisted by\nthis call.",
+    "operationId": "suggest_test_data_v1_scenarios__scenario_id__test_data_suggestions_post",
+    "parameters": [
+     {
+      "name": "scenario_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Scenario Id"
+      }
+     },
+     {
+      "name": "wos_session",
+      "in": "cookie",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Wos Session"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/SuggestRecordsInput"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/SuggestRecordsResponse"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/scenarios/{scenario_id}/test-data/imports": {
+   "post": {
+    "tags": [
+     "scenarios"
+    ],
+    "summary": "Import Test Data",
+    "description": "Read records from an uploaded file into review drafts for the scenario.\n\nThe file is really parsed (each row becomes one record, columns become\nits fields, the first column its friendly reference). Returns drafts in\nthe saved-record shape for the author to review; the author saves the\nones they want through the test-data PUT. Nothing is persisted by this\ncall. A file that can't be parsed is rejected with a plain-language 422.",
+    "operationId": "import_test_data_v1_scenarios__scenario_id__test_data_imports_post",
+    "parameters": [
+     {
+      "name": "scenario_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Scenario Id"
+      }
+     },
+     {
+      "name": "wos_session",
+      "in": "cookie",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Wos Session"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "multipart/form-data": {
+       "schema": {
+        "$ref": "#/components/schemas/Body_import_test_data_v1_scenarios__scenario_id__test_data_imports_post"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ImportRecordsResponse"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
   "/v1/projects/{project_id}/score-history": {
    "get": {
     "tags": [
@@ -12224,6 +12774,1239 @@
         }
        }
       }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/projects/{project_id}/requirements": {
+   "get": {
+    "tags": [
+     "requirements",
+     "requirements"
+    ],
+    "summary": "List Requirements",
+    "description": "List a project's requirements with computed rollup fields.\n\nEvery row carries the server-computed ``health``, link counts, pass\nrate, and last-evidence timestamp \u2014 clients never compute status.\nThe FE sidebar calls this with ``{limit: 1}`` and reads ``total``\nfor its count badge; the active-only default keeps drafts and\narchived rows out of that number. With ``scenario_id`` set, the same\nprojection is narrowed to the requirements linked to that scenario\n(draft + active) \u2014 the scenario fly-in's Requirements pills.",
+    "operationId": "list_requirements_v1_projects__project_id__requirements_get",
+    "parameters": [
+     {
+      "name": "project_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Project Id"
+      }
+     },
+     {
+      "name": "limit",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "integer",
+       "maximum": 200,
+       "minimum": 1,
+       "default": 50,
+       "title": "Limit"
+      }
+     },
+     {
+      "name": "offset",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "integer",
+       "minimum": 0,
+       "default": 0,
+       "title": "Offset"
+      }
+     },
+     {
+      "name": "lifecycle",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "enum": [
+          "draft",
+          "active",
+          "archived"
+         ],
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "description": "Filter by lifecycle. Omitted means ACTIVE only \u2014 drafts and archived requirements never inflate the default list or its total.",
+       "title": "Lifecycle"
+      },
+      "description": "Filter by lifecycle. Omitted means ACTIVE only \u2014 drafts and archived requirements never inflate the default list or its total."
+     },
+     {
+      "name": "scenario_id",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "description": "Scope to the requirements linked to this scenario, filtered to draft + active (archived excluded) \u2014 the scenario panel's requirement pills. A scenario outside this project 404s; an unlinked in-project scenario returns an empty list. When set, the lifecycle filter above does not apply.",
+       "title": "Scenario Id"
+      },
+      "description": "Scope to the requirements linked to this scenario, filtered to draft + active (archived excluded) \u2014 the scenario panel's requirement pills. A scenario outside this project 404s; an unlinked in-project scenario returns an empty list. When set, the lifecycle filter above does not apply."
+     },
+     {
+      "name": "wos_session",
+      "in": "cookie",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Wos Session"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/RequirementListResponse"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   },
+   "post": {
+    "tags": [
+     "requirements",
+     "requirements"
+    ],
+    "summary": "Create Requirement",
+    "description": "Create a requirement (human-authored ones land active by default).",
+    "operationId": "create_requirement_v1_projects__project_id__requirements_post",
+    "parameters": [
+     {
+      "name": "project_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Project Id"
+      }
+     },
+     {
+      "name": "wos_session",
+      "in": "cookie",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Wos Session"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/CreateRequirementInput"
+       }
+      }
+     }
+    },
+    "responses": {
+     "201": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/RequirementResponse"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/projects/{project_id}/requirements/extract": {
+   "post": {
+    "tags": [
+     "requirements",
+     "requirements"
+    ],
+    "summary": "Extract Requirements From Document",
+    "description": "Extract requirements from a pasted or uploaded document as drafts.\n\nOne synchronous LLM call decomposes the document into atomic\nachieve/avoid requirements and bulk-creates them as drafts, each with the\nverbatim source passage as provenance. Accepts a JSON ``{\"text\": ...}``\npaste or a multipart ``file`` upload (PDF / Word / plain text).",
+    "operationId": "extract_requirements_from_document_v1_projects__project_id__requirements_extract_post",
+    "parameters": [
+     {
+      "name": "project_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Project Id"
+      }
+     },
+     {
+      "name": "wos_session",
+      "in": "cookie",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Wos Session"
+      }
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ExtractRequirementsResponse"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    },
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "type": "object",
+        "properties": {
+         "text": {
+          "type": "string",
+          "description": "Pasted document text to extract requirements from."
+         }
+        },
+        "required": [
+         "text"
+        ]
+       }
+      },
+      "multipart/form-data": {
+       "schema": {
+        "type": "object",
+        "properties": {
+         "file": {
+          "type": "string",
+          "format": "binary",
+          "description": "A PDF, Word, or plain-text document to extract requirements from."
+         }
+        },
+        "required": [
+         "file"
+        ]
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/projects/{project_id}/requirements/quick-create": {
+   "post": {
+    "tags": [
+     "requirements",
+     "requirements"
+    ],
+    "summary": "Quick Create Requirement",
+    "description": "Title-only create, pre-linked to a scenario, in one transaction.\n\nBuilt for the scenario panel's requirement picker: the new\nrequirement lands active with a confirmed link to the given\nscenario, or nothing is written at all.",
+    "operationId": "quick_create_requirement_v1_projects__project_id__requirements_quick_create_post",
+    "parameters": [
+     {
+      "name": "project_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Project Id"
+      }
+     },
+     {
+      "name": "wos_session",
+      "in": "cookie",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Wos Session"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/QuickCreateRequirementInput"
+       }
+      }
+     }
+    },
+    "responses": {
+     "201": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/RequirementResponse"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/requirements/{requirement_id}": {
+   "get": {
+    "tags": [
+     "requirements",
+     "requirements"
+    ],
+    "summary": "Get Requirement",
+    "description": "One requirement with its computed rollup fields.",
+    "operationId": "get_requirement_v1_requirements__requirement_id__get",
+    "parameters": [
+     {
+      "name": "requirement_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Requirement Id"
+      }
+     },
+     {
+      "name": "wos_session",
+      "in": "cookie",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Wos Session"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/RequirementResponse"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   },
+   "patch": {
+    "tags": [
+     "requirements",
+     "requirements"
+    ],
+    "summary": "Update Requirement",
+    "description": "Partial content update (lifecycle changes use the actions below).",
+    "operationId": "update_requirement_v1_requirements__requirement_id__patch",
+    "parameters": [
+     {
+      "name": "requirement_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Requirement Id"
+      }
+     },
+     {
+      "name": "wos_session",
+      "in": "cookie",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Wos Session"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/UpdateRequirementInput"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/RequirementResponse"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   },
+   "delete": {
+    "tags": [
+     "requirements",
+     "requirements"
+    ],
+    "summary": "Discard Draft Requirement",
+    "description": "Discard a draft. Only drafts can be discarded (409 otherwise).",
+    "operationId": "discard_draft_requirement_v1_requirements__requirement_id__delete",
+    "parameters": [
+     {
+      "name": "requirement_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Requirement Id"
+      }
+     },
+     {
+      "name": "wos_session",
+      "in": "cookie",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Wos Session"
+      }
+     }
+    ],
+    "responses": {
+     "204": {
+      "description": "Successful Response"
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/requirements/{requirement_id}/activate": {
+   "post": {
+    "tags": [
+     "requirements",
+     "requirements"
+    ],
+    "summary": "Activate Requirement",
+    "description": "Promote a draft \u2014 or restore an archived requirement \u2014 to active.",
+    "operationId": "activate_requirement_v1_requirements__requirement_id__activate_post",
+    "parameters": [
+     {
+      "name": "requirement_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Requirement Id"
+      }
+     },
+     {
+      "name": "wos_session",
+      "in": "cookie",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Wos Session"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/RequirementResponse"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/requirements/{requirement_id}/archive": {
+   "post": {
+    "tags": [
+     "requirements",
+     "requirements"
+    ],
+    "summary": "Archive Requirement",
+    "description": "Archive an active requirement.",
+    "operationId": "archive_requirement_v1_requirements__requirement_id__archive_post",
+    "parameters": [
+     {
+      "name": "requirement_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Requirement Id"
+      }
+     },
+     {
+      "name": "wos_session",
+      "in": "cookie",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Wos Session"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/RequirementResponse"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/requirements/{requirement_id}/runs": {
+   "get": {
+    "tags": [
+     "requirements",
+     "requirements"
+    ],
+    "summary": "List Requirement Runs",
+    "description": "The requirement's per-run history, newest run first.\n\nOne row per completed run that evidenced any linked scenario, each\ncarrying the server-computed intersection verdict, pass rate,\nper-evaluator breakdown, and display-form failing-scenario examples\n\u2014 the Status tab renders these rows without any client-side\ncomputation.",
+    "operationId": "list_requirement_runs_v1_requirements__requirement_id__runs_get",
+    "parameters": [
+     {
+      "name": "requirement_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Requirement Id"
+      }
+     },
+     {
+      "name": "page",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "integer",
+       "minimum": 1,
+       "description": "1-indexed page number. Defaults to 1.",
+       "default": 1,
+       "title": "Page"
+      },
+      "description": "1-indexed page number. Defaults to 1."
+     },
+     {
+      "name": "page_size",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "integer",
+       "maximum": 200,
+       "minimum": 1,
+       "description": "Items per page. Defaults to 50. Maximum 200.",
+       "default": 50,
+       "title": "Page Size"
+      },
+      "description": "Items per page. Defaults to 50. Maximum 200."
+     },
+     {
+      "name": "wos_session",
+      "in": "cookie",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Wos Session"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/RequirementRunHistoryResponse"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/requirements/{requirement_id}/coverage": {
+   "get": {
+    "tags": [
+     "requirements",
+     "requirements"
+    ],
+    "summary": "Get Requirement Coverage",
+    "description": "The Coverage tab's fully server-computed projection.\n\nEvery linked scenario (all of them, no truncation) with its\nintersection verdict, the explicitly linked evaluators with their\nfail flags, and the derived \"via scenarios\" evaluator group \u2014 the\ntab renders with no client-side status computation.",
+    "operationId": "get_requirement_coverage_v1_requirements__requirement_id__coverage_get",
+    "parameters": [
+     {
+      "name": "requirement_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Requirement Id"
+      }
+     },
+     {
+      "name": "wos_session",
+      "in": "cookie",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Wos Session"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/RequirementCoverageResponse"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/requirements/{requirement_id}/links": {
+   "get": {
+    "tags": [
+     "requirements",
+     "requirements"
+    ],
+    "summary": "Get Requirement Links",
+    "description": "The requirement's scenario + evaluator links.",
+    "operationId": "get_requirement_links_v1_requirements__requirement_id__links_get",
+    "parameters": [
+     {
+      "name": "requirement_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Requirement Id"
+      }
+     },
+     {
+      "name": "wos_session",
+      "in": "cookie",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Wos Session"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/RequirementLinksResponse"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   },
+   "post": {
+    "tags": [
+     "requirements",
+     "requirements"
+    ],
+    "summary": "Update Requirement Links",
+    "description": "Batch add/remove scenario + evaluator links in one transaction.",
+    "operationId": "update_requirement_links_v1_requirements__requirement_id__links_post",
+    "parameters": [
+     {
+      "name": "requirement_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Requirement Id"
+      }
+     },
+     {
+      "name": "wos_session",
+      "in": "cookie",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Wos Session"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/BatchLinkInput"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/RequirementLinksResponse"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/projects/{project_id}/snapshots": {
+   "post": {
+    "tags": [
+     "project-snapshots"
+    ],
+    "summary": "Capture Snapshot",
+    "operationId": "capture_snapshot_v1_projects__project_id__snapshots_post",
+    "parameters": [
+     {
+      "name": "project_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Project Id"
+      }
+     },
+     {
+      "name": "wos_session",
+      "in": "cookie",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Wos Session"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/CreateSnapshotInput"
+       }
+      }
+     }
+    },
+    "responses": {
+     "201": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ProjectSnapshotResponse"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   },
+   "get": {
+    "tags": [
+     "project-snapshots"
+    ],
+    "summary": "List Snapshots",
+    "operationId": "list_snapshots_v1_projects__project_id__snapshots_get",
+    "parameters": [
+     {
+      "name": "project_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Project Id"
+      }
+     },
+     {
+      "name": "wos_session",
+      "in": "cookie",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Wos Session"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "array",
+         "items": {
+          "$ref": "#/components/schemas/ProjectSnapshotResponse"
+         },
+         "title": "Response List Snapshots V1 Projects  Project Id  Snapshots Get"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/projects/{project_id}/snapshots/evict-oldest": {
+   "post": {
+    "tags": [
+     "project-snapshots"
+    ],
+    "summary": "Evict Oldest Snapshot",
+    "operationId": "evict_oldest_snapshot_v1_projects__project_id__snapshots_evict_oldest_post",
+    "parameters": [
+     {
+      "name": "project_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Project Id"
+      }
+     },
+     {
+      "name": "wos_session",
+      "in": "cookie",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Wos Session"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "anyOf": [
+          {
+           "$ref": "#/components/schemas/EvictedSnapshotResponse"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "title": "Response Evict Oldest Snapshot V1 Projects  Project Id  Snapshots Evict Oldest Post"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/snapshots/{snapshot_id}/restore": {
+   "post": {
+    "tags": [
+     "project-snapshots"
+    ],
+    "summary": "Restore Snapshot",
+    "operationId": "restore_snapshot_v1_snapshots__snapshot_id__restore_post",
+    "parameters": [
+     {
+      "name": "snapshot_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Snapshot Id"
+      }
+     },
+     {
+      "name": "wos_session",
+      "in": "cookie",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Wos Session"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/RestoreResultResponse"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/snapshots/{snapshot_id}": {
+   "delete": {
+    "tags": [
+     "project-snapshots"
+    ],
+    "summary": "Delete Snapshot",
+    "operationId": "delete_snapshot_v1_snapshots__snapshot_id__delete",
+    "parameters": [
+     {
+      "name": "snapshot_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Snapshot Id"
+      }
+     },
+     {
+      "name": "wos_session",
+      "in": "cookie",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Wos Session"
+      }
+     }
+    ],
+    "responses": {
+     "204": {
+      "description": "Successful Response"
      },
      "422": {
       "description": "Validation Error",
@@ -14279,6 +16062,41 @@
     ],
     "title": "AuthUserResponse"
    },
+   "BatchLinkInput": {
+    "properties": {
+     "add_scenario_ids": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array",
+      "title": "Add Scenario Ids"
+     },
+     "remove_scenario_ids": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array",
+      "title": "Remove Scenario Ids"
+     },
+     "add_evaluator_ids": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array",
+      "title": "Add Evaluator Ids"
+     },
+     "remove_evaluator_ids": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array",
+      "title": "Remove Evaluator Ids"
+     }
+    },
+    "type": "object",
+    "title": "BatchLinkInput",
+    "description": "Batch add/remove of scenario+evaluator links, one transaction.\n\nAdds are validated all-or-nothing (any unresolvable id writes\nnothing) and are idempotent for already-linked pairs; removes of\nabsent pairs are no-ops."
+   },
    "BehavioralRule": {
     "properties": {
      "rule_id": {
@@ -14345,6 +16163,37 @@
     ],
     "title": "BillingVerdictNotice",
     "description": "The surfaced billing verdict on a launch/create response (warn, or bypassed block).\n\nAttached to the run/simulation/calibration response so the FE can render a soft\nusage banner without a second round-trip. ``None`` on the response when the\nverdict was ``allow`` (nothing to say). ``decision`` is the raw\n:data:`~trustai_core.billing.model.Decision` string; ``bypassed`` is ``True`` only\nwhen a ``block`` was allowed to proceed under the dev enforcement bypass.\n\n``used_pct`` is the binding window's net-consumption-over-limit **percentage** (0\u2013100+,\ne.g. ``90.0`` for a workspace 90% through its pool) \u2014 the engineer-facing figure the\nverdict already reports (SC-009), lifted from a ratio to a percent so the FE can render\n\"you're approaching your credit limit (N%)\" without re-deriving it. Fail-soft: ``None``\nwhen the verdict named no binding cap or reported no usage ratio (never blocks the notice)."
+   },
+   "Body_import_test_data_v1_scenarios__scenario_id__test_data_imports_post": {
+    "properties": {
+     "file": {
+      "type": "string",
+      "contentMediaType": "application/octet-stream",
+      "title": "File",
+      "description": "The spreadsheet to read records from."
+     },
+     "phase": {
+      "type": "string",
+      "enum": [
+       "starting",
+       "expected"
+      ],
+      "title": "Phase",
+      "description": "Whether these records are planted before the run or checked after it.",
+      "default": "starting"
+     },
+     "record_type": {
+      "type": "string",
+      "title": "Record Type",
+      "description": "What kind of record each row is, e.g. an order or a customer."
+     }
+    },
+    "type": "object",
+    "required": [
+     "file",
+     "record_type"
+    ],
+    "title": "Body_import_test_data_v1_scenarios__scenario_id__test_data_imports_post"
    },
    "Body_upload_scenarios_csv_v1_scenarios_upload_post": {
     "properties": {
@@ -15123,6 +16972,50 @@
     "title": "CohortBreakdownResponse",
     "description": "Row-cohort counts for one ``(dataset, agent version)`` pairing.\n\nThe new-run form renders these as two cards \u2014 \"Agent pass rate\"\n(``agent_testable`` / ``total_rows``, with ``currently_failing`` and\n``unusable`` as inline notes) and \"Evaluator accuracy\"\n(``evaluator_testable`` / ``total_rows``).\n\nA row's cohort is decided by its value in the dataset's pass/fail\nannotation column (the column whose ``type == 'pass_fail'``). When a\ndataset has no pass/fail column every row counts as ``unusable``."
    },
+   "ConcurrencyOption": {
+    "properties": {
+     "mode": {
+      "type": "string",
+      "enum": [
+       "reads",
+       "own",
+       "solo"
+      ],
+      "title": "Mode",
+      "description": "The stored concurrency choice this option sets."
+     },
+     "title": {
+      "type": "string",
+      "title": "Title",
+      "description": "The plain-language question-answer this option represents."
+     },
+     "description": {
+      "type": "string",
+      "title": "Description",
+      "description": "What choosing this option means for the run."
+     },
+     "summary": {
+      "type": "string",
+      "title": "Summary",
+      "description": "A short phrase for the at-a-glance summary."
+     },
+     "selected": {
+      "type": "boolean",
+      "title": "Selected",
+      "description": "Whether this is the scenario's current choice."
+     }
+    },
+    "type": "object",
+    "required": [
+     "mode",
+     "title",
+     "description",
+     "summary",
+     "selected"
+    ],
+    "title": "ConcurrencyOption",
+    "description": "One concurrency choice, presented in plain language.\n\n``mode`` is the stable stored value; ``title`` / ``description`` /\n``summary`` are the human presentation. The editor renders the\noptions as explain-each-option radio cards \u2014 the raw flag is never the\nonly thing shown."
+   },
    "ContentFingerprint": {
     "properties": {
      "algorithm": {
@@ -15442,6 +17335,109 @@
     ],
     "title": "CreateProjectInput"
    },
+   "CreateRequirementInput": {
+    "properties": {
+     "title": {
+      "type": "string",
+      "maxLength": 500,
+      "minLength": 1,
+      "title": "Title"
+     },
+     "description": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Description"
+     },
+     "acceptance_criteria": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array",
+      "title": "Acceptance Criteria"
+     },
+     "kind": {
+      "$ref": "#/components/schemas/RequirementKind",
+      "default": "achieve"
+     },
+     "lifecycle": {
+      "type": "string",
+      "enum": [
+       "draft",
+       "active"
+      ],
+      "title": "Lifecycle",
+      "default": "active"
+     },
+     "tags": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array",
+      "title": "Tags"
+     },
+     "source_kind": {
+      "$ref": "#/components/schemas/RequirementSourceKind",
+      "default": "manual"
+     },
+     "source_quote": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Source Quote"
+     },
+     "source_ref": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Source Ref"
+     },
+     "source_session_id": {
+      "anyOf": [
+       {
+        "type": "string",
+        "format": "uuid"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Source Session Id"
+     },
+     "source_file_id": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Source File Id"
+     }
+    },
+    "type": "object",
+    "required": [
+     "title"
+    ],
+    "title": "CreateRequirementInput",
+    "description": "Full create. Human-authored requirements land ``active`` by\ndefault (human-typed is human-reviewed); agent flows create drafts\nexplicitly."
+   },
    "CreateScenarioInput": {
     "properties": {
      "project_id": {
@@ -15707,6 +17703,22 @@
     ],
     "title": "CreateSimulationResponse",
     "description": "Returned from ``POST /v1/projects/{project_id}/simulations``."
+   },
+   "CreateSnapshotInput": {
+    "properties": {
+     "name": {
+      "type": "string",
+      "maxLength": 120,
+      "minLength": 1,
+      "title": "Name",
+      "description": "A label for this snapshot"
+     }
+    },
+    "type": "object",
+    "required": [
+     "name"
+    ],
+    "title": "CreateSnapshotInput"
    },
    "CreateTeamInput": {
     "properties": {
@@ -18783,6 +20795,36 @@
     "title": "EvaluatorVersionResponse",
     "description": "Response schema for an evaluator version."
    },
+   "EvictedSnapshotResponse": {
+    "properties": {
+     "id": {
+      "type": "string",
+      "title": "Id"
+     },
+     "project_id": {
+      "type": "string",
+      "title": "Project Id"
+     },
+     "name": {
+      "type": "string",
+      "title": "Name"
+     },
+     "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Created At"
+     }
+    },
+    "type": "object",
+    "required": [
+     "id",
+     "project_id",
+     "name",
+     "created_at"
+    ],
+    "title": "EvictedSnapshotResponse",
+    "description": "Body of the eviction endpoint. Mirrors a subset of\n``ProjectSnapshotResponse`` so the frontend can confirm which\nsnapshot was removed."
+   },
    "EvidenceCoverage": {
     "properties": {
      "references": {
@@ -19096,6 +21138,40 @@
     "title": "ExpectedActionResponse",
     "description": "A stored tool-call assertion as returned to the editor."
    },
+   "ExpectedFieldInput": {
+    "properties": {
+     "key": {
+      "type": "string",
+      "minLength": 1,
+      "title": "Key",
+      "description": "The field's name, as the agent sees it."
+     },
+     "value": {
+      "type": "string",
+      "title": "Value",
+      "description": "The value this field should hold once the run finishes."
+     },
+     "tolerance": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Tolerance",
+      "description": "How close counts as correct, in plain words. Leave empty for an exact match."
+     }
+    },
+    "type": "object",
+    "required": [
+     "key",
+     "value"
+    ],
+    "title": "ExpectedFieldInput",
+    "description": "One field on an expected-end-state record being saved.\n\n``tolerance`` is an optional human allowance (\"\u00b1 $0.01\", \"exact\") so\na close-enough value still passes \u2014 a readable hint, not a parsed\nnumber. Omit it for an exact-match field."
+   },
    "ExpectedOutputInput": {
     "properties": {
      "expected_actions": {
@@ -19189,6 +21265,82 @@
     "title": "ExpectedOutputResponse",
     "description": "The full stored expected-output contract for one scenario."
    },
+   "ExpectedRecordInput": {
+    "properties": {
+     "label": {
+      "type": "string",
+      "minLength": 1,
+      "title": "Label",
+      "description": "The friendly reference this record is known by, e.g. \u201cthe refundable order\u201d."
+     },
+     "record_type": {
+      "type": "string",
+      "minLength": 1,
+      "title": "Record Type",
+      "description": "What kind of record this is, e.g. an order or a customer."
+     },
+     "fields": {
+      "items": {
+       "$ref": "#/components/schemas/ExpectedFieldInput"
+      },
+      "type": "array",
+      "title": "Fields",
+      "description": "The field values to check after the run, each with an optional tolerance."
+     },
+     "line_items": {
+      "items": {
+       "$ref": "#/components/schemas/LineItemInput"
+      },
+      "type": "array",
+      "title": "Line Items",
+      "description": "Supporting lines to check, e.g. the lines on an order."
+     }
+    },
+    "type": "object",
+    "required": [
+     "label",
+     "record_type"
+    ],
+    "title": "ExpectedRecordInput",
+    "description": "An expected-end-state record being created or replaced."
+   },
+   "ExpectedRecordResponse": {
+    "properties": {
+     "label": {
+      "type": "string",
+      "title": "Label",
+      "description": "The friendly reference this record is known by."
+     },
+     "record_type": {
+      "type": "string",
+      "title": "Record Type",
+      "description": "What kind of record this is."
+     },
+     "fields": {
+      "items": {
+       "$ref": "#/components/schemas/ExpectedFieldInput"
+      },
+      "type": "array",
+      "title": "Fields",
+      "description": "The field values checked after the run, each with an optional tolerance."
+     },
+     "line_items": {
+      "items": {
+       "$ref": "#/components/schemas/LineItemInput"
+      },
+      "type": "array",
+      "title": "Line Items",
+      "description": "Supporting lines checked after the run."
+     }
+    },
+    "type": "object",
+    "required": [
+     "label",
+     "record_type"
+    ],
+    "title": "ExpectedRecordResponse",
+    "description": "A stored expected-end-state record as returned to the editor."
+   },
    "ExpectedRouteInput": {
     "properties": {
      "name": {
@@ -19239,6 +21391,51 @@
     ],
     "title": "ExpectedRouteResponse",
     "description": "A stored route assertion as returned to the editor."
+   },
+   "ExtractRequirementsResponse": {
+    "properties": {
+     "created_count": {
+      "type": "integer",
+      "title": "Created Count"
+     },
+     "drafts": {
+      "items": {
+       "$ref": "#/components/schemas/ExtractedRequirementDraft"
+      },
+      "type": "array",
+      "title": "Drafts"
+     }
+    },
+    "type": "object",
+    "required": [
+     "created_count"
+    ],
+    "title": "ExtractRequirementsResponse",
+    "description": "Result of a one-shot document \u2192 drafts extraction.\n\n``created_count`` is the number of draft requirements written; ``drafts``\nlists them in creation order. Every row lands as a ``draft`` for the\nuser to review and promote from the Requirements page \u2014 a bulk extract\nnever floods the coverage report with unvetted active requirements."
+   },
+   "ExtractedRequirementDraft": {
+    "properties": {
+     "id": {
+      "type": "string",
+      "title": "Id"
+     },
+     "display_id": {
+      "type": "string",
+      "title": "Display Id"
+     },
+     "title": {
+      "type": "string",
+      "title": "Title"
+     }
+    },
+    "type": "object",
+    "required": [
+     "id",
+     "display_id",
+     "title"
+    ],
+    "title": "ExtractedRequirementDraft",
+    "description": "One freshly created draft from a document extraction.\n\nA deliberately thin projection \u2014 the extract endpoint returns just what\nthe import modal needs to confirm the write and deep-link each draft:\nits id, the human-readable ``REQ-{n}`` handle, and the title."
    },
    "FeatureFlags": {
     "properties": {
@@ -19402,6 +21599,56 @@
      "project_id"
     ],
     "title": "ImportPackInput"
+   },
+   "ImportRecordsResponse": {
+    "properties": {
+     "available": {
+      "type": "boolean",
+      "title": "Available",
+      "description": "Whether the file's columns could be checked against the environment. Parsing still works when this is false."
+     },
+     "starting_records": {
+      "items": {
+       "$ref": "#/components/schemas/StartingRecordResponse"
+      },
+      "type": "array",
+      "title": "Starting Records",
+      "description": "Records read from the file to plant before the run."
+     },
+     "expected_records": {
+      "items": {
+       "$ref": "#/components/schemas/ExpectedRecordResponse"
+      },
+      "type": "array",
+      "title": "Expected Records",
+      "description": "Records read from the file to check after the run."
+     },
+     "record_count": {
+      "type": "integer",
+      "minimum": 0.0,
+      "title": "Record Count",
+      "description": "How many records were read from the file."
+     },
+     "detail": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Detail",
+      "description": "A plain-language note, e.g. that the environment's fields couldn't be checked."
+     }
+    },
+    "type": "object",
+    "required": [
+     "available",
+     "record_count"
+    ],
+    "title": "ImportRecordsResponse",
+    "description": "Records parsed from an uploaded file, for the author to review.\n\nThe \"Import from a file\" path parses a spreadsheet into draft records\nin the saved-record shape \u2014 exactly like a suggestion \u2014 so the author\ncan review them and save the ones they want through the Test Data PUT.\nNothing is persisted by the import call itself.\n\n``available`` reports whether the file's columns could be grounded\nagainst the environment's real field schema. That grounding is gated\nbehind the engine's environment read; until it lands the import still\nparses the file and returns drafts, so ``available`` stays true and\nthe columns pass through unvalidated. When a future engine-backed\ngrounder can't read the environment, ``available`` is false and\n``detail`` carries a plain-language note the editor surfaces.\n\nDrafts land in whichever phase the author imported into \u2014 records to\nplant before the run or to check after it \u2014 mirroring the suggest\ncontract so the editor handles both the same way."
    },
    "ImportSessionsInput": {
     "properties": {
@@ -19784,6 +22031,40 @@
     ],
     "title": "LaunchEvaluationInput",
     "description": "The unified launcher's create payload (the locked onConfirm shape).\n\nOne typed body backs all four create branches the EvaluationLauncher\nmodal can emit. Everything is inferred from the entry context the\nuser opened the modal from; the user assembles almost nothing.\n\nThe two orthogonal dimensions:\n\n* ``source`` \u2014 ``\"scenarios\"`` grades a fresh simulation per scenario\n  (an agent must run; evaluators are inherited, not picked);\n  ``\"sessions\"`` grades already-recorded sessions (LLM judges are\n  picked; nothing is simulated).\n* ``scope`` \u2014 ``\"bulk\"`` creates a named evaluation; ``\"one-off\"`` is\n  an unnamed, single-item evaluation homed on the session it ran\n  against.\n\n``run_only`` rides on top of scenarios-mode: simulate the\nconversations without grading them (a cold-start for a brand-new\nscenario that has no observed vocabulary yet).\n\n``items`` are the resolved ids the launch targets \u2014 scenario ids when\n``source == \"scenarios\"``, session ids when ``source == \"sessions\"``.\nThe FE maps its camelCase ``evaluatorIds`` / ``agent`` /\n``viewName`` onto the snake_case fields here, and reduces the picked\nconnected-agent object to its ``agent_version_id``."
+   },
+   "LineItemInput": {
+    "properties": {
+     "name": {
+      "type": "string",
+      "minLength": 1,
+      "title": "Name",
+      "description": "What this line is, in plain words."
+     },
+     "amount": {
+      "type": "string",
+      "title": "Amount",
+      "description": "The amount this line should show after the run."
+     },
+     "tolerance": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Tolerance",
+      "description": "How close this line's amount can be and still pass."
+     }
+    },
+    "type": "object",
+    "required": [
+     "name",
+     "amount"
+    ],
+    "title": "LineItemInput",
+    "description": "One supporting line on an expected record (e.g. an order line)."
    },
    "LogoutResponse": {
     "properties": {
@@ -20976,6 +23257,103 @@
     ],
     "title": "ProjectResponse"
    },
+   "ProjectSnapshotResponse": {
+    "properties": {
+     "id": {
+      "type": "string",
+      "title": "Id"
+     },
+     "project_id": {
+      "type": "string",
+      "title": "Project Id"
+     },
+     "name": {
+      "type": "string",
+      "title": "Name"
+     },
+     "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Created At"
+     },
+     "created_by": {
+      "type": "string",
+      "title": "Created By"
+     },
+     "last_restored_at": {
+      "anyOf": [
+       {
+        "type": "string",
+        "format": "date-time"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Last Restored At"
+     },
+     "last_restored_by": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Last Restored By"
+     },
+     "row_count": {
+      "type": "integer",
+      "title": "Row Count",
+      "description": "Total rows captured across every in-scope table"
+     },
+     "table_count": {
+      "type": "integer",
+      "title": "Table Count",
+      "description": "Number of in-scope tables that contributed at least one row"
+     },
+     "size_bytes": {
+      "type": "integer",
+      "title": "Size Bytes",
+      "description": "Approximate size of the JSON payload in bytes"
+     },
+     "schema_version": {
+      "type": "string",
+      "title": "Schema Version",
+      "description": "Alembic revision of the database schema at capture time"
+     },
+     "contents": {
+      "anyOf": [
+       {
+        "additionalProperties": {
+         "type": "integer"
+        },
+        "type": "object"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Contents",
+      "description": "Per-domain row counts captured in this snapshot \u2014 datasets, sessions, evaluators, evaluation_runs, trust_agent_tasks. Empty dict for snapshots captured before this field existed."
+     }
+    },
+    "type": "object",
+    "required": [
+     "id",
+     "project_id",
+     "name",
+     "created_at",
+     "created_by",
+     "row_count",
+     "table_count",
+     "size_bytes",
+     "schema_version"
+    ],
+    "title": "ProjectSnapshotResponse",
+    "description": "Snapshot metadata exposed to the API.\n\nThe ``payload`` column is intentionally NOT exposed here \u2014 it can\nbe hundreds of kilobytes of mixed-shape rows from across every\ndomain in scope, and there is no UI for rendering it."
+   },
    "ProviderUsage": {
     "properties": {
      "provider": {
@@ -21040,6 +23418,27 @@
      "seed_version"
     ],
     "title": "ProvisioningProjection"
+   },
+   "QuickCreateRequirementInput": {
+    "properties": {
+     "title": {
+      "type": "string",
+      "maxLength": 500,
+      "minLength": 1,
+      "title": "Title"
+     },
+     "scenario_id": {
+      "type": "string",
+      "title": "Scenario Id"
+     }
+    },
+    "type": "object",
+    "required": [
+     "title",
+     "scenario_id"
+    ],
+    "title": "QuickCreateRequirementInput",
+    "description": "Quick create from the scenario panel's picker: title-only, lands\n``active``, pre-linked to the given scenario \u2014 one transaction."
    },
    "RecentRunItem": {
     "properties": {
@@ -21327,6 +23726,27 @@
     "title": "RecordReviewInput",
     "description": "The review decision a POST records for one revision.\n\nWho decided and when are stamped by the server from the authenticated\ncaller \u2014 attribution is never client-supplied."
    },
+   "ReferenceDataSet": {
+    "properties": {
+     "label": {
+      "type": "string",
+      "title": "Label",
+      "description": "What this reference data set is, e.g. a product catalog."
+     },
+     "detail": {
+      "type": "string",
+      "title": "Detail",
+      "description": "A one-line description of the set, e.g. its size and origin."
+     }
+    },
+    "type": "object",
+    "required": [
+     "label",
+     "detail"
+    ],
+    "title": "ReferenceDataSet",
+    "description": "One environment-owned reference data set, read-only here.\n\nReference data is large, externally-owned data the agent reads but\ntests never create or reset. It is environment-owned, so it is read\nthrough the environment, not authored on the scenario. Until the\nenvironment read API lands, this is always empty and ``available`` is\nfalse \u2014 the editor shows its read-only / paused states accordingly."
+   },
    "ReferenceDocumentInput": {
     "properties": {
      "title": {
@@ -21551,6 +23971,799 @@
     "title": "ReorderSessionAnnotationColumnsInput",
     "description": "Body for ``POST .../sessions/annotation-columns/reorder``.\n\n``keys`` is the desired display order. The service rejects requests\nwhose ``keys`` aren't a strict permutation of the project's current\ncolumn keys \u2014 adds / removes go through create / delete."
    },
+   "RequirementCoverageEvaluator": {
+    "properties": {
+     "id": {
+      "type": "string",
+      "title": "Id"
+     },
+     "name": {
+      "type": "string",
+      "title": "Name"
+     },
+     "failing": {
+      "type": "boolean",
+      "title": "Failing",
+      "default": false
+     }
+    },
+    "type": "object",
+    "required": [
+     "id",
+     "name"
+    ],
+    "title": "RequirementCoverageEvaluator",
+    "description": "One explicitly-linked evaluator in the Coverage tab.\n\n``failing`` is true when this evaluator's fail-dominated verdict was\n``fail`` on any linked scenario's latest evidence \u2014 the fail flag the\nexplicit-evaluator row carries."
+   },
+   "RequirementCoverageResponse": {
+    "properties": {
+     "scenarios": {
+      "items": {
+       "$ref": "#/components/schemas/RequirementCoverageScenario"
+      },
+      "type": "array",
+      "title": "Scenarios"
+     },
+     "evaluators": {
+      "items": {
+       "$ref": "#/components/schemas/RequirementCoverageEvaluator"
+      },
+      "type": "array",
+      "title": "Evaluators"
+     },
+     "via_scenario_evaluators": {
+      "items": {
+       "$ref": "#/components/schemas/RequirementCoverageViaScenarioEvaluator"
+      },
+      "type": "array",
+      "title": "Via Scenario Evaluators"
+     }
+    },
+    "type": "object",
+    "title": "RequirementCoverageResponse",
+    "description": "The fly-in Coverage tab's fully server-computed projection.\n\nEvery linked scenario (ALL of them, no truncation) with its\nintersection verdict, the explicitly-linked evaluators with their\nfailing flags, and the derived \"via scenarios\" evaluator group \u2014 so\nthe tab renders with zero client-side status computation."
+   },
+   "RequirementCoverageScenario": {
+    "properties": {
+     "id": {
+      "type": "string",
+      "title": "Id"
+     },
+     "display_label": {
+      "type": "string",
+      "title": "Display Label"
+     },
+     "name": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Name"
+     },
+     "session_count": {
+      "type": "integer",
+      "title": "Session Count",
+      "default": 0
+     },
+     "verdict": {
+      "anyOf": [
+       {
+        "type": "string",
+        "enum": [
+         "pass",
+         "fail"
+        ]
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Verdict"
+     }
+    },
+    "type": "object",
+    "required": [
+     "id",
+     "display_label"
+    ],
+    "title": "RequirementCoverageScenario",
+    "description": "One linked scenario in the Coverage tab, display form.\n\n``display_label`` is the canonical ``SCN-{display_id:06d}`` handle \u2014\nalways present and non-null even when the scenario carries no author\n``name``. ``id`` is kept for deep links only (opening the scenario\nfly-in); the UI never renders it. ``verdict`` is the requirement's\nintersection verdict for this scenario over its latest non-excluded\nevidence (``passed_all`` fallback when the requirement has no\nexplicit evaluator links); null when the scenario has produced no\nevidence under the lens. The row's fail tint keys off ``verdict``."
+   },
+   "RequirementCoverageViaScenarioEvaluator": {
+    "properties": {
+     "id": {
+      "type": "string",
+      "title": "Id"
+     },
+     "name": {
+      "type": "string",
+      "title": "Name"
+     }
+    },
+    "type": "object",
+    "required": [
+     "id",
+     "name"
+    ],
+    "title": "RequirementCoverageViaScenarioEvaluator",
+    "description": "One evaluator surfaced through the linked scenarios' own\nattachments but NOT explicitly linked to the requirement.\n\nThe display-only \"via scenarios\" group: the concrete identities\nbehind the derived coverage leg. It never gates the headline status."
+   },
+   "RequirementEvaluatorLinkResponse": {
+    "properties": {
+     "id": {
+      "type": "string",
+      "title": "Id"
+     },
+     "evaluator_id": {
+      "type": "string",
+      "title": "Evaluator Id"
+     },
+     "origin": {
+      "$ref": "#/components/schemas/RequirementLinkOrigin"
+     },
+     "status": {
+      "$ref": "#/components/schemas/RequirementLinkStatus"
+     },
+     "confidence": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Confidence"
+     },
+     "rationale": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Rationale"
+     },
+     "confirmed_at": {
+      "anyOf": [
+       {
+        "type": "string",
+        "format": "date-time"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Confirmed At"
+     },
+     "created_by": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Created By"
+     },
+     "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Created At"
+     }
+    },
+    "type": "object",
+    "required": [
+     "id",
+     "evaluator_id",
+     "origin",
+     "status",
+     "created_at"
+    ],
+    "title": "RequirementEvaluatorLinkResponse",
+    "description": "One requirement\u2192evaluator link with its review state."
+   },
+   "RequirementHealth": {
+    "type": "string",
+    "enum": [
+     "archived",
+     "draft",
+     "uncovered",
+     "partially_covered",
+     "failing",
+     "not_yet_run",
+     "passing"
+    ],
+    "title": "RequirementHealth",
+    "description": "The computed rollup status \u2014 one closed set, first match wins.\n\nDeliberately distinct from :class:`RequirementLifecycle`: the wire\nexposes the lifecycle under ``status`` (the nexus-compatible name)\nand this computed health under ``health``."
+   },
+   "RequirementKind": {
+    "type": "string",
+    "enum": [
+     "achieve",
+     "avoid"
+    ],
+    "title": "RequirementKind",
+    "description": "Whether the requirement describes a behaviour to achieve or avoid."
+   },
+   "RequirementLifecycle": {
+    "type": "string",
+    "enum": [
+     "draft",
+     "active",
+     "archived"
+    ],
+    "title": "RequirementLifecycle",
+    "description": "Editorial lifecycle of a requirement."
+   },
+   "RequirementLinkOrigin": {
+    "type": "string",
+    "enum": [
+     "human",
+     "agent",
+     "auto"
+    ],
+    "title": "RequirementLinkOrigin",
+    "description": "Who created a requirement\u2194scenario/evaluator link."
+   },
+   "RequirementLinkStatus": {
+    "type": "string",
+    "enum": [
+     "confirmed",
+     "suggested",
+     "suspect"
+    ],
+    "title": "RequirementLinkStatus",
+    "description": "Confidence state of a link \u2014 confirmed by a human, suggested by an\nagent, or suspect (flagged for review after content drift)."
+   },
+   "RequirementLinksResponse": {
+    "properties": {
+     "scenarios": {
+      "items": {
+       "$ref": "#/components/schemas/RequirementScenarioLinkResponse"
+      },
+      "type": "array",
+      "title": "Scenarios"
+     },
+     "evaluators": {
+      "items": {
+       "$ref": "#/components/schemas/RequirementEvaluatorLinkResponse"
+      },
+      "type": "array",
+      "title": "Evaluators"
+     }
+    },
+    "type": "object",
+    "title": "RequirementLinksResponse",
+    "description": "A requirement's links, both kinds, oldest first."
+   },
+   "RequirementListResponse": {
+    "properties": {
+     "items": {
+      "items": {
+       "$ref": "#/components/schemas/RequirementResponse"
+      },
+      "type": "array",
+      "title": "Items"
+     },
+     "page": {
+      "type": "integer",
+      "title": "Page",
+      "description": "1-indexed page number returned.",
+      "default": 1
+     },
+     "page_size": {
+      "type": "integer",
+      "title": "Page Size",
+      "description": "Items per page returned.",
+      "default": 50
+     },
+     "total": {
+      "type": "integer",
+      "title": "Total",
+      "description": "Total number of items matching the filter set.",
+      "default": 0
+     },
+     "total_pages": {
+      "type": "integer",
+      "title": "Total Pages",
+      "description": "Total number of pages at the requested page_size. Always at least 1 \u2014 when total is 0 we still return 1 so the FE never renders 'Page 1 of 0'.",
+      "default": 1
+     }
+    },
+    "type": "object",
+    "title": "RequirementListResponse",
+    "description": "Paginated list of requirements.\n\nExtends the shared :class:`PageEnvelope` (``items`` / ``page`` /\n``page_size`` / ``total`` / ``total_pages``). With the default\nlifecycle filter (active only), ``total`` is the sidebar badge\ncount \u2014 drafts and archived requirements are excluded from it."
+   },
+   "RequirementResponse": {
+    "properties": {
+     "id": {
+      "type": "string",
+      "title": "Id"
+     },
+     "project_id": {
+      "type": "string",
+      "title": "Project Id"
+     },
+     "display_id": {
+      "type": "integer",
+      "title": "Display Id"
+     },
+     "title": {
+      "type": "string",
+      "title": "Title"
+     },
+     "description": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Description"
+     },
+     "status": {
+      "$ref": "#/components/schemas/RequirementLifecycle"
+     },
+     "kind": {
+      "$ref": "#/components/schemas/RequirementKind"
+     },
+     "acceptance_criteria": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array",
+      "title": "Acceptance Criteria"
+     },
+     "tags": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array",
+      "title": "Tags"
+     },
+     "source_kind": {
+      "$ref": "#/components/schemas/RequirementSourceKind"
+     },
+     "source_quote": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Source Quote"
+     },
+     "source_ref": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Source Ref"
+     },
+     "source_session_id": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Source Session Id"
+     },
+     "source_file_id": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Source File Id"
+     },
+     "created_by": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Created By"
+     },
+     "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Created At"
+     },
+     "updated_at": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Updated At"
+     },
+     "health": {
+      "$ref": "#/components/schemas/RequirementHealth"
+     },
+     "scenario_count": {
+      "type": "integer",
+      "title": "Scenario Count",
+      "default": 0
+     },
+     "evaluator_count": {
+      "type": "integer",
+      "title": "Evaluator Count",
+      "default": 0
+     },
+     "pass_rate": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Pass Rate"
+     },
+     "last_evidence_at": {
+      "anyOf": [
+       {
+        "type": "string",
+        "format": "date-time"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Last Evidence At"
+     },
+     "latest_run": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/RequirementRunRef"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     }
+    },
+    "type": "object",
+    "required": [
+     "id",
+     "project_id",
+     "display_id",
+     "title",
+     "status",
+     "kind",
+     "source_kind",
+     "created_at",
+     "updated_at",
+     "health"
+    ],
+    "title": "RequirementResponse",
+    "description": "A single requirement with its computed rollup fields.\n\nSuperset of the nexus integrator's wire shape \u2014 every nexus field\nkeeps its name and type; everything else is additive."
+   },
+   "RequirementRunEvaluatorRate": {
+    "properties": {
+     "id": {
+      "type": "string",
+      "title": "Id"
+     },
+     "name": {
+      "type": "string",
+      "title": "Name"
+     },
+     "pass_rate": {
+      "type": "number",
+      "title": "Pass Rate"
+     },
+     "evaluated_scenario_count": {
+      "type": "integer",
+      "title": "Evaluated Scenario Count"
+     },
+     "passed_scenario_count": {
+      "type": "integer",
+      "title": "Passed Scenario Count"
+     }
+    },
+    "type": "object",
+    "required": [
+     "id",
+     "name",
+     "pass_rate",
+     "evaluated_scenario_count",
+     "passed_scenario_count"
+    ],
+    "title": "RequirementRunEvaluatorRate",
+    "description": "One linked evaluator's pass rate within a single run's slice.\n\nOnly evaluators that actually scored a linked scenario in the run\nappear \u2014 the denominator is the linked scenarios this evaluator\nscored, so an unevaluated evaluator is absent rather than shown\nas ``0%``."
+   },
+   "RequirementRunFailingScenario": {
+    "properties": {
+     "id": {
+      "type": "string",
+      "title": "Id"
+     },
+     "display_label": {
+      "type": "string",
+      "title": "Display Label"
+     },
+     "name": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Name"
+     }
+    },
+    "type": "object",
+    "required": [
+     "id",
+     "display_label"
+    ],
+    "title": "RequirementRunFailingScenario",
+    "description": "A failing linked scenario, in display form.\n\n``display_label`` is the canonical human-readable scenario handle\n(the same rendering the scenarios list uses); ``name`` is the\nauthor-given name when one exists. ``id`` is kept for deep links\nonly \u2014 the UI never renders it."
+   },
+   "RequirementRunHistoryItem": {
+    "properties": {
+     "run_id": {
+      "type": "string",
+      "title": "Run Id"
+     },
+     "run_name": {
+      "type": "string",
+      "title": "Run Name"
+     },
+     "completed_at": {
+      "anyOf": [
+       {
+        "type": "string",
+        "format": "date-time"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Completed At"
+     },
+     "verdict": {
+      "anyOf": [
+       {
+        "type": "string",
+        "enum": [
+         "pass",
+         "fail"
+        ]
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Verdict"
+     },
+     "pass_rate": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Pass Rate"
+     },
+     "evaluated_scenario_count": {
+      "type": "integer",
+      "title": "Evaluated Scenario Count",
+      "default": 0
+     },
+     "passed_scenario_count": {
+      "type": "integer",
+      "title": "Passed Scenario Count",
+      "default": 0
+     },
+     "failed_scenario_count": {
+      "type": "integer",
+      "title": "Failed Scenario Count",
+      "default": 0
+     },
+     "evaluators": {
+      "items": {
+       "$ref": "#/components/schemas/RequirementRunEvaluatorRate"
+      },
+      "type": "array",
+      "title": "Evaluators"
+     },
+     "failing_scenarios": {
+      "items": {
+       "$ref": "#/components/schemas/RequirementRunFailingScenario"
+      },
+      "type": "array",
+      "title": "Failing Scenarios"
+     }
+    },
+    "type": "object",
+    "required": [
+     "run_id",
+     "run_name"
+    ],
+    "title": "RequirementRunHistoryItem",
+    "description": "One completed run's slice of a requirement's linked scenarios.\n\nEverything is server-computed from the requirement's evaluator lens\n(intersection verdict; ``passed_all`` fallback when the requirement\nhas no explicit evaluator links) so the Status tab renders each\nhistory row \u2014 verdict pill, pass rate, per-evaluator breakdown,\nfailing scenarios \u2014 without any client-side computation."
+   },
+   "RequirementRunHistoryResponse": {
+    "properties": {
+     "items": {
+      "items": {
+       "$ref": "#/components/schemas/RequirementRunHistoryItem"
+      },
+      "type": "array",
+      "title": "Items"
+     },
+     "page": {
+      "type": "integer",
+      "title": "Page",
+      "description": "1-indexed page number returned.",
+      "default": 1
+     },
+     "page_size": {
+      "type": "integer",
+      "title": "Page Size",
+      "description": "Items per page returned.",
+      "default": 50
+     },
+     "total": {
+      "type": "integer",
+      "title": "Total",
+      "description": "Total number of items matching the filter set.",
+      "default": 0
+     },
+     "total_pages": {
+      "type": "integer",
+      "title": "Total Pages",
+      "description": "Total number of pages at the requested page_size. Always at least 1 \u2014 when total is 0 we still return 1 so the FE never renders 'Page 1 of 0'.",
+      "default": 1
+     }
+    },
+    "type": "object",
+    "title": "RequirementRunHistoryResponse",
+    "description": "Paginated run history for a requirement, newest run first.\n\nPage one, row one is the run the headline rollup derived from (the\nfly-in expands it by default)."
+   },
+   "RequirementRunRef": {
+    "properties": {
+     "id": {
+      "type": "string",
+      "title": "Id"
+     },
+     "name": {
+      "type": "string",
+      "title": "Name"
+     },
+     "completed_at": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Completed At"
+     }
+    },
+    "type": "object",
+    "required": [
+     "id",
+     "name",
+     "completed_at"
+    ],
+    "title": "RequirementRunRef",
+    "description": "The run behind a requirement's current evidence.\n\nIdentifies the run containing the most recent non-excluded evidence\nacross the requirement's linked scenarios \u2014 the SAME evidence\nboundary the rollup uses, so the \"derived from run\" line and the\nheadline health can never cite different runs."
+   },
+   "RequirementScenarioLinkResponse": {
+    "properties": {
+     "id": {
+      "type": "string",
+      "title": "Id"
+     },
+     "scenario_id": {
+      "type": "string",
+      "title": "Scenario Id"
+     },
+     "origin": {
+      "$ref": "#/components/schemas/RequirementLinkOrigin"
+     },
+     "status": {
+      "$ref": "#/components/schemas/RequirementLinkStatus"
+     },
+     "confidence": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Confidence"
+     },
+     "rationale": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Rationale"
+     },
+     "confirmed_at": {
+      "anyOf": [
+       {
+        "type": "string",
+        "format": "date-time"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Confirmed At"
+     },
+     "created_by": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Created By"
+     },
+     "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Created At"
+     }
+    },
+    "type": "object",
+    "required": [
+     "id",
+     "scenario_id",
+     "origin",
+     "status",
+     "created_at"
+    ],
+    "title": "RequirementScenarioLinkResponse",
+    "description": "One requirement\u2192scenario link with its review state."
+   },
+   "RequirementSourceKind": {
+    "type": "string",
+    "enum": [
+     "manual",
+     "document",
+     "chat",
+     "import"
+    ],
+    "title": "RequirementSourceKind",
+    "description": "How the requirement entered the system."
+   },
    "ResolveSavedViewResponse": {
     "properties": {
      "kind": {
@@ -21576,6 +24789,40 @@
     ],
     "title": "ResolveSavedViewResponse",
     "description": "Response for ``POST /saved-views/{view_id}/resolve``.\n\nResolves a saved view to the concrete items it currently selects,\nusing SERVER time for any date-window filter. ``item_ids`` are\nopaque machine handles the launcher passes straight through to a\nlaunch payload \u2014 never rendered; the launcher shows the view NAME.\n\n``kind`` is the resolved item domain (``sessions`` | ``scenarios``),\nderived from the persisted view ``kind``."
+   },
+   "RestoreResultResponse": {
+    "properties": {
+     "snapshot_id": {
+      "type": "string",
+      "title": "Snapshot Id"
+     },
+     "project_id": {
+      "type": "string",
+      "title": "Project Id"
+     },
+     "restored_at": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Restored At"
+     },
+     "tables_restored": {
+      "type": "integer",
+      "title": "Tables Restored"
+     },
+     "rows_restored": {
+      "type": "integer",
+      "title": "Rows Restored"
+     }
+    },
+    "type": "object",
+    "required": [
+     "snapshot_id",
+     "project_id",
+     "restored_at",
+     "tables_restored",
+     "rows_restored"
+    ],
+    "title": "RestoreResultResponse"
    },
    "ResultVerdict": {
     "properties": {
@@ -25168,6 +28415,150 @@
     "title": "SourceSessionProjection",
     "description": "Per-row projection of the live source Session for a materialised row.\n\nA DatasetRow materialised from a session (``origin_kind ==\n'session'``) carries an ``origin_session_id`` FK to the live\n``Session`` it was copied from. The Dataset Detail rows table's\nprototype column model is *session-shaped* \u2014 its ``SESSION_COLUMNS``\n(``docs/design/_source/columns.jsx:5-16``) surface a transcript\npreview, routed-to topics, tools called, turn count, the session\ndate, the originating user, and a duration. None of that lives on\nthe DatasetRow itself (an Example is an immutable *copy* of\nconversation turns, not a live reference), so this block is a\nread-time projection of the source Session.\n\nIt is attached to :class:`DatasetRowResponse.source_session` only\nfor rows whose source session still exists. Rows materialised from\nan upload \u2014 or rows whose source session has since been deleted\n(``origin_session_id`` is ``ON DELETE SET NULL``) \u2014 carry\n``source_session = null``, so the FE only paints the session-shaped\ncolumns for rows that genuinely back them (AGENTS.md \"Built for\nHumans and Agents\": absent fields must not surface zero-value\nplaceholders)."
    },
+   "StartingFieldInput": {
+    "properties": {
+     "key": {
+      "type": "string",
+      "minLength": 1,
+      "title": "Key",
+      "description": "The field's name, as the agent sees it."
+     },
+     "value": {
+      "type": "string",
+      "title": "Value",
+      "description": "The value this field should hold when the run starts."
+     }
+    },
+    "type": "object",
+    "required": [
+     "key",
+     "value"
+    ],
+    "title": "StartingFieldInput",
+    "description": "One field on a starting record being saved."
+   },
+   "StartingRecordInput": {
+    "properties": {
+     "label": {
+      "type": "string",
+      "minLength": 1,
+      "title": "Label",
+      "description": "The friendly reference this record is known by, e.g. \u201cthe refundable order\u201d."
+     },
+     "record_type": {
+      "type": "string",
+      "minLength": 1,
+      "title": "Record Type",
+      "description": "What kind of record this is, e.g. an order or a customer."
+     },
+     "fields": {
+      "items": {
+       "$ref": "#/components/schemas/StartingFieldInput"
+      },
+      "type": "array",
+      "title": "Fields",
+      "description": "The field values to plant for this record."
+     }
+    },
+    "type": "object",
+    "required": [
+     "label",
+     "record_type"
+    ],
+    "title": "StartingRecordInput",
+    "description": "A starting-data record being created or replaced.\n\nThe record is referenced everywhere by its ``label`` \u2014 a required,\nhuman \"friendly reference\" \u2014 never by an id."
+   },
+   "StartingRecordResponse": {
+    "properties": {
+     "label": {
+      "type": "string",
+      "title": "Label",
+      "description": "The friendly reference this record is known by."
+     },
+     "record_type": {
+      "type": "string",
+      "title": "Record Type",
+      "description": "What kind of record this is."
+     },
+     "fields": {
+      "items": {
+       "$ref": "#/components/schemas/StartingFieldInput"
+      },
+      "type": "array",
+      "title": "Fields",
+      "description": "The field values planted for this record."
+     }
+    },
+    "type": "object",
+    "required": [
+     "label",
+     "record_type"
+    ],
+    "title": "StartingRecordResponse",
+    "description": "A stored starting-data record as returned to the editor."
+   },
+   "SuggestRecordsInput": {
+    "properties": {
+     "starting": {
+      "type": "boolean",
+      "title": "Starting",
+      "description": "Draft records to plant before the run.",
+      "default": true
+     },
+     "expected": {
+      "type": "boolean",
+      "title": "Expected",
+      "description": "Draft records to check after the run.",
+      "default": false
+     }
+    },
+    "type": "object",
+    "title": "SuggestRecordsInput",
+    "description": "Which phases the author asked \"Suggest from environment\" to draft.\n\nThe two Test Data populate buttons map to these flags: one drafts\nstarting-data records, the other drafts expected-end-state records.\nAt least one must be requested. Suggestions are drafts only \u2014 they are\nreturned for review, never saved by this path."
+   },
+   "SuggestRecordsResponse": {
+    "properties": {
+     "available": {
+      "type": "boolean",
+      "title": "Available",
+      "description": "Whether the environment could be read to draft suggestions."
+     },
+     "starting_records": {
+      "items": {
+       "$ref": "#/components/schemas/StartingRecordResponse"
+      },
+      "type": "array",
+      "title": "Starting Records",
+      "description": "Suggested records to plant before the run."
+     },
+     "expected_records": {
+      "items": {
+       "$ref": "#/components/schemas/ExpectedRecordResponse"
+      },
+      "type": "array",
+      "title": "Expected Records",
+      "description": "Suggested records to check after the run."
+     },
+     "detail": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Detail",
+      "description": "A plain-language note when suggestions are paused, e.g. the environment couldn't be read."
+     }
+    },
+    "type": "object",
+    "required": [
+     "available"
+    ],
+    "title": "SuggestRecordsResponse",
+    "description": "Drafted records for the author to review, in the saved-record shape.\n\nEach draft matches a record the editor could save through the Test\nData PUT, so the author can drop a suggestion straight in and edit it.\n``available`` is false when the environment couldn't be read \u2014 the\ndrafts are then empty and ``detail`` carries a plain-language reason\nthe editor shows in its paused state. Already-saved test data is\nindependent of a suggestion outcome."
+   },
    "TdmLaunchPreflightInput": {
     "properties": {
      "items": {
@@ -25332,6 +28723,224 @@
     ],
     "title": "TeamSummary",
     "description": "One row of the **Teams** tab: a team + its member count (the list-with-counts surface).\n\n``member_count`` is the resolved size of the team's member-set; ``name_missing`` is True when the\nteam's display name could not be resolved (the ``name`` then degrades to the package's missing-name\nmarker) so the UI can show a placeholder rather than the raw marker."
+   },
+   "TestDataInput": {
+    "properties": {
+     "starting_records": {
+      "items": {
+       "$ref": "#/components/schemas/StartingRecordInput"
+      },
+      "type": "array",
+      "title": "Starting Records",
+      "description": "The complete set of records to plant before the run."
+     },
+     "expected_records": {
+      "items": {
+       "$ref": "#/components/schemas/ExpectedRecordInput"
+      },
+      "type": "array",
+      "title": "Expected Records",
+      "description": "The complete set of records to check after the run."
+     },
+     "benchmark_task_id": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Benchmark Task Id",
+      "description": "Bind this scenario's starting world to a benchmark task on a self-seeding backend (the run replays that task to seed data instead of planting starting records). Leave empty for hand-authored scenarios."
+     },
+     "customer_ref": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Customer Ref",
+      "description": "The customer this scenario's runs act as. Set it only to override the customer id the starting records already carry; leave empty to derive it from a starting record's customer id field. Like the benchmark binding, a client that reads then writes the whole contract must round-trip it."
+     },
+     "execution_identity_ref": {
+      "anyOf": [
+       {
+        "type": "string",
+        "maxLength": 64
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Execution Identity Ref",
+      "description": "Select a connection-owned execution identity by its non-secret reference. Leave empty to use the connection default."
+     },
+     "postgres_lifecycle": {
+      "anyOf": [
+       {
+        "additionalProperties": true,
+        "type": "object"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Postgres Lifecycle",
+      "description": "Compatibility alias for the Postgres/RDS direct-table lifecycle payload. New clients should write adapter lifecycle payloads."
+     },
+     "adapter_lifecycle": {
+      "anyOf": [
+       {
+        "additionalProperties": true,
+        "type": "object"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Adapter Lifecycle",
+      "description": "Adapter-specific lifecycle payloads keyed by data connection type. Leave empty for scenarios that only use standard authored records."
+     },
+     "concurrency": {
+      "type": "string",
+      "enum": [
+       "reads",
+       "own",
+       "solo"
+      ],
+      "title": "Concurrency",
+      "description": "Whether this scenario may run alongside other tests.",
+      "default": "own"
+     }
+    },
+    "type": "object",
+    "title": "TestDataInput",
+    "description": "The full Test Data contract a PUT replaces wholesale.\n\nStarting and expected records are replaced as complete lists (the\neditor sends the full set), ``concurrency`` sets the run posture, and\n``benchmark_task_id`` (optional) binds the scenario's starting world\nto a self-seeding benchmark task \u2014 a client that reads then writes the\nwhole contract must round-trip it, or the binding clears (wholesale\nPUT semantics). Reference data is not accepted \u2014 it is\nenvironment-owned and read-only."
+   },
+   "TestDataResponse": {
+    "properties": {
+     "starting_records": {
+      "items": {
+       "$ref": "#/components/schemas/StartingRecordResponse"
+      },
+      "type": "array",
+      "title": "Starting Records",
+      "description": "The records this scenario plants before the run."
+     },
+     "expected_records": {
+      "items": {
+       "$ref": "#/components/schemas/ExpectedRecordResponse"
+      },
+      "type": "array",
+      "title": "Expected Records",
+      "description": "The records this scenario checks after the run."
+     },
+     "benchmark_task_id": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Benchmark Task Id",
+      "description": "The benchmark task on a self-seeding backend that establishes this scenario's starting world, when one is bound. Empty for hand-authored scenarios, which plant starting records instead."
+     },
+     "customer_ref": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Customer Ref",
+      "description": "The customer this scenario's runs act as, when set explicitly. On environments that keep each customer's data separate, the run plants and checks that customer's own records. Usually left empty \u2014 the run reads the customer from the starting records' customer id field instead."
+     },
+     "execution_identity_ref": {
+      "anyOf": [
+       {
+        "type": "string",
+        "maxLength": 64
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Execution Identity Ref",
+      "description": "The connection-owned execution identity this scenario runs as. This is a non-secret reference, not a platform username. Empty uses the connection's default identity."
+     },
+     "postgres_lifecycle": {
+      "anyOf": [
+       {
+        "additionalProperties": true,
+        "type": "object"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Postgres Lifecycle",
+      "description": "Compatibility alias for the Postgres/RDS direct-table lifecycle payload. New clients should use adapter lifecycle payloads."
+     },
+     "adapter_lifecycle": {
+      "anyOf": [
+       {
+        "additionalProperties": true,
+        "type": "object"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Adapter Lifecycle",
+      "description": "Adapter-specific lifecycle payloads keyed by data connection type. Each adapter owns the arguments it needs for seed, capture, and reset."
+     },
+     "concurrency": {
+      "type": "string",
+      "enum": [
+       "reads",
+       "own",
+       "solo"
+      ],
+      "title": "Concurrency",
+      "description": "The scenario's stored concurrency choice."
+     },
+     "concurrency_options": {
+      "items": {
+       "$ref": "#/components/schemas/ConcurrencyOption"
+      },
+      "type": "array",
+      "title": "Concurrency Options",
+      "description": "Every concurrency choice in plain language; the current one is marked."
+     },
+     "reference_data": {
+      "items": {
+       "$ref": "#/components/schemas/ReferenceDataSet"
+      },
+      "type": "array",
+      "title": "Reference Data",
+      "description": "Environment-owned reference data the agent reads. Read-only here."
+     },
+     "reference_data_available": {
+      "type": "boolean",
+      "title": "Reference Data Available",
+      "description": "Whether reference data could be read from the environment."
+     }
+    },
+    "type": "object",
+    "required": [
+     "concurrency",
+     "reference_data_available"
+    ],
+    "title": "TestDataResponse",
+    "description": "The full per-scenario Test Data contract returned to the editor.\n\nMirrors the tab's spine: reference data (read-only, environment-owned)\nand starting data sit \"before the run\"; expected end state is checked\n\"after the run\"; concurrency is the run posture, in plain language."
    },
    "ToolOverride": {
     "properties": {
@@ -25726,6 +29335,75 @@
     },
     "type": "object",
     "title": "UpdateProjectInput"
+   },
+   "UpdateRequirementInput": {
+    "properties": {
+     "title": {
+      "anyOf": [
+       {
+        "type": "string",
+        "maxLength": 500,
+        "minLength": 1
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Title"
+     },
+     "description": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Description"
+     },
+     "acceptance_criteria": {
+      "anyOf": [
+       {
+        "items": {
+         "type": "string"
+        },
+        "type": "array"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Acceptance Criteria"
+     },
+     "kind": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/RequirementKind"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "tags": {
+      "anyOf": [
+       {
+        "items": {
+         "type": "string"
+        },
+        "type": "array"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Tags"
+     }
+    },
+    "type": "object",
+    "title": "UpdateRequirementInput",
+    "description": "Partial content update. Omitted fields are left unchanged;\n``description`` may be explicitly cleared with ``null``. Lifecycle\nchanges go through the dedicated lifecycle actions, never here."
    },
    "UpdateScenarioInput": {
     "properties": {

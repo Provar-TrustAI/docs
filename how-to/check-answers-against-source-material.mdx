@@ -1,0 +1,175 @@
+---
+title: "Check answers against source material"
+icon: "file-check"
+description: "Use the Groundedness judge to check every factual claim in a reply against documents you attach — and read the per-claim report, with its verified quotes, that comes back."
+---
+
+A **Groundedness judge** answers one question: *is everything this reply asserts backed by the source material I gave it?* It splits each agent reply into individually checkable claims, checks each one against the documents attached to the scenario, and returns a per-claim report where every supported claim carries a quote the product verified against the document before showing it.
+
+Use it when your agent answers from a policy, a rate sheet, a help-centre article, or any body of knowledge you can paste in — and a confidently-worded invention would be worse than no answer.
+
+<Note>
+  *Ask the Trust Agent:* "Create a Groundedness judge for the refund policy, attach it to the refund-timing scenarios, and tell me which of them still need reference material." It drafts the evaluator and the bindings, and shows you the write for [approval](/how-to/approve-agent-writes) before anything is saved. The screens below are the observation pane and the manual path.
+</Note>
+
+## What it refuses to judge
+
+This is the most important thing to understand before you use it, because it is what makes the result trustworthy.
+
+A Groundedness judge **only** decides whether a claim is backed by the material. It does not:
+
+- **Penalise omissions.** Leaving a detail out is a coverage question, not a groundedness one.
+- **Judge tone, style, or formatting.** A curt, badly-formatted, perfectly-grounded answer passes.
+
+So a passing Groundedness check is a narrow, strong statement: *nothing here was made up*. It is not a statement that the answer was good — helpfulness and completeness are not inputs to its decision either, they simply are not among the boundaries the judge states. Pair it with an [LLM judge](/how-to/write-llm-judge-prompt) for everything it deliberately ignores — that combination is the point, not a workaround.
+
+The judge states those two boundaries itself. Open one from the Evaluators list and its **Criteria** tab reads top to bottom: **How this judge works** (what it checks, then the two never-does lines above), **Verdict vocabulary**, the editable **Additional guidance**, and **Grades these scenarios** — the last of which lists every scenario this judge is bound to and flags the ones still reading *"No reference material"*, so you can find the unattached ones without opening each scenario.
+
+## 1. Create the judge
+
+On the Evaluators library, choose **New evaluator**. The **Kind** chooser offers exactly two cards — **LLM judge** and **Groundedness judge** — and picking the second one changes what the rest of the form asks for.
+
+| An LLM judge asks for | A Groundedness judge asks for |
+|---|---|
+| Name, Description | Name, Description |
+| **Score type** — Pass / fail or 1–5 scale | *(nothing — it is always pass/fail)* |
+| **Judge criteria** — the rules you author | *(nothing — the rubric is built in and can't be edited)* |
+| **Reason step by step** toggle | *(not offered)* |
+| | **Additional guidance** — optional |
+
+That is the whole difference: **you write no criteria and pick no score type.** The Score type cards and the Judge criteria textarea are not hidden-but-defaulted, they are gone from the form.
+
+**Additional guidance** is optional free text appended to the built-in rubric — the place to note a domain quirk it should respect, not a place to restate the rubric. Leave it blank to grade with the standard rubric; you can add or clear it later from the evaluator's **Criteria** tab.
+
+<Note>
+  You get exactly **two** levers on this judge: the optional guidance above, and the reference material you attach to each scenario. Everything else — the rubric, the claim decomposition, the evidence rule — belongs to the product. See [Evaluators](/concepts/evaluators) for how it sits alongside the other kinds.
+</Note>
+
+## 2. Bind it to a scenario
+
+Open a [Scenario](/concepts/scenarios) and go to its **Expected Output** tab. Under **Expected behavior**, use **Add evaluator** and pick your judge. The section's own subtitle states the gating rule — every bound evaluator has to pass for the scenario to pass — with one carve-out this judge can trigger: a check that lands on **Needs review** is excluded from pass/fail gating rather than counted as a failure. See [step 5](#5-read-the-result).
+
+## 3. Attach the reference material
+
+**Reference material lives on the scenario, never on the evaluator.** The same judge grades different scenarios against different sources, so the documents belong to the thing being graded.
+
+Binding the judge is what makes the editor appear: a **Reference material** subsection nested under **Expected behavior**, which is not rendered at all until a scenario binds a judge that grades against documents. Until you attach one it shows a blocker:
+
+> **Reference material required**
+> *&lt;your judge&gt;* grades this scenario's answers against reference material. Attach at least one document — until then this scenario can't run.
+
+**Add reference material** opens a three-field form:
+
+| Field | Required | Notes |
+|---|---|---|
+| **Title** | Yes | Also searchable evidence — the judge may quote the title itself |
+| **Source link (optional)** | No | Renders as a **Source** link on the row; not read by the judge |
+| **Content** | Yes | Paste the article, policy, or knowledge itself |
+
+The limits are **5 documents per scenario** and **64 KB of text per document**, and both are enforced in the form rather than as a failed save:
+
+- The content field shows a live size ("6 KB"). Past 64 KB it turns red, prints *"This document is too long — trim it to 64 KB or less"*, and **Add document** stays disabled.
+- At five documents, **Add reference material** is disabled and the section prints *"Up to 5 documents per scenario."*
+
+Attached documents list by title with their size and, when you gave one, a **Source** link. Each row can be edited or removed; the writes ride the scenario's Expected Output save.
+
+## 4. Run — the launcher blocks before it starts
+
+If a scenario binds a Groundedness judge and has no reference material, the run **does not start and is not queued**. The launcher disables its primary button — **Run evaluation** on a bulk launch, **Run & evaluate** when you launch a single scenario, **Queue run** when the environment you picked is busy — and names the problem inline:
+
+> **Reference material required**
+> *&lt;scenario&gt;* needs reference material before it can run — a Groundedness judge grades its answers against attached documents, but none are attached. Add reference material on its Expected Output tab.
+
+More than one offending scenario is listed together in one message. The same rule is enforced server-side, so a run launched from the API is rejected the same way rather than starting and quietly skipping the check. The gate is specific to graded scenario runs: a run-only launch grades nothing, and a [session-source evaluation](/how-to/evaluate-sessions) doesn't inherit scenario judges.
+
+Fix it on the scenario's **Expected Output** tab, then run again.
+
+{/* Sections 5-7 were driven end to end on v2026.08.03.2 (DEV-6218): a scenario
+    with one attached policy document, graded by a Groundedness judge against a
+    simulated conversation, produced a real per-claim adjudication — the result
+    card, the report drawer, the claim/quote highlight linkage and the override
+    recompute are all captured in the recording embedded in section 6.
+
+    ACCURACY-AUDIT-PENDING — four behaviours below are still read from the
+    shipped source rather than driven, because the graded run could not be
+    coerced into producing them: the **Needs review** verdict and its Unknown
+    claim class; the "no scored claims at all -> Pass" row of the verdict
+    table; the ungraded "No reference material attached - not graded." state;
+    and the quote-verification downgrade (and with it the structural
+    non-adjudicable states in "When claims can't be adjudicated"). Each is
+    written at behaviour level and hedged. Re-drive them when a fixture that
+    reproduces an unknown or unverifiable quote exists. */}
+
+## 5. Read the result
+
+The check renders as a card in the result fly-in, carrying a verdict, a metric chip, and a per-verdict tally of the claims.
+
+**The verdict** is **Pass**, **Fail**, or **Needs review** — or, on a row where the judge had nothing to grade, no verdict at all. Needs review is a real third state, not a soft fail: it is the answer when the grade can't be trusted as-is, and it is excluded from pass/fail gating, so it neither passes the row silently nor paints it red.
+
+A fourth, quieter state exists and is worth recognising. A Groundedness check is pinned to the whole evaluation, but reference material lives on each scenario — so on a run covering several scenarios, a row whose scenario doesn't bind the judge shows the check card ungraded: no verdict chip, a neutral (never red) accent, and the line *"No reference material attached — not graded."* That is honest bookkeeping, not a failure, and step 4's launcher gate does not prevent it — the gate only fires for a scenario that binds the judge *and* has no documents.
+
+**The metric chip** reads **N% grounded** — the share of scored claims the judge could ground in the material. It sits next to the verdict as a neutral annotation, never in place of it.
+
+**The counts line** tallies the claims by verdict, e.g. `14 supported · 1 unsupported · 1 unknown · 1 conversational`. Only non-zero tallies appear.
+
+### How the verdict is decided
+
+Grading is **strict**: the grounded fraction has to be 1.0. There is no tolerance dial.
+
+| The claim set contains | Verdict |
+|---|---|
+| Any **Contradicted** claim | **Fail** — a contradiction is a hard violation, even alongside unknowns |
+| Otherwise, any **Unknown** claim | **Needs review** — uncertainty is never quietly grounded |
+| Otherwise, no scored claims at all | **Pass** — pure pleasantries, nothing to be ungrounded about |
+| Otherwise, anything less than 100% supported | **Fail** — any single unsupported claim fails the answer |
+| Otherwise | **Pass** |
+
+**Conversational** claims — greetings and filler — are excluded from the denominator entirely.
+
+## 6. Open the groundedness report
+
+**View groundedness report** on the check card opens the evidence surface: claims on the left grouped by reply, the source on the right.
+
+The recording below follows one graded scenario end to end: the policy document attached on its **Expected Output** tab, the check card's **50% grounded** chip and **Fail** verdict, the four adjudicated claims, and a reviewer overriding one of them.
+
+<video controls muted playsInline className="w-full rounded-xl" src="/images/demos/d3-groundedness-report.mp4"></video>
+
+Every claim card carries the judge's **verdict**, its **reasoning in plain language**, and — for a supported or contradicted claim — the **verbatim quote** it was grounded in. Clicking a claim highlights that quote inside the document, and the right pane toggles between **Reference material** and **Agent's replies** so you can read a claim against either the source it was checked against or the sentence it came from.
+
+The five claim verdicts are one vocabulary, used identically in the report and on the evaluator's **Criteria** tab:
+
+| Verdict | Meaning |
+|---|---|
+| **Supported** | Directly backed by a verified quote from the reference material |
+| **Contradicted** | The material says the opposite — always fails the check |
+| **Unsupported** | A factual claim the material doesn't back |
+| **Unknown** | The judge couldn't decide, or its evidence couldn't be verified — triggers review |
+| **Conversational** | Greetings and filler — excluded from scoring |
+
+### The quotes are checked, not asserted
+
+This is the part worth trusting. A supported or contradicted claim must cite a quote, and the product searches for that quote — whitespace-normalised — in the cited document's title and content before the claim is allowed to keep its verdict. A quote that isn't found verbatim doesn't quietly stand: the claim is **downgraded to Unknown**, the card says what it was downgraded from and why, and the whole check lands on **Needs review**.
+
+A fabricated citation therefore cannot prop up a pass. That is why the evidence in the report is checkable rather than merely claimed.
+
+## 7. Override a claim, and revert
+
+A reviewer can correct an individual claim. Click a claim's verdict chip to open **Override verdict**: it shows the judge's verdict, a **Your verdict** picker, and an optional **Why** note, then **Apply override**.
+
+You may override a claim to **Supported**, **Contradicted**, **Unsupported**, or **Conversational** — **four** options. **Unknown** is deliberately not one of them: it is the judge's uncertainty sink, not a reviewer's call.
+
+Applying an override **recomputes the score** through the same rule the judge used. The counts and the **N% grounded** figure move immediately; the verdict moves only if your override changes what the rule decides. Overriding the one unsupported claim in a set that also holds a contradiction takes the figure from **50% grounded** to **75% grounded** and leaves the check on **Fail** — a contradiction is a hard violation, and no amount of grounding elsewhere clears it. Resolving the unknown claims is what lets a Needs review check re-enter pass/fail gating. No model re-runs; the recompute is deterministic, and the parent result's roll-up follows it.
+
+An overridden claim keeps a provenance strip reading *"Overridden by reviewer — judge said …"* with your note, plus **Revert**, which restores the judge's verdict and recomputes again.
+
+<Note>
+  This is the one place a human verdict rewrites an automated one. It does **not** generalise — see [Annotations](/concepts/annotations) for how session-level Verdict annotations differ.
+</Note>
+
+## When claims can't be adjudicated
+
+Overrides need a claim list worth adjudicating, and only two check states have one: a check that finished grading, and a check that needs review *specifically* because of unknown claims. Every other route to Needs review is structural — a truncated or unparseable judge response, a claim set over the budget, a decomposition that failed a guard, or reference material edited while the run was in flight — and none of those leaves a claim list the product will let you adjudicate. On those the report offers no override affordance and asks you to re-run instead.
+
+<Note>
+  The launch and result endpoints behind this flow, including the per-claim adjudication calls, are in the [API Reference](/api-reference).
+</Note>

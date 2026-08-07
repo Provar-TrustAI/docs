@@ -32,14 +32,69 @@ pnpm install        # install Remotion + React
 pnpm preview        # opens Remotion Studio in the browser
 ```
 
-## Rendering
+## The full loop
+
+Layer 2 above is the part that did not exist until DEV-6188 — nothing produced the
+recording Remotion composites onto. Playwright is the recorder:
 
 ```bash
-pnpm render         # produces out/demo.mp4
-pnpm render:gif     # produces out/demo.mp4 then converts to out/demo.gif
+# 1. Record. Writes pipeline/public/<name>.webm
+cd ../captures && npx tsx demos/record-<name>.ts
+
+# 2. Fill in the timeline. Stubs live in pipeline/public/<slug>.json
+#    Element bounds come from the recording — do not guess them.
+
+# 3. Render
+cd ../pipeline
+npx remotion render src/index.ts DemoComposition out/<name>.mp4 \
+  --props=public/<slug>.json
 ```
 
-GIF conversion requires `ffmpeg` on your PATH.
+`--props` selects which demo renders. Duration and viewport are derived from the timeline
+via `calculateMetadata`, so a longer recording needs no code change.
+
+**Pass an absolute path to `--props`.** A relative path is resolved against Remotion's bundle,
+not your shell — `--props=public/x.json` silently fails over to `defaultProps` and renders the
+example at the example's length. Use `--props="$PWD/public/x.json"`.
+
+Remotion MERGES `--props` over `defaultProps`, so a bare timeline still arrives carrying the
+example's nested `timeline` key. `Root.tsx` therefore detects the bare shape by its top-level
+`beats` array and prefers it; do not "simplify" that back to `props.timeline ?? props`.
+
+### Verify the output
+
+Render a single frame and **look at it** before shipping:
+
+```bash
+npx remotion still src/index.ts DemoComposition out/check.png \
+  --props=public/<slug>.json --frame=90
+```
+
+A render that completes is not a render that is correct — the same lesson the capture
+harness learned when a passing test produced a screenshot of a loading spinner.
+
+### GIF export
+
+`ffmpeg` is **not** currently installed on this machine. Install it, then:
+
+```bash
+ffmpeg -i out/<name>.mp4 -vf "fps=15,scale=1200:-1" -loop 0 out/<name>.gif
+```
+
+## Budgeted artifacts
+
+Four Tier-2 demos this cycle, one per surface, each blocking a page. Timeline stubs are in
+`public/`:
+
+| Slug | Blocks | Ticket |
+|---|---|---|
+| `d1-salesforce-authorize` | `get-started/connect-your-agentforce-agent.mdx` | DEV-6216 |
+| `d2-agent-profile-review` | `how-to/review-an-agent-profile.mdx` | DEV-6217 |
+| `d3-groundedness-report` | `how-to/check-answers-against-source-material.mdx` | DEV-6218 |
+| `d4-launcher-fanout` | `concepts/evaluations.mdx` | DEV-6219 ✅ shipped |
+
+Recordings (`public/*.webm`) and renders (`out/`) are gitignored — they are large binaries,
+and only the finished asset belongs in `/images`.
 
 ## Timeline JSON contract
 

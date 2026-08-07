@@ -1,7 +1,7 @@
 ---
 title: "Annotations"
 icon: "tag"
-description: "Human judgment recorded in typed columns on Sessions. The ground truth that grades every automated judge."
+description: "Human judgment recorded in typed columns on Sessions and as verdicts on Scenarios — the ground truth that grades your automated judges."
 ---
 
 An Annotation is a piece of **human judgment** attached to a [Session](/concepts/sessions). You record it in typed **annotation columns** on the Sessions surface — a pass/fail verdict, a severity, a score, tags, or a reviewer note — and it becomes data the rest of Trust AI can use. The human **Verdict** is the ground truth every [Evaluator](/concepts/evaluators) is measured against: it grades the judges.
@@ -12,7 +12,7 @@ Without Annotations, Evaluator scores are unaccountable — the app can tell you
 
 Annotations live in a project-wide schema of typed columns. Each column holds one value per Session, and every project starts with three seeded columns:
 
-- **Verdict** — a Pass / Fail judgment of the whole Session. This column is reserved: you can't delete it or change its type, because it is the human ground-truth channel that evaluator accuracy is measured against.
+- **Verdict** — a Pass / Fail judgment of the whole Session. This is the human ground-truth channel that evaluator accuracy is measured against.
 - **Severity** — a single choice among **minor**, **major**, and **blocker**.
 - **Reviewer note** — a free-text comment.
 
@@ -26,7 +26,21 @@ You add your own columns from the Sessions table's add-column menu with **New an
 | **Tags** | Multiple tags from a palette |
 | **Comment** | A free-text note |
 
-Annotations are **Session-level**: each value judges the conversation as a whole. There is no per-Turn annotation — if a specific exchange is what matters, say so in a **Reviewer note** or a **Comment** column.
+A column's **name is editable; its type is not.** Once values exist, changing a column's type would silently invalidate every value already written against it, so the app doesn't allow it — for any column, not just the seeded three. If you need a different type, delete the column and create a new one.
+
+Session annotations are **whole-conversation**: each value judges the Session as a unit. There is no per-Turn annotation — if a specific exchange is what matters, say so in a **Reviewer note** or a **Comment** column.
+
+## Two levels of human verdict
+
+Human judgment is recorded at **two** levels, and they are separate records with separate consumers. This trips people up, so it's worth being precise:
+
+| | Session verdict | Scenario verdict |
+|---|---|---|
+| **Where you set it** | The Verdict annotation column on [Sessions](/concepts/sessions) — inline or in the fly-in | The **Verdict** column on the [Scenarios](/concepts/scenarios) list, visible by default |
+| **What it judges** | One captured conversation | One test case |
+| **What reads it** | **Evaluator accuracy** on evaluation results | **Calibration** in the Evaluator panel's Calibrate tab |
+
+The consequence worth internalising: **calibrating a judge does not read your Session verdicts.** The Calibrate tab grounds on scenario pass/fail verdicts, and says so in its own empty state — *"Add a pass/fail column to your scenarios and mark some rows."* Annotating a hundred Sessions will move the evaluator-accuracy number and leave the Calibrate tab empty.
 
 ## Where you annotate
 
@@ -35,18 +49,30 @@ Annotation happens where the Sessions already are — there is no separate revie
 - **Inline in the Sessions table.** **Verdict** and **Severity** cells are editable directly in the table, so a reviewer can sweep down the list without opening anything. The Verdict column shows by default; other annotation columns can be shown from the column menu.
 - **In the Session fly-in.** The fly-in's **Annotations** tab is the full schema-driven editor for every column, alongside the **Transcript**, **Evaluations**, and **Details** tabs. The same panel appears when you drill into a session from a scenario. An edit made in a table cell repaints any open panel for that Session, so the two never disagree.
 
-{/* CAPTURE-PENDING: sessions-inline-annotation.gif — setting Verdict and Severity inline in the Sessions table, then opening the fly-in's Annotations tab to add a Reviewer note */}
+<Frame caption="One Session, both entry points: the highlighted row's Verdict and Severity cells carry the same Fail and major the fly-in's Annotations tab is showing — an edit in either place repaints the other.">
+  <img src="/images/annotations-two-places.png" alt="The Sessions table with the Verdict and Severity columns shown, and the fly-in open over it on the Annotations tab. The highlighted row RUN-000012 reads Fail and major in its table cells, while the panel shows the same Fail verdict, major severity, and a Reviewer note reading 'Promised a refund without checking the policy window.'" />
+</Frame>
 
-To work through Sessions in volume, filter the list to the slice you care about — by Source, tag, or agent version — and save the filter as a [saved view](/concepts/saved-views). Selecting multiple Sessions raises the bulk-actions bar (**Evaluate** · **Tag** · **Download**); **Tag** applies tags from a vocabulary shared across Scenarios and Sessions, with autocomplete.
+To work through Sessions in volume, filter the list to the slice you care about — the filter offers **Date**, **Routed To**, **Tags**, and **Turn count** — and save the configuration as a [saved view](/concepts/saved-views). To narrow by something outside that set, show the column and sort on it. Selecting multiple Sessions raises the bulk-actions bar (**Evaluate** · **Tag** · **Download**); **Tag** applies tags from a vocabulary shared across Scenarios and Sessions, with autocomplete.
 
 ## Two verdicts, one rule
 
 A Session can carry two verdicts at once, and they never overwrite each other:
 
-- The **automated verdict** — the three-state pill (**Pass** / **Fail** / **Not evaluated**) produced by [Evaluations](/concepts/evaluations). Only automated results set it.
-- The **human Verdict annotation** — your Pass / Fail judgment in the reserved Verdict column.
+- The **automated verdict** — the pill produced by [Evaluations](/concepts/evaluations): **Pass**, **Fail**, **Not evaluated** (nothing ran), or **Not graded** (something ran but produced no behavioural score). Only automated results set it.
+- The **human Verdict annotation** — your Pass / Fail judgment in the Verdict column.
 
-The rule: **your Verdict grades the judges, and never overrides the automated verdict.** When a Session carries both, Trust AI compares them, and the agreement rate surfaces as the **Evaluator accuracy** headline on evaluation results — how often the automated judges reached the same conclusion a person did. A Session where the two disagree is exactly the signal worth investigating: either the agent's behavior is subtle, or the Evaluator's rubric needs work.
+The rule: **your Verdict annotation grades the judges — it never overwrites the automated verdict.** When a Session carries both, Trust AI compares them, and the agreement rate surfaces as the **Evaluator accuracy** headline on evaluation results. A Session where the two disagree is exactly the signal worth investigating: either the agent's behavior is subtle, or the Evaluator's rubric needs work.
+
+### The one place human judgment does change a score
+
+That rule is about the **Verdict annotation column**, not about human input generally. The [Groundedness judge](/concepts/evaluators) has a separate mechanism — **adjudication** — where a reviewer's call genuinely rewrites the automated result.
+
+In a Groundedness report, each claim the agent made carries a judged verdict — **Supported**, **Contradicted**, **Unsupported**, **Unknown**, or **Conversational**. A reviewer can override one to any of those five, with an optional note, and **revert** puts the judge's verdict back. The claim counts, the **% grounded** figure, and the check's pass/fail then recompute, and the parent result's roll-up updates with them. The recompute is deterministic: no model re-runs, and the judge's original verdict is kept alongside yours so the report can still show what it had said.
+
+<Note>
+  Adjudication is a correction to a specific claim, not a global override. It exists because a claim-by-claim judgment is exactly the kind of thing a person can check faster than a model can — and it's scoped to Groundedness. Nowhere else does a human entry move an automated score.
+</Note>
 
 ## Annotations vs Evaluator scores — different things, paired
 
@@ -54,13 +80,13 @@ Annotations and Evaluator scores are structurally similar — a judgment attache
 
 | | Annotation | Evaluator score |
 |---|---|---|
-| **Source** | Human reviewer | LLM Judge or Structured Match |
+| **Source** | Human reviewer | Any of the four evaluator kinds — LLM judge, Structured match, Outcome grounded, or Groundedness judge |
 | **Question answered** | "Was this actually acceptable?" | "Does this pass the rubric, at scale?" |
 | **Cost per Session** | Reviewer minutes | LLM tokens / compute |
 | **When applied** | During review, any time after capture | At Evaluation time, programmatically |
 | **Role** | Ground truth for evaluator accuracy | Sets the automated verdict |
 
-The relationship is **calibration**: Evaluator scores earn trust to the degree they agree with human Verdicts on the same Sessions. That agreement is what the calibration surfaces on [Evaluators](/concepts/evaluators) measure.
+The relationship is **calibration**: Evaluator scores earn trust to the degree they agree with a person on the same material. Which material depends on which surface you're looking at — the Calibrate tab on [Evaluators](/concepts/evaluators) uses your **scenario** verdicts, and the Evaluator accuracy figure on a run uses your **Session** verdicts.
 
 ## Workflows
 
@@ -85,8 +111,8 @@ The common annotation patterns:
 
 Annotations justify their cost downstream:
 
-1. **Evaluator accuracy** — every human Verdict on an evaluated Session sharpens the judge-vs-human agreement number on evaluation results. This is the primary payoff: it tells you whether to trust the automated scores.
-2. **Evaluator calibration** — when accuracy is low, the disagreeing Sessions show you exactly where the rubric misjudges. Refine the Evaluator and re-run.
+1. **Evaluator accuracy** — a human Verdict on an evaluated Session sharpens the judge-vs-human agreement number on evaluation results. This is the primary payoff: it tells you whether to trust the automated scores. One qualifier: the comparison uses the combined **LLM judge** verdict only — any judge failing counts as a fail — and structural scores are excluded, so annotating Sessions graded solely by a **Structured match** evaluator won't move the number.
+2. **Evaluator calibration** — when accuracy is low, the disagreeing Sessions show you exactly where the rubric misjudges. Refine the Evaluator and re-run. To drive the Calibrate tab itself, mark verdicts on **scenarios**, not sessions.
 3. **Review-driven evaluation** — filter to the Sessions your review flagged, select them, and hit **Evaluate** to grade them with your judges. Annotation is not a prerequisite: you can evaluate Sessions you haven't annotated at all.
 
 All three close the loop described in [the evaluation loop](/concepts/evaluation-loop) — Annotations are what keep the automated half of that loop honest.
@@ -95,11 +121,12 @@ All three close the loop described in [the evaluation loop](/concepts/evaluation
 
 Annotating is one of the few genuinely hands-on tasks in Trust AI — the judgment is the point, so no agent does it for you. You can ask the [Trust Agent](/concepts/trust-agent) to find the Sessions worth reviewing ("which sessions from this week have no verdict yet?"), then grade them yourself inline or in the fly-in.
 
-Earlier releases attached annotations to entries in the legacy dataset container; those values survive on the wire through the legacy API, but the Sessions annotation columns are the product's annotation surface. For reading or writing annotation columns and values programmatically, the endpoint details live in the [API Reference](/api-reference).
+For reading or writing annotation columns and values programmatically, the endpoint details live in the [API Reference](/api-reference).
 
 ## Related concepts
 
-- **[Sessions](/concepts/sessions)** — what Annotations attach to
+- **[Sessions](/concepts/sessions)** — where the annotation columns live
+- **[Scenarios](/concepts/scenarios)** — the other verdict level, and the one calibration reads
 - **[Evaluators](/concepts/evaluators)** — the judges your Verdicts grade
 - **[Evaluations](/concepts/evaluations)** — where Evaluator accuracy surfaces
 - **[The evaluation loop](/concepts/evaluation-loop)** — how annotation fits the larger cycle

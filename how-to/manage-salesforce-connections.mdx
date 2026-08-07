@@ -1,0 +1,175 @@
+---
+title: "Manage Salesforce connections"
+icon: "cable"
+description: "See every Salesforce org your workspace is connected to, reuse one across Projects, and understand the difference between Disconnect and Delete before you click either."
+---
+
+import { DeprecatedNotice } from "/snippets/deprecated-notice.mdx";
+
+A Salesforce org is authorized **once for the whole workspace**, not once per [Project](/concepts/projects). Several Projects can point at the same org, and they all share the one External Client App Trust AI deployed there. **Workspace Settings → Connections** is where that shared picture lives: one row per org, the Projects using it, and the two ways to remove it.
+
+This page covers reading and removing connections. Creating one is a separate job you do in chat with the [Trust Agent](/concepts/trust-agent) — see [Connect a Salesforce Agentforce agent](/how-to/connect-agentforce). There is no **Connect** button on this tab; a workspace with none yet reads *"No Salesforce connections yet. Connect an org from a project’s chat to see it here."*
+
+<Warning>
+  **Disconnect** and **Delete** sit side by side and read alike. Only one of them reaches into your Salesforce org, and only one of them clears the connection out of every Project. They are not the same pair of ends — read [Disconnect vs Delete](#disconnect-vs-delete) before you use either.
+</Warning>
+
+## Prerequisites
+
+- A **Trust AI account** in the workspace, and access to at least one Project that holds a Salesforce connection. The list is scoped to the Projects you can reach, so two admins can see different rows on the same tab.
+- To **Disconnect**: **Editor** access on the Project the connection belongs to — plus a **Salesforce administrator** who can sign in, because the teardown needs a fresh admin token.
+- To **Delete**: **Owner** on every Project listed under **Used by** — not just one of them. Delete removes each of those Projects' connection records in one action, and each removal is authorized on its own Project, so Owner on two of three Projects is not enough. Delete is the more restricted of the two.
+
+## Open the Connections tab
+
+Click **Workspace Settings** in the sidebar footer, then the **Connections** tab — fifth of the six, after **Credits**. It is a stable route, so a bookmark or a refresh lands back on it. See [Administer workspace access](/how-to/administer-workspace-access) for the rest of the tab strip.
+
+The panel is titled **Connections**, subtitled *"The Salesforce orgs your workspace is connected to, and the projects that use each one."*
+
+<Frame caption="One row per org, carrying its My Domain host, its lifecycle badge, and the Projects using it. This badge reads Needs admin rather than Connected, so this org is not ready to test against — and Disconnect sits beside Delete only because Trust AI provisioned the connection.">
+  <img src="/images/workspace-settings-connections.png" alt="Workspace Settings with the Connections tab selected, fifth in the strip after Credits. A single connection row is headed provar--trustaidev.sandbox.my.salesforce.com with an amber Needs admin badge next to it, then Used by Acme refunds CSAT and Sign-in Admin authorization, with Disconnect and Delete buttons at the right edge of the row." />
+</Frame>
+
+## Read a connection row
+
+Each row carries four things and nothing else:
+
+| Field | What it is |
+|---|---|
+| Org | The org's **My Domain** host — for example `acme.my.salesforce.com`. Never a raw id. One exception: a connection that never recorded a My Domain or org URL falls back to the connection's own name here, so a row labelled with a nickname rather than a host is a connection missing its org URL. |
+| Status | A lifecycle badge: **Connected**, **Setting up**, **Needs admin**, or **Setup failed**. |
+| **Used by** | The Projects that use this org, by name, comma-separated. |
+| **Sign-in** | How this connection authenticates. |
+
+<Note>
+  A row does **not** list the agents reachable through the connection. Release notes for this surface describe a reachable-agents list; the shipped row has no such field. The agent a Project drives lives on that Project's own **Settings → Connection** tab.
+</Note>
+
+### Lifecycle badges
+
+| Badge | Meaning |
+|---|---|
+| **Connected** | Set up and ready to test. |
+| **Setting up** | Trust AI is still finishing setup in your Salesforce org. |
+| **Needs admin** | A Salesforce admin has to finish authorizing this connection. |
+| **Setup failed** | Setup didn't complete. Reconnect to try again. |
+
+Only a **Connected** org is offered for reuse in another Project.
+
+### Sign-in methods
+
+The **Sign-in** line names how the connection authenticates, in this surface's own wording:
+
+| Label | Connection type |
+|---|---|
+| **Admin authorization** | An administrator signed in once and approved Trust AI. This is how new connections are made. |
+| **App key & secret** | Legacy — wired to an app your admin created. |
+| **Certificate (JWT)** | Legacy. |
+| **Username & password** | Legacy. |
+
+An unrecognized method falls back to the generic **Salesforce sign-in**, and a connection with no recorded method omits the **Sign-in** line entirely.
+
+<Note>
+  These four labels are specific to this surface. A Project's Salesforce connection *edit* form names the same methods differently — "Authorize TrustAI as an admin (recommended)", "External Client App key + secret (legacy)", "Certificate-based JWT (legacy)", "Username + password (legacy)" — and the in-chat card names them differently again. Read each surface in its own words rather than mapping one onto another.
+</Note>
+
+<DeprecatedNotice
+  what="Key & secret, certificate (JWT), and username & password sign-in"
+  instead="a one-time admin authorization"
+  who="connections that already use them" />
+
+## One row per org, however many Projects use it
+
+An org connected in five Projects mints five connection records — one per Project, all pointing at the same provisioned org. The tab folds them into **one row**, and lists all five Projects under **Used by**.
+
+The fold is on the org's My Domain, so it holds even when the Projects were connected through different-looking URLs: a Lightning host (`acme.lightning.force.com`) and a My Domain host (`acme.my.salesforce.com`) resolve to the same org and land on the same row. The fold has one blind spot: a connection that recorded no My Domain or org URL cannot be matched on one, so it stands alone even when another row is the same org. Two rows usually mean two orgs — check the **Org** label on both before you assume it.
+
+This is also why the removal actions read as org-level: whatever you click applies to the org named on the row, not to the Project you happen to be standing in.
+
+## Reuse a connection in another Project
+
+You never authorize the same org twice. When you connect Salesforce in a Project and your workspace already reached that org elsewhere, the Trust Agent offers the existing connection instead — ask it *"Connect my Salesforce Agentforce agent"* and it surfaces the offer on the way past.
+
+Two different offers can appear, and they are not the same thing:
+
+- **The org is already connected in *another* Project** — the card reads **"Reuse a Salesforce connection you already have"**: *"Your workspace already connected this org in another project. Reuse a connection here — no need to sign in or set it up again."* Each candidate names the connection, its org host, and its availability — **Already connected in your workspace**, or *"Already connected in your workspace, in 3 projects"* — with a **Use this connection** button.
+- **The org is already connected in *this* Project** — the more specific notice **“You’re already connected to this org”** replaces it, naming the existing connection and offering the same **Use this connection**, alongside **Connect a new one**.
+
+The two offers do different amounts of work, so read which one you got:
+
+- **Across Projects**, **Use this connection** *clones* the connection into the current Project, pointed at the same already-provisioned org. No admin signs in, nothing is re-provisioned, and this tab's **Used by** for that org grows by one Project. The clone starts with no agent selected, so you pick the agent for the new Project.
+- **Within one Project**, **Use this connection** simply picks up the record that is already there. Nothing is cloned, no new record is created, and **Used by** does not change.
+
+The eligibility rules differ too, and only the cross-Project one is strict. A connection is offered to *another* Project only when it is **Connected** *and* was made by admin authorization: a **Setting up**, **Needs admin**, or **Setup failed** org is withheld — reusing it would drag an admin back into setup — and so are the three legacy sign-in methods. The same-Project notice applies no such filter: it is raised by matching the org URL you typed against the Salesforce connections already in that Project, whatever their badge or sign-in method, and a connection still waiting on a certificate upload resumes at that upload step instead. If you expected a cross-Project offer and did not get one, check the org's badge on this tab first.
+
+## Disconnect vs Delete
+
+This is the distinction the surface exists for. Both buttons remove a connection, and each one does something the other does not.
+
+| | **Disconnect** | **Delete** |
+|---|---|---|
+| Touches your Salesforce org | **Yes** — permanently removes the External Client App Trust AI deployed there | No |
+| Needs a Salesforce admin | **Yes** — you are sent to Salesforce to authorize the removal | No |
+| Removes the connection from every Project using the org | No — one connection record | **Yes** — all of them |
+| Reconnect afterwards | Requires a fresh admin authorization | Straight away; the org-side app is still there |
+| Who can do it | **Editor** on the Project the connection belongs to | **Owner** on every Project under **Used by** |
+| Offered on | Connections made by admin authorization only | Every connection |
+
+**Disconnect** appears only on connections Trust AI provisioned — the admin-authorization ones. A connection wired to an app your own admin created has nothing of Trust AI's to tear down, so it offers **Delete** alone.
+
+### What each confirmation says
+
+Both actions are confirm-gated, and the dialogs name what happens. Quoted here as shipped; the org name and the project count are filled in from the row.
+
+**Disconnect** — the dialog is titled **Disconnect this Salesforce org?**
+
+> This permanently removes the Salesforce app TrustAI created in **acme.my.salesforce.com** and deletes the connection from 3 projects. Anyone using it will lose access until you reconnect. You can’t undo this.
+
+Its buttons are **Keep connection** and **Disconnect**.
+
+**Delete** — the dialog is titled **Remove this connection?**
+
+> This removes **acme.my.salesforce.com** from TrustAI across 3 projects. The Salesforce app TrustAI created stays in place, so you can reconnect later. You can’t undo this.
+
+Its buttons are **Cancel** and **Remove connection**.
+
+### Read the Disconnect wording carefully
+
+Confirming **Disconnect** does two things: it removes the External Client App from your Salesforce org, and it deletes **the one connection record that owns that app**. It does not delete the other Projects' records.
+
+The practical consequence is still workspace-wide — every Project that reuses the org shares the app that just went away, so all of them stop working, exactly as the dialog warns. But the cleanup is not: if several Projects were listed under **Used by**, come back to this tab afterwards. Anything still listed now points at an org where Trust AI's app no longer exists, and **Delete** is what clears it.
+
+If you want the connection gone from Trust AI everywhere and the org left untouched, **Delete** is the action that does that in one step — provided you own every Project under **Used by**. If you do not, the action reports a failure — but the removals are not undone, so records in the Projects you *do* own can already be gone. Check **Used by** before you click, and re-read the row afterwards.
+
+### While a Disconnect is running
+
+Disconnecting is not instant, because removing the org-side app needs a fresh administrator token. Confirming does not remove anything yet: Trust AI starts an admin authorization and hands your whole browser tab to Salesforce. Approve it there, and you land back on a Trust AI confirmation page — headed **Salesforce connection** — that runs the removal and reports it. This is a full page, not a toast on the Connections tab.
+
+While it runs, that page shows a **Disconnecting** pill under the heading *"Removing your connection"*. It then settles one of two ways:
+
+- **It finishes** — a **Disconnected** pill, the heading *"Connection removed"*, and *"TrustAI removed the components it added to your Salesforce org and deleted the connection."* You are returned to **Connections** automatically a moment later.
+- **It doesn't** — a **Not disconnected** pill and *"We couldn't finish disconnecting"*, with the reason underneath. If the admin declines, the org can't be reached, or the External Client App itself can't be removed, the connection is **kept** rather than left half-removed, and you can try again. A **Return to Connections** button takes you back.
+
+One caveat on the success wording: it reports that the External Client App is gone, which is what the connection record's removal is gated on. If some *other* component of the app bundle could not be removed, this page still reads **Connection removed** — so if the disconnect was retried or reported trouble earlier, have your Salesforce administrator confirm the org is clean.
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="The connection I expected isn't in the list">
+    The list is scoped to Projects you can reach. A connection living only in a Project you have no grant on is not shown — that is the access boundary, not a missing row. Ask for **Viewer** access on that Project, or ask someone who has it to check.
+  </Accordion>
+
+  <Accordion title="There's no Disconnect button on a row">
+    Only connections Trust AI provisioned by admin authorization have an org-side External Client App to remove. Check the row's **Sign-in** line: anything other than **Admin authorization** offers **Delete** alone.
+  </Accordion>
+
+  <Accordion title="The Trust Agent didn't offer to reuse an org I know is connected">
+    That filter applies to the *cross-Project* offer only: a candidate from another Project must be **Connected** and made by admin authorization, so a **Needs admin** or **Setting up** org is withheld on purpose. Check the org's badge on this tab. Cross-Project reuse also requires **Editor** access on the Project you are connecting *into*. The same-Project notice is not filtered this way, so an org that raises no offer in a new Project may still raise one where it is already connected.
+  </Accordion>
+
+  <Accordion title="Delete was refused">
+    Deleting is restricted to a Project's **Owner**, and Delete acts on every Project under **Used by** at once — so it is refused unless you own all of them. Editor access is enough to disconnect, but never to delete. If the org is used by a Project you don't own, ask its Owner to remove their side, or disconnect instead.
+  </Accordion>
+</AccordionGroup>
+
+Developers who want the underlying request and response shapes can find them in the [API Reference](/api-reference).

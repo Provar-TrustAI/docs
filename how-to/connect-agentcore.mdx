@@ -1,71 +1,91 @@
 ---
 title: "Connect an AWS Bedrock AgentCore agent"
 icon: "plug"
-description: "Connect a deployed AgentCore runtime to a Trust AI Project with the guided setup wizard — region, AWS admin handoff, role ARN, first sync."
+description: "Connect a deployed AgentCore runtime to a Trust AI Project — get the IAM role ARN from your AWS admin first, then finish the guided wizard in one sitting."
 ---
 
 This how-to connects an **AWS Bedrock AgentCore** agent to a Trust AI [Project](/concepts/projects). When you're done:
 
 - Your AgentCore agent's conversations import into the Project as [Sessions](/concepts/sessions) — on demand with **Sync now**, or automatically if you set up streaming
-- The connected agent appears as an agent build you can pick when you launch an Evaluation, and on each session's Details
+- The connected agent appears as an [agent version](/concepts/agent-versions) you can pick when you launch an Evaluation, and on each session's Details
 
-AgentCore is one of three platforms in the **Add connection** picker, alongside [Salesforce Agentforce](/how-to/connect-agentforce) and [Claude Managed Agent](/how-to/connect-claude-managed-agent) — each has its own setup guide. This page covers AgentCore only.
+AgentCore is one of four platforms in the **Add connection** picker, alongside [Salesforce Agentforce](/how-to/connect-agentforce), [Claude Managed Agent](/how-to/connect-claude-managed-agent), and [Conversational HTTP agent](/how-to/connect-http-agent). Each has its own setup path and its own guide; this page covers AgentCore only.
 
-Before you start, it's worth asking the [Trust Agent](/concepts/trust-agent) whether an agent is already connected — try *"Is an agent connected to this project?"* It checks the project's connected agent builds and tells you what it finds, so you don't reconnect something that already works. The AgentCore connection itself is made in a guided wizard in Project Settings, described below.
+Before you start, it's worth asking the [Trust Agent](/concepts/trust-agent) whether an agent is already connected — try *"Is an agent connected to this project?"* It checks the project's connected agents and tells you what it finds, so you don't reconnect something that already works. The AgentCore connection itself is made in a guided wizard in Project Settings, described below.
+
+## Before you start
 
 <Warning>
   This setup creates a **cross-account IAM role** that Trust AI assumes to reach your AWS account, protected by an External ID baked into the setup package. Coordinate with whoever owns AWS security in your team before creating the role. Use the setup package the wizard generates — don't hand-author the policies.
 </Warning>
 
+### The wizard does not save your place
+
+The setup wizard holds everything in the page: the region you typed, the role ARN you pasted, and which of the three steps you're on. Leaving the Connection tab — opening another settings tab, going to Sessions, closing the browser tab — drops all of it. When you come back you get step one again, with the region reset to its `us-east-1` default and the role ARN gone. There is no draft and no resume.
+
+That matters because getting a role ARN means waiting on an AWS admin, which can take hours or days. So plan the setup as **two visits**:
+
+1. **First visit.** Open the wizard, enter your region, copy the setup package, and send it to your AWS admin. What survives is the package — it's on your clipboard and in the message you sent, not in the wizard.
+2. **Second visit.** With the role ARN in hand, re-open the wizard, set the region again (the field comes back pre-filled with `us-east-1`, so check it if that isn't yours), go to the **Role ARN** step, and finish without leaving the tab. What survives is the saved connection.
+
+Nothing is lost by walking away after the first visit — the package is the only thing that visit produces. What you must not do is paste a role ARN and wander off before saving.
+
 ## Prerequisites
 
 - An **AWS account** with a deployed AgentCore Runtime agent. Trust AI discovers agents once the AgentCore runtime and its Memory are ready.
-- An **AWS admin** who can create IAM roles in that account — or you, if that's your role. The wizard is built for handoff: you can send the whole setup to your admin and come back when they reply with a role ARN.
+- An **AWS admin** who can create IAM roles in that account — or you, if that's your role.
 - A **Trust AI Project**. If you don't have one yet, start with [Your first 10 minutes in Trust AI](/tutorials/quickstart).
 - The **AWS region** your agent runs in (for example `us-east-1`).
+- For the second visit: the **role ARN** your admin creates from the setup package. Have it in front of you before you re-open the wizard.
 
 ## Connect the agent
 
 <Steps>
   <Step title="Open the setup wizard">
-    In your Project, open **Project Settings**, select the **Connection** tab, and click **Add connection**. Choose **AWS Bedrock AgentCore** from the platform picker.
+    In your Project, open **Project Settings**, select the **Connection** tab, and click **Add connection**. On the "Add a connection" picker, choose **AWS Bedrock AgentCore**.
 
     **You should see:** a "Connect your AgentCore agent" pane with three progress chips — **Region**, **AWS setup**, **Role ARN**. The wizard walks you through one step at a time.
   </Step>
 
   <Step title="Enter the region">
-    Enter the **AWS region** where your agent runs (like `us-east-1` or `eu-west-1`) and click **Continue**. The region is included in the setup package your AWS admin receives, so get it right here.
+    Under **Where is your AgentCore agent?**, enter the **AWS region** where your agent runs (like `us-east-1` or `eu-west-1`) and click **Continue**. The region is included in the setup package your AWS admin receives, so get it right here.
   </Step>
 
-  <Step title="Send the AWS setup to your admin">
-    On the **AWS setup** step, click **Copy setup for AWS admin**. This copies a self-contained setup package to your clipboard — send it to the person who manages AWS. It contains everything they need:
+  <Step title="Copy the setup package and send it to your AWS admin">
+    The **AWS setup** step is headed **Create the AWS role**. Click **Copy setup for AWS admin** to put a self-contained JSON setup package on your clipboard, then send it to the person who manages AWS. It contains everything they need:
 
     - A **cross-account trust policy** that lets Trust AI assume the role, locked to an External ID
-    - The **minimum permission policy** the connection needs
+    - The **minimum permission policy** the connection needs — five statements: confirm the role assumption worked, discover agents and their versions, endpoints and memories, read conversation history from AgentCore Memory, invoke the agent runtime for evaluations, and run CloudWatch Logs Insights queries to pull session traces
     - A ready-to-use **CloudFormation template** that creates the role in one stack. The package notes that the template body must be pasted into a new CloudFormation stack (or uploaded to an approved S3 bucket) — there is no one-click Quick Create link yet.
-    - Console steps and CLI commands for the optional streaming setup (see [Stream sessions automatically](#optional-stream-sessions-automatically) below)
+    - A **session import** section for the optional streaming setup (see [Stream sessions automatically](#optional-stream-sessions-automatically) below). This one is conditional: the console steps and CLI commands are in the package only once Trust AI has enabled session import for your region. Until then the wizard's **Session import** tile reads **Pending for this region** and the package carries a short note in place of the steps.
 
     The stack creates a role named `TrustAI-AgentCore-<region>` and outputs `TrustAIAgentCoreRoleArn` — that ARN is what your admin sends back to you.
 
-    Wondering what access you're granting? The wizard's **What access does this setup use?** expander answers it: Trust AI can import AgentCore conversation history and run evaluation prompts against the selected agent. The setup does not grant permission to change, deploy, or delete AgentCore resources. In IAM terms, the policy has five statements: verify the role assumption worked, discover agents and their versions and memories, read conversation history from AgentCore Memory, invoke the agent runtime for evaluations, and run CloudWatch Logs Insights queries to pull session traces.
+    Wondering what access you're granting? The wizard's **What access does this setup use?** expander gives the short version: Trust AI can import AgentCore conversation history and run evaluation prompts against the selected agent, and the setup does not grant permission to change, deploy, or delete AgentCore resources. The exact IAM actions are in the copied package.
 
-    When your admin has created the role, click **I have the role ARN** to move on. If you're waiting, you can leave and come back — the wizard is where you left it in the Connection tab.
+    <Note>
+      Once the package is on its way to your admin, this visit is finished — you can close the tab. **I have the role ARN** only moves the wizard to its third step; it doesn't save anything, so there is nothing to come back to.
+    </Note>
+  </Step>
+
+  <Step title="When the ARN arrives, return to the Role ARN step">
+    Re-open **Project Settings → Connection → Add connection → AWS Bedrock AgentCore**, enter the same **region** again, click **Continue**, then click **I have the role ARN**. That puts you on the **Role ARN** step, where the rest of the setup happens in one pass.
   </Step>
 
   <Step title="Paste the role ARN and check access">
-    On the **Role ARN** step, paste the ARN your admin sent back (it looks like `arn:aws:iam::123456789012:role/TrustAI-AgentCore-us-east-1`) and click **Check access**.
+    Under **Paste the Role ARN**, paste the ARN your admin sent back (it looks like `arn:aws:iam::123456789012:role/TrustAI-AgentCore-us-east-1`) and click **Check access**.
 
     Trust AI assumes the role and verifies it, then shows three facts — **Account**, **Region**, and **Access check** — plus one of these outcomes:
 
-    - **Access confirmed** — Trust AI can connect to AgentCore in this account, and shows the agent it found.
+    - **Access confirmed** — Trust AI can connect to AgentCore in this account, and names the agent it found.
     - **Choose the agent to connect** — the account has multiple AgentCore runtimes. Pick the one this Project should track; each runtime carries a **Ready** or **Needs review** badge. A connection tracks exactly one runtime — add another connection for a second agent.
     - **AWS role needs an admin update** — the role is reachable but missing required access. The pane lists the exact missing IAM actions as chips. Send the setup package to your admin again, then click **Check access** to recheck.
     - **AWS couldn't assume this role** — double-check the role ARN, the AWS account number, and that the role's trust policy lets Trust AI assume it.
     - **Role connected, no ready agent found yet** — the role works but no runtime is ready. You can click **Save role connection** now and return to Connection settings after an AgentCore runtime and Memory are ready.
 
-    One guardrail to know about: the wizard rejects AWS SSO reserved roles and warns on roles that look person-bound (names containing things like `sso`, `federated`, or `personal`). Saved connections need a dedicated Trust AI cross-account role protected by an External ID — a role tied to a person signing in won't work.
+    One guardrail to know about: the wizard rejects AWS SSO reserved roles outright, and warns on roles that look person-bound (names containing things like `sso`, `federated`, or `personal`). Saved connections need a dedicated Trust AI cross-account role protected by an External ID — a role tied to a person signing in won't work.
 
-    Once you've picked the agent, click **Save connection**.
+    Once you've picked the agent, click **Save connection**. The connection is saved at that click, and not before.
   </Step>
 
   <Step title="Import your first sessions">
@@ -73,9 +93,17 @@ Before you start, it's worth asking the [Trust Agent](/concepts/trust-agent) whe
 
     Sync is on-demand and per-agent — picking an agent syncs only that agent, and there is no "sync all" option. Each sync pulls recent AgentCore activity from your account's CloudWatch logs using the saved role.
 
-    To confirm the connection end to end, you can also ask the Trust Agent — *"Which agent build is connected now?"* — and it will report the newly connected agent.
+    To confirm the connection end to end, you can also ask the Trust Agent — *"Which agent is connected now?"* — and it will report the newly connected agent.
   </Step>
 </Steps>
+
+## What the saved connection shows
+
+Back on the **Connection** tab, the saved connection carries two things worth knowing about.
+
+**Current agent version.** A row on the connection card names the agent version this connection tracks and opens its [Agent Profile](/concepts/agent-profile). For AgentCore that panel opens on the never-generated empty state — *"No profile has been generated for this agent build yet."* — with a **Generate profile** button, exactly like any other platform. Press it and the capture comes straight back as *"Agent profiling isn't available for this connection yet."*, a plain statement with no retry offered. Automatic capability discovery isn't implemented for AgentCore, so a capture could never succeed — this is a platform limit, not a failure to work around. Nothing else about the connection is affected.
+
+**AgentCore connection.** A panel summarising what's ready now for the project: **Agent connected**, and **Simulations and evaluations** — the second reads **Ready** once the connection has both a runtime and a working sign-in, and **Needs setup** until then. Its next step points you at the Sessions sync, which this panel calls **Sync latest** — the button in the Sessions header is labelled **Sync now**. Same action, two labels.
 
 ## Optional: stream sessions automatically
 
@@ -84,19 +112,27 @@ Before you start, it's worth asking the [Trust Agent](/concepts/trust-agent) whe
 - `aws/spans` — span records with timing, trace IDs, and session context
 - `/aws/bedrock-agentcore/runtimes/<agent_id>-<endpoint>` — runtime events with the customer and assistant messages
 
-Both are required to reconstruct sessions, and your AWS account keeps control of the subscription filters. The connection's streaming status shows as **Not set up**, **Partially streaming** (only one log group is arriving), or **Ready** — at Ready, sessions stream into Trust AI in real time and you no longer need to sync by hand.
+Both are required to reconstruct sessions, and your AWS account keeps control of the subscription filters.
 
-If Trust AI hasn't enabled session import for your region yet, the package says so — you can still connect the role now, and Trust AI provides the CloudWatch setup steps once the region is enabled.
+On the saved connection this handoff becomes a card headed **Send sessions to TrustAI**. Until both log groups are delivering, its status reads one of two ways — **Not set up**, or **Partially streaming** when only one of the two log groups is arriving. Once both are delivering, the card gives way to a green **Streaming sessions** chip on the connection header, and you no longer need to sync by hand.
+
+The card lists the two log groups, each labelled **Receiving logs** or **No logs received yet** so you can see which half is missing — but only once Trust AI has a destination for your region. Until then the card names no log groups at all: it shows **Not set up** and points you at **Sync latest** in the meantime.
+
+If Trust AI hasn't enabled session import for your region yet, the wizard says so too — the **Session import** tile on the **AWS setup** step reads **Pending for this region**. You can still connect the role now, and Trust AI provides the CloudWatch setup steps once the region is enabled.
 
 ## Other sign-in methods
 
-The admin-handoff role is the recommended way to connect, but the AgentCore connection form supports other **Sign-in method** options: **Local AWS profile** (local development only), **AWS access keys** (advanced fallback), **OAuth token**, and **JWT token**.
+The admin-handoff role — **AWS role from admin setup (recommended)** — is the way to connect. The AgentCore connection form also carries other **Sign-in method** options: **Local AWS profile (local development only)**, **AWS access keys (advanced fallback)**, **OAuth token**, and **JWT token**. They live in the full manual form, which the wizard hides behind **Advanced setup for developers → Open full manual form**, and they are not the supported path for a production connection.
 
-Whatever method you use, secrets are write-only: a saved access key or token is shown only as a masked value and is never displayed back — to change it, you enter a new one.
+Whatever method you use, secrets are write-only, exactly as on the other three connectors: reopening a saved connection shows the credential field **blank**, carrying a **Configured** status pill and the placeholder `•••• configured — leave blank to keep existing`. Leave it blank to keep the stored value; type a new one to replace it. The value itself is never displayed back.
 
 ## Troubleshooting
 
 <AccordionGroup>
+  <Accordion title="I left the wizard and it forgot everything">
+    Expected, unfortunately. The wizard keeps its state in the page only, so any navigation away resets it to the first step. Nothing is broken and nothing was half-saved: re-open **Add connection → AWS Bedrock AgentCore**, re-enter your region, click **Continue** and then **I have the role ARN**, and you're back at the step that matters. The setup package you already sent your admin is still valid.
+  </Accordion>
+
   <Accordion title="Check access fails with 'AWS couldn't assume this role'">
     Trust AI couldn't assume the role at all. Check, in order:
 
@@ -110,13 +146,13 @@ Whatever method you use, secrets are write-only: a saved access key or token is 
   </Accordion>
 
   <Accordion title="The role ARN is rejected as an SSO or personal role">
-    AWS SSO reserved roles are tied to a person signing in and can't be used for saved Trust AI access. The same goes for roles that look person-bound. Ask your AWS admin for the dedicated Trust AI cross-account role from the setup package — it's protected by an External ID and isn't tied to any person's sign-in.
+    AWS SSO reserved roles are tied to a person signing in and can't be used for saved Trust AI access, so the wizard blocks them. Roles whose names look person-bound get a warning instead. Ask your AWS admin for the dedicated Trust AI cross-account role from the setup package — it's protected by an External ID and isn't tied to any person's sign-in.
   </Accordion>
 
   <Accordion title="Role connected, but no agent is found">
     The role works, but discovery found no ready AgentCore runtime. Confirm:
 
-    1. The **region** you entered in step 2 matches where the agent is actually deployed — the role and discovery are region-scoped.
+    1. The **region** you entered matches where the agent is actually deployed — the role and discovery are region-scoped.
     2. The AgentCore **runtime and its Memory are ready** in that region — check the AgentCore console. You can save the role connection now and come back to Connection settings once they're ready.
   </Accordion>
 
@@ -125,7 +161,7 @@ Whatever method you use, secrets are write-only: a saved access key or token is 
 
     1. Make sure the agent has had **invocations recently** — a quiet agent syncs zero sessions, which the toast reports honestly.
     2. If conversations exist but don't arrive, recheck access from the Connection tab — a role that lost its CloudWatch Logs Insights access can discover agents but not pull sessions. The missing-actions chips will show what's gone.
-    3. If you expected sessions to appear **without syncing**, that's the streaming setup — see [Stream sessions automatically](#optional-stream-sessions-automatically) above. Until streaming shows **Ready**, sessions arrive only when you sync.
+    3. If you expected sessions to appear **without syncing**, that's the streaming setup — see [Stream sessions automatically](#optional-stream-sessions-automatically) above. Until both log groups are delivering, sessions arrive only when you sync.
   </Accordion>
 </AccordionGroup>
 
@@ -133,5 +169,6 @@ Whatever method you use, secrets are write-only: a saved access key or token is 
 
 - **[Projects](/concepts/projects)** — the workspace that owns the connection
 - **[Sessions](/concepts/sessions)** — what imported AgentCore conversations become
-- **[Agent Versions](/concepts/agent-versions)** — how connected agent builds are tracked
+- **[Agent Versions](/concepts/agent-versions)** — how connected agents are tracked
+- **[Agent Profile](/concepts/agent-profile)** — what a profile covers, and which platforms it can be built for
 - **[Your first 10 minutes in Trust AI](/tutorials/quickstart)** — the end-to-end onboarding, including connecting an agent

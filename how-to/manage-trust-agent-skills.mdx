@@ -1,0 +1,143 @@
+---
+title: "Manage Trust Agent skills"
+icon: "sparkles"
+description: "Read the built-in skills the Trust Agent ships with, author your own on a different name, and see where a skill shows up once you save it."
+---
+
+A **skill** is a reusable recipe the [Trust Agent](/concepts/trust-agent) can run on demand — a written procedure for a job you do often, like drafting a judge rubric or pulling a weekly review of refund conversations. The agent reaches for one on its own when your request matches it, and you can invoke one directly by typing **/** in the composer.
+
+There are two kinds, and the difference matters for what you can change:
+
+- **Built-in skills** ship with TrustAI. They are always available and are never editable.
+- **Workspace skills** are the ones your team writes. They are editable, deletable, and yours.
+
+Skills are **workspace-scoped**: one set, shared by every project in your workspace. There is no per-project skill list.
+
+The quickest way to see what you have is to ask the agent — "Which skills do you have available?" — and it answers with the list.
+
+## Before you start
+
+<Warning>
+  Creating, editing, or deleting a skill requires the workspace **Owner** or **Admin** role. Using a skill does not — anyone in the workspace can invoke one, and the agent can reach for one on any project you can open.
+
+  Neither editor is **hidden from Members**. A Member can open the Trust Agent's skills editor or the **Workspace Settings → Skills** form, fill in every field, choose **Create skill**, and only be refused on save; nothing is stored. The two surfaces word that refusal differently, and only one of them says what went wrong:
+
+  - **Workspace Settings → Skills** gives the reason — **You do not have access to this resource**.
+  - The **Trust Agent's skills editor** shows its catch-all, **Couldn't save the skill. Check the slug and try again.** That is the same sentence it shows for a rejected name, so a permission refusal there reads like a typo. Check your role before you go hunting for a bad slug.
+
+  If you are not an Admin, ask one to author the skill for you rather than filling in the form first. See [Administer workspace access](/how-to/administer-workspace-access) for who holds which role.
+</Warning>
+
+## Open the skills editor
+
+Open the Trust Agent on a **conversation** — the editor button lives in the conversation header, not on the new-chat screen. Choose the sparkles **Skills** button there.
+
+The editor opens as a panel titled **Skills**, with the subtitle "Teach the agent reusable recipes it can run on demand." It has two halves:
+
+- **On the left**, a list: **+ New skill** at the top, then one row per skill. Each row shows the skill's **/name** and a one-line description; a built-in also carries a **Built-in** chip.
+- **On the right**, the detail form for whichever row you selected.
+
+<Frame caption="The chip is the whole distinction: every row carrying Built-in is read-only, and the one without it — selected here — is the workspace skill you can change. Note what the form gives you on a saved skill: a locked Slug, and Delete and Save changes rather than Create skill.">
+  <img src="/images/skills-editor-panel.png" alt="The Skills panel. On the left, + New skill above a list of skills, each showing its /name and a one-line description; the selected row /acme-refund-review carries no chip while the rows below it — /analyze-failures, /analyze-patterns, /author-adapter-lifecycle and others — are each tagged Built-in. On the right, the detail form for the selected skill with its Slug greyed out and fixed, and Label, Description, When to use and Instructions filled in, over Delete, Close and Save changes buttons." />
+</Frame>
+
+## Built-in skills are read-only
+
+Select a built-in and the form goes view-only. A note at the top of the form reads **Built-in skill** — "Always available to the agent — view only. To customise, create your own skill with a different name." — followed by a version label for the shipped recipe. Every field is disabled, there is no **Delete**, and there is no **Save** at all: the only button is **Close**.
+
+| | Built-in skill | Workspace skill |
+| --- | --- | --- |
+| Run it from **/** | Yes | Yes |
+| Read its recipe | Yes | Yes |
+| Edit it | No | Yes |
+| Delete it | No | Yes |
+
+You can still read a built-in's full recipe in the **Instructions** field — that is the point of the view-only form. Read it before you write your own version, so you start from what the shipped recipe actually does.
+
+<Note>
+  A built-in skill is always on. It is served by the product rather than stored in your workspace, so there is nothing to switch off — and nothing to lose track of when TrustAI ships a new one.
+</Note>
+
+## Customise a built-in by authoring on a different name
+
+You cannot fork a built-in onto its own name. Every built-in's name is reserved, and a save that targets one is rejected — the built-in is the single copy everyone gets, so nothing in your workspace is allowed to shadow it.
+
+What the refusal looks like depends on where you are:
+
+- In **Workspace Settings → Skills**, the message names the conflict: "'analyze-failures' is a built-in skill and is always available — it can't be used for a custom skill. Choose a different name for your skill."
+- In the Trust Agent's skills editor, the same rejection reads more generally: "Couldn't save the skill. Check the slug and try again." That sentence is the editor's catch-all for *any* failed save — a reserved name, a malformed one, or a role that is not allowed to save at all — so it never tells you which. Rule out the name and your role before you rewrite the recipe.
+
+To customise one: open the built-in, read its **Instructions**, then choose **+ New skill**, give it **your own** name, and write your version there. Your skill sits alongside the built-in rather than replacing it, so name it for what makes it different — `refund-review-weekly`, not `analyze-patterns`.
+
+## Create a workspace skill
+
+<Steps>
+  <Step title="Choose + New skill">
+    The form clears and the **Slug** field becomes editable. That only happens on a new skill — the name is fixed once the skill exists.
+  </Step>
+
+  <Step title="Name it in the Slug field">
+    This is the **/command** you will type in the composer. Lowercase letters, digits, and single dashes only — `weekly-refund-review`. Renaming later is not supported: you create a new skill under the new name and delete the old one.
+  </Step>
+
+  <Step title="Write the Description">
+    One line. It shows in the **/** menu, and it is what the agent matches your request against when it decides whether to reach for this skill on its own. Write it as the situation, not as a title.
+  </Step>
+
+  <Step title="Add a When to use cue">
+    Optional, and worth it. It is the second signal the agent uses to pick between skills that sound similar.
+  </Step>
+
+  <Step title="Write the Instructions">
+    Required. This is the procedure the agent follows once the skill runs — numbered steps in plain English work well. The agent reads it only when the skill is invoked, so it can be as long as the job needs.
+  </Step>
+
+  <Step title="Choose Create skill">
+    The skill saves and the row appears in the list without a **Built-in** chip. Editing it later gives you **Save changes** and a **Delete** button in the same form.
+
+    **You should see:** your skill in the left-hand list, and the **Slug** field now locked.
+  </Step>
+</Steps>
+
+<Note>
+  The editor's **Label** field is accepted but not stored. However you fill it in, the skill is listed and invoked as **/name** — the name you typed in **Slug**. Put the human wording in **Description**, where it is actually shown.
+</Note>
+
+## Where skills live
+
+The workspace list is **Workspace Settings → Skills**, grouped into two sections:
+
+- **Built-in** — this group reads "No built-in skills available yet." That is expected. Built-in skills are served by the product, not stored per workspace, so they are read in the Trust Agent's skills editor and never appear here.
+- **Custom** — your workspace skills. Each row carries an **Enabled** / **Disabled** toggle and a delete button; deleting asks you to confirm ("Delete *name*? This cannot be undone.").
+
+Because there is only one list, a bookmark to a project's skills settings takes you to the workspace page instead — the project-scoped address redirects there.
+
+<Info>
+  Turning a workspace skill **Disabled** stops the agent from choosing it on its own. It still appears in the composer's **/** menu, so treat disabling as "stop suggesting this," not as "hide it." Delete it if you want it gone.
+</Info>
+
+## Use a skill
+
+A saved skill is live immediately — no reload, no restart. Type **/** in the composer and it is in the menu, right where its name sorts.
+
+From there, either invoke it directly or just describe what you want: if your request matches the skill's description, the agent picks it up itself.
+
+## What you see in the transcript
+
+When the agent consults a skill, the transcript shows a receipt: **Reviewed** followed by the skill's name in words — **Reviewed Analyze patterns**, not the **/name** — with a chip naming where the skill came from:
+
+- **Core skill** — one of the recipes that ships with TrustAI
+- **Workspace skill** — one your team authored
+
+Select the receipt to expand the skill's one-line purpose, so you can see what the agent was working from without leaving the conversation.
+
+<Frame caption="Nobody typed a slash command here — the agent matched the request to the skill's description and reached for it. The receipt is how you find that out: the skill's name in words, where it came from, and the purpose it was working from once you select it.">
+  <img src="/images/skills-transcript-receipt.png" alt="The top of a Trust Agent transcript. The user asks what kinds of conversations the refunds assistant is actually handling; below it a Reviewed the project receipt, then a receipt reading Reviewed Analyze patterns with a Core skill chip, expanded to show the skill's one-line purpose about surfacing behavioural patterns across a session set." />
+</Frame>
+
+## Related reading
+
+- **[Trust Agent](/concepts/trust-agent)** — the concept page: modes, transcript, side rail, and the composer's **/** palette
+- **[Work with the Trust Agent](/how-to/work-with-the-trust-agent)** — driving the agent day to day
+- **[Approve an agent write](/how-to/approve-agent-writes)** — what happens when a skill's procedure reaches a write
+- **[Administer workspace access](/how-to/administer-workspace-access)** — the Owner / Admin / Member / Guest roles that gate skill authoring

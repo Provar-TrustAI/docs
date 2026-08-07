@@ -1,0 +1,101 @@
+---
+title: "Requirements"
+icon: "list-checks"
+description: "What your agent must do and must never do, written in business language — each one linked to the scenarios and evaluators that prove it, with coverage computed for you."
+---
+
+A Requirement is a statement about your agent in the language your business actually uses: *"Refund requests are resolved within one conversation."* *"Never promise a refund amount without checking policy."* It's the layer above test cases — the thing a test case exists to prove.
+
+Requirements answer a question the rest of Trust AI can't: **is anything actually checking this?** A project can have a healthy pass rate and still be blind to a rule nobody wrote a scenario for. Requirements make that blindness visible.
+
+## What a requirement carries
+
+- **A title** — the statement itself, in business language.
+- **A handle** — `REQ-1`, `REQ-2`. A bare number, deliberately *not* zero-padded the way scenario ids are (`SCN-000123`), because requirements are things people say out loud in a meeting.
+- **A type** — either **The agent must do this** or **The agent must never do this**. A must-not requirement wears a small **Must-not** badge so it reads correctly at a glance; you'd otherwise have to parse the sentence to notice the negation.
+- **A description and acceptance criteria** — optional detail for what "satisfied" means.
+- **A source** — where it came from: **Manual**, **Document**, **Chat**, or **Import**.
+- **Links** — the scenarios and evaluators that prove it.
+
+## Two different states, never conflated
+
+This is the distinction to hold onto, because the words look interchangeable and aren't:
+
+| | What it is | Who sets it |
+|---|---|---|
+| **Status** (lifecycle) | Draft, Active, or Archived | You |
+| **Health** (rollup) | Whether it's proven, and how well | Computed by the server |
+
+You never assert a requirement's health. It's derived from the scenarios and evaluators you've linked and the evidence those have produced — link something and the health moves on its own.
+
+### The five health states
+
+| State | Means |
+|---|---|
+| **Passing** | Covered, and the evidence says it holds |
+| **Failing** | Covered, and the evidence says it doesn't |
+| **Partially covered** | Some proof attached, but not enough to stand behind |
+| **Uncovered** | Nothing is checking this |
+| **Not yet run** | Coverage is in place; no run has exercised it yet |
+
+<Note>
+  A **Draft** or **Archived** requirement shows a lifecycle chip instead, and its Status column reads an em-dash — because health is a statement about evidence, and a draft isn't claiming anything yet. Drafts aren't a health state wearing a different hat.
+</Note>
+
+Here's that computation in practice, on a requirement with nothing attached:
+
+| Action | Health becomes |
+|---|---|
+| — | **Uncovered** |
+| Link a scenario | **Partially covered** |
+| Also link an evaluator | **Passing** (the linked scenario already had passing evidence) |
+
+Nothing was asserted at any step. Linking changed what could be proven, and the rollup followed.
+
+## Reading the list
+
+The Requirements list leads with a rollup — how many requirements, how many uncovered, how many still drafts — and three filters:
+
+- **All**
+- **Gaps** — Uncovered **plus** Partially covered. Both are places you can't yet stand behind a claim, so they belong in one worklist.
+- **Failing** — covered, and the evidence is bad.
+
+Gaps is the one to live in. Failing tells you something broke; Gaps tells you something was never being watched, which is usually the more expensive problem.
+
+The table shows the handle, the requirement, its source, linked scenario and evaluator counts, status, pass rate, and when evidence last arrived. Drafts and archived requirements are excluded from the Gaps and Failing filters, since their health isn't a health state.
+
+## Following a requirement to its evidence
+
+A requirement's fly-in has **Details**, **Coverage**, and **Status** tabs — what it says, what proves it, and what the evidence currently shows.
+
+From the other direction, a scenario's requirement pills link back with a `?req=` deep link, and that link takes the handle in whatever form you have it. All of these resolve to the same requirement:
+
+```
+?req=5      ?req=REQ-5      ?req=req-5      ?req=req 5      ?req=REQ#5
+```
+
+That's deliberate: the handle is meant to be pasteable out of a message or a ticket without cleanup. An unparseable handle resolves to an honest empty state rather than silently showing everything.
+
+## Where requirements come from
+
+Four sources, and the list labels each one so you always know how a requirement entered:
+
+- **Manual** — typed in directly.
+- **Document** — extracted from a document you already have, via **Extract from your docs**.
+- **Chat** — captured from a conversation with the [Trust Agent](/concepts/trust-agent).
+- **Import** — brought in from an external system.
+
+The point of naming the source is traceability: when a requirement looks wrong, the first question is usually where it came from.
+
+## Next step
+
+<Card title="Capture requirements" icon="clipboard-check" href="/how-to/capture-requirements">
+  The task recipe: file a requirement from a conversation, a document, or by hand; link it to the scenarios and evaluators that prove it; and work the **Gaps** filter down.
+</Card>
+
+## Related concepts
+
+- **[Scenarios](/concepts/scenarios)** — the test cases that prove a requirement
+- **[Evaluators](/concepts/evaluators)** — the judges attached as proof
+- **[Evaluations](/concepts/evaluations)** — the runs that produce the evidence health is computed from
+- **[Trust Agent](/concepts/trust-agent)** — can capture requirements from a conversation

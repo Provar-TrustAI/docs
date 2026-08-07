@@ -1,0 +1,138 @@
+---
+title: "From zero to a connected Salesforce agent"
+icon: "rocket"
+description: "Onboarding for a team whose agent runs on Salesforce Agentforce — how you get access to Trust AI, what to prepare in your Salesforce org, and the one-time admin authorization that connects the agent."
+---
+
+This is the on-ramp for a team whose agent runs on **Salesforce Agentforce**. It takes you from nothing to a connected agent you can evaluate. When you're done:
+
+- You can sign in to Trust AI and open a [Project](/concepts/projects)
+- Your Salesforce org is prepared, and a Salesforce administrator has authorized TrustAI once
+- One Agentforce agent is connected and ready to run
+
+<Note>
+  Two different "agents" meet on this page. The **Agentforce agent** you're connecting is *your* agent — the one under test, tracked as an [Agent Version](/concepts/agent-versions). The **Trust Agent** is the in-app assistant that helps you do the connecting. They share a word and nothing else.
+</Note>
+
+<Frame caption="The whole on-ramp in one sitting — an empty workspace, the connection wizard, and a first conversation with the connected agent. Voiced walkthrough, about three minutes.">
+  <video controls playsInline className="w-full rounded-xl" src="/images/demos/get-started-walkthrough.mp4"></video>
+</Frame>
+
+## Get access to Trust AI
+
+Trust AI signs you in through your workspace's SSO identity provider. There's nothing for you to configure and no separate Trust AI password to manage.
+
+- **Ask the Provar team to set up your workspace**, and tell them who the first workspace **Owner** should be.
+- **After the workspace exists, access is self-service inside it.** The Owner or a workspace **Admin** invites the rest of your team and grants each person access to the right Project. See [Administer workspace access](/how-to/administer-workspace-access) for roles, invites, and per-project **Viewer** and **Editor** grants.
+
+You also need a [Project](/concepts/projects) before you can connect anything — create one from the project switcher at the top of the sidebar. [Your first 10 minutes in Trust AI](/tutorials/quickstart) owns that walkthrough; its first step is exactly this.
+
+## Prepare your Salesforce org
+
+Work through this before you open the connection form. A missing item shows up later as a failed check.
+
+**The agent**
+
+- **The Agentforce agent must be activated**, not just created. Open it in **Agentforce Builder** and turn it on.
+
+**The person who authorizes**
+
+- **A Salesforce administrator has to complete the authorization step in person.** It's a one-time, in-browser approval.
+- That administrator needs three Salesforce permissions: **Modify Metadata Through Metadata API Functions**, **Author Apex**, and **Customize Application**. TrustAI validates them before it writes anything to your org.
+- **Have that administrator sign in as the user you want the agent to run as.** The connection runs as the administrator who authorized it.
+
+**The user the agent runs as**
+
+- **Assign the selected agent's own permission set** to that user in Salesforce. TrustAI assigns its own access permission set, but never the agent's.
+- **The same user needs read access to agent metadata.** Without it, sign-in succeeds and the agent list comes back empty.
+
+**The org**
+
+- **Your org's URL** — the My Domain host, like `https://myorg.my.salesforce.com`. You'll paste it into **Salesforce instance URL**. A sandbox has its own My Domain, which looks like `https://myorg--dev.sandbox.my.salesforce.com`. If you paste a Lightning or Setup URL, Trust AI normalizes it to the right host.
+- **Use a Sandbox, not production.** Authorizing deploys an **External Client App** into whichever org you sign in to, so point this at a Salesforce Sandbox. This is guidance, not a block.
+- **Agentforce has to be enabled in the org.** Trust AI doesn't check this — there is no enablement probe anywhere in the connection path — so confirm it with your Salesforce admin first. {/* ACCURACY-AUDIT-PENDING: the failure SHAPE ("fails with a generic error rather than naming the cause") is runbook-attested only; verifying it needs an org without Agentforce, which no local fixture can produce. The no-probe half is code-verified. */}
+
+<Note>
+  *Ask the Trust Agent:* "What do I need to set up in Salesforce before I connect my Agentforce agent?" It walks the same checklist in plain language, so you can forward it to whoever holds the administrator account.
+</Note>
+
+### What TrustAI deploys
+
+You hand over no consumer key, consumer secret, certificate, or password. When your administrator approves, TrustAI deploys that External Client App — named `TrustAI_Agent_Eval_<suffix>` — into the org, along with a permission set that authorizes the run-as user for it. TrustAI creates, names, and manages that app itself.
+
+Removing the connection later is two different actions with different blast radii — read [Manage Salesforce connections](/how-to/manage-salesforce-connections) before you use either.
+
+## Connect the agent
+
+The fastest route is to ask the Trust Agent; the steps below are the manual path, in short. Full detail: [Connect a Salesforce Agentforce agent](/how-to/connect-agentforce).
+
+<Note>
+  *Ask the Trust Agent:* "Connect my Salesforce Agentforce agent." It checks whether something is already connected, asks for your org URL, and hands you the authorization card. You don't name a run-as user on this path — the connection runs as the administrator who authorizes it.
+</Note>
+
+<Steps>
+  <Step title="Start a connection">
+    In **Project Settings → Connection**, click **Add connection** and choose **Salesforce Agentforce**. Give the connection a **Connection Name** you'll recognize later — "Agentforce Sandbox" beats "Salesforce 1" — and enter your org's URL in **Salesforce instance URL**. There is no sign-in method to choose: admin authorization is how a Salesforce connection is created.
+
+    **You should see:** the host Trust AI will use echoed back under the field.
+  </Step>
+
+  <Step title="Authorize once, in Salesforce">
+    Click **Authorize in Salesforce with an administrator account**. Salesforce opens in a new tab, your administrator signs in and approves, and that tab closes itself.
+
+    The Salesforce tab shows **Connecting** while Trust AI sets the org up. If the account that approved is missing one of the three administrator permissions, it stops on **An admin needs to finish setup**, usually naming the missing permissions. If it names none, hand the authorization to a System Administrator and try again.
+
+    **You should see:** the original form return on its own and advance to the agent-picking step, headed **Salesforce org connected**.
+  </Step>
+
+  <Step title="Pick your agent">
+    Trust AI lists the Agentforce agents in the org by name — pick yours in **Agent**. If nothing is listed, click **Find agents** to run the search again. Leave **Run agent as** on its default unless your agent is a Service Agent.
+
+    **You should see:** your agent listed by name rather than by an identifier you had to look up.
+  </Step>
+
+  <Step title="Test, then save">
+    Click **Test Connection** first. Trust AI signs in, lists your agents, and opens and immediately closes one real session against the agent you picked — it sends no message, so the test costs no agent turn. The form reports a single summary line; for the three checks behind it, and the exact message and fix for each failure, see [What the connection test checks](/how-to/connect-agentforce#what-the-connection-test-checks).
+
+    Then click **Save changes**. Saving records your agent choice and closes the form, returning you to the **Connection** tab — which is why you test first, since **Test Connection** lives on that form.
+
+    **You should see:** **Connection verified** from the test, then your connection listed on the **Connection** tab once you save. Workspace Settings → **Connections** shows the org with lifecycle **Connected** and sign-in **Admin authorization**.
+  </Step>
+</Steps>
+
+## Watch the connection end to end
+
+The wizard leg of this page — authorize, the hand-off to Salesforce, the automatic return, picking an agent, **Connection verified** — is recorded on the how-to: [watch it there](/how-to/connect-agentforce#connect-from-project-settings). The walkthrough video above covers the same ground in the flow of the whole setup.
+
+## What to expect after connecting
+
+- **Sessions come from Trust AI driving your agent** — observe-only explorations, simulated [Scenarios](/concepts/scenarios), and evaluation runs. Each lands in the Project as a [Session](/concepts/sessions). Historical import of past production conversations isn't available for Agentforce today: **Sync now** lists your Agentforce agent, then reports that sync isn't supported for the platform.
+- **Step-level trace evidence needs extra setup in Salesforce.** To see the agent's internal steps rather than just the transcript, more has to be turned on org-side than the connection itself needs. Where it works, Data 360 is live and **Agentforce Session Tracing** and **Audit and Feedback** are on — Trust AI doesn't check for any of these and no message names them, so confirm with your Salesforce admin. {/* ACCURACY-AUDIT-PENDING: Data 360 provisioned and live, Agentforce Session Tracing, and Audit and Feedback are required for step-level trace evidence — attested only by an engineering runbook, with no code check or user-facing message. Verify against the app on the release tag */}
+- **Traces settle late.** Salesforce publishes trace data on its own schedule — expect roughly 11 to 13 minutes, typically, before a run's step evidence is complete. Salesforce does not backfill sessions from before tracing was turned on.
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Some checks pass and others don't">
+    **Reach the selected agent** is the check that decides whether the connection works — a clean sign-in on its own isn't enough. The cause is almost always an item from [Prepare your Salesforce org](#prepare-your-salesforce-org): an agent that isn't activated, a run-as user missing the agent's own permission set, or a user without read access to agent metadata. The [failure list on the how-to](/how-to/connect-agentforce#troubleshooting) gives the exact message and fix for each.
+  </Accordion>
+
+  <Accordion title="Trust AI says this instance isn't configured to make Agentforce connections">
+    Clicking **Authorize in Salesforce with an administrator account** answers with exactly that message instead of opening Salesforce. It means what it says: the admin-authorize flow is provisioned per deployment, and this instance's connected app hasn't been set up yet. Contact the Provar team rather than reaching for another sign-in method — there is no client-side workaround.
+  </Accordion>
+</AccordionGroup>
+
+## Related reading
+
+- **[Connect a Salesforce Agentforce agent](/how-to/connect-agentforce)** — the full walkthrough of both routes, including every connection-test failure and its fix
+- **[Manage Salesforce connections](/how-to/manage-salesforce-connections)** — reuse one org across Projects, and Disconnect vs Delete
+- **[Administer workspace access](/how-to/administer-workspace-access)** — invite the rest of your team and grant project access
+- **[Work with the Trust Agent](/how-to/work-with-the-trust-agent)** — driving the assistant that guides this setup
+
+Developers who want the underlying endpoints and request/response shapes can find them in the [API Reference](/api-reference).
+
+## Where to go next
+
+Continue with [Your first 10 minutes in Trust AI](/tutorials/quickstart). Its first two steps — creating a Project and connecting an agent — are the two you've just done.
+
+Its third step, **Observe real sessions**, starts with **Sync now**, which Agentforce doesn't support. On Agentforce you generate your first sessions by driving the agent instead, so use that step's fallback — *ask the Trust Agent:* "Try my agent with a few example questions and show me how it responds." Read the session it produces end to end, then pick the tutorial up at **Adopt starter evaluators and scenarios**.

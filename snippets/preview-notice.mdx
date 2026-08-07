@@ -1,0 +1,22 @@
+{/* Shared preview callout for any surface that is flag-gated and off by default in production,
+    so the boundary reads the same everywhere and is auditable.
+
+    Usage:
+      import { PreviewNotice } from "/snippets/preview-notice.mdx";
+      <PreviewNotice surface="Test Data Management" />
+      <PreviewNotice surface="Test Data Management" detail="Ask your admin to enable it." />
+
+    Do NOT name environment variables — readers do not set flags, operators do. Do not promise
+    a ship date. See AGENTS.md on preview features.
+
+    Wrapper choice is deliberate, and pairs with deprecated-notice.mdx:
+      <Note> — PreviewNotice. Something is limited RIGHT NOW; the reader may not see it.
+      <Info> — DeprecatedNotice. Nothing is limited or at risk; the guidance has moved.
+    Neither uses <Warning>: no reader is in danger in either case. */}
+
+export const PreviewNotice = ({ surface, detail }) => (
+  <Note>
+    **{surface} is a preview.** It is off by default, so you will only see it if your workspace
+    has been opted in.{detail ? ` ${detail}` : ""}
+  </Note>
+);

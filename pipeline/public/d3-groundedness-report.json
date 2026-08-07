@@ -1,0 +1,208 @@
+{
+  "title": "Groundedness claim report",
+  "description": "Reference material on the scenario, the N% grounded chip, and the per-claim report with its verified quotes",
+  "_ticket": "DEV-6218",
+  "_blocksPage": "how-to/check-answers-against-source-material.mdx",
+  "viewportWidth": 1280,
+  "viewportHeight": 800,
+  "totalDurationMs": 62544,
+  "videoFile": "d3-groundedness-report.webm",
+  "beats": [
+    {
+      "timeMs": 4471,
+      "action": "navigate",
+      "caption": "Scenarios"
+    },
+    {
+      "timeMs": 4501,
+      "action": "click",
+      "elementBounds": {
+        "x": 335,
+        "y": 354,
+        "width": 86,
+        "height": 22
+      },
+      "caption": "Open the scenario the judge grades"
+    },
+    {
+      "timeMs": 6615,
+      "action": "click",
+      "elementBounds": {
+        "x": 869.765625,
+        "y": 95.640625,
+        "width": 124.1875,
+        "height": 40.5
+      },
+      "caption": "Expected Output"
+    },
+    {
+      "timeMs": 9155,
+      "action": "hover",
+      "elementBounds": {
+        "x": 780,
+        "y": 323.625,
+        "width": 355.140625,
+        "height": 21
+      },
+      "caption": "The Groundedness judge is bound under Expected behavior"
+    },
+    {
+      "timeMs": 11977,
+      "action": "hover",
+      "elementBounds": {
+        "x": 792,
+        "y": 546.53125,
+        "width": 393,
+        "height": 19.5
+      },
+      "caption": "Reference material attaches to the scenario, never to the evaluator"
+    },
+    {
+      "timeMs": 18861,
+      "action": "navigate",
+      "caption": "The run that graded it"
+    },
+    {
+      "timeMs": 20408,
+      "action": "click",
+      "elementBounds": {
+        "x": 331,
+        "y": 387.453125,
+        "width": 314,
+        "height": 16.5
+      },
+      "caption": "Open the result"
+    },
+    {
+      "timeMs": 22663,
+      "action": "click",
+      "elementBounds": {
+        "x": 921.25,
+        "y": 83.75,
+        "width": 84.46875,
+        "height": 40.5
+      },
+      "caption": "Evaluation"
+    },
+    {
+      "timeMs": 24903,
+      "action": "hover",
+      "elementBounds": {
+        "x": 1107.296875,
+        "y": 270.890625,
+        "width": 100.53125,
+        "height": 23.25
+      },
+      "caption": "The metric chip reads 50% grounded — the verdict is Fail"
+    },
+    {
+      "timeMs": 27508,
+      "action": "hover",
+      "elementBounds": {
+        "x": 845.125,
+        "y": 401.890625,
+        "width": 98.1875,
+        "height": 23.25
+      },
+      "caption": "2 supported · 1 contradicted · 1 unsupported"
+    },
+    {
+      "timeMs": 29914,
+      "action": "click",
+      "elementBounds": {
+        "x": 754,
+        "y": 437.140625,
+        "width": 176.734375,
+        "height": 18.75
+      },
+      "caption": "View groundedness report"
+    },
+    {
+      "timeMs": 32983,
+      "action": "click",
+      "elementBounds": {
+        "x": 175,
+        "y": 180,
+        "width": 485.734375,
+        "height": 211.75
+      },
+      "caption": "Claims on the left, the source on the right",
+      "durationMs": 1600
+    },
+    {
+      "timeMs": 34813,
+      "action": "wait",
+      "caption": "A supported claim carries the quote it was grounded in — highlighted where it sits in the source"
+    },
+    {
+      "timeMs": 38819,
+      "action": "click",
+      "elementBounds": {
+        "x": 175,
+        "y": 399.75,
+        "width": 485.734375,
+        "height": 173.6875
+      },
+      "caption": "The contradicted claim",
+      "durationMs": 1600
+    },
+    {
+      "timeMs": 40652,
+      "action": "wait",
+      "caption": "The agent said 60 days. The policy says 30 — and the report shows you where"
+    },
+    {
+      "timeMs": 44260,
+      "action": "click",
+      "elementBounds": {
+        "x": 190,
+        "y": 592.4375,
+        "width": 106.015625,
+        "height": 23.25
+      },
+      "caption": "A reviewer can override one claim's verdict",
+      "durationMs": 1600
+    },
+    {
+      "timeMs": 47382,
+      "action": "wait",
+      "caption": "Four choices — Unknown is the judge's uncertainty, never a reviewer's call"
+    },
+    {
+      "timeMs": 50912,
+      "action": "type",
+      "elementBounds": {
+        "x": 441,
+        "y": 467.359375,
+        "width": 398,
+        "height": 64
+      },
+      "caption": "Overrides carry a note",
+      "durationMs": 3200
+    },
+    {
+      "timeMs": 54202,
+      "action": "click",
+      "elementBounds": {
+        "x": 727.65625,
+        "y": 547.359375,
+        "width": 111.34375,
+        "height": 30
+      },
+      "caption": "Apply override",
+      "durationMs": 1600
+    },
+    {
+      "timeMs": 57447,
+      "action": "wait",
+      "elementBounds": {
+        "x": 1114.296875,
+        "y": 23,
+        "width": 100.53125,
+        "height": 23.25
+      },
+      "caption": "The score recomputes — 75% grounded. The contradiction still fails the check.",
+      "durationMs": 4200
+    }
+  ]
+}

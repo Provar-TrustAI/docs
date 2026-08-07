@@ -1,49 +1,72 @@
 ---
 title: "Saved Views"
 icon: "bookmark"
-description: "Persisted filter, sort, and column configurations — name a lens on your data, share it with your team, and run evaluations against it."
+description: "Persisted filter, sort, search, and column configurations — name a lens on your data and share it with your team."
 ---
 
 A Saved View is a named, persisted combination of filters, sort order, and column layout for a list surface. Instead of re-applying the same filters every time you open Sessions or Scenarios, save the configuration once and return to it with a click. Views are stored server-side and shared across the project, so the whole team works from the same lenses.
 
 ## Why Saved Views exist
 
-Every list surface in Trust AI — Sessions, Scenarios, Evaluations — supports filtering, sorting, and column selection. Teams quickly develop recurring lenses: "sessions from the last 24 hours with failed annotations," "scenarios tagged regression, sorted by tag," "evaluation runs triggered by CI." Without Saved Views, each team member rebuilds these filters manually every session.
+Teams develop recurring lenses on their data: "sessions from the last 24 hours," "scenarios missing expected output," "the failed results in this run." Without Saved Views, each team member rebuilds those filters by hand every time. A Saved View captures the configuration once so the whole project works from the same lens.
 
-A Saved View captures that configuration so the team shares a common lens on the data — and, since a view describes a repeatable slice of your sessions or scenarios, it can also serve as the scope for an evaluation run.
+## Which surfaces have them
+
+Not every list has Saved Views, and the ones that do don't all offer the same controls. This is the map:
+
+| Surface | Filters | Column control | Saved Views |
+|---|---|---|---|
+| [Sessions](/concepts/sessions) | Yes | Yes | Yes |
+| [Scenarios](/concepts/scenarios) | Yes | Yes | Yes |
+| A run's results | Yes | Yes | Yes — scoped to that run |
+| The [Evaluations](/concepts/evaluations) run list | No | No | No |
+
+The Evaluations list is deliberately lighter: it offers a search box and sortable columns, and nothing else. There is no filter popover, no column menu, and no view picker on it. If you are looking for the place to save a lens over evaluation *results*, that's inside a run, not on the list of runs.
+
+Views on a run's results belong to that run — open a different run and you get that run's views, not the ones you built elsewhere.
 
 ## What's in a Saved View
 
-- **Filters** — which items to include (by tag, status, time window, annotation state, etc.)
+- **Filters** — which items to include
 - **Sort order** — which column to sort by and in which direction
-- **Column layout** — which columns are visible, their left-to-right order, and their widths. Drag columns to reorder them from the column menu; each view remembers its own layout, so switching views restores the arrangement you saved.
-- **Surface binding** — which list surface the view applies to (Sessions, Scenarios, or Evaluations)
+- **Column layout** — which columns are visible, their left-to-right order, and their widths. Each view remembers its own layout, so switching views restores the arrangement you saved.
+- **The search box** — whatever you typed into the toolbar search is part of the view too. This surprises people: a view that looks "modified" when you expected it clean is often just a leftover search term.
+- **Surface binding** — a view belongs to one surface and is never offered on another
 
 ## Built-in views
 
-Each surface ships with server-managed built-in views, so a list is never a blank slate:
+Every view is one of two kinds, and the difference decides what you're allowed to do with it.
+
+**Built-in views** ship with the project so a list is never a blank slate:
 
 | Surface | Built-in views |
 | --- | --- |
 | Sessions | **All sessions**, **Recent sessions** (last 24 hours) |
 | Scenarios | **All scenarios**, **Missing expected output** |
-| Evaluations | **All runs**, **Last 7 days**, **Failed runs** |
+| A run's results | **All results** |
 
-Built-in views can't be overwritten — clicking **Save view** while a built-in is active opens **Save as new view** instead, so the shared starting points stay stable for everyone.
+Built-ins are read-only. They can't be renamed, deleted, overwritten, or set as your default — and rather than showing you disabled buttons, the app simply doesn't offer those actions when a built-in is active. Clicking **Save view** on one falls through to **Save as new view**, so the shared starting points stay stable for everyone.
+
+**User-created views** are the ones you make. They carry the full set: rename, delete, and set-as-default.
 
 ## Default views
 
-Any Saved View can be marked as your default for a given surface. When you open that surface, it loads with your default view's filters pre-applied instead of the unfiltered list. Defaults are per-user and per-project, and they stick — your default and its saved state persist as you navigate around the app and come back.
+A **user-created** view can be marked as your default for a surface, and that surface then opens with it pre-applied. Defaults are per-user and per-project — yours doesn't change anyone else's. A built-in can't be a default; the **Set as default** item isn't offered while one is active.
 
 ## Views as run scopes
 
-A Saved View is also an input to the evaluation launcher. When you start a run from the Evaluations surface, you pick a source — Sessions or Scenarios — and then a saved view of that surface instead of hand-picking individual items. Trust AI resolves the view to its concrete item list on the server at launch time, so time-window filters are anchored to the moment you launch: picking **Recent sessions** always means the last 24 hours as of now, and the same view yields fresh results on every run.
+<Note>
+  **Only the Sessions source takes a view.** In the evaluation launcher, choosing **Sessions** as what to evaluate gives you a view picker. Choosing **Scenarios** gives you a scenario picker instead — you select the scenarios individually, and no Scenarios view is consulted.
+</Note>
+
+For the Sessions branch, Trust AI resolves the view to its concrete session list on the server at launch time, so time-window filters anchor to the moment you launch: picking **Recent sessions** always means the last 24 hours as of *now*, and the same view yields a fresh set on every run.
+
+If you were counting on a curated Scenarios view to scope a run, it won't — pick the scenarios in the launcher, or narrow the list first and select from it.
 
 ## In the app
 
-- **View picker** — a dropdown in the toolbar of each list surface lets you switch between saved views or manage them (rename, delete).
-- **Save view** — the toolbar's save button is always visible. When your current configuration has nothing new to save it is disabled with an explanatory tooltip; its adjacent menu offers **Save as new view**, **Reset view**, and **Manage views**.
-- **Set as default** — mark a view as your default so the surface opens with it pre-applied.
+- **View picker** — the toolbar dropdown lists the surface's views and switches between them. On a user-created view it also offers **Set as default**, **Rename view**, and **Delete view**; on a built-in, those three are absent.
+- **Save view** — the toolbar's save button is always visible, and is disabled with an explanatory tooltip when there's nothing to save. Its adjacent chevron menu offers **Save as new view** and **Reset view** — and **Reset view** is itself disabled unless you're on a user-created view with unsaved changes.
 
 Saved Views are managed from the toolbar of each list surface. Developers who need the underlying endpoint detail can find the Saved Views family in the [API Reference](/api-reference).
 
@@ -52,4 +75,4 @@ Saved Views are managed from the toolbar of each list surface. Developers who ne
 - **[Tables and panels](/concepts/tables-and-panels)** — the shared table whose filters, sort, and column layout a view persists
 - **[Sessions](/concepts/sessions)** — the primary surface where Saved Views reduce filter noise
 - **[Scenarios](/concepts/scenarios)** — filter the flat Scenarios list by tag, persona, or missing expected output
-- **[Evaluations](/concepts/evaluations)** — filter evaluation runs by status or time window, and launch runs scoped to a Sessions or Scenarios view
+- **[Evaluations](/concepts/evaluations)** — the run list has no views; a run's *results* table has its own, scoped to that run

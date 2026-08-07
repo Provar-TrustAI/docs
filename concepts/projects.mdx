@@ -1,83 +1,142 @@
 ---
 title: "Projects"
 icon: "sliders-horizontal"
-description: "The top-level workspace container for an agent or agent fleet under evaluation."
+description: "The boundary around one agent under evaluation — and the workspace-level resources every project draws on."
 ---
 
-A Project is the workspace boundary around a single agent (or fleet of related agents) under evaluation. Member access, runtime connections, and every Trust AI artifact — Sessions, Annotations, Scenarios, Evaluators, Evaluations, Agent Versions — belong to one Project.
+A Project is the boundary around a single agent (or a small fleet of closely related agents) under evaluation. Sessions, Scenarios, Evaluators, Evaluations, and Annotations each belong to exactly one Project.
 
-## What's in a Project
+Some things deliberately do **not** stop at that boundary. People, teams, credits, the Trust Agent's skills, and an authorized Salesforce org are workspace-level: you set them up once and every Project draws on them. Knowing which is which is the fastest way to find a setting you can't locate — half of "where is this configured?" is really "is this project-scoped or workspace-scoped?"
 
-Every Project owns four things:
+## What a Project owns, and what the workspace owns
 
-<CardGroup cols={2}>
-  <Card title="Members + access" icon="users">
-    Who can read, annotate, define Evaluators, or run Evaluations. Workspace members get per-Project **Viewer** or **Editor** access — granted directly, or inherited from a team.
-  </Card>
-  <Card title="Runtime connections" icon="plug">
-    One or more connections to the agent platforms you're evaluating. AWS Bedrock AgentCore, Salesforce Agentforce, and Claude Managed Agent connections coexist in one Project as peers.
-  </Card>
-  <Card title="Inventory of artifacts" icon="folder-open">
-    Sessions ingested, Annotations applied, Scenarios curated, Evaluators defined, Evaluations run, Agent Versions tracked. All scoped to this Project.
-  </Card>
-  <Card title="Settings" icon="sliders-horizontal">
-    Project name and description, runtime connections, member access, and — when a Project has served its purpose — permanent deletion.
-  </Card>
-</CardGroup>
+| Scope | What lives there |
+| --- | --- |
+| **Project** | Sessions, Scenarios, Evaluators, Evaluations, Annotations, this Project's connections, and its own access grants |
+| **Workspace** | Members and identity, Teams, project access, credits, the Trust Agent's skills, and the Salesforce orgs Trust AI is authorized in |
+
+Project work happens under the Project you have selected in the sidebar. Workspace setup lives in **Workspace Settings**, which has six tabs: **Members**, **Teams**, **Project access**, **Credits**, **Connections**, and **General**.
+
+A Project's own **Settings** page carries **General**, **Connection**, and **Members**.
+
+<Tip>
+  Agent versions are not a Project surface you manage by hand. They are discovered through a connection — the connection summary shows the **Current agent version** it's pointed at — and an Evaluation pins one when it runs. See [Agent Versions](/concepts/agent-versions).
+</Tip>
 
 ## Who creates Projects, and when
 
 The two personas who reach for **Create new project** most:
 
-- **SI Consultant** — setting up Trust AI for a new customer engagement. The Consultant creates one Project per agent the customer cares about evaluating. Their first hour in the product is: create the Project, connect the agent — the Trust Agent can walk you through it — and sync the first Sessions.
-- **Agent Owner** — adding a new agent to an existing customer's Trust AI workspace. Same shape, narrower scope: they know what they're evaluating and just need the workspace to put it in.
+- **SI Consultant** — setting up Trust AI for a new customer engagement. One Project per agent the customer cares about evaluating. Their first hour is: create the Project, connect the agent, sync the first Sessions.
+- **Agent Owner** — adding a new agent to an existing workspace. Same shape, narrower scope.
 
-In both cases, you're answering the question: "Do these things deserve to share an Evaluator pool, an annotation queue, and an Agent Version timeline?" If yes, one Project. If no, two.
+In both cases you're answering one question: "Do these things deserve to share an Evaluator pool and an annotation queue?" If yes, one Project. If no, two.
 
 ## One Project per logical product
 
-Practical guidance:
+- **Different production agents** → different Projects. Even on a shared model, the Scenarios and Evaluators that judge them differ.
+- **Multiple environments of the same agent** (staging and prod) → **one Project**. The Scenarios and Evaluators want to be shared; what differs is the agent version under test.
+- **A fleet of similar agents** (one per customer, one per region) → judgment call. Identical evaluator criteria, share. Divergent criteria, split.
 
-- **Different production agents** → different Projects. Even if they share an underlying model, the Scenarios and Evaluators that judge them are different. Don't conflate.
-- **Multiple environments of the same agent** (staging vs prod) → **one Project**, two Agent Versions. The Scenarios and Evaluators want to be shared across environments; what differs is the version under test.
-- **A fleet of similar agents** (one per customer, one per region) → judgment call. If the evaluator criteria are identical, consider sharing. If they diverge, split.
+## Connecting an agent
 
-## Runtime connections
+In **Settings → Connection**, **Add connection** opens a picker — "Choose the agent platform you want to connect to this project" — with four platforms:
 
-A Project can hold multiple runtime connections at once. In **Project Settings → Connection**, the **Add connection** picker offers three platforms:
+<CardGroup cols={2}>
+  <Card title="AWS Bedrock AgentCore" icon="cloud" href="/how-to/connect-agentcore">
+    A guided setup wizard built around an admin handoff: your AWS admin provisions a cross-account role and you paste back the role ARN.
+  </Card>
+  <Card title="Salesforce Agentforce" icon="cloud" href="/how-to/connect-agentforce">
+    An admin signs in to your org once and approves Trust AI. No keys, no secret, no certificate.
+  </Card>
+  <Card title="Claude Managed Agent" icon="sparkles" href="/how-to/connect-claude-managed-agent">
+    An Anthropic managed agent on Claude Platform on AWS. You supply an API key, region, and workspace; the agent and environment are discovered for you.
+  </Card>
+  <Card title="Conversational HTTP agent" icon="link">
+    Any agent that accepts AG-UI run requests and streams AG-UI events over SSE. You give it a base URL, a run endpoint, a health endpoint, and — if it needs one — a bearer token.
+  </Card>
+</CardGroup>
 
-- **AWS Bedrock AgentCore** — a guided setup wizard built around an admin handoff: your AWS admin provisions a cross-account role, and you paste back the role ARN. For the full walkthrough, see [Connect an AWS Bedrock AgentCore agent](/how-to/connect-agentcore).
-- **[Salesforce Agentforce](/how-to/connect-agentforce)** — a credential form: your Salesforce instance URL plus a sign-in method (JWT via an External Client App is recommended; username + password is the legacy fallback).
-- **[Claude Managed Agent](/how-to/connect-claude-managed-agent)** — a credential form for an Anthropic managed agent on AWS: API key, region, and workspace, agent, and environment IDs.
+A Project can hold several connections at once, and they are peers rather than alternatives. Ingestion, evaluation-time invocation, and agent-version discovery all flow through the connection the work belongs to.
 
-Connections are peers, not alternatives — each connected agent gets its own **Sync now** entry on the Sessions page, and ingestion, evaluation-time invocation, and version discovery all flow through its connection. Connection secrets are write-only: once saved, Trust AI masks them and never displays them again.
+Classic **AWS Bedrock Agents** connections are the one exception: an existing one keeps working and stays editable, but the picker no longer offers it for a new connection.
+
+Connection secrets are write-only. Once saved, the field shows a **Configured** pill and the placeholder `•••• configured — leave blank to keep existing` — Trust AI never displays the value again.
+
+### Two connect in the chat, two in the form
+
+Ask the Trust Agent "help me connect my agent" and it starts by checking what is already connected, so you don't reconnect something that works. What happens next depends on the platform:
+
+- **Claude Managed Agent and Salesforce Agentforce connect inside the conversation.** The Trust Agent opens a secure card. You never touch the connection form for either one. Credentials are typed into a secure field in that card — they never enter the transcript and are never read by the model.
+- **AWS Bedrock AgentCore and Conversational HTTP agents are set up in the form.** The Trust Agent points you to **Settings → Connection** rather than collecting those credentials in chat.
+
+### Salesforce: an admin authorizes Trust AI
+
+The Salesforce connection form asks for your org URL and then offers a single action: **Authorize in Salesforce with an administrator account**. An admin signs in once and approves Trust AI; Trust AI provisions an External Client App in the org and discovers the agents there. There is nothing for you to gather beforehand.
+
+<Warning>
+  Connect a Salesforce Sandbox, not production. Approving Trust AI sets up a connected app in whichever org the admin signs in to — the form says so on the way past.
+</Warning>
+
+The create form offers no other sign-in method. A **Sign-in method** picker appears only on the *edit* form — and it appears there for every Salesforce connection, including one you created by admin authorization. Alongside **Authorize TrustAI as an admin (recommended)** it lists three legacy paths kept alive for setups that already use them: **External Client App key + secret (legacy)**, **Certificate-based JWT (legacy)**, and **Username + password (legacy)**. Seeing them on a connection you authorized as an admin is not an invitation to switch: don't plan a new Salesforce connection around them.
+
+If a connection saves before an agent has been chosen, the Trust Agent opens an in-chat agent picker so you pick yours by name.
+
+## Salesforce connections are workspace-level
+
+Authorizing a Salesforce org is a workspace-level act, and this is the single most useful thing to know about connection scope: **you authorize an org once, not once per Project.**
+
+When you connect an org that your workspace already reached in another Project, the in-chat wizard offers to reuse it — "Reuse a Salesforce connection you already have", with a **Use this connection** button per org. Reusing points the current Project at the same already-provisioned org, with no second admin sign-in and no re-provisioning.
+
+**Workspace Settings → Connections** is where you see the result. Each org appears once — named by its My Domain host, never a raw id — with:
+
+- **Used by** — the Projects that use that org
+- **Sign-in** — **Admin authorization**, **App key & secret**, **Certificate (JWT)**, or **Username & password**
+- Its connection status, and **Disconnect** or **Delete**
+
+**Disconnect** tears down the External Client App Trust AI deployed in the org, so it's offered only for connections Trust AI provisioned. A connection wired to an app your admin created offers **Delete** only. Both act on the org, not on one Project: each removes the connection from every Project listed under **Used by**. **Delete** leaves the org-side app in place so you can reconnect later; **Disconnect** does not.
+
+Both the reuse offer and the workspace list respect your access: you see only the Projects you can reach, and reuse candidates only for a Project you could edit.
+
+Connections to the other three platforms have no equivalent — each belongs to the Project it was created in.
 
 ## Members and access
 
-Access to a Project has two layers:
+Access has two layers.
 
-- **Workspace membership** — people join your workspace through **Workspace settings → Members**, where invitations are sent and managed — see [Administer workspace access](/how-to/administer-workspace-access). Identity is federated via WorkOS — your organization's SSO is the source of truth.
-- **Per-Project grants** — a Project's **Settings → Members** tab shows the **Project access** panel: who can reach this Project, and whether each grant is direct or inherited from a team. **Grant access** gives an existing workspace member or team **Viewer** or **Editor** access, and you change a grant's role inline from the same list.
+- **Workspace membership** — people join through **Workspace Settings → Members**, where invitations are sent and managed. See [Administer workspace access](/how-to/administer-workspace-access). Identity is federated through your workspace's SSO identity provider.
+- **Per-Project grants** — a Project's **Settings → Members** tab shows the **Project access** panel: who can reach this Project, and whether each grant is direct or inherited from a team. **Add access** opens **Grant access**, where you give a person or a team **Viewer** or **Editor**.
 
-The Project boundary holds even for administrators: a workspace admin who isn't a member of a Project doesn't automatically see its contents — content access resolves against the Project's own grants.
+Project **Owner** is conferred when a Project is created. It is not a grantable tier and it does not transfer.
+
+The Project boundary holds for **Admins** too: a workspace Admin who isn't a member of a Project doesn't automatically see its contents. Content access resolves against the Project's own grants. Managing access is a separate power from having it: an Admin can grant access to any Project in the workspace, including to themselves, but until that grant exists the Project's contents stay closed to them.
+
+**The workspace Owner is not an exception.** An Owner without a grant on a Project is denied that Project's content exactly as anyone else would be, and a Projects list is built from your grants — so an Owner holding no grants sees an empty list rather than the whole workspace. Owning the workspace is the power to *grant* yourself access, not to bypass the check. Read the boundary as "everyone, Owners included". See [Multi-tenancy](/concepts/multi-tenancy) for how that decision is enforced.
+
+## Importing sessions
+
+The Sessions page header carries one primary control: **Sync now**, a dropdown listing the Project's connected agents grouped by source system. Picking an agent syncs that agent only — there is deliberately no "sync everything" action, so an import is always one deliberate choice.
+
+## Working with Projects
+
+**Create new project** in the Project switcher spins one up from a name and an optional description. Names are unique within a workspace; if one is taken, Trust AI asks you to choose another.
+
+**Settings → General** is where you rename a Project, edit its description, and — from the **Danger zone** — delete it permanently. Deletion asks you to type the Project's name to confirm.
+
+Some Projects are created and owned by Trust AI itself. The one you're most likely to meet is **TrustAI Agent Sessions**: the auto-managed Project that collects conversations with the Trust Agent when a workspace turns capture on. **System-managed Projects cannot be deleted or archived** — the Danger zone is hidden on them and the API refuses the request. To remove one, turn capture off in **Workspace Settings → General**.
+
+Developers who want the underlying endpoints can find the full request and response shapes in the [API Reference](/api-reference).
 
 ## Where this fits in the evaluation loop
 
 <Tip>
-  Projects are the **boundary**, not a step. Every step of the [evaluation loop](/concepts/evaluation-loop) — from defining scenarios through simulating, authoring expected output, running evaluations, reading results, annotating, and calibrating — happens inside one Project. If you find yourself wanting to cross a Project boundary mid-workflow, that's a signal the workflow belongs in a single Project (or the Projects need merging).
+  Projects are the **boundary**, not a step. Every step of the [evaluation loop](/concepts/evaluation-loop) — defining scenarios, simulating, authoring expected output, running evaluations, reading results, annotating, calibrating — happens inside one Project. Wanting to cross a Project boundary mid-workflow is a signal the work belongs in a single Project.
 </Tip>
-
-## Working with Projects
-
-You create and manage Projects from the UI. **Create new project** in the project switcher spins one up from a name and an optional description. Project names are unique within your workspace — if a name is taken, Trust AI asks you to choose a different one. A Project's **Settings** page is where you rename it, manage its connections and access, and — from the **Danger zone** on the **General** tab — delete it permanently.
-
-You can also ask the Trust Agent to help make a new Project productive — for example, "help me connect my agent." It checks whether an agent build is already connected and, for Claude-managed and Salesforce Agentforce agents, walks you through a plain-English checklist before you touch the connection form.
-
-Developers who want the underlying endpoints can find the full request/response shapes in the [API Reference](/api-reference).
 
 ## Related concepts
 
-- **[Sessions](/concepts/sessions)** — the raw material every Project ingests from its connected runtimes
+- **[Sessions](/concepts/sessions)** — the raw material a Project ingests from its connected agents
 - **[Scenarios](/concepts/scenarios)** — curated test beds, scoped to one Project
 - **[Evaluators](/concepts/evaluators)** — reusable judgment functions, scoped to one Project
+- **[Agent Versions](/concepts/agent-versions)** — the pinned snapshots an Evaluation runs against
 - **[The evaluation loop](/concepts/evaluation-loop)** — the workflow that happens inside a Project

@@ -1,117 +1,206 @@
 ---
 title: "Evaluate captured sessions"
 icon: "clipboard-check"
-description: "Grade conversations that already happened — bulk-evaluate sessions with LLM Judge evaluators, run a one-off check from a session's panel, and read the verdicts where they land."
+description: "Grade conversations you already have — launch a bulk run from the Sessions list, grade a single stored transcript from its fly-in, and read the Final verdict where it lands."
 ---
 
-An [evaluation](/concepts/evaluations) doesn't have to simulate anything. When the conversations already exist — synced from your runtime, saved from the [Playground](/concepts/playground), or produced by earlier scenario runs — you can grade them exactly as they happened: the judges read the captured transcript, no agent is invoked, and the session is never modified. This page is the task recipe for that; the model behind it lives on [Evaluations](/concepts/evaluations) and [Sessions](/concepts/sessions).
+An [evaluation](/concepts/evaluations) doesn't have to start from a scenario. When the conversations already exist — synced from your runtime, saved from the [Playground](/concepts/playground), or produced by earlier scenario runs — you can put judges on them from the Sessions surface. This page is the task recipe; the model behind it lives on [Evaluations](/concepts/evaluations) and [Sessions](/concepts/sessions).
 
-You'll do the job two ways:
+There are two ways in, and they are **not** the same job:
 
 - **Bulk** — select sessions and click **Evaluate**, so one named run grades the whole batch
-- **One-off** — click **Evaluate** in a single session's panel, so the verdict lands on the session with no run created
+- **One-off** — click **Evaluate** in a single session's fly-in, so the verdict lands on that session with no run created
+
+<Warning>
+  **The two paths grade different things.** A one-off reads the transcript you are looking at. A bulk run **re-sends** each session's user message to your connected agent and grades the *new* answer. Pick the one that matches the question you're asking — the difference is spelled out below.
+</Warning>
+
+## Which path grades what
+
+|  | **Bulk run** — Sessions list → **Evaluate** | **One-off** — session fly-in → **Evaluate** |
+|---|---|---|
+| What the judges read | A **fresh answer**. The session's user message is replayed to your connected agent and the reply it gives *now* is what gets graded. | The **stored transcript**, exactly as recorded. |
+| Which sessions it can target | Only a session that has a **scenario made from it** — the launcher resolves each selected session to that scenario and replays it. Anything else is refused. See [Not every session can be bulk-evaluated](#not-every-session-can-be-bulk-evaluated). | **Any** stored session, including one no scenario was ever made from. |
+| Is your agent invoked? | Yes — once per session. | No. Nothing is called; grading is a read. |
+| Does it need a connected agent? | Yes. Without one every row fails as a rig problem, not an agent fail. | No. |
+| What it produces | A named run on the [Evaluations](/concepts/evaluations) list. | Nothing on the Evaluations list — the verdict homes on the session. |
+| What it costs | One agent replay per session **plus** one check per judge per session. | One check per judge. No agent replay. |
+| Stopped when you're at your credit cap? | Yes — the launch is refused before any work starts. | No — but it still draws credit. |
+
+Neither path edits the conversation you selected. The stored transcript, its turns, and its metadata are left exactly as they were; what accrues on a session is evaluation history and a verdict.
 
 <Note>
-  Session grading is **judge-only**. The launcher's evaluator picker offers [LLM Judge evaluators](/concepts/evaluators) exclusively — a captured conversation has no authored expected output to structurally check. Sessions that came from a scenario also run that scenario's automatic routing and tool checks, per the launcher's own helper text.
+  Session grading is **judge-only**. The launcher's evaluator picker offers [LLM judges](/concepts/evaluators) exclusively — a captured conversation carries no authored expected output to check structurally. Sessions that came from a scenario also run that scenario's automatic routing and tool checks, per the launcher's own helper text.
 </Note>
 
-## Sessions or scenarios — which to evaluate
+### Not every session can be bulk-evaluated
+
+A bulk run does not target the session directly. Because it replays rather than reads, it needs something to replay — and that something is a [scenario](/concepts/scenarios) made from the session. The launcher resolves every session you selected to the scenario it was created from, and replays those.
+
+A session no scenario was ever made from — a conversation that only ever arrived from your runtime and was never turned into a test case — has nothing to resolve to, and the launch is **refused before anything is created**. You get no run and no partial result, just this message on the launcher:
+
+> There's nothing to evaluate yet. Pick at least one scenario or session and try again.
+
+It reads like you selected nothing, which is the confusing part: you did select sessions, and they are real. What they lack is a scenario.
+
+**The check is all-or-nothing.** One unresolvable session in the selection refuses the whole launch — the rest are not run, and nothing is partially graded.
+
+Two ways out, and they answer different questions:
+
+- **Grade the recorded words** — use the one-off path on each session. It has no such requirement, needs no connected agent, and works on any stored session.
+- **Measure the live agent** — give those conversations a scenario first, then bulk-evaluate. *Ask the [Trust Agent](/concepts/trust-agent):* "Turn these sessions into scenarios." It drafts them and pauses for your approval before writing anything.
+
+## Sessions or scenarios — which to launch
 
 Both are launcher sources; they answer different questions.
 
 | Evaluate **sessions** when… | Run **scenarios** when… |
 |---|---|
-| You want to grade what *actually happened* — yesterday's production traffic, a batch of synced conversations, a Playground save. | You want to test what *would happen* — simulate fresh conversations against an [Agent Version](/concepts/agent-versions) before it ships. |
-| No agent is invoked; the judges read stored transcripts. | The agent is driven live, one conversation per attached persona. |
+| You want to grade the traffic you actually saw — yesterday's production conversations, a batch of synced sessions, a Playground save. | You want to test what *would* happen — fresh conversations driven against an [Agent Version](/concepts/agent-versions) before it ships. |
+| The agent answers the recorded user message once, with no persona driving it. | The agent is driven live, one multi-turn conversation per attached persona. |
 | You pick the judges in the launcher. | Evaluators are inherited from each scenario's expected output. |
-| Re-grading is free — evaluate the same sessions again with a different judge, no re-run needed. | Each run produces new sessions you can later evaluate or annotate. |
+| Every launch is metered and can be refused at your credit cap. | Same — a scenarios launch passes the identical gate. |
 
-If you're chasing a regression between agent builds, use [scenarios](/concepts/scenarios). If you're asking "how is my agent really doing?", evaluate the sessions.
+If you're chasing a regression between [Agent Versions](/concepts/agent-versions), use [scenarios](/concepts/scenarios). If you want the questions your real users actually asked put back to the agent, evaluate the sessions.
 
 ## Prerequisites
 
 - A **Trust AI account** with access to a [Project](/concepts/projects) that has sessions — synced, generated, or run in the Playground
-- At least one **LLM Judge evaluator** in the project. If your Evaluators list is empty, **Add recommended evaluators** on the [Evaluators](/concepts/evaluators) surface gives you a curated starting roster in one step.
+- At least one **LLM judge** evaluator in the project. If your Evaluators list is empty, **Add recommended evaluators** on the [Evaluators](/concepts/evaluators) surface gives you a curated starting roster in one step.
+- For a **bulk** run only: a connected agent on the project. The replay needs something to call.
+- For a **bulk** run only: a scenario made from every session you select. See [Not every session can be bulk-evaluated](#not-every-session-can-be-bulk-evaluated).
+- Credit headroom in your workspace pool. See [Credits and the launch gate](#credits-and-the-launch-gate).
 
 ## Evaluate sessions in bulk
 
 <Steps>
   <Step title="Select the sessions to grade">
-    Open **Sessions** in the project nav and select the conversations you want graded — tick their checkboxes, and shift-click a second checkbox to select the whole range between. A bulk-actions bar appears with **Evaluate** as its primary action, alongside **Tag** and **Download**.
+    Open **Sessions** in the project nav and select the conversations you want graded — tick their checkboxes, and shift-click a second checkbox to select the whole range between. A bulk-actions bar appears reading "*N* selected", with **Evaluate** as its primary action alongside **Tag**, **Download**, and **Clear selection**.
 
-    You can also skip selecting entirely: the **Evaluate** button in the Sessions page header evaluates the sessions in your current view, so a filtered [saved view](/concepts/saved-views) — say, last week's external sessions — becomes the run's target in one click.
+    You can also skip selecting: the **Evaluate** button in the Sessions page header targets the rows **already loaded** in the list. That is not the same as "everything matching your filter" — Sessions loads 50 at a time and pulls more as you scroll, so on a large [saved view](/concepts/saved-views) the header button captures the first page plus however far you have scrolled. When the exact set matters, select the rows.
+
+    Select only sessions that have a scenario made from them — one that doesn't refuses the whole launch. [Not every session can be bulk-evaluated](#not-every-session-can-be-bulk-evaluated) covers what that looks like and what to do instead.
 
     **You should see:** the bulk-actions bar rise when sessions are selected, with **Evaluate** as the primary button.
   </Step>
 
-  <Step title="Pick judges in the launcher">
-    Clicking **Evaluate** opens the Evaluation Launcher in sessions mode, titled **Evaluate sessions**. Three things to check before you commit:
+  <Step title="Set up the run in the launcher">
+    Clicking **Evaluate** opens the launcher titled **Evaluate sessions**. It renders four fields, in this order:
 
-    - **Name** — pre-filled from your selection, judge count, and date; edit it if you want the run recognizable later.
-    - **Evaluators** — a searchable multi-select of your project's LLM Judges, pre-filled with up to three. Add or remove until the panel lists exactly the judges you want applied to every session.
-    - **This will run** — the fan-out preview: how many sessions, how many evaluators, and the total evaluator runs that multiplies out to. It also confirms no conversations are simulated.
+    - **Evaluation name** — pre-filled as *selection · judge count · date* (for example `2 selected · 1 evaluator · Aug 6`). Edit it if you want the run recognizable later; the caption reminds you it is shown on the Evaluations page.
+    - **Evaluators** — a searchable multi-select of your project's LLM judges, pre-filled with up to three. Add or remove until the panel lists exactly the judges you want applied to every session.
+    - **Repeat each test case** — a 1 · 2 · 3 · 4 selector. Leave it at 1 for a single attempt; raise it to measure how reliably the agent passes the same case. More repeats take longer and cost proportionally more.
+    - **This will run** — the fan-out preview: sessions × evaluators, and the evaluator runs that multiplies out to. With no judge picked it reads "Pick at least one evaluator to see how many runs this will produce."
 
-    There is no agent picker — nothing is invoked, so there's nothing to pick.
+    There is no agent picker. The replay uses the project's connected agent.
 
-    **You should see:** the **Evaluate sessions** modal with a pre-filled name, a judge multi-select, and a fan-out preview that matches your selection.
+    **You should see:** the **Evaluate sessions** modal with a pre-filled name, a judge multi-select, the repeat selector, and a fan-out preview that matches your selection.
   </Step>
 
   <Step title="Launch and watch the run fill in">
-    Click **Run evaluation**. You land on the new run's detail page, and results fill in as the judges finish each session. The run also appears in the **Evaluations** list under the name you gave it.
+    Click **Run evaluation**. You land on the new run's detail page, and results resolve as each session is replayed and graded. The run also appears in the **Evaluations** list under the name you gave it.
 
-    **You should see:** a run detail page whose results resolve one by one, each with a three-state verdict — **Pass**, **Fail**, or **Not evaluated**.
+    **You should see:** a run detail page whose rows resolve one by one under a **Final verdict** column — **Pass**, **Fail**, or **Not graded**.
   </Step>
 </Steps>
 
-{/* CAPTURE-PENDING: evaluation-launcher sessions mode — the "Evaluate sessions" modal with judge multi-select + fan-out preview */}
+<Frame caption="Four fields and no agent picker. The fan-out does the arithmetic before you commit — five sessions × three judges is fifteen evaluator runs. Read its closing line precisely: no conversations are *simulated* means no scenario is played out, and the replay still calls your connected agent once per session.">
+  <img src="/images/evaluate-sessions-launcher.png" alt="The Evaluate sessions launcher open over the Sessions list, with five rows ticked and the bulk-actions bar reading '5 selected'. The modal shows an Evaluation name pre-filled '5 selected · 3 evaluators · Aug 6', an Evaluators multi-select holding Refund timeline accuracy, Tone and Completeness chips, a 1–2–3–4 Repeat each test case selector set to 1, and a This will run panel reading 5 sessions × 3 evaluators, 15 evaluator runs. The primary button is Run evaluation." />
+</Frame>
 
 ## Evaluate one session
 
-For the quick check while you're already reading a conversation, you don't need a named run at all.
+For the quick check while you're already reading a conversation, you don't need a run at all — and this is the path that grades the transcript in front of you.
 
 <Steps>
   <Step title="Open the session and click Evaluate">
-    Click any session on the Sessions list to open its fly-in panel. The header's primary action is **Evaluate** — click it and the launcher opens titled **Evaluate session**, with the judge picker but no name field: a one-off is deliberately anonymous.
+    Click any session on the Sessions list to open its fly-in. The header's primary action is **Evaluate** — click it and the launcher opens titled **Evaluate session**, with just two fields: **Evaluators** and **This will run**. There is no name field and no repeat selector; a one-off mints no run, so there is nothing to name and nothing to repeat.
 
-    **You should see:** the fly-in header's **Evaluate** button open a launcher scoped to just this session.
+    **You should see:** the fly-in header's **Evaluate** button open a launcher scoped to just this session, with **Evaluate session** as the primary button.
   </Step>
 
   <Step title="Confirm and read the verdict in place">
-    Pick your judges and click **Evaluate session**. No run is created and you stay exactly where you are — the verdict lands on the session itself once grading completes: the fly-in header's verdict pill reflects it, and the **Evaluations** tab records the grade in the session's history.
+    Pick your judges and click **Evaluate session**. The modal closes and you stay exactly where you are. Once grading completes, the verdict lands on the session itself: the fly-in header's verdict pill reflects it, and the **Evaluations** tab records the grade.
 
-    **You should see:** the modal close, the Evaluations list stay unchanged, and the session's own panel carry the new verdict.
+    **You should see:** the Evaluations list stay unchanged, and the session's own fly-in carry the new verdict.
   </Step>
 </Steps>
 
-Bulk runs are for measurement; the one-off is for "does this one pass?" without ceremony.
+Bulk runs are for measurement against a live agent; the one-off is for "did this recorded answer pass?" without ceremony.
+
+## Credits and the launch gate
+
+Evaluating sessions is **metered work, and re-grading is not free**. Every bulk launch is priced from its shape — sessions × repeats for the agent replays, times judges for the checks — and checked against your workspace credit pool *before* any work is queued.
+
+Three things can happen when you click **Run evaluation**:
+
+| Verdict | What you see | What happens to the run |
+|---|---|---|
+| Within budget | Nothing. | It launches. |
+| Approaching the cap | An amber toast: "You're approaching your credit limit (*N*%)". | It launches. |
+| At or over the cap | A persistent banner in the launcher headed **Credit limit reached**, carrying `cap reached — contact your admin`. The modal stays open so you can see it. | It is refused. Nothing is queued and nothing is charged. |
+
+Practical consequences:
+
+- **A re-grade costs the same as the first grade.** Re-running ten sessions through two judges after tweaking a rubric is another twenty checks and another ten replays.
+- **Raising Repeat each test case multiplies everything.** Four repeats over ten sessions is forty replays, not ten.
+- **A one-off draws credit too** — one check per judge. It is not stopped by the launch gate, but it is not free either.
+- **The credit pool resets monthly.** A cap you hit late in the month clears at the reset; you don't have to buy your way out of it.
+- Only a workspace **Owner** or **Admin** can raise the pool. If you're blocked, that's who the banner is pointing you at.
 
 ## Read the results
 
 ### On the run
 
-A finished bulk run leads with two headline numbers, and they answer different questions:
+A finished single-attempt run leads with up to two headline numbers, and they answer different questions:
 
 - **Pass rate** grades the *agent* — of the sessions that count, how many passed.
 - **Evaluator accuracy** grades the *judges* — how often their combined verdict agreed with a human's verdict on the same sessions.
 
-Evaluator accuracy only resolves when humans have recorded verdicts: it compares the judges against the pass/fail **Verdict** [annotations](/concepts/annotations) people set on those sessions, and sessions without a human verdict are excluded. If nobody has verdicted anything, the headline simply doesn't render — record human verdicts (the Annotate sessions guide covers this) and accuracy starts resolving. A human verdict grades the judges; it never overrides the automated one.
+Evaluator accuracy only resolves when humans have recorded verdicts: it compares the judges against the pass/fail **Verdict** [annotations](/concepts/annotations) people set on those sessions, and sessions without a human verdict are excluded. If nobody has verdicted anything, that headline simply doesn't render — record human verdicts ([Annotate sessions](/how-to/annotate-sessions) covers this) and accuracy starts resolving. A human verdict grades the judges; on this surface it never overrides the automated one.
 
-Open any result in the run and use **Open session** to jump to the exact conversation it was graded against — the Sessions list opens with that session's panel already up. And on any finished run, **Re-run** reopens the launcher pre-seeded with the same sessions and the same judges, so re-grading after a judge edit is one click plus confirm.
+If you raised **Repeat each test case**, the headline changes shape: the standalone pass rate is replaced by a reliability read written `Pass^K` — how often a case passed across *every* attempt, not just one — with the full `Pass^1 … Pass^K` curve revealed on hover. Evaluator accuracy still sits beside it. And a run where nothing was behaviourally scored leads with a plain **Not graded** rather than a fabricated 0%.
+
+The results table itself opens with a **Transcript** column and a **Final verdict** column — **Pass**, **Fail**, or **Not graded** — followed by one column per judge, headed with that judge's name. There is no separate score column; the per-judge columns *are* the breakdown.
+
+Results default to **By scenario**, where each case is one row and its repeats nest under it; the verdict cell carries the reliability count beside the chip, so a case that passed two of three attempts reads `2/3`. Switch to the flat per-attempt table with the **View** toggle at the top of the **Columns** popover — **By scenario** / **Flat**.
+
+Open any result and use **Open session** — in the fly-in header's **⋯** menu, alongside **Open scenario** — to jump to the conversation it was graded against. Each entry appears only when it resolves, so a result whose session can't be linked shows neither. On any finished run, **Re-run** reopens the launcher pre-seeded with the same sessions and the same judges.
 
 ### On the session
 
 Every graded session carries its results with it:
 
-- The fly-in header shows the **automated verdict** pill — **Pass**, **Fail**, or **Not evaluated** — derived from automated evaluations only.
-- The fly-in's **Evaluations** tab lists every run that graded this session, newest first, each expandable into its individual check results.
+- The fly-in header shows the automated verdict pill. It has four labels across three states: **Pass**, **Fail**, and two distinct neutrals — **Not evaluated** when nothing has graded this session, **Not graded** when an evaluation exists but produced no behavioural score. They are not interchangeable, and writing a human annotation does not change either.
+- The fly-in's **Evaluations** tab opens with a count line reading "*N* evaluations", and lists every evaluation that graded this session below it, newest first. Each one is a **card**, not a disclosure — the run's rollup verdict, its name, when it ran, and its individual checks with their reasoning, all visible without expanding anything. A still-grading run leads the tab as a **Queued** or **Running** card, above even the count line — which counts finished evaluations only.
 
 *Ask the [Trust Agent](/concepts/trust-agent):* "Analyze the failures in that run." On a completed run it open-codes each failing result and groups the notes into ranked failure themes — a fast first pass before you read transcripts yourself.
 
 ## Common stumbles
 
 <AccordionGroup>
-  <Accordion title="The evaluator picker only offers LLM Judges">
-    By design. A captured session has no authored expected output, so structural checks have nothing to assert against — grading a transcript is judge work. Sessions that link back to a scenario additionally run that scenario's automatic routing and tool checks.
+  <Accordion title="My bulk run failed every row with a rig error, and I have no agent connected">
+    Expected. A bulk sessions run replays each session's user message against your connected agent, so with none connected there is nothing to call. Those rows count as an **Environment problem** — excluded from the pass-rate denominator rather than scored as agent failures — and the run reads **Not graded** rather than 0%. Connect an agent and re-run, or use the one-off path, which grades the stored transcript and needs no agent.
+  </Accordion>
+
+  <Accordion title="The bulk verdicts don't match what I read in the transcript">
+    Also expected, and worth internalising: the bulk run graded a *new* answer, not the one on screen. Your agent has had prompt, model, or knowledge changes since that conversation was recorded, so a session that reads badly can pass on replay and vice versa. To grade the recorded words themselves, open the session and use its **Evaluate** button.
+  </Accordion>
+
+  <Accordion title="The launcher's Run evaluation button won't click">
+    A sessions launch needs at least one judge. With the picker empty the button is simply **disabled** — there is no error message to look for, and the fan-out panel reads "Pick at least one evaluator to see how many runs this will produce." Pick a judge and the button enables. If the picker itself is empty, your project has no LLM judge evaluators yet — create one, or adopt the recommended set from the Evaluators surface.
+  </Accordion>
+
+  <Accordion title="My bulk launch says there's nothing to evaluate, but I selected sessions">
+    You did, and they are real — but a bulk run replays a [scenario](/concepts/scenarios), so it needs a scenario made from each session you picked, and at least one of yours has none. The message is generic ("There's nothing to evaluate yet. Pick at least one scenario or session and try again.") and does not name the session that failed to resolve. It is also all-or-nothing: one unresolvable session refuses the whole selection. Grade those conversations with the one-off path instead, or turn them into scenarios first — [Not every session can be bulk-evaluated](#not-every-session-can-be-bulk-evaluated) has both routes.
+  </Accordion>
+
+  <Accordion title="The launch was refused with a credit message">
+    Your workspace is at its credit cap. The launcher raises a persistent **Credit limit reached** banner and keeps itself open; the run is not queued and you are not charged for the refusal. A workspace Owner or Admin raises the pool — and the pool resets monthly, so waiting for the reset is also an answer.
+  </Accordion>
+
+  <Accordion title="The header Evaluate button graded fewer sessions than my filter shows">
+    It targets the rows **loaded so far**, not every row matching your view. Sessions pages in as you scroll, so a view of 500 sessions you have not scrolled through hands the launcher the first page only. Check the fan-out preview's session count before you launch — it tells you exactly what the run will target — or select the rows explicitly.
   </Accordion>
 
   <Accordion title="Evaluator accuracy is missing from my run">
@@ -119,15 +208,11 @@ Every graded session carries its results with it:
   </Accordion>
 
   <Accordion title="My one-off evaluation isn't in the Evaluations list">
-    Also by design. A one-off mints no run — the verdict is homed on the session. Find it on the session itself: the verdict pill in its fly-in header and the graded checks in its **Evaluations** tab.
-  </Accordion>
-
-  <Accordion title="The launcher won't run — it says I need a judge">
-    A sessions launch requires at least one selected LLM Judge; the launcher renders the validation message inline rather than failing silently. If the picker itself is empty, your project has no LLM Judge evaluators yet — create one, or adopt the recommended set from the Evaluators surface.
+    By design. A one-off mints no run — the verdict is homed on the session. Find it on the session itself: the verdict pill in its fly-in header and the graded checks in its **Evaluations** tab.
   </Accordion>
 
   <Accordion title="Will evaluating change my sessions?">
-    No. Grading is read-only: the judges read the stored transcript, the session's conversation is never edited, and there is no delete-session action for a run to trigger. What accrues on the session is its evaluation history and verdict — evidence, not mutation.
+    No, on either path. The captured conversation is never edited, no turn is added or removed, and no run deletes a session. What accrues on a session is its evaluation history and verdict — evidence, not mutation.
   </Accordion>
 </AccordionGroup>
 
@@ -135,8 +220,9 @@ Developers who want the underlying launch endpoint and result shapes can find th
 
 ## Related reading
 
-- **[Sessions](/concepts/sessions)** — the concept page: where sessions come from, the Source chip, and the four-tab fly-in
+- **[Sessions](/concepts/sessions)** — the concept page: where sessions come from, the Source column, and the fly-in tabs
 - **[Evaluations](/concepts/evaluations)** — the run model: launcher entry points, lifecycle, and how results are scored
 - **[Evaluators](/concepts/evaluators)** — the judges you pick in sessions mode, and how to build or adopt them
 - **[Annotations](/concepts/annotations)** — the human verdicts that make evaluator accuracy resolve
-- **[Saved views](/concepts/saved-views)** — filtered views the page-level **Evaluate** button turns into run targets
+- **[Annotate sessions](/how-to/annotate-sessions)** — the task guide for recording those verdicts
+- **[Saved views](/concepts/saved-views)** — filtered views the page-level **Evaluate** button draws its rows from

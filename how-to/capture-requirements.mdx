@@ -1,0 +1,184 @@
+---
+title: "Capture requirements"
+icon: "clipboard-check"
+description: "File a requirement from a conversation, a document, or by hand; link it to the scenarios and evaluators that prove it; and read the coverage rollup that computes itself from the evidence."
+---
+
+This how-to walks you through the Requirements surface end to end: getting requirements on file, linking each one to the scenarios and evaluators that prove it, and reading the coverage that comes back. After you've worked through it:
+
+- You can file a requirement three ways — from a [Trust Agent](/concepts/trust-agent) conversation, extracted from a document, or typed by hand
+- You can read the list: handle, source, coverage counts, status, pass rate
+- You can link scenarios and evaluators, and watch a requirement's status move as you do
+- You can find your **Gaps** and move a requirement through its lifecycle
+
+This page is a task recipe. For what a requirement *is*, and why coverage is computed rather than asserted, read [Requirements](/concepts/requirements) rather than re-deriving it here.
+
+## Prerequisites
+
+- A **Trust AI account** with access to at least one [Project](/concepts/projects)
+- Some [Scenarios](/concepts/scenarios) and [Evaluators](/concepts/evaluators) in the project — a requirement proves nothing on its own, and the linking step needs something to link
+- At least one completed [Evaluation](/concepts/evaluations) if you want to see a requirement reach **Passing**, since that verdict is read from evidence a run produced
+
+## Capture one
+
+<Note>
+  *Ask the Trust Agent:* "Read the attached PRD and file the requirements it implies." The agent has a built-in **Capture requirements** skill: it checks what is already on file first, offers you a document or an interview, reflects the candidate list back to you before writing anything, then files each requirement behind an approval card. Every requirement the agent files records its Source as **Chat**. One you approve on its own lands **active** — but a batch mined out of a document lands as **drafts**, exactly like the Extract from document path below, so dozens of unvetted rows never land in your coverage counts at once. When you are filing several in one sitting, the first approval card offers a chat-wide grant so you approve once rather than once per requirement.
+</Note>
+
+The **Requirements** list header carries the two manual paths.
+
+<Steps>
+  <Step title="Open Requirements">
+    In a project, open **Requirements** from the sidebar. The row carries a count of the project's **active** requirements — drafts and archived ones are excluded from it.
+  </Step>
+  <Step title="Extract from a document">
+    Click **Extract from document**. The modal — *Extract from a document* — takes **either** pasted text **or** one uploaded file, never both; picking a file clears a pending paste. Its caption reads "PDF, Word, Markdown, or plain text."; the file picker also accepts `.csv` and `.json`, and uploads are capped at 10 MB.
+
+    Everything the extractor finds is filed as a **draft**, each carrying the verbatim passage it came from and a Source of **Document**. Nothing lands active — you review and promote. A document that yields nothing usable is rejected with a plain-language reason in the modal, not a status code.
+  </Step>
+  <Step title="Or add one by hand">
+    Click **New requirement**. It asks for three things: a **Title** (the only required field), an optional **Description**, and a **Requirement type** — either **The agent must do this** or **The agent must never do this**. A hand-typed requirement lands **active** with a Source of **Manual**, and its fly-in opens so you can add acceptance criteria and coverage straight away.
+  </Step>
+</Steps>
+
+<Note>
+  The Source column has a fourth label, **Import**, for requirements loaded into a project programmatically rather than created in the app. There is no import control in the interface.
+</Note>
+
+## Read the list
+
+The list opens on a stat strip, then a toolbar, then one table.
+
+The **stat strip** counts the five health states across the project's active requirements, and adds a neutral **Drafts** segment when there are any. Segments at zero are omitted — only the headline total always renders — so the strip narrates the states you actually have. Drafts never inflate a health count.
+
+The **toolbar** carries three fixed filters and a search box that matches on handle, title, and description:
+
+| Filter | Shows |
+| --- | --- |
+| **All** | Every active requirement, plus drafts |
+| **Gaps** | **Uncovered** plus **Partially covered** |
+| **Failing** | Covered, and the evidence says it doesn't hold |
+
+**Gaps** is the one to work from. Failing tells you something broke; Gaps tells you nothing was watching in the first place, which is usually the more expensive problem. Drafts drop out of Gaps and Failing, because a draft has no health to report.
+
+The table reads left to right: **ID**, **Requirement**, **Source**, **Scenarios**, **Evaluators**, **Status**, **Pass rate**, **Last evidence**.
+
+- The **ID** is the handle — `REQ-1`, `REQ-2`, `REQ-14`. A bare number, deliberately not zero-padded the way a scenario id is (`SCN-000123`), because these are things people say out loud. A draft carries a small neutral **Draft** chip beside its handle.
+- **Scenarios** and **Evaluators** are link counts. A zero is drawn in the failure colour — it is a flag, not a neutral number.
+- **Status** is the computed health: **Passing**, **Failing**, **Partially covered**, **Uncovered**, or **Not yet run**. A draft's Status cell is an em-dash; the lifecycle chip beside the handle carries that signal instead.
+- **Pass rate** is an em-dash until something has been evidenced. It is never a stand-in `0%`, and it is never folded into the Status pill — the two answer different questions.
+
+<Warning>
+  **Status and health are not the same field, even though the column is called Status.** The *lifecycle* — draft, active, archived — is editorial, and you set it. The *health* the Status column renders is computed by the server from linked evidence, and you cannot set it at all. Draft and Archived are lifecycle values: they render as chips, never as health pills.
+</Warning>
+
+## Open one
+
+Click any row to open its fly-in. The header carries the requirement's title, a **Copy requirement ID** button, and a **More actions** menu. A must-not requirement wears a small **Must-not** badge next to its title, so the negation is legible without parsing the sentence. Under the header, a meta row reads the health pill, the linked evaluator count, and the linked scenario count.
+
+<Note>
+  **Copy ID** copies the handle — `REQ-3` — not the underlying identifier. The handle is what you paste into a ticket or a message, and it is what the deep link below accepts.
+</Note>
+
+There are three tabs:
+
+| Tab | What's on it |
+| --- | --- |
+| **Details** | Status, Requirement type, Description, Acceptance criteria, Source |
+| **Coverage** | The linked evaluators and scenarios, and the controls to change them |
+| **Status** | The evaluation runs that have exercised this requirement |
+
+Coverage and Status show a count beside their label once there is something to count. Edits on Details save the moment you make them, with a confirmation toast — there is no save button.
+
+## Link it, and watch the status move
+
+This is the point of the feature. You never assert that a requirement holds; you attach evidence and read what the evidence says.
+
+<Steps>
+  <Step title="Open the Coverage tab">
+    On a requirement with nothing attached, both sections are empty: *No evaluators are scoped to this requirement yet.* and *No scenarios cover this requirement yet.* On a must-not requirement the scenario line reads *No scenarios attempt to trigger this behavior yet.* instead — triggering the behaviour is what a test for one has to do.
+  </Step>
+  <Step title="Link a scenario">
+    Click **Add scenarios** and pick one. The picker searches over handles and names and shows each option as `SCN-000008 · <name>`. The Status pill leaves **Uncovered** as soon as the link lands — but where it goes depends on the scenario. Link one that carries no evaluator of its own and the requirement reads **Partially covered**: the evaluator leg is still open. Link one that already carries an evaluator and that leg is satisfied on its own, so the requirement resolves straight to **Passing**, **Failing**, or **Not yet run** without ever showing **Partially covered**.
+  </Step>
+  <Step title="Link an evaluator">
+    Click **Add evaluator** and pick one. If that evaluator has already scored the linked scenario, the requirement reads **Passing** or **Failing** and a pass rate appears.
+  </Step>
+  <Step title="Undo anything you didn't mean">
+    Unlinking is a single click with an undo toast and no confirmation dialog. Links are cheap; treat them as cheap.
+  </Step>
+</Steps>
+
+Driven end to end on a seeded project, against a scenario carrying no evaluator of its own, one requirement moved like this:
+
+| After | Scenarios | Evaluators | Status | Pass rate |
+| --- | --- | --- | --- | --- |
+| Nothing linked | 0 | 0 | **Uncovered** | — |
+| Linking one scenario | 1 | 0 | **Partially covered** | 0% |
+| Also linking an evaluator that had scored it | 1 | 1 | **Passing** | 100% |
+
+Nothing was asserted at any step. Each link changed what could be proven, and the rollup followed.
+
+<Warning>
+  **Linking an evaluator that has never scored the linked scenario does not produce a verdict.** Run the same two links with an evaluator that has never been near that scenario and the requirement lands on **Not yet run**, with the pass rate back to an em-dash — not **Passing**.
+
+  That is deliberate. Once you link evaluators explicitly, they become the lens: only their scores on the linked scenarios count as evidence, and an empty intersection is treated as *no evidence*, never as a silent pass. **Not yet run** means coverage is in place and nothing has exercised it yet — run an evaluation and the status resolves.
+</Warning>
+
+Two things follow from that:
+
+- **The evaluator leg can be satisfied without an explicit link.** If every linked scenario already carries an evaluator of its own, coverage counts. Those evaluators appear on the Coverage tab in a display-only **Via scenarios** group — visible, but with no unlink control, because there is no explicit link to remove.
+- **The same scenario can read differently under two requirements.** Its verdict is computed through each requirement's own linked evaluators, so a scenario that fails one requirement's lens can pass another's.
+
+Within a requirement, a failure dominates: any failing linked scenario makes the requirement **Failing**. Results in the denominator-excluded classes — **Guardrail blocked**, **Environment problem**, **Access blocked** — are not evidence at all, so they can neither pass nor fail a requirement.
+
+### From the scenario side
+
+The link is also reachable from the other direction. A scenario's fly-in counts its requirements in the meta row, and its **Expected Output** tab opens with a **REQUIREMENTS** section: one pill per link, reading `REQ-1 · <title>`, plus a **Link requirement** control. The picker there can also create a title-only requirement already linked to the scenario you are looking at.
+
+## Read coverage, and find the Gaps
+
+Switch the list to **Gaps**. What you get is everything **Uncovered** or **Partially covered** — the requirements where linking work, not debugging work, is what closes the distance. Uncovered means nothing is checking the requirement at all. Partially covered means something is attached but not enough to stand behind.
+
+To go the other way — from a requirement to the scenarios that prove it — the Scenarios list takes a `?req=` scope on its URL. It accepts the handle in whatever form you have it, so a handle pasted out of a ticket works without cleanup:
+
+```
+?req=5      ?req=REQ-5      ?req=req-5      ?req=req 5      ?req=REQ#5
+```
+
+All five resolve to the same requirement. The list then shows a removable chip reading `REQ-5 · <title>` and filters to that requirement's linked scenarios. The failure modes stay honest rather than silently showing everything:
+
+| You pass | You get |
+| --- | --- |
+| A handle with no links yet | *No scenarios are linked to REQ-5 yet.* |
+| A number that isn't in this project | A chip reading `REQ-999 · Not in this project`, and *We couldn't find requirement REQ-999 in this project.* |
+| Something unparseable | No chip, and *We couldn't find that requirement in this project.* |
+
+Archived requirements do not resolve through `?req=` either — the scope reads the active list only.
+
+## Move it through its lifecycle
+
+Lifecycle actions live in the fly-in's **More actions** menu, and the menu only offers what the current state allows:
+
+| Current status | Available actions |
+| --- | --- |
+| **Draft** | **Activate**, **Discard draft** |
+| **Active** | **Archive** |
+| **Archived** | **Activate** (this restores it) |
+
+Promoting extracted drafts is the common path: open each draft, correct the wording, then **Activate**. It joins the health counts immediately.
+
+**Discard draft** is destructive and asks first — *Discard this draft?* / "The draft is permanently removed. This cannot be undone."
+
+<Warning>
+  **Archive only what you are finished with.** This release has no archived filter on the Requirements list, so an archived requirement leaves every view — it is out of All, out of Gaps, out of Failing, out of the counts, and out of `?req=` resolution.
+</Warning>
+
+## What's next
+
+- [Requirements](/concepts/requirements) — what a requirement carries, and why health is computed from evidence rather than asserted
+- [Simulate agents with scenarios](/how-to/simulate-with-scenarios) — build the scenarios a requirement links to
+- [Calibrate an evaluator](/how-to/calibrate-an-evaluator) — check that the evaluator behind a requirement's verdict agrees with you
+- [Work with the Trust Agent](/how-to/work-with-the-trust-agent) — the approval flow behind agent-filed requirements
+
+Requirements, their links, and the coverage rollup are also readable and writable on the wire. Request and response shapes live in the [API Reference](/api-reference).

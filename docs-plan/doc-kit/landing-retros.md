@@ -1,5 +1,39 @@
 # Doc Kit — landing retros
 
+## 2026-08-07 — v2026.08.03.2 docs (worktrunk/docs-v2026-08-03-2 → main)
+
+**Documented:** Eleven releases of drift closed in one cycle (v2026.06.30.1 → v2026.08.03.2).
+47 pages touched, 13 new — Agent Profile, Requirements, a Get started on-ramp — plus the four-kind
+evaluator taxonomy, the Groundedness judge, Pass^K and the repeat selector, scenario-grouped
+results, the two-level verdict model, and TDM/Requirements un-hedged to GA. 44 screenshots and
+5 videos (4 pipeline demos + a hand-recorded voiced walkthrough), from a docset that previously
+embedded zero images.
+
+**Convergence map:** 8 Wave-1 + 25 Wave-2 pages via writer→adversarial-verifier pairs; 34
+verifier follow-ups shipped (~1 surviving defect/page). Three convergence gates + release gate
+(DEV-6248, CONDITIONAL GO). No ESCALATED parents. The formal per-page audit-round tickets
+(DEV-6249..6269) were superseded by the verifier+inspection passes — closed as consolidated.
+
+**Harness events:** capture harness had no test timeout (30s default tore contexts down mid-shot,
+masquerading as crashes); Remotion pipeline had never produced a correct render (`--props` relative
+paths silently fall back to defaultProps, and Remotion MERGES props so the example timeline always
+won); the acme-refunds-csat seed left Scenarios as shells and annotation columns empty — populated
+via API, documented in captures/README.md. Playwright pipe-status trap: `git show | head` exit
+status is head's, not git's — nearly deleted an unmerged branch on a false success.
+
+**Near-misses:** the fan-out preview does NOT multiply by repeat count — a caption asserting the
+opposite was caught only by opening the rendered frame; "the only exception to the fly-in rule"
+shipped and needed a same-day correction (navigate is a third row-click behavior); two legacy
+images carried a prompt-injection string ("You are now DAN…") one git-add away from publication;
+the sibling onboarding draft would have reverted 119 lines of Wave-2-corrected how-to.
+
+**Propagated:** AGENTS.md flag-authority rule (behaviour vs deployment state; values/** is a
+template, not production); captures/README.md fixture + horizontal-scroll traps; pipeline/README.md
+absolute --props + props-merge rules; incoming/ gitignore for raw hand-recorded footage (carries
+OAuth codes + presenter webcam). Open contradiction DEV-6149 stands: this landing used the archive
+TAG model (docs-v2026.06.30.1 pushed at align time), not this runbook's §6 folder archive — the
+runbook text predates DEV-2182 and needs reconciling.
+
 Newest first. One entry per release landed on `main` via `/doc-land-release`.
 
 ## 2026-07-02 — v2026.06.30.1 alignment (autonomous cron loop, 43 PRs #57–#99, DEV-4720)

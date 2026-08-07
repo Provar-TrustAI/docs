@@ -1,0 +1,209 @@
+---
+title: "Author expected output with the Trust Agent"
+icon: "sparkles"
+description: "Ask the Trust Agent to draft a scenario's grading contract, read the approval card and its proposed-state diff, and understand what the agent will and won't decide for you."
+---
+
+A scenario's **expected output** is its grading contract: the tool calls the agent must or must not make, the routes it must or must not take, and the evaluators that grade the conversation. You can author it by hand on the scenario's **Expected Output** tab — but describing it to the [Trust Agent](/concepts/trust-agent) is usually faster, because the agent reads the scenario first, tells you what it thinks is wrong with your request, and shows you the exact write before anything is saved.
+
+This page is about that conversation: what to ask for, what comes back on the approval card, and where the agent's judgment stops and yours begins.
+
+<Note>
+  Expected output is per scenario, and setting it **replaces the whole contract** — the write is not a merge. That is why the agent reads the scenario's current contract before it proposes anything, and why it asks you what to keep when the scenario already has one.
+</Note>
+
+## Ask for the contract you want
+
+<Steps>
+  <Step title="Name the scenario and the assertions">
+    Open the Trust Agent and describe the contract in plain language, naming the scenario by its id:
+
+    > Set the expected output on SCN-000004: the agent must call `issue_refund`, and must never call `close_account`.
+
+    You do not need to say "required" or "disallowed" — "must" and "must never" are enough. Ranges of scenarios work too ("every scenario tagged refund"), but the agent will confirm the list before writing.
+  </Step>
+
+  <Step title="Let it read first">
+    The agent reads the scenario before it drafts. You'll see a **Reviewed scenarios** receipt listing what it opened, and its reply will tell you the scenario's current state — for example that SCN-000004 is currently empty, or that it already carries assertions the replace would drop.
+  </Step>
+
+  <Step title="Answer the questions it asks">
+    When the scenario **already has a contract**, the agent does not guess. It opens a question flow — "SCN-000008 already has a contract. `set_expected_output` replaces it wholesale, so confirm what to keep alongside your new assertions" — and walks you through one decision per existing assertion, such as **Keep Billing as required** or **Drop it — no route assertion**. Work through the flow with **Next**; **Back** revisits an earlier answer.
+  </Step>
+
+  <Step title="Review the approval card, then approve">
+    Nothing is written until you approve. The card is covered in the next section.
+  </Step>
+</Steps>
+
+## What the approval card actually shows
+
+The gate for an expected-output write is the standard permission card, and it is **deliberately terse**. It carries:
+
+| On the card | Example |
+|---|---|
+| The question | **Set the expected output on SCN-000002?** |
+| A change count | **1 field changed** |
+| A link to the full proposal | **View proposal** |
+| Your choice | **Approve** / **Reject — and tell me why (optional)** |
+
+The card face does **not** itemize the assertions. To see them, choose **View proposal** — it opens the proposed-state panel, headed **Proposed changes to SCN-000002** with a **Pending approval** status, showing a field-level before-and-after:
+
+```
+EXPECTED ACTIONS
+none
+issue_refund — required; close_account — disallowed
+```
+
+The "before" line reads `none` on a scenario that had no contract; on a scenario that had one, it shows what the replace would drop. **Read this panel, not just the card** — it is the only place the write is spelled out, and on a wholesale replace it is where you catch an assertion you meant to keep.
+
+The agent's message above the card is the other half of the story. It routinely explains its reasoning and flags problems there before the card ever renders — that prose is worth reading, because some of what the agent knows never makes it onto the card.
+
+<Note>
+  The mechanics of permission cards — dismissing, rejecting with a reason, standing approvals — belong to [Approve an agent write](/how-to/approve-agent-writes). This page covers only what is specific to expected output.
+</Note>
+
+## What the contract can hold
+
+### Assertions are required or disallowed — nothing else
+
+Every action and every route assertion is exactly one of two values:
+
+- **Required** — the tool must be called, or the route must be taken, for the scenario to pass.
+- **Disallowed** — it must not be.
+
+There is no "allowed" and no "optional" value. This is enforced at the wire, not just in the editor: a write carrying any third value is rejected outright with `Input should be 'required' or 'disallowed'`. If you ask the agent for an "optional" tool call, it has nowhere to put it — say what you actually mean, which is usually that you want no assertion on that tool at all.
+
+### Pin arguments, not just tool names
+
+An action assertion can pin argument values, so the check is "called `issue_refund` **with `amount` = 49.99**" rather than merely "called `issue_refund`". Ask for it directly:
+
+> On SCN-000004, require `issue_refund` with amount 49.99 and currency USD.
+
+Two assertions naming the same tool with **different** pins are distinct checks and both survive the write — pinning is how you express "must refund the right amount", not just "must refund". In the manual editor these are the **key: value pairs** under an action, suggested from calls observed across the project's sessions.
+
+### Evaluators grade the parts assertions can't
+
+Assertions cover structure — which tools, which routes. Anything about the *quality* of what the agent said is graded by an evaluator attached to the scenario, listed on the Expected Output tab under **Expected behavior** with the note "Evaluators used to grade the scenario. All must pass for the session to pass."
+
+Only **review evaluators** can be attached — an [LLM judge](/how-to/write-llm-judge-prompt) or a **Groundedness judge**. Attaching anything else is refused with *"Only review evaluators can grade a scenario. Structural checks live on the scenario's expected output."* That refusal is the design, not a limitation: structural checks are the assertions above, so there is no Structured match evaluator to attach — creating one is retired.
+
+A Groundedness judge grades the agent's answers against the scenario's **Reference material**, which attaches per scenario on the same tab. A scenario with a Groundedness judge and no reference material can't run, and the tab says so.
+
+## Building and attaching an evaluator in one approval
+
+When you ask the agent to build a judge, it does not need a second turn to attach it. The evaluator create and the attach are **the same gated write** — one approval card, one approve, and the judge is grading immediately afterwards.
+
+The card for a create is titled **Create the evaluator 'your evaluator name'?** and its primary button reads **Create it**. Behind **View proposal** you get the same before-and-after treatment on the evaluator's own fields:
+
+```
+NAME     Not set → ZZ politeness
+TYPE     Not set → LLM judge
+RUBRIC   Not set → Pass if the agent's reply stays polite …
+```
+
+### What it attaches to when you don't say
+
+This is the part most worth knowing, because it is easy to assume wrong in either direction:
+
+| You ask for | Scenarios it attaches to |
+|---|---|
+| A **create**, naming scenarios | Exactly those |
+| A **create**, naming none | Every scenario in the project that has **no evaluator yet** |
+| An **update**, naming none | **None** — attachments are left alone |
+
+The create default is idempotent and never clobbers: a scenario that is already graded by any evaluator is skipped, and a scenario that already had assertions keeps them — the new evaluator is appended to its contract, not swapped in. In a ten-scenario project where one scenario already had an evaluator, a create naming no scenarios attached the new judge to the other nine and left that one untouched.
+
+<Warning>
+  It is **not** a bulk attach to every scenario. If you want a judge on a scenario that already has one, name that scenario explicitly — re-running the create won't do it, because the default deliberately skips scenarios that are already graded.
+
+  Updating an existing evaluator's rubric attaches it to nothing new. A rubric tweak must not silently pick up scenarios, so if you want wider coverage after an edit, ask for the attach as its own request.
+</Warning>
+
+## Where the agent's judgment stops
+
+The agent is an author, not an authority. Two guardrails are worth understanding before you decide how much to trust a generated contract.
+
+### It flags unknown tools, but it will still write them
+
+The agent knows the connected agent's real tool catalog and checks your assertions against it. When you name a tool the agent under test doesn't expose, it tells you plainly:
+
+> One flag before I write: `close_account` isn't a tool this agent actually exposes — its recorded capabilities are `lookup_order` and `issue_refund` only. A "disallowed" assertion on a tool the agent doesn't have will never fire, so it's harmless but also meaningless.
+
+Then it authors what you asked for anyway, and the assertion is saved. **The catalog check is advice, not a gate** on this path — the warning is in the chat prose, and it does not appear on the approval card. If you skim straight to **Approve**, you will ship an assertion that can never fire. Read the message above the card.
+
+Two consequences follow. A **required** assertion on a nonexistent tool fails the scenario every single run, because the call can never happen. A **disallowed** assertion on a nonexistent tool passes every run and tells you nothing. Neither is a platform error; both are contracts you asked for.
+
+The catalog is only as good as what the platform has captured. If the connected agent has no captured profile, the agent has no catalog to check against and cannot warn you at all — see [Review an agent profile](/how-to/review-an-agent-profile) for how capture works and what **Captured / Partial / Limited** coverage means.
+
+### A rubric must be grading criteria only
+
+When the agent builds a judge for you, the rubric describes what makes a reply good or bad — and nothing else. Response-format instructions, verdict-shape instructions ("return strict JSON", "respond pass or fail"), and hardcoded answer-key tables are **rejected by the platform**, because the product owns the judge's verdict contract.
+
+The refusal lands after you approve, not before, and the agent recovers by asking you how to proceed rather than silently rewriting your words:
+
+> The rubric's '## Output format' block (strict JSON / pass-or-fail verdict) is what the platform rejected — it wants grading criteria only. How do you want to proceed?
+>
+> · Drop the Output format block, keep just 'Pass if the answer is accurate.'
+> · Cancel — don't create it
+
+Nothing is created when the rubric is refused. Note the scope: this rule governs rubrics the **Trust Agent** writes. Authoring a judge by hand in the Evaluators editor is not policed the same way, so the discipline there is yours — [Write grading rules that calibrate](/how-to/write-llm-judge-prompt) is the guide.
+
+## Check the result on the Expected Output tab
+
+After you approve, open the scenario from the [Scenarios](/concepts/scenarios) list and choose the **Expected Output** tab. It is the observation pane for everything above. Three sections are always there:
+
+- **Expected behavior** — the evaluators grading this scenario. All must pass for the session to pass.
+- **Expected actions** — "Required tools must be called to pass; Disallowed must not be called." Argument pins sit under each action.
+- **Expected routes** — subagents, skills, and topics, with the same Required / Disallowed pair.
+
+**Reference material is not a fourth section.** It is a subsection nested under **Expected behavior**, and it is revealed only by attaching a judge that grades against it — today, a Groundedness judge. A scenario without one never shows it, so don't go looking for it before you attach the judge. Once it is showing and still empty it carries a blocker naming the judge: *"Reference material required — … grades this scenario's answers against reference material. Attach at least one document — until then this scenario can't run."*
+
+Above all of it sits the tab's **Requirements** section — the `REQ-{n}` pills for the requirements this scenario covers, plus **Link requirement**. It is the *why* behind the contract rather than part of the contract, and it is covered in [Requirements](/concepts/requirements).
+
+The action and route pickers suggest values observed across the project's sessions; on a project that hasn't run yet they say *"Nothing observed yet. Type a tool name to add it — observed actions will appear here as suggestions once sessions run."* You can type a name that has never been observed, which is exactly how an unverified tool name reaches a contract — the same gap the agent warns you about.
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="The agent asked me questions instead of proposing a write">
+    The scenario already has an expected output, and the write replaces it wholesale. The flow confirms what to keep before anything is dropped. Answer each question and the approval card follows.
+  </Accordion>
+
+  <Accordion title="I approved a new evaluator but one scenario still isn't graded by it">
+    Expected. A create that names no scenarios attaches only to scenarios with **no evaluator yet**; anything already graded is skipped. Ask for that scenario by id to attach it.
+  </Accordion>
+
+  <Accordion title="My scenario fails every run on a tool it never calls">
+    Check whether the required tool exists on the connected agent. A required assertion on a tool the agent doesn't expose can never be satisfied. The agent flags this in chat when it drafts the contract, but the assertion is still written if you approve.
+  </Accordion>
+
+  <Accordion title="The evaluator wasn't created after I approved it">
+    Its rubric probably carried response-format or answer-key content, which the platform rejects. The agent comes back with options — drop the offending block, or cancel. Nothing was saved.
+  </Accordion>
+
+  <Accordion title="The scenario can't run and mentions reference material">
+    A Groundedness judge is attached but no documents are. Attaching that judge is also what reveals the **Reference material** subsection, under **Expected behavior** on the Expected Output tab — attach at least one document there.
+  </Accordion>
+</AccordionGroup>
+
+<Note>
+  **The wire surface behind the flow.** Expected output is a sub-resource of the scenario under the `/v1/scenarios` family. Request and response shapes live in the [API Reference](/api-reference).
+</Note>
+
+## Related
+
+<CardGroup cols={2}>
+  <Card title="Approve an agent write" icon="shield-check" href="/how-to/approve-agent-writes">
+    The permission card, the proposed-state panel, rejection, and standing approvals.
+  </Card>
+  <Card title="Simulate agents with scenarios" icon="users" href="/how-to/simulate-with-scenarios">
+    Define a scenario, run it, and set expected output from a session you like.
+  </Card>
+  <Card title="Write grading rules that calibrate" icon="ruler" href="/how-to/write-llm-judge-prompt">
+    Authoring judge rules by hand, and the anti-patterns that don't calibrate.
+  </Card>
+  <Card title="Calibrate an evaluator" icon="target" href="/how-to/calibrate-an-evaluator">
+    Prove a judge agrees with a careful human reviewer before you rely on it.
+  </Card>
+</CardGroup>

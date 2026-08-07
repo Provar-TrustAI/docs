@@ -186,10 +186,11 @@ disagrees with *itself* — it does, in several places called out below — the 
   credit limit. Contact your admin to continue." (no-detail fallback).
 - **Never publish per-action credit weights.** They are uncalibrated placeholders.
 
-## Terminology — Requirements (pinned now, do not publish yet)
+## Terminology — Requirements
 
-Requirements is a fully built domain behind a flag that is off in every environment. The vocabulary
-is pinned here so drafts and the eventual flip are consistent; the pages stay out of `docs.json`.
+Requirements ships and is enabled in production. Document it as an ordinary surface. The vocabulary
+below is locked — several of these labels are enforced by conformance tests, so a slip is a build
+failure, not a style nit.
 
 - The handle is **`REQ-{n}`** — a bare integer, deliberately **not** zero-padded like `SCN-000123`.
   The UUID is never reader-visible.
@@ -230,29 +231,28 @@ is pinned here so drafts and the eventual flip are consistent; the pages stay ou
 - Unverified claims read as unverified: behavior the running app hasn't confirmed carries an
   `{/* ACCURACY-AUDIT-PENDING */}` marker and is written at behavior level, hedged, never asserted
   with mechanics. Never vouch for an unverified security property.
-- Preview features are labeled preview, never GA. When release notes and the tagged code disagree on
-  a flag default, **the code wins**. Currently flag-gated and off:
-  - **Test Data Management** — frontend `VITE_TDM_PREVIEW`, backend `ENABLE_TDM`, both off in
-    production and FedRAMP builds. Describe as preview with the flag caveat, or not at all.
-  - **Requirements** — `enable_requirements` off in every environment; the router 404s and the
-    sidebar row is hidden. Not documented this cycle.
-  - `/v1/connect/environments*` are TDM-gated and must not be presented as generally available.
+- Preview features are labeled preview, never GA. **Requirements and Test Data Management are NOT
+  preview** — both are enabled in production and documented as ordinary shipped surfaces, including
+  `/v1/connect/environments*`. Nothing in the docs is currently preview-gated.
 
-  > [!WARNING]
-  > **The dev instance you drive runs preview flags ON. Production runs them OFF.**
+  > [!IMPORTANT]
+  > **How to establish flag state — read this before writing about any gated surface.**
   >
-  > The local app for this cycle sets `ENABLE_TDM=true`, `VITE_TDM_PREVIEW=true`, and
-  > `ENABLE_REQUIREMENTS=true`, deliberately — you cannot verify a claim about a surface you
-  > cannot see, and the Requirements and Test Data drafts need driving.
+  > The tagged code is authoritative for **behaviour**: what a surface does, what the router returns
+  > when a flag is off, which labels render. It is **not** authoritative for **deployment state**.
   >
-  > So **Requirements and Test Data will look like ordinary, working surfaces to you.** They are
-  > not. The sidebar row, the Test Data tab, the Environments screens, and the extra API routes
-  > are all invisible to every customer.
+  > A default in `core/config.py` is evidence of a default, nothing more. And the `values/**` files
+  > in the app repo are **not** production — `values-prod-agents.yaml` is a template whose origins
+  > are placeholders (`api.trustai.example.com`) and whose own comments describe a cluster that does
+  > not exist yet. Real deployments are `app.agents.provar.com` and its siblings, configured
+  > elsewhere.
   >
-  > **Seeing a surface work on your instance is not evidence that it ships.** Flag state is
-  > established from the tagged code and the production values files, never from the app in front
-  > of you. This applies with equal force to an `accuracy` audit: an auditor driving the dev app
-  > will find GA-voiced prose about Requirements perfectly accurate, and be wrong.
+  > **Confirm flag posture with someone who operates the deployment.** Reading it out of the repo
+  > has produced two wrong conclusions already: that the Salesforce authorize path 503s in
+  > production (it does not), and that Requirements is off everywhere (it is on).
+  >
+  > Where a surface genuinely is gated off, say so with the caveat. Where it ships, document it
+  > plainly. Do not infer either from a config default.
 - **Cookie-authenticated external MCP connection is internal only** — not a supported customer path.
   Do not present it as one. The engineering notes at `docs/eng/mcp-clients/README.md` are vestigial
   and are **not** a source.

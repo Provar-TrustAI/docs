@@ -21,6 +21,24 @@ const ZOOM_SCALE = 1.5;
 const EASE_FRAMES = 15;
 
 /**
+ * Clamp one axis of the pan so the scaled frame still covers the viewport.
+ *
+ * Without this the zoom pans the recording clean off the edge whenever the
+ * target sits near a border — and every click in a right-anchored fly-in does.
+ * Scaling about the target's centre `c` maps the content edges to
+ * `c(1-s)+t` and `c(1-s)+Ls+t`, so covering `[0, L]` means
+ * `t ∈ [(c-L)(s-1), c(s-1)]`. Outside that window the composition's own
+ * background renders as a black band beside the frame, which reads as a
+ * broken render rather than a zoom. At `s === 1` the window collapses to
+ * `0`, so an un-zoomed frame is never nudged.
+ */
+function clampPan(desired: number, center: number, length: number, scale: number): number {
+  const min = (center - length) * (scale - 1);
+  const max = center * (scale - 1);
+  return Math.min(Math.max(desired, min), max);
+}
+
+/**
  * Wraps its children with a CSS transform that smoothly zooms from 1x
  * to 1.5x scale, centered on the target element's bounding box. Holds
  * the zoom for the beat duration, then eases back out.
@@ -73,8 +91,18 @@ export const ZoomEffect: React.FC<ZoomEffectProps> = ({
   const maxTranslateY = viewportCenterY - targetCenterY;
 
   const translateFactor = interpolate(scale, [1, ZOOM_SCALE], [0, 1]);
-  const translateX = maxTranslateX * translateFactor;
-  const translateY = maxTranslateY * translateFactor;
+  const translateX = clampPan(
+    maxTranslateX * translateFactor,
+    targetCenterX,
+    viewportWidth,
+    scale,
+  );
+  const translateY = clampPan(
+    maxTranslateY * translateFactor,
+    targetCenterY,
+    viewportHeight,
+    scale,
+  );
 
   return (
     <div
