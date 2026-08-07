@@ -56,6 +56,13 @@
             ]
           },
           {
+            "group": "Get started",
+            "icon": "rocket",
+            "pages": [
+              "get-started/connect-your-agentforce-agent"
+            ]
+          },
+          {
             "group": "Concepts",
             "icon": "book-open",
             "pages": [

@@ -88,7 +88,7 @@ Four Tier-2 demos this cycle, one per surface, each blocking a page. Timeline st
 
 | Slug | Blocks | Ticket |
 |---|---|---|
-| `d1-salesforce-authorize` | `how-to/connect-agentforce.mdx` | DEV-6216 |
+| `d1-salesforce-authorize` | `get-started/connect-your-agentforce-agent.mdx` | DEV-6216 |
 | `d2-agent-profile-review` | `how-to/review-an-agent-profile.mdx` | DEV-6217 |
 | `d3-groundedness-report` | `how-to/check-answers-against-source-material.mdx` | DEV-6218 |
 | `d4-launcher-fanout` | `concepts/evaluations.mdx` | DEV-6219 ✅ shipped |
