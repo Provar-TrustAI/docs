@@ -14,6 +14,21 @@ This is the on-ramp for a team whose agent runs on **Salesforce Agentforce**. It
   Two different "agents" meet on this page. The **Agentforce agent** you're connecting is *your* agent — the one under test, tracked as an [Agent Version](/concepts/agent-versions). The **Trust Agent** is the in-app assistant that helps you do the connecting. They share a word and nothing else.
 </Note>
 
+{/* CAPTURE-PENDING: get-started-walkthrough.mp4 — Cameron's hand-recorded
+    walkthrough, voiced, webcam on. Scope he described: a blank slate with no
+    projects and no connections, connecting an Agentforce agent, chatting with
+    it, and a closing mention that scenarios exist. Embed here with controls
+    and NOT muted (unlike the silent D-series demos — this is a guided
+    walkthrough, a different genre):
+
+<Frame caption="The whole on-ramp in one sitting — from an empty workspace to chatting with a connected agent.">
+  <video controls playsInline className="w-full rounded-xl" src="/images/demos/get-started-walkthrough.mp4"></video>
+</Frame>
+
+    Not harness-drivable: the admin-authorize leg needs a real administrator
+    consenting in a real org. Review the frames for org identifiers before
+    embedding, as with D1. */}
+
 ## Get access to Trust AI
 
 Trust AI signs you in through your workspace's SSO identity provider. There's nothing for you to configure and no separate Trust AI password to manage.
@@ -21,7 +36,7 @@ Trust AI signs you in through your workspace's SSO identity provider. There's no
 - **Ask the Provar team to set up your workspace**, and tell them who the first workspace **Owner** should be.
 - **After the workspace exists, access is self-service inside it.** The Owner or a workspace **Admin** invites the rest of your team and grants each person access to the right Project. See [Administer workspace access](/how-to/administer-workspace-access) for roles, invites, and per-project **Viewer** and **Editor** grants.
 
-You also need a Project before you can connect anything. Open the project switcher at the top of the sidebar, click **Create new project**, and name it after the agent under evaluation, for example "Acme Support Agent". [Your first 10 minutes in Trust AI](/tutorials/quickstart) covers project creation in more detail.
+You also need a [Project](/concepts/projects) before you can connect anything — create one from the project switcher at the top of the sidebar. [Your first 10 minutes in Trust AI](/tutorials/quickstart) owns that walkthrough; its first step is exactly this.
 
 ## Prepare your Salesforce org
 
@@ -46,7 +61,7 @@ Work through this before you open the connection form. A missing item shows up l
 
 - **Your org's URL** — the My Domain host, like `https://myorg.my.salesforce.com`. You'll paste it into **Salesforce instance URL**. A sandbox has its own My Domain, which looks like `https://myorg--dev.sandbox.my.salesforce.com`. If you paste a Lightning or Setup URL, Trust AI normalizes it to the right host.
 - **Use a Sandbox, not production.** Authorizing deploys an **External Client App** into whichever org you sign in to, so point this at a Salesforce Sandbox. This is guidance, not a block.
-- **Agentforce has to be enabled in the org.** Trust AI doesn't check this, and an org without it fails with a generic error rather than naming the cause — so confirm it with your Salesforce admin first. {/* ACCURACY-AUDIT-PENDING: Agentforce/Einstein must be enabled in the org for the connection to work — attested only by an engineering runbook; no code check and no user-facing message names this condition. Verify against the app on the release tag */}
+- **Agentforce has to be enabled in the org.** Trust AI doesn't check this — there is no enablement probe anywhere in the connection path — so confirm it with your Salesforce admin first. {/* ACCURACY-AUDIT-PENDING: the failure SHAPE ("fails with a generic error rather than naming the cause") is runbook-attested only; verifying it needs an org without Agentforce, which no local fixture can produce. The no-probe half is code-verified. */}
 
 <Note>
   *Ask the Trust Agent:* "What do I need to set up in Salesforce before I connect my Agentforce agent?" It walks the same checklist in plain language, so you can forward it to whoever holds the administrator account.
@@ -96,27 +111,9 @@ The fastest route is to ask the Trust Agent; the steps below are the manual path
   </Step>
 </Steps>
 
-{/* VIDEO SLOT — D1, the connection end to end. Deliberately not a heading: an empty
-    section would render a dead entry in the page's contents. To activate it once the
-    recording lands, drop the file at images/demos/d1-salesforce-authorize.mp4, delete
-    this comment, and paste in its place:
-
 ## Watch the connection end to end
 
-The whole connection recorded end to end, from the empty **Connection** tab to **Connection verified**.
-
-<video controls muted playsInline className="w-full rounded-xl" src="/images/demos/d1-salesforce-authorize.mp4"></video>
-
-    CAPTURE-BLOCKED, not pending: the capture harness cannot drive this flow. The
-    admin-authorize round trip needs a real administrator consenting in a real Salesforce
-    org — the callback needs a genuine single-use OAuth code, and the hand-off opens in a
-    second tab the harness records to a separate file. There is no local stub. The one
-    bootstrapped org on the dev instance is a real sandbox whose frames carry a real host,
-    admin username, org id, and External Client App name, so it cannot be published either.
-
-    This one has to be recorded by hand, against a disposable sandbox whose identifiers are
-    safe to publish. Full shot list and redaction notes: docs-plan/doc-kit/capture-backlog.md (D1).
-    Do not ship the first leg alone — it ends on a promise the video cannot keep. */}
+The wizard leg of this page — authorize, the hand-off to Salesforce, the automatic return, picking an agent, **Connection verified** — is recorded on the how-to: [watch it there](/how-to/connect-agentforce#connect-from-project-settings). The walkthrough video above covers the same ground in the flow of the whole setup.
 
 ## What to expect after connecting
 
@@ -132,8 +129,7 @@ The whole connection recorded end to end, from the empty **Connection** tab to *
   </Accordion>
 
   <Accordion title="Trust AI says this instance isn't configured to make Agentforce connections">
-    Clicking **Authorize in Salesforce with an administrator account** returns an error instead of opening Salesforce. The admin-authorize flow appears to be provisioned per deployment — contact the Provar team rather than reaching for another sign-in method.
-    {/* ACCURACY-AUDIT-PENDING: whether a given customer environment has been provisioned for the admin-authorize flow is a deployment fact, not knowable from the repo. Confirm with someone who operates the deployment */}
+    Clicking **Authorize in Salesforce with an administrator account** answers with exactly that message instead of opening Salesforce. It means what it says: the admin-authorize flow is provisioned per deployment, and this instance's connected app hasn't been set up yet. Contact the Provar team rather than reaching for another sign-in method — there is no client-side workaround.
   </Accordion>
 </AccordionGroup>
 

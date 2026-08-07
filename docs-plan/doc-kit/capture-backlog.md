@@ -7,6 +7,15 @@ only when a clean recording exists. See `demo-tooling.md` for how captures are p
 
 ## D1 — Agentforce admin-authorize round trip
 
+> **SHIPPED 2026-08-07** (PR #222), hand-recorded by Cameron against the
+> `provar--trustaidev` sandbox after revoking the org's prior approval — the
+> revoke is what makes the consent screen appear at all. Embedded on
+> `how-to/connect-agentforce.mdx`, not the get-started page (the get-started
+> slot became the fuller voiced walkthrough, still pending). The approving
+> admin's username is blurred, time-gated to the consent frames. The shot list
+> below is kept because it was used and the redaction notes remain the
+> template for the pending walkthrough recording.
+
 **Target page:** `get-started/connect-your-agentforce-agent.mdx`. The page carries a commented-out
 video slot where the `## Watch the connection end to end` section goes; the heading itself stays cut
 until this clears, so the page never renders an empty section. Slug `d1-salesforce-authorize`, per

@@ -24,3 +24,9 @@ pipeline/out/
 
 # Playwright run artifacts
 captures/test-results/
+
+# Raw screen recordings handed over for demo editing. These can contain org
+# hostnames, admin usernames, OAuth codes, and the presenter's webcam feed.
+# They are reviewed and cut before anything derived from them is committed.
+# The source never is.
+pipeline/public/incoming/
