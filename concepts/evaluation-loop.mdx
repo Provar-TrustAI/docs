@@ -144,12 +144,12 @@ The split matters. A pass rate is only as trustworthy as the judges producing it
 
 Results are honest about what did and didn't count, on two separate axes. **Five outcomes are excluded from the pass-rate denominator — never counted as a red Fail, never fabricated into a Pass — and only four of them are the environment's fault.** Exclusion says the result left the score; attribution says whose problem it was. They surface under four labels:
 
-| Reads as | What happened | Attributed to |
-| --- | --- | --- |
-| **Guardrail blocked** | A runtime guardrail suppressed the agent's response. | The environment |
-| **Environment problem** | The supporting infrastructure failed, or the harness was misconfigured for that case. | The environment |
-| **Access blocked** | The platform authenticated the test user but denied it access to the agent. | The environment |
-| **Couldn't test** | An action the agent itself runs returned an error, so the behavior under test never happened. | The agent's own stack |
+| Reads as | What happened, and whose problem it is |
+| --- | --- |
+| **Guardrail blocked** | A runtime guardrail suppressed the agent's response. **The environment.** |
+| **Environment problem** | The supporting infrastructure failed, or the harness was misconfigured for that case. **The environment.** |
+| **Access blocked** | The platform authenticated the test user but denied it access to the agent. **The environment.** |
+| **Couldn't test** | An action the agent itself runs returned an error, so the behavior under test never happened. **The agent's own stack.** |
 
 The first three labels — four outcomes, because **Environment problem** covers two — are the ones the product frames as *not the agent's fault*, and they read as a neutral **Not graded** cell rather than a verdict. **Couldn't test does not join them.** It paints its own amber chip in the **Final verdict** column, and its banner says only what happened — *"Not scored because an action the agent runs returned an error."* — because the failing action belongs to the agent, not to the rig. A summary row over mixed trials reads **Pass among scored** with an **N couldn't test** caption rather than a bare pass.
 

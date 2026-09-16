@@ -130,13 +130,13 @@ One more state exists a level down. An individual check can come back **Needs re
 
 Not every non-pass means the agent got something wrong, and the results no longer pretend otherwise. **Five outcomes leave the pass-rate denominator, and only four of them are the environment's fault.** Leaving the score and being blamed for it are separate questions, and the product keeps them apart:
 
-| Label | When | Reads |
-|---|---|---|
-| **Guardrail blocked** | A runtime content guardrail suppressed the response before the agent could answer | Grey |
-| **Environment problem** | The supporting infrastructure failed — a gateway or network error, or a timeout — before the agent could answer | Grey |
-| **Environment problem** | The evaluation harness itself errored before it could score the conversation | Grey |
-| **Access blocked** | The platform authenticated the run but refused the selected test user | Grey |
-| **Couldn't test** | An action the agent itself runs — a Flow, an Apex class, an API automation — returned an error, so the behaviour under test never happened | Amber |
+| Label | When |
+|---|---|
+| **Guardrail blocked** (grey) | A runtime content guardrail suppressed the response before the agent could answer |
+| **Environment problem** (grey) | The supporting infrastructure failed — a gateway or network error, or a timeout — before the agent could answer |
+| **Environment problem** (grey) | The evaluation harness itself errored before it could score the conversation |
+| **Access blocked** (grey) | The platform authenticated the run but refused the selected test user |
+| **Couldn't test** (amber) | An action the agent itself runs — a Flow, an Apex class, an API automation — returned an error, so the behaviour under test never happened |
 
 **The first four are the environment's fault**, and only they carry that framing. Each gets its own plain-language explanation rather than one generic guardrail line, because "the network timed out" and "a guardrail fired" are different problems for you to act on. Open one of those results and the banner is headed by its own label — **Guardrail blocked**, **Environment problem**, or **Access blocked**. The per-persona matrix is the one place the three collapse: an excluded row there reads the single neutral keystone **Environment problem — not the agent · Excluded from the score**. All four render neutral in both places, and never a red Fail. The agent never got a fair shot at any of them, so the result is neither a pass nor a fail.
 
