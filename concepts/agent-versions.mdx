@@ -28,7 +28,7 @@ These two get confused constantly, because both are "about the agent." They answ
 | | **Agent Version** | **[Agent Profile](/concepts/agent-profile)** |
 |---|---|---|
 | Answers | *Which build was this?* | *What can this build do?* |
-| Shape | A label plus connector metadata | A captured record of identity, tools, and knowledge sources |
+| Shape | A label plus connector metadata | A captured record of identity, declared rules, tools, and knowledge sources |
 | Versioned unit | The version row itself | The **profile revision** |
 | Pinned by | An **Evaluation** | A **Trust Agent** session |
 
@@ -53,18 +53,29 @@ That is the whole record. In particular, an Agent Version **does not** store you
 
 ## Where Agent Versions come from
 
-Agent Versions arrive through **connectors**. Four platforms connect today — none of them flagged or gated — from **Project Settings → Connection → Add connection**. They are peers in that picker, though not in everything that follows: session backfill and Agent Profile capture each reach only some of them, and both limits are stated where they bite.
+Agent Versions arrive through **connectors**. Four platforms connect today — none of them flagged or gated — and you add one from **Project Settings → Connections**, through the tab's **Connect an agent** action. They are peers in that picker, though not in everything that follows: session backfill and Agent Profile capture each reach only some of them, and both limits are stated where they bite.
 
 - **AWS Bedrock AgentCore** — a guided setup flow connects the runtime, and its builds sync into the Project automatically. Discovery stays reconciled with what's deployed: a build that no longer matches the connected runtime is archived, and pointing the connection back at it revives the record.
 - **Salesforce Agentforce** — connect an Agentforce agent in your Salesforce org. See [Connect Salesforce Agentforce](/how-to/connect-agentforce).
 - **Claude Managed Agent** — connect an Anthropic Managed Agent on Claude Platform. Trust AI observes the agent and relays its responses; the agent runs its own tools.
 - **Conversational HTTP agent** — connect **any agent that accepts AG-UI run requests and streams AG-UI events over SSE**. This is the escape hatch for a platform Trust AI has no dedicated connector for: if your agent speaks AG-UI over HTTP, it connects like the rest.
 
+### What the Connections tab reports
+
+Every connected agent is a **card** on the tab, naming the agent, its platform, and the coordinates it points at. The card answers two separate questions in two vocabularies that are easy to mistake for one:
+
+- **Is setup finished?** — a setup badge reading **Connected**, **Setting up**, **Needs admin**, or **Setup failed**. It shows only while setup still has something to say.
+- **Can Trust AI reach it right now?** — a reachability pill reading **Connected**, **Partly reachable**, **Can’t reach it**, or **Not checked yet**. A connection nobody has probed reads **Not checked yet** rather than a fabricated green.
+
+**Customize environment** expands the card downward in place, without leaving the tab. It holds that connection's test data stores, what happens to records between tests, how many tests may run against it at once, and — on Salesforce — its optional test users. [Manage a project's connections](/how-to/manage-project-connections) walks the tab end to end.
+
 ### Connecting a Salesforce org
 
 Salesforce connections are created by **authorizing Trust AI once as a Salesforce admin**. The new-connection form asks for the org URL and then hands you a single action — *Authorize in Salesforce with an administrator account*. There are no keys, no secret, and no certificate to hand over, and the form warns you to point it at a Sandbox rather than production, because approving Trust AI provisions a connected app in whichever org you sign in to.
 
 Three older sign-in methods — **External Client App key + secret**, **Certificate-based JWT**, and **Username + password** — are each labelled **(legacy)** and appear only when you edit a connection that already uses one. They exist to keep existing setups working. Do not build a new connection around them.
+
+You only authorize an org once per workspace. If the org you want is already connected somewhere you can reach, the same step offers **Reuse a Salesforce connection you already have** — one row per org, each reading **Already connected in your workspace**, with **Use this connection** beside it. Taking one creates an **agent-less connection**: a clone pointed at the same already-provisioned org with no agent chosen yet, which drops you straight at the agent picker. No second sign-in, and no second app provisioned in the org.
 
 ### Discovering the agent
 
@@ -74,7 +85,7 @@ One thing holds across every connector: **connection secrets stay secret.** Priv
 
 **Pulling in past sessions does not hold across every connector.** The **Sync now** button in the Sessions page header opens a picker grouped by connected system, and that picker lists *every* connected agent — but only an **AWS Bedrock AgentCore** agent actually pulls anything. Pick a Salesforce Agentforce, Claude Managed Agent, or Conversational HTTP agent and the sync returns nothing, reporting that historical session sync is supported only for AWS Bedrock AgentCore. Sessions from those platforms arrive as they are produced — a scenario-driven simulation or a Playground conversation writes one as it runs — rather than by backfill.
 
-The fastest path for the two platforms it covers is to ask the **Trust Agent** to connect your agent: its in-chat connect card handles Claude Managed Agent and Salesforce Agentforce, collecting credentials inside the card so no secret ever reaches the conversation. Every other platform is set up in **Settings → Connection**.
+The fastest path for the two platforms it covers is to ask the **Trust Agent** to connect your agent: its in-chat connect card handles Claude Managed Agent and Salesforce Agentforce, collecting credentials inside the card so no secret ever reaches the conversation. Every other platform is set up from **Project Settings → Connections**, through **Connect an agent**.
 
 Archiving an Agent Version in Trust AI does not affect the source runtime.
 
@@ -115,7 +126,7 @@ The core regression-tracking pattern:
 When the same Scenarios and the same Evaluators are held constant, **the only variable left is the agent itself**. Whatever changes in the Evaluation results between the two runs is attributable to the version change. That's the loop the Agent Version concept exists to make legible.
 
 <Note>
-  There is no dedicated run-vs-run comparison view in the product yet — you compare by opening the two run details. **Re-run** on a finished run restores its configuration, including the pinned agent and Evaluators, so repeating the same setup against a different version is a one-field change. **Repeat each test case** is the one field that does not carry over — it resets to 1.
+  There is still no run-vs-run comparison screen — you compare by opening the two run details side by side. A comparison does exist at the API level, and it declines rather than guessing when the two runs would not be a fair match, such as when an evaluator's rubric moved between them; treat its shape as provisional until something renders it. **Re-run** on a finished run restores its configuration, including the pinned agent and Evaluators, so repeating the same setup against a different version is a one-field change. **Repeat each test case** is the one field that does not carry over — it resets to 1.
 </Note>
 
 Hold any of those three constants and you get a different signal:
@@ -138,12 +149,12 @@ All three reduce to the same primitive: Evaluation runs that held the Scenarios 
 
 You do everything around Agent Versions from the app, usually by asking the Trust Agent:
 
-- **See what's connected** — ask the Trust Agent which agent builds are connected in the Project; the manual view is **Project Settings → Connection**, where each connection card names its **Current agent version**.
-- **Connect a new platform** — ask the Trust Agent to connect a Claude Managed Agent or a Salesforce Agentforce agent, or add any of the four platforms yourself from **Connection → Add connection**.
+- **See what's connected** — ask the Trust Agent which agent builds are connected in the Project; the manual view is **Project Settings → Connections**, where each card names the agent, its platform, the coordinates it points at, and whether Trust AI could reach it.
+- **Connect a new platform** — ask the Trust Agent to connect a Claude Managed Agent or a Salesforce Agentforce agent, or add any of the four platforms yourself from **Connections → Connect an agent**.
 - **Backfill past sessions** — click **Sync now** in the Sessions page header and pick the connected agent. AgentCore only; every other platform writes its sessions as they happen.
 - **Pin one at run time** — pick the build in the launcher's **Agent** step, or tell the Trust Agent which build to evaluate.
 - **Check what a session ran on** — open the session's **Details** tab for its Model or Agent row.
-- **See what a build can do** — open its [Agent Profile](/concepts/agent-profile) from the connection card's current-version row. Not available for an AgentCore build.
+- **See what a build can do** — open the **Playground**, pick the build, and press the info button beside the agent picker to open its [Agent Profile](/concepts/agent-profile). That topbar button is the only door to a profile at this release. Not available for an AgentCore build.
 
 If you need the underlying endpoints — including registering a build for a platform without a connector — the [API Reference](/api-reference) is the authoritative source.
 
@@ -154,3 +165,4 @@ If you need the underlying endpoints — including registering a build for a pla
 - **[Evaluations](/concepts/evaluations)** — every scenario-driven Evaluation is scoped to one Agent Version
 - **[The evaluation loop](/concepts/evaluation-loop)** — Agent Versions are what every run — step 4 of the loop — is scoped to
 - **[Compare two Agent Versions](/how-to/compare-agent-versions)** — the regression-tracking how-to
+- **[Manage a project's connections](/how-to/manage-project-connections)** — the tab Agent Versions are discovered through, card by card
