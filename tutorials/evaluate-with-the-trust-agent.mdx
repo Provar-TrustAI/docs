@@ -26,7 +26,7 @@ You do **not** need existing sessions, scenarios, evaluators, or requirements. Y
 
 ## The order is enforced, not suggested
 
-The Trust Agent guides one core authoring workflow, and the runtime holds you to it. Each step refuses to run until the artifact before it exists, so a tutorial that skipped ahead would dead-end its reader at the first write.
+The Trust Agent guides one core authoring workflow, and the runtime holds you to it. Each step refuses to run until the artifact before it exists, so a tutorial that skipped ahead would dead-end its reader at the first write. [The workflow the agent enforces](/concepts/trust-agent#the-workflow-the-agent-enforces) covers the mechanism; this page walks it.
 
 | Step | Finished when |
 | --- | --- |
@@ -259,7 +259,7 @@ A few states are worth recognising when they show up:
 
 A failed-turn card also carries the hint *"You can try again, or pick a different model first."* — switching models is a real recovery, not a consolation.
 
-Under every settled reply sits a collapsed timing line reading **Answered in _N_** plus its biggest non-answering slice, expanding into a proportion bar with per-phase totals (Thinking, Using tools, Writing the answer, Waiting for you). A turn still paused at an approval gate has not settled and shows no line.
+Under every settled reply sits a collapsed timing line — **Answered in** a duration, followed by the biggest slice that wasn't answering — which expands into a proportion bar with per-phase totals: Thinking, Using tools, Writing the answer, Waiting for you. A turn still paused at an approval gate has not settled and shows no line at all.
 
 One thing that does not persist: the mode is never remembered across chats. It is handed to a conversation's first turn from whatever the launcher read when you pressed send, and nothing restores it later — so check the toggle rather than assuming.
 
