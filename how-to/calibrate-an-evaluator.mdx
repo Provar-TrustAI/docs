@@ -57,7 +57,6 @@ Aim for 10–20 marked scenarios spanning both passes and fails — don't label 
 
     <Warning>
       **Calibration is metered.** Each sampled scenario is one billable check against your [workspace credit pool](/concepts/overview#workspace-credits), and the credit check runs *before* any judging starts. If your workspace has reached its credit limit the check is refused outright rather than running slowly — nothing is judged and no result is written. Your admin manages the pool, which resets monthly.
-      {/* ACCURACY-AUDIT-PENDING: the refusal is verified in the API (services/api/src/domain/evaluators/service.py:1438-1451 gates admission and raises a 402 before judging). A credit-capped workspace is not reachable on the instance used for this pass, so how the Calibrate tab renders that refusal is described at behavior level only. */}
     </Warning>
   </Step>
 

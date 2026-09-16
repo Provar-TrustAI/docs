@@ -62,7 +62,7 @@ Annotating is hands-on judgment work — you do it directly on the Sessions surf
 
     **One exception, and it bites exactly where this recipe lands you: the shortcuts stand down while your cursor is in a field.** With focus inside the **Reviewer note** box — where you just finished typing — <kbd>J</kbd> and <kbd>K</kbd> are plain letters and get typed into the note instead of moving the panel. Take focus out of the box first: click anywhere else in the panel, or press <kbd>Tab</kbd>. Either gesture also flushes the note, so nothing you wrote is lost. The same guard covers <kbd>F</kbd> (fullscreen) and every text input on the surface.
 
-    <Frame caption="The Annotations tab renders every column in the project schema, and the footer keeps the keyboard contract in view.">
+    <Frame caption="The Annotations tab renders every column in the project schema, and the footer keeps the keyboard contract in view. Captured before the Test Data tab joined the fly-in strip.">
       <img src="/images/session-fly-in-annotations.png" alt="The session fly-in on its Annotations tab: a Verdict pass/fail pair with Fail selected, Severity chips with major selected, and a filled-in Reviewer note." />
     </Frame>
 
@@ -113,9 +113,12 @@ The automated pill has **four** labels, not three — the neutral state is two d
 | **Pass** | Every counted evaluation on this Session passed |
 | **Fail** | At least one counted evaluation failed |
 | **Not evaluated** | No evaluation has ever run against this Session |
-| **Not graded** | Evaluations exist, but none of them produced a behavioural score — every run against the Session was either excluded from the denominator (a **Guardrail blocked**, **Environment problem**, or **Access blocked** outcome) or scored nothing that judges the agent's behaviour |
+| **Not graded** | Evaluations exist, but none of them produced a behavioural score — every run against the Session either scored nothing that judges the agent's behaviour, or left the pass-rate denominator. **Five** outcomes leave that denominator, under four labels: **Guardrail blocked**, **Environment problem** (an infrastructure failure or a harness failure), **Access blocked**, and **Couldn't test** |
 
 Read the difference as a next action. **Not evaluated** means nobody has run the judges yet — run them. **Not graded** means someone did, and the run never got far enough to say anything about the agent — fix the run, then re-run it. Neither is a Fail, and neither ever becomes a Pass because you recorded a human Verdict.
+
+{/* ACCURACY-AUDIT-PENDING */}
+Only four of those five outcomes are the environment's fault. The fifth, **Couldn't test**, paints amber rather than grey on the run's own results: an action the agent itself runs returned an error, so the conversation left the score attributed to **the agent under test**, not to the harness or the org around it. The next action differs with it — fix the failing action and run the judges again, rather than recording a human Verdict against a conversation the judges never got to read.
 
 ### What you can change about a column, and what you can't
 

@@ -27,7 +27,7 @@ Click **Workspace Settings** in the sidebar footer. The page is titled **Workspa
 | **Teams** | Groups that bundle project access. |
 | **Project access** | Who can open each project. |
 | **Credits** | Your credit pool, how much you have used this billing month, and where it went. |
-| **Connections** | The Salesforce orgs your workspace is connected to. |
+| **Connected orgs** | The Salesforce orgs your workspace is connected to, and the projects that use each one. |
 | **General** | Settings that apply across every project in this workspace. |
 
 Open **Credits**. Each tab is its own route, so this one is bookmarkable and survives a refresh.
@@ -42,7 +42,7 @@ The card is a snapshot of the current billing month, in four parts, top to botto
 |---|---|
 | **Used this billing month** | A percentage, right-aligned on the same line, and a meter bar beneath it. |
 | **Used / Pool / Remaining** | Three figures side by side: what you have spent this month, the size of the pool, and what is left. |
-| **Where your credits went** | One row per kind of activity, each with how many times it happened and how many credits it accounted for. |
+| **Where your credits went** | One row per kind of activity, each with the credits it accounted for — and, on the rows that count things that happened, how many times. |
 | **As of …** | When the snapshot was read. |
 
 Three things about those numbers are worth knowing before you act on them:
@@ -65,7 +65,18 @@ The tone follows the exact value, not the rounded label — at 79.6% the label a
 
 ### Reading the breakdown
 
-**Where your credits went** groups the month's activity by kind, so you can see whether a big month came from simulation, from grading, or from chat. **Scenario simulations** and **Evaluator checks** are named plainly. Some other rows are not yet given a friendly name and render an internal identifier in Title Case instead — treat those labels as cosmetic and unfinished; the count and the credits on the row are correct.
+**Where your credits went** groups the month's activity by kind, so you can see whether a big month came from simulation, from grading, or from chat. Three kinds carry plain names — **Scenario simulations**, **Evaluator checks** and **Trust Agent conversations**.
+
+Rows do not all read the same way, and the difference is deliberate:
+
+- **A row that meters things that happened shows both numbers** — a multiplier for how many times, and an exact credit total. **Scenario simulations** and **Evaluator checks** work this way.
+- **A row that meters what the work consumed shows no multiplier at all.** **Trust Agent conversations** is the one of these at this release. Its quantity is a measure of spend rather than a count of anything you would recognise, so the card drops the multiplier instead of printing a fraction as though it were a tally.
+
+On a consumption row the credit total is rounded to whole credits and prefixed with **About**, and a total above zero but below one credit reads **Under 1 credit** rather than rounding away to zero and implying the work was free. That hedge is about precision, not accuracy: the figure behind it is exact, but the credit weight it is priced at is still being calibrated, so the card declines to print a decimal nobody has set yet.
+
+The AI drafting helpers have no friendly name yet and render an internal identifier in Title Case instead. Treat those labels as cosmetic and unfinished; the count and the credits on the row are correct.
+
+The breakdown splits the month by kind of activity and by nothing else. There is no per-person and no per-project column here, and nothing on the card to filter by either.
 
 ## If your workspace has no pool yet
 
@@ -77,7 +88,7 @@ This is the useful state, not a broken one: usage is still being recorded, **Whe
 
 ## What consumes credits
 
-Four categories of work draw on the pool. Everything below is metered per operation, and the weights are not published — they are set centrally, they differ per activity, and they are still being tuned. The breakdown on the card is where you see what your own month actually cost.
+Four categories of work draw on the pool. Most of them are metered per operation; Trust Agent turns are metered on what each turn consumed. Either way the weights are not published — they are set centrally, they differ per activity, and they are still being tuned. The breakdown on the card is where you see what your own month actually cost.
 
 <AccordionGroup>
   <Accordion title="Simulated conversations">
@@ -91,7 +102,13 @@ Four categories of work draw on the pool. Everything below is metered per operat
   </Accordion>
 
   <Accordion title="Trust Agent turns">
-    Every turn you send in a Trust Agent chat is metered — one per turn, regardless of how much work the agent does inside it. See [Work with the Trust Agent](/how-to/work-with-the-trust-agent).
+    A turn is priced by what it consumed, not by the fact that you sent it. The charge is derived from what the turn actually spent on the model, so a short question costs a fraction of a credit and a turn that reads a lot of context and thinks hard about it costs several. Picking a heavier model, or a deeper setting on the composer's **Thinking** chip, costs more for the same question.
+
+    One flat credit per turn survives in two narrower places. Nothing can be priced before it runs, so the check that admits a turn **estimates** it at one credit — which is why a turn can be refused near the limit on an estimate the finished turn would not have matched. And a turn that cannot be priced afterwards — no usage recorded, or a model with no price behind it — falls back to that same flat credit rather than going free.
+
+    **A turn that dies before producing any reply is not charged.** It is the one place where work happens and nothing is metered, and it is deliberately narrow: the turn has to have failed having streamed nothing at all — no prose, no tool call. A turn that fails *after* it has started answering is still charged, because capacity was spent and you got something.
+
+    See [Work with the Trust Agent](/how-to/work-with-the-trust-agent).
   </Accordion>
 
   <Accordion title="AI drafting helpers">

@@ -75,7 +75,9 @@ Once you've read the preview, you have three ways to resolve a permission card.
 
     **Approving once covers the batch that card represented, not one record.** If the agent is partway through a repeated series — filing four requirements, generating scenarios — a single approval lets the rest of that series through **for the remainder of that turn**. It does not carry into your next message: the next turn asks again.
 
-    Three kinds of write are held back from that batch behavior and are approved strictly one write at a time: a **delete**, **authoring an agent profile**, and a **bulk edit that has a requirement mixed into it**. These are the same three a standing approval can never cover — see the exclusions under [Standing approvals](#standing-approvals).
+    Some writes are held back from that batch behavior and are approved strictly one at a time, under two different rules. Three are held back for **what the write is** — a **delete**, **authoring an agent profile**, and **starting an unattended full run** (a preview capability your workspace may not have). One more is held back for **what is inside the batch** — a bulk edit with a requirement mixed into it. Both rules also bound what a standing approval can cover; see the exclusions under [Standing approvals](#standing-approvals).
+
+    **Filing requirements is the worked example of the batch behavior.** When the agent drafts a set of requirements for you, it does not ask a scoping question first and it does not raise a card per requirement. The whole set goes behind **one** card that lists every requirement — each one's title and a one-line summary, in the order they will be filed — so you are never asked to approve a count you cannot read. The decision is all-or-nothing: approve and the set lands in a single write, in that same order, so the `REQ-{n}` handles come out numbered exactly as the card listed them. If one entry fails, nothing is saved at all. A batch tops out at **50** requirements; past that the agent splits the work across more than one card.
 
     When the agent expects to keep repeating the same kind of write, the card also offers a **for-this-chat** option, worded for what it would keep doing. That one is a standing approval — see [Standing approvals](#standing-approvals) below. Deletes never offer it.
 
@@ -98,6 +100,10 @@ Once you've read the preview, you have three ways to resolve a permission card.
     **You should see:** your rejection and your reason echoed into the transcript ("You rejected: *your note*"), and the agent respond to your reasoning on its next turn.
   </Step>
 </Steps>
+
+<Note>
+  **Stop is not a fourth way out.** The composer's **Stop** control shows only while a turn is genuinely running. By the time a card is waiting on you the run has already halted at the tool call, so Stop is not on screen — the card's three choices are the whole set. Stopping a turn *before* it reaches a write is a different outcome again: the reply ends where it got to and the transcript notes **"This reply was interrupted."** with a **Continue** action. Nothing was proposed, so there is nothing to approve or reject, and you get no error notice — a turn you stopped is not a failure.
+</Note>
 
 <Note>
   A permission card is not the same as a plan confirmation. In Plan mode the agent proposes a task list and waits at a plan-confirm bar — one tap on **Approve & run** starts the work, or you can type a go-ahead in the composer and it does the same thing. That's a different gate: it approves a plan, not a write. A permission card is the per-write checkpoint, and it's what executes the change. See [Work with the Trust Agent](/how-to/work-with-the-trust-agent) for Plan mode.
@@ -135,12 +141,20 @@ Choose the × on the chip. Its accessible name is **Turn off: *the grant's label
 There is no confirmation step and nothing to undo — turning a grant off only removes the agent's permission to skip the card. Writes it already made stay made.
 
 <Warning>
-  Three things a standing approval can never do, no matter what you grant.
+  **What a standing approval can never cover.** Two separate rules, and neither bends for anything you grant.
 
-  - **It never covers a delete.** An irreversible removal is confirmed every single time, and the for-this-chat option is not even offered on a delete card.
-  - **It never covers authoring an agent profile.** That write replaces the profile every evaluation in the project reads from, so it is confirmed each time.
-  - **It never lets a requirement ride along in a bulk edit.** A grant for scenario edits covers a bulk change to scenarios. If a requirement is mixed into that same batch, the whole batch falls back to a card — a scenario grant can never quietly commit a requirement change.
+  Three writes are excluded for **what they are**, and each is confirmed every single time:
+
+  - **A delete.** An irreversible removal is confirmed every time, and the for-this-chat option is not even offered on a delete card.
+  - **Authoring an agent profile.** That write replaces the profile every evaluation in the project reads from, so it is confirmed each time.
+  - **Starting an unattended full run.** This one is a preview capability and may not be turned on for your workspace at all. Where it is, it spends real credits driving live conversations against your connected agent with nobody watching, so it is confirmed every time rather than handed to a grant.
+
+  One more is excluded for **what is inside the batch**: a requirement mixed into a bulk edit. A grant for scenario edits covers a bulk change to scenarios, but if a requirement rides along in that same batch the whole batch falls back to a card — a scenario grant can never quietly commit a requirement change. Saving a *new* requirement is grantable, so authoring a set in one sitting does not make you confirm each one; bulk-changing or deleting requirements that already exist never is.
 </Warning>
+
+<Note>
+  **A standing approval is not MCP act mode.** Act mode is a property of one bearer token, chosen once on the MCP consent screen, that lets an outside client write without a per-change approval — a different mechanism on a different surface, and granting either one never grants the other. See [MCP integration](/concepts/mcp-integration).
+</Note>
 
 ## Answer a question card
 

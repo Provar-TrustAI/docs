@@ -11,7 +11,7 @@ A Session is one complete conversation between a user and an agent — every mes
 A Session is a tree of nested structures:
 
 - **The Session itself** — top-level metadata: its Source, timestamps, the Model and agent version it ran against, and where it was simulated from.
-- **Turns** — each message exchange between the user and the agent, with an optional response-latency readout per turn.
+- **Turns** — each message exchange between the user and the agent, with an optional response-latency readout per turn. {/* ACCURACY-AUDIT-PENDING */} A turn can also carry **pictures** — images sent with the message, kept with the conversation and handed back when you reopen it.
 - **Tool calls inside a Turn** — function name, arguments, return value. Often the most diagnostic data in a Session.
 - **Agent steps** — the trace between question and answer. The transcript labels four kinds:
 
@@ -23,6 +23,9 @@ A Session is a tree of nested structures:
   | **Routed to** | A routing decision — which downstream agent or skill took the turn |
 
   Reasoning is provider-dependent — where a runtime can't emit it, the transcript simply shows no Thinking steps rather than a blank frame.
+
+{/* ACCURACY-AUDIT-PENDING */}
+A simulated conversation closes with one plain-English line saying why it stopped. It reads **This conversation ended because** and finishes with one of: *the customer got what they needed*, *the agent could not help with it*, *the customer gave up*, *the agent ended or transferred it*, or *it reached the length limit before finishing* — falling back to *the customer chose to stop* where the reason isn't one this build recognises. Where the simulated customer explained itself, its own words follow on a second line, quoted verbatim rather than paraphrased. A conversation with no recorded ending renders nothing at all, so read a missing line as "not recorded", never as "unknown".
 
 Think of a Session as a fully-resolved record: not just what the user said and what the agent said back, but every decision the agent made on the way to its response. Annotations and evaluation results attach to the Session as a whole — you grade the conversation, not an individual Turn.
 
@@ -46,6 +49,16 @@ Session IDs reflect origin too: sessions generated in-product get `RUN-` ids (`R
 
 **Sync now** in the Sessions header opens a picker of your project's connected agents, grouped by platform. The picker lists *every* connected agent, but only an AgentCore agent actually pulls anything — pick a Salesforce Agentforce, Claude Managed Agent, or Conversational HTTP agent and the sync returns nothing and says historical session sync is supported only for AWS Bedrock AgentCore. Sessions from those platforms arrive as they are produced, written by a scenario run or a Playground conversation rather than by backfill. Ingestion is read-only: Trust AI never modifies the source runtime or its logs.
 
+#### What a Salesforce Agentforce session carries
+
+A conversation served by a connected Agentforce org arrives with the org's own evidence attached.
+
+{/* ACCURACY-AUDIT-PENDING */}
+At the foot of the fly-in's **Evaluations** tab — below every Trust AI result, never mixed in among them — a **Salesforce also scored this** section reports how Salesforce graded its own agent, turn by turn. There is one card per turn, each carrying **Task resolution** and **Instruction adherence** with Salesforce's written reasoning quoted as Salesforce wrote it, plus a line of its own on any turn where Salesforce flagged its own reply as unsafe. Read it as a contrast signal against your own evaluators rather than a second verdict in their vocabulary: it carries no Pass / Fail pill, and it renders nothing at all until the org's scoring lands — no empty state, no waiting banner.
+
+{/* ACCURACY-AUDIT-PENDING */}
+Two things also shape the transcript itself. A **Model call** step carries the detail of one underlying model request, alongside the Thinking, Tool used, and Routed to steps every transcript can hold. And where an action returned Salesforce records, the transcript renders them as labelled cards rather than raw payload: a single record is shown whole, while a list of several is shortened to one line per field and capped at ten cards, closing with a line that accounts for the rest — "…and 4 more records."
+
 ## In the app
 
 The Sessions list is where you review, grade, and evaluate captured conversations. The table and panel behaviors shared across list surfaces — sorting, the column menu, range selection, the keyboard contract — are described in [Tables and panels](/concepts/tables-and-panels); here is what the surface offers:
@@ -55,7 +68,9 @@ The Sessions list is where you review, grade, and evaluate captured conversation
 - **Typed annotation columns** — every project starts with three: **Verdict** (pass / fail), **Severity** (minor / major / blocker), and **Reviewer note**. **Add column → New annotation column** adds your own, typed **Pass / Fail**, **Score** (1–5), **Category** (single choice), **Tags** (multiple from a palette), or **Comment**. Verdict and severity cells edit inline, right in the table.
 - **Column control** — one column menu handles show/hide and drag-to-reorder, and the order is remembered per saved view. Shift-click a second checkbox to select a whole range of sessions at once.
 - **Bulk actions** — selecting sessions raises a bar with **Evaluate** (the primary action), **Tag**, **Download** (CSV export of the selection), and **Clear selection**.
-- **Fly-in detail panel** — click any session to open a panel with four tabs: **Transcript** (default), **Annotations**, **Evaluations**, and **Details**. The header carries the session's evaluation verdict as a pill and a one-off **Evaluate** button; the overflow menu offers **Download transcript**, **Copy session ID**, and **Copy link**.
+- **Fly-in detail panel** — click any session to open a panel with five tabs: **Transcript** (default), **Annotations**, **Evaluations**, **Test Data**, and **Details**. **Test Data** sits between Evaluations and Details and reports what Trust AI set up, read back, and cleaned up around this one conversation — see [Test data](/concepts/test-data). The header carries the session's evaluation verdict as a pill, an **Evaluate** button, a **Tag** button, and an overflow menu offering **Download transcript**, **Copy session ID**, and **Copy link**.
+- {/* ACCURACY-AUDIT-PENDING */}**Pictures in the transcript** — an image sent with a turn renders inline in the bubble. Click it to open it over the whole window, and leave by <kbd>Esc</kbd>, the close control, or a click outside the picture. Where a picture can't be shown, the row keeps the file name and says which case it is: never saved with the conversation, or saved but not loadable here.
+- {/* ACCURACY-AUDIT-PENDING */}**Quick evaluation in place** — **Evaluate** in the fly-in header grades this one conversation and mints no run. A **Queued** card appears on the **Evaluations** tab, turns to **Running**, and counts the checks off as they land — "Scoring check 2 of 3…". The progress is held on the server, so it survives a reload and a colleague watching in another tab sees the same state. [Evaluate sessions](/how-to/evaluate-sessions) is the recipe.
 - **Keyboard navigation** — <kbd>J</kbd> / <kbd>K</kbd> cycles through sessions, <kbd>F</kbd> toggles fullscreen, <kbd>Esc</kbd> exits fullscreen first and then closes the panel.
 - **Details tab** — a **Session properties** block of ten rows: Session ID, Run date, Triggered by, Source, Model, Turn count, Duration, Routed to, Tools called, and Tags. Simulated sessions carry a **Simulated from** provenance card above it.
 - **Transcripts are immutable** — there is no Delete Session action, and a session's conversation can't be edited. What you *can* write are the annotation values and tags layered on top; tags autocomplete from one vocabulary shared with Scenarios.
@@ -66,7 +81,7 @@ The four primary workflows:
 
 <CardGroup cols={2}>
   <Card title="Evaluate it" icon="play">
-    Select sessions and click **Evaluate** — or evaluate one session from its fly-in — to have **LLM judge** evaluators grade the conversation that already happened. Grading is read-only: the session is never changed, and every result carries an **Open session** button back to the exact conversation it judged.
+    Select sessions and click **Evaluate** — or run a quick evaluation on one session from its fly-in — to have **LLM judge** evaluators grade the conversation that already happened. Grading is read-only: the session is never changed, and every result carries an **Open session** button back to the exact conversation it judged.
   </Card>
   <Card title="Review and annotate" icon="tag">
     Read the transcript, then record your judgment in typed annotation columns — a pass/fail **Verdict**, a severity, a score, tags, or a reviewer note. Your Verdict becomes the ground truth that scores evaluator accuracy; it never overrides the automated verdict. See [Annotations](/concepts/annotations).
@@ -101,7 +116,7 @@ Out of the box, every Session carries:
 - Time: when the conversation happened and when it was captured
 - Routing: the **Routed To** route, plus tool calls made along the way
 - Human signal: annotation column values (Verdict, Severity, and any custom columns) and tags
-- Automated signal: the session's evaluation verdict — **Pass**, **Fail**, or one of two distinct neutrals, **Not evaluated** (nothing ran) and **Not graded** (something ran but produced no behavioural score)
+- Automated signal: the session's evaluation verdict — **Pass**, **Fail**, or one of two distinct neutrals, **Not evaluated** (nothing ran) and **Not graded** (something ran but produced no behavioural score). Five outcomes leave a run's pass-rate denominator, and one of them belongs to the agent: where an action the agent itself runs returns an error, the conversation reads amber **Couldn't test** on that run's results — excluded from the score like an environment problem, never excused as one. Back on the Session, a run that ended that way reads **Not graded**.
 
 Not all of it is filterable. The table filters on **Date**, **Routed To**, **Tags**, and **Turn
 count**; the rest is there to read, sort, and export. To narrow by something the filter set doesn't
