@@ -102,7 +102,7 @@ When you connect an org that your workspace already reached in another Project, 
 - **Sign-in** — **Admin authorization**, **App key & secret**, **Certificate (JWT)**, or **Username & password**
 - Its connection status, and **Disconnect** or **Delete**
 
-**Disconnect** tears down the External Client App Trust AI deployed in the org, so it's offered only for connections Trust AI provisioned. A connection wired to an app your admin created offers **Delete** only. Both act on the org, not on one Project: each removes the connection from every Project listed under **Used by**. **Delete** leaves the org-side app in place so you can reconnect later; **Disconnect** does not.
+**Disconnect** tears down the External Client App Trust AI deployed in the org, so it's offered only for connections Trust AI provisioned. A connection wired to an app your admin created offers **Delete** only. The two reach different ends, and the difference is worth reading before you click either: **Delete** removes the connection from every Project listed under **Used by** and leaves the org-side app in place, so you can reconnect straight away; **Disconnect** removes the app from the org — which stops every Project that reuses it — but deletes only the one connection record that owns the app. See [Manage Salesforce connections](/how-to/manage-salesforce-connections).
 
 Both the reuse offer and the workspace list respect your access: you see only the Projects you can reach, and reuse candidates only for a Project you could edit.
 

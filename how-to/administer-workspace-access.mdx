@@ -215,11 +215,15 @@ Two states are worth recognizing:
 - **No pool yet.** Usage is metered but nothing is capped, and the card says so.
 - **Past the pool.** The card reads "You have gone past your credit pool for this billing month." When a workspace is capped and reaches its limit, runs are refused with a clear message telling you to contact your admin, rather than failing obscurely.
 
+Reading the card in full — what draws on the pool, and what happens as you approach and then reach the limit — is covered in [Track credit usage](/how-to/track-credit-usage).
+
 ## The Connected orgs tab
 
 **Connected orgs** lists the Salesforce orgs your *workspace* is connected to — one card per org, showing which projects use it, its connection state, and how it signs in (for a connection made the recommended way, **Admin authorization**).
 
-Every card offers **Delete**, which removes the connection from Trust AI across every project that uses it. **Disconnect** — which also tears down the app Trust AI deployed in your Salesforce org — appears **only on connections made by admin authorization**, because those are the only ones with a Trust AI–deployed app to remove; a connection wired to an app your own admin created offers **Delete** alone. Both actions are destructive and both ask you to confirm.
+Every card offers **Delete**, which removes the connection from Trust AI across every project listed under **Used by** and leaves your Salesforce org untouched. **Disconnect** appears **only on connections made by admin authorization**, because those are the only ones with a Trust AI–deployed app to remove; a connection wired to an app your own admin created offers **Delete** alone.
+
+Disconnect is not Delete with a teardown on top. It removes the app from your Salesforce org — which stops every project that reuses the org — but deletes only the one connection record that owns that app, so any other project under **Used by** is left pointing at an app that no longer exists. Both actions are destructive and both ask you to confirm.
 
 This tab is where you see connections your projects share. Reading a row, reusing an org, and choosing between the two removals are covered in full in [Manage Salesforce connections](/how-to/manage-salesforce-connections). Creating one is a per-project job, done on that project's own **Settings → Connections** tab — see [Manage a project's connections](/how-to/manage-project-connections) for that tab, and [Connect a Salesforce Agentforce agent](/how-to/connect-agentforce) for the Salesforce setup itself.
 
@@ -273,5 +277,6 @@ This tab is where you see connections your projects share. Reading a row, reusin
 - **[Multi-tenancy](/concepts/multi-tenancy)** — the organization boundary all of this access control lives inside
 - **[Manage Salesforce connections](/how-to/manage-salesforce-connections)** — the Connected orgs tab in full: reading a row, reusing an org, Disconnect vs Delete
 - **[Manage a project's connections](/how-to/manage-project-connections)** — the project-side **Settings → Connections** tab the fifth workspace tab is deliberately not named after
+- **[Track credit usage](/how-to/track-credit-usage)** — the Credits tab in full: what draws on the pool, and what happens at the limit
 - **[Connect a Salesforce Agentforce agent](/how-to/connect-agentforce)** — how a Salesforce connection is created in the first place
 - **[Glossary](/glossary)** — the vocabulary in one place
