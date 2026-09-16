@@ -1,248 +1,291 @@
 ---
 title: "Evaluate with the Trust Agent"
 icon: "sparkles"
-description: "Chat with the Trust Agent to build and run an Evaluation end to end — answering its questions and approving each write it proposes along the way."
+description: "Drive a whole evaluation through conversation, in the order the product enforces: capture requirements, generate scenarios from them, attach a judge to each one, finish the grading contract, run it, and read the result."
 ---
 
-This walkthrough covers the full evaluation flow end to end. Instead of clicking through Scenarios, Evaluators, and Evaluations by hand, you'll **drive a full evaluation through conversation** with the [Trust Agent](/concepts/trust-agent) — the in-app assistant that asks what you actually want, generates test scenarios, and runs the evaluation, pausing for your approval before it writes anything.
+This walkthrough covers the full evaluation flow end to end. Instead of clicking through Requirements, Scenarios, Evaluators, and Evaluations by hand, you'll **drive the whole thing through conversation** with the [Trust Agent](/concepts/trust-agent) — the in-app assistant that drafts what you describe, shows you every write before it lands, and waits for your approval.
 
-By the end you'll have done a complete round of the [evaluation loop](/concepts/evaluation-loop) without leaving the chat: answered the agent's clarifying questions, approved each write as it landed, watched a batch of **Scenarios** get generated and an **Evaluation** simulate them live against your agent, and read the result — all in the open, with every step legible.
+By the end you'll have a scored evaluation and a coverage picture that computes itself: requirements on file, scenarios linked to them, a judge attached to each, and a run that says which behaviours hold.
 
 <Note>
-  **The Trust Agent is not an Agent Version.** They share the word "agent," but the **[Trust Agent](/concepts/trust-agent)** is *your* assistant inside Trust AI — the thing you chat with in this tutorial. An **[Agent Version](/concepts/agent-versions)** is the *customer's agent under test* — the pinned snapshot the Evaluation grades. In this tutorial you use the Trust Agent to evaluate an Agent Version; they're distinct concepts.
+  **The Trust Agent is not an Agent Version.** They share the word "agent," but the **[Trust Agent](/concepts/trust-agent)** is *your* assistant inside Trust AI — the thing you chat with in this tutorial. An **[Agent Version](/concepts/agent-versions)** is the *customer's agent under test* — the pinned snapshot the evaluation grades. In this tutorial you use the Trust Agent to evaluate an Agent Version; they're distinct concepts.
 </Note>
 
-Allow about 20 minutes. Most of that is the agent thinking and the simulated conversations playing out — your part is answering a few questions and approving the writes.
+Budget 30 to 60 minutes. Most of that is the agent thinking and the simulated conversations playing out — your part is answering a few questions and approving the writes.
 
 ## Before you start
 
-You'll want a Project with something to evaluate against:
+You need one thing, and it is not optional:
 
-- A [Project](/concepts/projects) — you don't need existing [Sessions](/concepts/sessions), because the agent generates scenarios from a plain-English description of what your agent should handle
-- A connected agent with at least one deployed [Agent Version](/concepts/agent-versions) for the evaluation to simulate against (the demo data ships with pre-seeded versions) — and if nothing is connected yet, you can ask the Trust Agent to walk you through connecting one before you begin
-- Familiarity with the manual path helps but isn't required — this tutorial does through the agent what [Run your first Evaluation](/tutorials/run-first-evaluation) does by hand
+- **A [Project](/concepts/projects) with a connected agent.** Most of the Trust Agent's authoring is refused outright without one — it will tell you *"Connect an agent before creating tests or running them. I can help you connect one now."* and offer to walk you through it in the chat. If you'd rather connect first, use the guide for your platform: [Agentforce](/how-to/connect-agentforce), [Claude managed agent](/how-to/connect-claude-managed-agent), [AgentCore](/how-to/connect-agentcore), or a [conversational HTTP agent](/how-to/connect-http-agent).
 
-### Which mode this tutorial uses
+One thing to check while you are there: that the connected agent has a **captured [Agent Profile](/concepts/agent-profile)** — the record of the subject areas it serves and the actions it can take. You can get all the way to the last two steps without it, but not through them: the grading contract in step 6 is written against the agent's captured actions, so a build with nothing captured stops there. [Review an agent profile](/how-to/review-an-agent-profile) is the guide.
 
-The Trust Agent has three operating modes — **Ask**, **Plan**, and **Act**. This tutorial runs in **Ask**, and that is not an arbitrary pick:
+You do **not** need existing sessions, scenarios, evaluators, or requirements. You build them here, in the order below — and that order is the point of the page.
 
-- **Ask** is the mode every new chat starts in, and it is the mode whose contract is *clarify first*: on an ambiguous request the agent's first move is a question card, not a guess. It then pauses for your approval before every write. That combination — questions up front, an approval gate on each change — is exactly the flow this tutorial shows.
-- **Plan** researches and proposes a task list, and **changes nothing**. In Plan the agent may only read, ask questions, and propose the plan; it is blocked from every write *and* from raising an approval card at all. The ban is decided per turn, from what the toggle read when you pressed send — and once a plan is on the rail the composer flips that toggle to **Act** on your next send, so the protection is narrower than "I picked Plan, I'm safe" (Step 3 has the detail). Clarifying questions are *optional* in Plan, not guaranteed — a plan can arrive with no question card at all.
-- **Act** works the plan end to end. It still stops for your approval on every write that changes data.
+## The order is enforced, not suggested
 
-Step 3 shows where Plan fits if you want the task list locked down before anything can happen. This tutorial also uses the **default model** throughout; you won't change models in this flow.
+The Trust Agent guides one core authoring workflow, and the runtime holds you to it. Each step refuses to run until the artifact before it exists, so a tutorial that skipped ahead would dead-end its reader at the first write. [The workflow the agent enforces](/concepts/trust-agent#the-workflow-the-agent-enforces) covers the mechanism; this page walks it.
 
-## The end-to-end flow
+| Step | Finished when |
+| --- | --- |
+| **1. Connect an agent** | A usable agent is connected to the project |
+| **2. Capture requirements** | At least one saved requirement states what to test |
+| **3. Generate scenarios** | Each new scenario is linked to the requirement it exercises |
+| **4. Build evaluators** | One evaluator per requirement is attached to its scenarios and linked back |
+| **5. Complete expected output** | The applicable actions, routes, and test data are saved on each scenario |
+| **6. Run the evaluation** | A prepared evaluation has run against the connected agent |
+
+Ask for a later step first and you don't get a refusal you have to decode. The agent checks what the project actually holds, names the earliest missing step, and offers to do that instead — it won't collect the later step's details or raise an approval card until the prerequisite lands. Underneath, the platform is returning a specific sentence for each missing artifact:
+
+| The project is missing | What the platform refuses with |
+| --- | --- |
+| Any saved requirement | *"Draft and save the requirements first."* |
+| Scenarios linked to those requirements | *"Create scenarios linked to every requirement first."* |
+| An evaluator per requirement | *"Create and attach one evaluator for each requirement first."* |
+| Those evaluators attached to the scenarios | *"Attach each requirement's evaluator to its scenarios first."* |
+| Expected actions or routes on the scenarios | *"Create expected actions or routes for the scenarios first."* |
+
+Each closes with the same offer — *"I can guide you through that now before we continue."* You will usually meet these in the agent's own words rather than as a quoted string: the refusal is handed to the agent as recovery data, and it explains the block and proposes the fix in the reply. Exploration, personas, security coverage, and data discovery sit outside this sequence entirely. They can strengthen a step; they never substitute for one.
+
+<Tip>
+  Landing on a project and not sure how far it got? Ask the agent, or use the **Show me where to start** chip described in step 1. It re-reads the project's real state rather than trusting what an earlier conversation said, so it is accurate even on a project somebody else left half-built.
+</Tip>
+
+## The walkthrough
 
 <Steps>
-  <Step title="Open the Trust Agent and send your brief">
-    From your Project, click **New chat** in the left nav — the Trust Agent lives at `/projects/:id/agent`. It's the default experience on every project; there's no flag or setting to opt into.
+  <Step title="Open the Trust Agent and say what you want tested">
+    From your project, click **New chat** in the left nav. A new chat opens on a **Welcome** surface: a greeting, a one-line status about your last evaluation, a composer, and four starter-prompt pills beneath it — **Evaluate agent**, **Improve requirements**, **Summarize evaluations**, and **Connect agent**. That set is the same on every project, however far along it is. Clicking a pill expands its suggested prompts inline, and clicking a suggestion pre-fills the composer; nothing sends until you press send.
 
-    A new chat opens on a **Welcome** surface: a greeting, a one-line status about your last evaluation, a composer, and four starter-prompt pills beneath it. The set you see depends on how far the project has come. On a brand-new project you get the cold-start set — **Connect agent**, **Explore behaviour**, **Create scenarios**, **Run evaluation** — the guided first-hour arc the agent is built to walk you through. On a project that already holds sessions or scenarios you get a curated everyday set instead: **Curate data**, **Annotate data**, **Evaluate agent**, **Analyze failures**. Clicking a pill expands its suggested prompts inline, and clicking a suggestion pre-fills the composer — nothing sends until you press send.
+    <Warning>
+      **Check the mode before you send.** The Welcome composer is a full composer, not a stripped-down launcher: it carries the **Attach files** control, the **Ask** / **Plan** / **Act** mode toggle, the model picker, and the **Thinking** chip. A mode you pick there is handed to that conversation's first turn, so the mode your first message goes out in is whatever the toggle reads — not a fixed default. Look at it before you send.
+    </Warning>
 
-    <Note>
-      The Welcome composer has **no mode control**. The Ask / Plan / Act toggle lives on the chat composer, which appears once the thread opens — so your first message always goes out in **Ask**, the safe default. That is the mode this tutorial wants, so there is nothing to change before you send.
-    </Note>
+    This tutorial runs in **Ask**, which is what the toggle starts on. Ask clarifies genuine ambiguity before it acts and stops at an approval card before every write. **Plan** researches and proposes a task list and cannot write or even raise an approval card; **Act** works straight through but still stops for approval on every write. Leave the model on whatever your workspace offers by default, and leave **Thinking** on **Balanced**.
 
-    Send an open-ended brief — describe the problem in your words, the way you'd ask a teammate. Something like: *"Our support agent handles refunds, and I need to trust it before Friday's release. Can you build test coverage and run it?"*
+    Now describe what you want tested, in your words, the way you'd brief a teammate — and put the actual rules in the message, because those rules are about to become requirements:
 
-    The chat opens as soon as you send, and the project's left nav (**Playground**, **Scenarios**, **Sessions**, **Evaluators**, **Evaluations**, and the rest) stays visible beside the agent. You're chatting *inside* the app, not in a window floating over it. From here on the composer is anchored to the bottom of the content pane, with the mode toggle and the model picker in its tool row.
+    > Our refunds agent goes live Friday and I need to trust it. Refunds go back to the original card 7-10 business days after the warehouse scans the return, returns are only accepted inside a 60-day window, and anything past the 10th business day must be escalated to the payments team the same day. The agent must never promise a refund amount it has not looked up. Capture that as requirements.
 
-    <Frame caption="The pills sit below the composer: clicking one expands its suggestions, and clicking a suggestion fills the composer and stops there. Note what isn't on this composer — no mode control, which is why your first message always goes out in Ask.">
-      <img src="/images/agent-tutorial-welcome.png" alt="The Welcome surface of a project's Trust Agent: the greeting 'Hi, Dev. Let's get to work!', a one-line status reading 'You haven't run any evaluations yet. Try one from the prompts below.', a composer pre-filled with the suggestion 'Build a tone-of-voice evaluator for the brand voice', and four starter-prompt pills — Curate data, Annotate data, Evaluate agent, Analyze failures — with Evaluate agent active and its three suggested prompts listed beneath. The project's left nav, with Scenarios, Sessions, Evaluators and Evaluations, stays beside it." />
+    <Frame caption="The Welcome composer carries everything the chat composer does — attach, the mode toggle, the model picker and Thinking — so the mode this conversation starts in is a choice you make here. Requirements sits above Scenarios in the project nav, with a count of the project's active requirements.">
+      <img src="/images/agent-tutorial-welcome.png" alt="The Welcome surface of a project's Trust Agent: the greeting 'Hi, Dev. Let's get to work!', a one-line status reading 'You haven't run any evaluations yet. Try one from the prompts below.', and a composer holding the refunds brief typed out in full. The composer's tool row carries an attach control, an Ask mode toggle, a Claude Opus 4.8 model chip and a Balanced Thinking chip, with the send control at its right. Four starter-prompt pills sit beneath it — Evaluate agent, Improve requirements, Summarize evaluations, Connect agent — with Improve requirements active and its two suggested prompts listed below. The project's left nav shows Requirements with a count of 4 above Scenarios, Sessions, Evaluators and Evaluations." />
     </Frame>
 
-    **You should see:** the Welcome surface with its four starter-prompt pills, and — once you send — the Trust Agent's full view with your message as turn one, the project nav still on your left, and the composer's mode toggle reading **Ask**.
+    On a project with nothing at all in it — no sessions, no scenarios, no evaluators, no runs — the suggestion row under the agent's first reply leads with a standing **Show me where to start** chip. It pre-fills a request for a guided walk and, like every chip, never sends on its own. It disappears as soon as the project holds any real work.
+
+    **You should see:** the Welcome surface with its four pills, and — once you send — the chat with your message as turn one, the project nav still on your left, and the composer's mode toggle reading **Ask**.
   </Step>
 
-  <Step title="Answer the agent's clarifying questions">
-    On an open-ended request in Ask mode, the agent's **first move is to clarify** rather than guess. It does a quick grounding read of the project first — you'll see a **Reviewed the project** receipt land in the transcript — and then leads with the question itself. There's no wall of preamble in front of it.
+  <Step title="Let it draft the requirements">
+    The agent leads with its **Capture requirements** skill, and it reads before it writes. Expect three receipts in the transcript before any prose: **Reviewed the project**, **Reviewed Capture requirements** carrying a **Core skill** chip, and **Reviewed project records**. That last one is it checking what is already on file, so a behaviour you have already written down comes back as an edit to that requirement rather than a second one saying the same thing.
 
-    The question arrives as a card that **replaces the composer in its slot**, and the chat header switches to **Awaiting your answer**. You'll see one of two shapes:
+    It works from whichever of three paths fits what you gave it:
 
-    - A **single-question card** — one question with the drafted choices.
-    - A **multi-question flow card** — a short sequence of two to five questions under one framing line. A progress row counts you through them (**Question 1 of 3**, and **Question 3 of 3 · Last** on the final step), and **← Back** / **Next →** step between them, so you can revise an earlier answer before you commit. The last step's button reads **Submit**; nothing runs until you press it.
+    <AccordionGroup>
+      <Accordion title="A brief you paste or type">
+        What this tutorial does. The rules in your message get decomposed into atomic, testable requirements — one behaviour each, compound statements split apart, and each classified out loud as something the agent must do or must never do.
+      </Accordion>
+      <Accordion title="A document you upload">
+        Attach a PRD, policy, or spec with the composer's **Attach files** control and ask it to file what the document implies. It reads the whole thing before proposing anything, scans it twice — once for what the agent must do, once for the boundaries it must never cross — and quotes the line each requirement came from.
+      </Accordion>
+      <Accordion title="Seeded from the connected agent, or a guided walk">
+        With a captured profile to read, it can propose one draft per topic the connected agent genuinely serves, quoting any operating rule the platform declares. With nothing known about the agent yet, it runs a structured interview instead: purpose, happy path, boundaries, edge cases, failure modes, and what would make a reviewer mark a reply pass or fail.
+      </Accordion>
+    </AccordionGroup>
 
-    Individual questions can be single-select or multi-select. Both card shapes offer the drafted choices plus a write-in **Other** field for an answer that isn't listed, and both carry a **Skip** control — skipping tells the agent to proceed with what it already has rather than cancelling the turn.
+    It defaults to the document when you have one, falls back to seeding when there is a profile to read, and uses the interview for a greenfield agent.
 
-    When you submit, the flow collapses into a resolved row in the transcript that echoes every question and the answer you gave — *"You answered: What should this coverage focus on? Core refund behaviour · How much new coverage should I generate? A focused set (~5 scenarios)"* — so the scoping decision stays readable long after the card is gone.
+    Whichever path it takes, **it writes every draft into the reply first** — numbered, one line each, title plus the behaviour that would pass or fail it — before it proposes anything. Read that list. It is where you catch a rule it split the wrong way or a "must never" it read as a "must".
 
-    <Frame caption="The card has taken the composer's slot — there is no composer under it to type into — and the header has switched to Awaiting your answer. On step two of three, Back and Next are both live, so an earlier answer is still yours to change.">
-      <img src="/images/agent-tutorial-clarify-card.png" alt="A multi-question flow card in place of the composer, framed 'You've already got 15 ready scenarios and 6 evaluators. Let me scope the run for Friday.' and headed 'Question 2 of 3' with a three-dot progress row. It asks how the conversations should be produced, offering two drafted choices — the first, simulating live against the connected agent, selected — plus a write-in 'Or type your own answer…' option, with Back and Next in the footer. The header reads 'Awaiting your answer', and a 'Reviewed the project' receipt and two object tables of reviewed evaluators and scenarios sit above the card." />
-    </Frame>
+    [Capture requirements](/how-to/capture-requirements) is the focused recipe, including the manual paths: **Requirements → Extract from document** for a file, or **New requirement** to type one in.
 
-    Answer the questions to scope the work the way you want it, then submit. If useful context lives in a file — a requirements doc, a CSV of examples — you can add it with the composer's **Attach files** button once the chat has a first message (PDF, Word, Markdown, text, CSV, and JSON files).
-
-    **You should see:** a question card in place of the composer, your answers captured, and — once you submit — a resolved "You answered…" row and the agent moving on to work.
+    **You should see:** the three receipts, then a numbered list of proposed requirements in the agent's reply, then a single approval card.
   </Step>
 
-  <Step title="Watch it reason and work">
-    After you answer, the agent works in the open. Its reasoning, the reply text, and any tool-call arguments all **stream live, token by token** — a turn doesn't buffer silently and then dump a wall of text. Replies render as markdown-formatted prose (lists, paragraphs, emphasis), with an accent caret while a turn is still streaming.
+  <Step title="Approve the one batch card">
+    A curated batch of requirements files behind **one approval card**, not one card per requirement. The card repeats the list you just read — every requirement by title with a one-line summary — above a **_N_ records in this batch** line, so you are never approving a count you cannot expand.
 
-    Where the model exposes its thinking, it streams into a collapsible **reasoning rail**: a live **Thinking** label with a count-up timer while the pass runs, collapsing to **Thought for *Xs*** when it resolves, which you can expand to read what the agent considered. How much you see depends on the model runtime — where reasoning isn't exposed, there's simply no rail rather than a fabricated one.
+    | On the card | What it means |
+    | --- | --- |
+    | A numbered entry per requirement | You approve content you can see, not a total |
+    | *"They're filed together: if any one of them can't be saved, none of them are."* | All-or-nothing. A batch never lands half-applied |
+    | *"Nothing is saved until you approve."* | The gate is the card, not the message above it |
+    | *"They become active as soon as you approve — you can edit or archive any of them later from the Requirements page."* | Or, on a draft batch: *"Saved as drafts — review and promote them from the Requirements page when you're ready; drafts don't count toward coverage."* |
 
-    <Note>
-      Any wait you feel before a response or a card is the **upstream model's thinking time**, surfaced honestly by the Thinking timer and a working indicator — not a runtime delay, an SLA, or a bug. How long it takes depends on the model and the infrastructure it runs on, which is exactly why the agent shows a live timer instead of promising a number.
-    </Note>
+    A batch tops out at 50 requirements; past that the agent has to split it. Two entries that say the same thing are refused before a card is ever offered, and so is one an existing requirement already captures.
 
-    Each tool call the agent makes lands in the transcript as its own compact receipt — a verb and a humanised summary, like **Reviewed the project** or **Reviewed evaluators**. Receipts for records you can open are clickable; the next step covers that.
+    You can answer a card four ways, not two: approve it once, grant a **standing approval** for that action across this chat, reject it with an optional note, or dismiss it with the floating **×** and hand the turn back. [Approve agent writes](/how-to/approve-agent-writes) is the focused recipe for all four. Some writes a standing approval can never cover, and they are confirmed every single time: **deleting items**, **saving an agent profile**, and a bulk edit with a requirement mixed into it.
 
-    Once it has a shape for the work, the agent states the plan in a line or two and **the ordered task list renders on the side rail's Progress section** — not in the transcript — with a live **N of M done** counter that ticks as it works. For the brief above, expect a short list along the lines of *generate a focused set of scenarios* → *run them simulated and scored by a named evaluator* → *report the results*. The rail's **Context** section fills in beside it, headed by the **Connected agent** card and its health chip (**Not checked** until something has probed it).
-
-    Watch for the **evaluator beat** in that list. A graded run needs a judge, so before it can propose a run the agent reads your project's evaluators and either picks the one that matches the behaviour under test — you'll see a **Reviewed evaluators** receipt and a sentence naming its choice — or, on a project that has none, adds *build an evaluator* to the plan as its own step. Making each scenario gradable is a prerequisite of the arc, not an optional extra: a scenario with no expected output and no attached evaluator has nothing solid to grade against. [Build your first Evaluator](/tutorials/build-first-evaluator) is the manual version of that same beat.
-
-    <Tip>
-      **Want the plan before anything at all can happen?** Switch the composer's mode toggle to **Plan** and send your go-ahead. In Plan the agent may only read, optionally clarify, and propose the task list — it is blocked from every write *and* from raising an approval card, so no permission card can appear on a turn you send with the toggle reading **Plan**. A **Plan ready · *N* steps** bar appears above the composer with an **Approve & run** button; approving **switches the mode to Act** and hands the existing plan straight to execution, where each write stops at an approval card as usual.
-
-      **Read that condition literally, because Plan does not hold once the plan exists.** While a plan with unfinished steps is on the rail, *anything* you send from the composer flips the toggle to **Act** first — a refinement and a question take exactly the same transition the **Approve & run** button does. What happens next is the agent's read of your message, not a mode gate: a clear go-ahead executes the plan end to end, while a refinement or a question is answered without mutating and leaves the plan paused. So the moment you have a plan you want to keep, treat the toggle as your signal — check that it still reads **Plan** before you assume the hard ban is what is protecting you.
-    </Tip>
-
-    <Frame caption="The task list is on the rail, not in the transcript — the reply beside it only states the plan in a line or two. This one is the Plan detour: the toggle reads Plan, nothing has been written, and the Plan ready bar's Approve & run says out loud that it switches to Act.">
-      <img src="/images/agent-tutorial-plan.png" alt="The Trust Agent full view with a four-step task list in the side rail's Progress section headed '0 of 4 done', and a Context section below it led by the Refunds Concierge connected-agent card with a 'Not checked' health chip. The transcript shows a resolved 'You answered…' row, the agent's two-line statement of the plan, three next-step chips, and a 'Plan ready · 4 steps' bar above the composer whose button reads 'Approve & run — switches to Act'. The composer's mode toggle reads Plan." />
-    </Frame>
-
-    **You should see:** streaming prose in the transcript, tool receipts landing as the agent works, an ordered task list filling the side rail's **Progress** section, and — where the model exposes it — a reasoning rail you can expand.
-  </Step>
-
-  <Step title="Approve each write the agent proposes">
-    The agent stops for you before it does anything consequential. When it reaches a step that **writes** — generating the batch of Scenarios, starting an Evaluation — the run **halts at that tool call** and a **permission card** replaces the composer. The agent does not continue until you decide. Read operations don't gate: fetching sessions, scenarios, evaluator configs, and results all proceed without asking.
-
-    The card leads with a plain-English question — *"Generate 5 core refund scenarios (happy paths + edge cases) for the support agent?"* — written by the agent, never a tool name or a raw payload. It is **not** a full preview pane. Where the agent attaches structured detail to the write, the body adds a **compact summary line** — *"3 fields changed"* for a create or update, *"12 records removed · 2 downstream dependencies"* for a delete — and a **View proposal** link. That link is where the detail lives: it opens a right-side fly-in with the field-level old-vs-new diff for a create or update, or the itemised record list plus the downstream-dependency callouts for a delete. Dependency callouts are **delete-only**; a create or update proposal has none. On a plain gate with no structured detail attached, there is no summary line and no link — just the question and the agent's supporting sentence.
-
-    You have **four** ways to answer, not two. The first three are a row of choices on the card; you pick one and press the CTA at the foot, whose label follows your pick.
-
-    | Decision | What it does |
-    | -- | -- |
-    | **Approve once** | The default. The choice carries the agent's own label for this write — *"Generate them"* — and the CTA reads **Approve**. The run resumes and the write lands. |
-    | **Approve for the chat** | A durable **standing approval** for that action across this chat. Offered only when the agent has written a specific label for it, and **never** on a delete. |
-    | **Reject** | The chip itself is the note input, prompting *"Reject — and tell me why (optional)"*. The CTA swaps to **Send rejection**. The note is optional; the rejection is not silent either way. |
-    | **Dismiss** | The floating **×** closes the card without approving or rejecting. The agent acknowledges and waits for your next message. |
-
-    On a delete card the CTA reads **Delete *N* items** and paints as destructive, and the chat-wide choice is hidden outright — a standing "always delete" is never on offer.
-
-    **"Once" is once per *turn*, not once per write.** This is the part readers get wrong, so be deliberate about it: when the agent batched a repeated series behind one card — scenario after scenario — a single **Approve** lets the whole batch through for the remainder of that turn, including the other writes the agent raised under that same card. What "once" withholds is durability: it does not survive into your next message, and the next turn asks again. That is the *only* thing separating it from the chat-wide grant. Three kinds of write are held out of that batch behaviour and are confirmed one write at a time — a **delete**, **authoring an agent profile**, and a bulk edit with a requirement mixed into it — the same three a standing approval can never cover.
-
-    A standing approval surfaces as a chip above the composer reading *"\<action\> in this chat · Active until \<date\>"*. Its control is **turn off** — use that when you want the per-write gate back.
-
-    Before it proposes the evaluation run itself, the agent works through **four** pre-flight checks. The second is the one most first-timers trip on:
-
-    1. **There are scenarios, and they carry a grading contract.** A scenario with no expected output and no attached evaluator gets scored against a re-inferred guess rather than a real contract.
-    2. **An evaluator exists, and it's calibrated.** If the judge was never calibrated the agent raises it rather than quietly running — you can proceed knowingly, but you'll be told. See [Build your first Evaluator](/tutorials/build-first-evaluator) and [Calibrate an evaluator](/how-to/calibrate-an-evaluator).
-    3. **There's an Agent Version to simulate against**, for persona-and-goal scenarios.
-    4. **The data is fresh enough** — for scenarios curated from real traffic, the agent flags clearly stale sessions and offers to refresh first.
-
-    If a check fails it says so plainly instead of proposing a run that would do nothing.
-
-    Approving a write **actually executes it**: your approval resumes the run and the mutation lands. It is not a preview that quietly does nothing — the Scenarios are really created, the Evaluation really starts.
-
-    Each decision is recorded back into the transcript as a **resolved row** that echoes what you chose — *"You approved: Create it"*, *"You rejected: too narrow"*, *"You dismissed the request. I'll wait for your next message."* — an audit trail that persists after the turn finishes and on reload. A pending approval is durable too: reload mid-decision and the card rehydrates as still answerable, with the composer held until you decide.
-
-    <Note>
-      **The approval you gave is what authorizes the write.** The server, not your browser, decides whether a write may execute: it accepts a decision only for a card it raised itself, and it binds that decision to the write the card was actually about — so a different write chained into the same turn asks you again rather than riding your last answer.
-
-      A write is also expected to stay inside the project and organization you are working in. See [Multi-tenancy](/concepts/multi-tenancy) for the platform detail.
-      {/* ACCURACY-AUDIT-PENDING: the cross-organization isolation property is stated at behaviour level only — it cannot be driven on a single-organization local deployment; verify against a multi-organization deployment before asserting the mechanics. The server-anchored approval binding above IS verified (agui/write_gate.py:12-46). */}
-    </Note>
-
-    <Frame caption="The card is a question plus a one-line summary of the change — the field-level detail is behind View proposal, not in the card body. Because this write repeats the same action eight times, the agent has offered the chat-wide grant as its middle choice; the run stays stopped until you pick one.">
+    <Frame caption="The card has taken the composer's slot — there is nothing to type into until you decide. This one offers the chat-wide grant as its middle choice, which the agent only does when it has written a specific label for the action; a delete never offers it.">
       <img src="/images/agent-tutorial-permission-card.png" alt="A permission card in place of the composer, asking whether to detach the Refund policy groundedness evaluator from eight behaviour scenarios while keeping each one's routes, tool assertions and remaining evaluators. Below the question a compact summary line reads '8 fields changed' with a 'View proposal' link, then three choices — 'Detach on all 8' selected, 'Detach Groundedness from these scenarios' as the chat-wide grant, and 'Reject — and tell me why (optional)' — with a floating close control at the top right and an Approve button at the foot. The transcript above lists the eight scenarios the write touches." />
     </Frame>
 
-    Approve the writes as they come up. The focused recipe for the approval flow — every card type, rejecting with a note, standing approvals, and exactly what approving does to your data — lives in [Approve agent writes](/how-to/approve-agent-writes).
+    Approve, and the write actually executes — this is not a preview that quietly does nothing. A **Created a requirement** receipt lands in the transcript, expanded into a clickable table of the real records: `REQ-1`, `REQ-2`, `REQ-3`, `REQ-4`, each with its title and description. The handle is a bare number, deliberately not zero-padded like a scenario's `SCN-000123`, because these are things people say out loud. Your decision is recorded above it as a resolved row, and it survives a reload.
 
-    <Tip>
-      If you've minimized the agent to its docked panel or collapsed pill when a write comes up, the pill switches to a **needs you** state, and the docked view auto-expands so the card that needs you is on screen without a manual tap. You don't have to keep the full view open to stay in the loop.
-    </Tip>
+    The side rail's **Outputs** section now lists the same records, and the project's left nav shows **Requirements** with a count of the active ones.
 
-    **You should see:** a permission card in place of the composer with a compact summary and a **View proposal** link, your approval landing the write for real, and a resolved row in the transcript recording the decision.
+    **You should see:** `REQ-1` through `REQ-4` on the card's receipt and in the rail, a resolved approval row in the transcript, and exactly one next-step chip under the reply — something like **Create linked scenarios**.
   </Step>
 
-  <Step title="Click into the objects it built">
-    When a step reads or writes records, the agent renders them as clickable objects in the chat rather than describing them in prose.
+  <Step title="Ask it to generate scenarios from the requirements">
+    With requirements on file, the next step unlocks. Ask for it plainly:
 
-    - **One record** — the tool receipt itself becomes the click target. The whole row is clickable, with a link glyph at its end, and opens that record's real **fly-in** in context: the same fly-in you'd get from the Scenarios or Evaluations surface. The receipt *is* the link; nothing extra renders beside it.
-    - **Several records** — the batch of Scenarios it just generated, say — the receipt expands into a **clickable object table** of real, human-readable rows. No bare IDs. Click a row and its fly-in opens.
+    > Generate scenarios from those requirements.
 
-    A reference to a sub-entity resolves to its *parent* record's fly-in, so you always land somewhere real, and an evaluator reference opens the real evaluator panel rather than a placeholder.
+    The agent drafts a focused batch — a persona and a goal each, no transcripts yet — and stops at an approval card before creating them. Approve it and the scenarios land in your project's one flat **Scenarios** list; there is no set or folder layer above them. Personas are drafted alongside them if the project has none.
 
-    Alongside the transcript, the **side rail** tracks the work in this order:
+    Then it does the part that makes coverage computable, without being asked: it reads the scenarios back and **links each one to the requirement it exercises**, several scenarios to one requirement where a requirement has more than one edge. Expect a second approval and a **Reviewed scenarios** receipt between the two.
 
-    1. **Progress** — the plan, with live step counts and execution status ticking as the agent works.
-    2. **Context** — the records the agent reviewed, as a humanised count per type ("5 sessions"), expandable to the individual entities where the agent recorded them.
-    3. **Outputs** — one row per entity it created, updated, or ran, each deep-linking into a fly-in, windowed at the first five with a **Show more** disclosure.
-
-    An **Attachments** section joins the rail when you've attached files. The rail persists across the whole task rather than resetting between steps, and a section only renders when it has something to show — a purely conversational turn shows no rail at all.
-
-    The work this tutorial drives lands on real surfaces. The scenarios the agent generated appear in your project's flat **Scenarios** list — click **Scenarios** in the left nav, at `/projects/:id/scenarios`. Each one is a first-class scenario with a stable ID like `SCN-000123`; there is no set or folder layer to dig through. The **[Scenarios](/concepts/scenarios)** concept page covers the surface in full. The Evaluation the agent started shows up under **Evaluations** — the same run you could start yourself from the **New evaluation** button on that list.
-
-    <Frame caption="Every row is a record you can click into — named scenarios and evaluators, no bare IDs — and the rail keeps its own tally beside them: what the agent read under Context, what it changed under Outputs. (Progress only renders once there's a plan, as in the Step 3 shot.)">
+    <Frame caption="Every row is a real record you can click into — named scenarios and requirements, never a bare identifier — and the rail keeps its own tally beside them: what the agent read under Context, what it changed under Outputs.">
       <img src="/images/agent-tutorial-object-table.png" alt="The Trust Agent transcript with two multi-record tool receipts expanded into clickable object tables — reviewed evaluators and reviewed scenarios — each row carrying a record's name and description with a link glyph at its end and a 'Show more' row beneath. The side rail beside them shows Context, headed by the Refunds Concierge connected-agent card with counts of 6 evaluators and 1 scenario, and an Outputs section reading '8 changes' that lists five named scenarios with 'Show more (3)'. Two resolved 'You answered…' rows sit below the tables." />
     </Frame>
 
-    Click a row in the object table — or an **Outputs** row in the side rail — to open the real record and confirm the agent built exactly what you approved.
+    Read the links before you move on. This is the step where a scenario quietly attached to the wrong requirement turns into a coverage number you can't trust later. The agent flags genuine ambiguity in your requirements here too — a window that doesn't say whether its last day counts, for instance — because that reading is about to be baked into a rubric.
 
-    **You should see:** clickable receipts and object tables in the transcript, the **Progress / Context / Outputs** side rail tracking the work, and a real record fly-in opening when you click through.
+    **In the UI instead:** open **Scenarios** and use **New scenario**, or **Add recommended scenarios** for the starter library of adversarial probes. Link each one from its **Expected Output** tab, under **REQUIREMENTS**.
+
+    **You should see:** the new scenarios in the rail's **Outputs**, each requirement's **Scenarios** count moving off zero on the Requirements list, and one next-step chip pointing at evaluators.
   </Step>
 
-  <Step title="Read the Evaluation result">
-    While the Evaluation runs, the simulator holds a **fresh multi-turn conversation for every persona on every scenario** against the pinned Agent Version, then scores each one. Every conversation it plays out is saved as a real [Session](/concepts/sessions), linked back to the scenario that produced it — its **Source** reads **Scenario** — so you can open the exact transcript the judge scored.
+  <Step title="Create and attach an evaluator for each requirement">
+    A scenario with nothing grading it proves nothing, so this step is where the coverage actually closes.
 
-    When the run finishes, ask the agent about it — *"What failed?"* On a completed run the agent's failure analysis renders as an inline **Failure analysis** widget rather than a paragraph of prose:
+    > Build the evaluators and attach each to its scenarios.
 
-    - A header counting the failures, and a line naming the run: *"Grouped the failing rows in \<run name\> by root cause."*
-    - One **clickable object table per root-cause cluster**, each headed with a plain-English theme and its share of the failures ("4 of 7 failures"). Every row is a failing result you can click straight into.
-    - A **View the run** link into the full Evaluation results.
+    The agent builds judges **one per requirement**, not one broad judge per project. For each requirement that has linked scenarios but no evaluator, it writes a focused rubric from that requirement's own acceptance criteria, attaches it to that requirement's linked scenarios **in the same write**, and links it back to the requirement so health rolls up. Where the project has human-reviewed scenarios to sample, it calibrates on the same save and tells you the agreement.
 
-    After a reply, the agent often attaches up to three one-tap **next-step chips** — plain-English follow-ups like tightening a scenario or digging into a failing session. Clicking one pre-fills the composer with a ready-to-send prompt; it never sends on its own.
+    Because this is the same action repeated, the agent will often offer the **chat-wide grant** on the first card so you approve once instead of four times. Take it or leave it — it binds only to that action, in that chat, and its chip above the composer carries a **turn off** control whenever you want the per-write gate back.
 
-    You've now done a full round of the evaluation loop through conversation: the agent generated persona-and-goal Scenarios, made them gradable, ran an Evaluation that simulated a fresh conversation for each one against an Agent Version, and surfaced the result — and you approved every write along the way. For the manual path to the same place (configuring Evaluators, picking the Agent Version, reading the results), see [Run your first Evaluation](/tutorials/run-first-evaluation) and the [Evaluations](/concepts/evaluations) concept page.
+    Each receipt reads **Created an evaluator** and says what it attached to, counting the scenarios rather than listing their ids — *attaching to 3 selected scenarios*.
 
-    **You should see:** an inline **Failure analysis** widget clustering the run's failures, clickable rows into the failing results, a **View the run** link, and next-step chips offering where to go from here.
+    <Note>
+      **A rubric is grading criteria only.** Response-format instructions, verdict-shape instructions, and hardcoded answer keys are rejected by the platform while the write is still a preview, so there is nothing to approve and nothing created. The rejection quotes the offending text and names the fix, and the agent is expected to revise and re-save rather than hand you a menu.
+    </Note>
+
+    **In the UI instead:** open **Evaluators** and click **Add recommended** — the catalog offers 11 curated LLM-judge presets, five under **Quality** and six under **Safety**, with three carrying a **Tailor first** badge because they're written against a generic agent. [Build your first Evaluator](/tutorials/build-first-evaluator) walks the manual path end to end, including calibrating a judge against verdicts you recorded yourself.
+
+    **You should see:** one evaluator per requirement in the rail's **Outputs**, each requirement's **Evaluators** count off zero, and a follow-up linking the evaluators back to their requirements as evidence.
+  </Step>
+
+  <Step title="Finish the grading contract">
+    Attaching a judge is not the whole contract, and this is the step most first-timers discover the hard way: a run is refused until each scenario also carries **expected output** — the tool calls it must or must not make, and the routes it must or must not take. An attached evaluator alone does not satisfy that gate.
+
+    > Set the expected output on these scenarios.
+
+    The agent grounds assertions in what the connected agent really exposes rather than inventing tool names. Where it has a captured [Agent Profile](/concepts/agent-profile) to read, it completes the applicable actions and routes from that recorded vocabulary itself, then sets any applicable test data and end-state checks, and only then offers to run.
+
+    <Warning>
+      **This step needs the connected agent's actions to have been captured.** Expected actions are saved against the agent's captured action catalog, so on a build with nothing captured there is nothing valid to write — and the agent says so rather than guessing, naming the connection as the place to fix it. Tool names you supply by hand don't get you past it either, which is the point: an assertion on a tool the agent may not have is worse than no assertion. A **required** one fails every run; a **disallowed** one passes every run and tells you nothing.
+
+      If you meet that, capture the profile first — [Review an agent profile](/how-to/review-an-agent-profile) covers how capture works and what **Captured / Partial / Limited** coverage means — then come back and ask again.
+    </Warning>
+
+    The agent will not go around the gate, and there is no reason to want it to. Answer what it asks, get the catalog in place, and the assertions it writes are the ones the run can actually check.
+
+    [Author expected output with the Trust Agent](/how-to/author-expected-output-with-the-trust-agent) is the focused recipe — what a write replaces, what it leaves alone, and how to read the proposal panel. Two things worth carrying from it: assertions are **required** or **disallowed** only, and **expected end state** — the data contract inside a scenario's test data plan — is a different contract from expected output, never the same thing.
+
+    **In the UI instead:** open a scenario from the **Scenarios** list and use its **Expected Output** tab — **Expected actions** and **Expected routes** take a name each, with **required** or **disallowed** beside it.
+
+    **You should see:** the agent either reporting the actions and routes it completed, or a question card naming exactly what it is missing and what it can do about it.
+  </Step>
+
+  <Step title="Run the evaluation">
+    > Run the evaluation now — simulate every scenario against the connected agent and score them.
+
+    A run is a write like any other, so it stops at its own approval card. Note that a standing approval you granted earlier for creating evaluators does **not** cover it: a standing grant binds to one action, and a different action is gated afresh.
+
+    Before proposing the run the agent may ask how you want it scoped — how many conversations, whether to simulate live against the connected agent or grade sessions you already have. That arrives as a question card in the composer's slot, and the chat header switches to **Awaiting your answer**.
+
+    <Frame caption="The card has taken the composer's slot and the header reads Awaiting your answer. On step two of three, Back and Next are both live, so an earlier answer is still yours to change before anything runs.">
+      <img src="/images/agent-tutorial-clarify-card.png" alt="A multi-question flow card in place of the composer, framed 'You've already got 15 ready scenarios and 6 evaluators. Let me scope the run for Friday.' and headed 'Question 2 of 3' with a three-dot progress row. It asks how the conversations should be produced, offering two drafted choices — the first, simulating live against the connected agent, selected — plus a write-in 'Or type your own answer…' option, with Back and Next in the footer. The header reads 'Awaiting your answer', and a 'Reviewed the project' receipt and two object tables of reviewed evaluators and scenarios sit above the card." />
+    </Frame>
+
+    A question card can be single-question or a short flow of two to five, counted through as **Question 1 of 3** with **← Back** and **Next →** between them and **Submit** on the last. Both shapes take a write-in answer where the agent asks for one, and both carry **Skip**, which tells the agent to proceed with what it has rather than cancelling the turn. Your answers collapse into a resolved row afterwards that echoes every question and what you chose.
+
+    {/* ACCURACY-AUDIT-PENDING: the run itself and everything downstream of it are described at behaviour level. The authoring steps above were driven end to end, but the run could not be started on the connection available for verification — its agent build had no captured action catalog, which stops step 6. */}
+    Once it runs, the simulator holds a **fresh multi-turn conversation for every persona on every scenario** against the pinned Agent Version, then scores each one. Every conversation it plays out is saved as a real [Session](/concepts/sessions) whose **Source** reads **Scenario**, linked back to the scenario that produced it — so you can open the exact transcript the judge read. The rail's **Outputs** row reads **Running…** until the real run lands.
+
+    **In the UI instead:** open **Evaluations** and use **New evaluation** — [Run your first Evaluation](/tutorials/run-first-evaluation) walks the launcher, including the repeat selector and the fan-out preview.
+
+    **You should see:** an approval card for the run, then a run record in the rail you can click into, and the **Evaluations** count in the left nav moving off zero.
+  </Step>
+
+  <Step title="Read the result">
+    {/* ACCURACY-AUDIT-PENDING: every label in this step is taken from the shipped surface, but the reading flow was not driven against a completed run during verification — see the note on the previous step. */}
+    Open the run. Results land grouped: run detail opens on **By scenario**, one summary row per scenario carrying a rollup verdict and a passed-of-total reliability figure — `2/3` when two of three attempts passed. Expand a row for the individual attempts, labelled **Trial 1**, **Trial 2**, and so on; click one and the result fly-in opens. The **View** toggle switches to **Flat** when you'd rather sort across scenarios than within them.
+
+    Inside a result, **Final verdict** is the headline, with a score card per evaluator beneath it and the transcript beside it.
+
+    <Warning>
+      **Read the amber count next to the pass rate before you read the pass rate.** Five outcomes leave the pass-rate denominator, and they are not all the environment's fault. Four are — they read under **Guardrail blocked**, **Environment problem**, and **Access blocked**. The fifth reads amber as **Couldn't test**: an action the agent itself runs returned an error, so the behaviour under test never happened. It is excluded for the same reason as the others, but it is deliberately *not* framed as an environment problem, because that failure is in the agent's own stack.
+
+      The run list carries that amber count beside the pass rate so a green rate never renders uncaveated, and Run Detail adds a health strip headed **Couldn't test some conversations** with a **What happened in this run** dialog behind it. A run that is 100% passing over two conversations it could actually test is not a run that passed.
+    </Warning>
+
+    Three neutral labels do different jobs and are never interchangeable: **Not evaluated** means no evaluation exists, **Not graded** means something ran but produced no behavioural score, and **Not scored** belongs to the reliability lexicon above. A per-check **Needs review** is a fourth thing again — amber, recorded, and excluded from pass/fail gating.
+
+    Then ask the agent about it:
+
+    > What failed?
+
+    On a completed run the answer renders as an inline **Failure analysis** widget rather than a paragraph: a header counting the failures, one clickable table per root-cause cluster with its share of them ("4 of 7 failures"), and a **View the run** link into the full results. Every row opens the failing result.
+
+    [Evaluations](/concepts/evaluations) covers the results surface in full — the verdict states, the repeat selector, and what an excluded outcome does and doesn't mean.
+
+    **You should see:** **By scenario** rows with rollup verdicts, an amber count beside the pass rate if anything couldn't be tested, a **Final verdict** inside any result you open, and one next-step chip under the agent's reply.
   </Step>
 </Steps>
 
+## Where the coverage picture lands
+
+The reason for doing it in that order shows up on the **Requirements** list. Each requirement now carries its linked scenario and evaluator counts and a computed **Status** — **Passing**, **Failing**, **Partially covered**, **Uncovered**, or **Not yet run** — which the server derives from the evidence rather than from anything you asserted. Switch the list to **Gaps** to see what is still uncovered or only partly covered.
+
+Nothing in that rollup is a claim. It is what the run proved, which is why the requirement had to come first. [Requirements](/concepts/requirements) explains the model.
+
 ## Pick up where you left off
 
-The whole conversation is durable. The Trust Agent runs as **one app-root-scoped session** that survives navigation: open the full view, jump to **Evaluations** or **Scenarios** and back, and the same thread is intact — it's one mount, not a fresh widget per page. It has three shells — full page, docked panel, and collapsed pill — and the transcript and thread state carry across all three as you switch.
+The whole conversation is durable. The Trust Agent survives navigation — jump to **Evaluations** or **Scenarios** and back and the same thread is intact — and transcripts are persisted, so a reload gives you the real prior history rather than an empty pane. A pending approval rehydrates as still answerable, with the composer held until you decide. An unsent draft survives a reload, and a message you send while the agent is mid-reply is queued rather than lost.
 
-Transcripts are persisted, too. Navigate away or reload, then reopen the chat, and you get its **real prior history** — not an empty transcript. Smaller comforts hold up the same promise: an unsent draft in the composer survives navigation and even a full reload; a message you send while the agent is mid-reply is queued, not lost; and if a reply is cut off by a disconnect, the chat reopens with a calm "This reply was interrupted." note and a one-tap **Continue** that picks up from saved context.
+A few states are worth recognising when they show up:
 
-One thing that does **not** carry over: the mode toggle is per-chat and in-memory. Every new chat starts in **Ask**, whatever you last used.
+| What you see | What happened |
+| --- | --- |
+| **The Trust Agent hit an unexpected error and stopped. Please try again.** | The turn failed server-side. The card carries **Try again** and the model picker |
+| **The Trust Agent couldn't finish this reply. Please check your connection and try again.** | The request never reached a server verdict at all |
+| **This reply was interrupted.** with **Continue** | The reply was cut short — a dropped connection, or a turn you stopped with **Stop**. Continue picks up from saved context |
+| **Couldn't load this conversation** with **Retry** | The history read failed. The conversation is not lost |
 
-## Jump back to a beat
+A failed-turn card also carries the hint *"You can try again, or pick a different model first."* — switching models is a real recovery, not a consolation.
 
-Each beat of this flow stands on its own — scroll back to the step you need:
+Under every settled reply sits a collapsed timing line — **Answered in** a duration, followed by the biggest slice that wasn't answering — which expands into a proportion bar with per-phase totals: Thinking, Using tools, Writing the answer, Waiting for you. A turn still paused at an approval gate has not settled and shows no line at all.
 
-- **Clarify-first questions** — Ask mode leads with a question instead of guessing: single- and multi-question cards with a write-in Other.
-- **The plan on the rail** — the ordered task list on the side rail's **Progress** section, the evaluator beat inside it, and the Plan-mode detour with its **Approve & run** bar.
-- **Approve the writes** — the permission card, its **View proposal** fly-in, and the four ways to answer it.
-- **Click into the objects** — clickable receipts, object tables, record fly-ins, and the Progress / Context / Outputs side rail.
+One thing that does not persist: the mode is never remembered across chats. It is handed to a conversation's first turn from whatever the launcher read when you pressed send, and nothing restores it later — so check the toggle rather than assuming.
 
-{/* CAPTURE-PENDING: evaluate-with-trust-agent.mp4 (+ .gif fallback + poster) — the full autoplay reel rendered once via pipeline/, click-to-play, gated here at the end inside a "Watch the entire flow end-to-end (optional)" Accordion */}
-
-## Next steps
+## What to do next
 
 <CardGroup cols={2}>
-  <Card title="The Trust Agent" icon="sparkles" href="/concepts/trust-agent">
-    The full concept — the three shells, the transcript anatomy, the side rail, the modes, and the agent-vs-Agent-Version distinction in depth.
+  <Card title="Capture requirements" icon="clipboard-check" href="/how-to/capture-requirements">
+    The focused recipe for step 2 — the three capture paths, the one-card batch, and the list that computes your coverage.
   </Card>
   <Card title="Approve agent writes" icon="shield-check" href="/how-to/approve-agent-writes">
-    The focused recipe for the approval flow: every card type, rejecting with a note, standing approvals, and what approving actually executes.
+    Every card type, rejecting with a note, standing approvals and their limits, and what approving actually executes.
   </Card>
-  <Card title="Work with the Trust Agent" icon="messages-square" href="/how-to/work-with-the-trust-agent">
-    The everyday task recipe — Ask / Plan / Act modes, picking models, mentions and slash commands, and skills.
+  <Card title="Author expected output with the Trust Agent" icon="sparkles" href="/how-to/author-expected-output-with-the-trust-agent">
+    The grading contract in detail: what a write replaces, what it leaves alone, and where the agent's judgment stops.
   </Card>
-  <Card title="Simulate with Scenarios" icon="play" href="/how-to/simulate-with-scenarios">
-    The scenario loop by hand — author personas and goals, generate sessions, and run scenarios through an evaluation yourself.
+  <Card title="Build your first Evaluator" icon="ruler" href="/tutorials/build-first-evaluator">
+    The manual path to a judge — adopt from the recommended catalog, write your own rules, and calibrate them against your verdicts.
   </Card>
 </CardGroup>
 
 ## Related concepts
 
+- **[Requirements](/concepts/requirements)** — the gate the whole workflow hangs off, and how health is computed rather than asserted
 - **[Trust Agent](/concepts/trust-agent)** — the assistant you drove in this tutorial
-- **[Agent Versions](/concepts/agent-versions)** — the agent under test the Evaluation grades; not the Trust Agent
-- **[Scenarios](/concepts/scenarios)** — the flat list where the agent's generated scenarios land
+- **[Agent Versions](/concepts/agent-versions)** — the agent under test the evaluation grades; not the Trust Agent
+- **[Scenarios](/concepts/scenarios)** — the flat list the generated scenarios land in
 - **[Sessions](/concepts/sessions)** — the simulated conversations the run produced, linked back to their scenarios
-- **[Evaluators](/concepts/evaluators)** — the judge a graded run needs before it can score anything
-- **[Evaluations](/concepts/evaluations)** — the run the agent started, and the manual path to configure one
-- **[Multi-tenancy](/concepts/multi-tenancy)** — the platform's organization and project boundary
+- **[Evaluators](/concepts/evaluators)** — the judges that make a scenario gradable
+- **[Evaluations](/concepts/evaluations)** — the run, its verdict states, and the outcomes that leave the denominator
