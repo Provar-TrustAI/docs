@@ -25,7 +25,9 @@ A **scenario** is one test case worth scoring your agent on: a name, the goal a 
 - **A name and a stable id** — the id renders as `SCN-000123` everywhere, so a scenario keeps the same handle in results, links, and conversations with teammates.
 - **A user goal** — what the simulated user is trying to accomplish ("Get a refund for a duplicate charge"). The goal drives the simulation; a scenario with a goal and no persona still simulates.
 - **Personas** (optional) — reusable, project-scoped actors that role-play the user. Attach more than one and a run produces one session per persona (see [Personas](#personas)).
-- **Expected output** — the authored grading contract: expected behavior, expected actions, and expected routes (see [Expected output](#expected-output-the-grading-contract)).
+- **Expected output** — the authored grading contract: expected behavior, expected actions, and expected routes (see [Expected output](#expected-output-—-the-grading-contract)).
+- **Files the simulated user can send** (optional) — pictures the simulated customer can hand the agent mid-conversation, each with a description under **What each file shows**. The agent under test receives the real file; the simulated user never sees it, and decides from your description alone when — or whether — to send one.
+- **Test data** (optional) — a plan describing the records this test needs and what happens to them afterwards (see [Test Data](#test-data-—-the-plan-a-scenario-runs-on)).
 - **Tags** — drawn from one shared project vocabulary, so the same tag autocompletes on Scenarios and Sessions alike.
 - **Linked sessions** — the real conversations this scenario has produced, listed on the scenario itself.
 
@@ -54,10 +56,14 @@ What happens next depends on what you launched:
 | Launch | Where you end up |
 |---|---|
 | **Run only** (simulate, no grading) | Stays on the Scenarios list, live in-flight badges settling as each finishes |
-| A one-off from a fly-in | Stays put — it mints no run, and the fly-in reports the verdict |
+| A **quick evaluation** from a session fly-in | Stays put — the fly-in reports the verdict, and the graded conversation also lands on the Evaluations list |
 | **Run & evaluate** | Navigates to the new run's detail page |
 
 So "stay on the list and watch the badges" is the ungraded story. A graded run takes you to its results, because that's where the grading it just produced lives.
+
+A **quick evaluation** grades one session in place from its own fly-in, and it is visible well beyond that fly-in. It announces itself with a **Quick evaluation started** toast, reports progress as **Scoring check 2 of 3…** while the judges land, and finishes with a **Quick evaluation finished** toast carrying a **View** action. Its row on the Evaluations list wears a muted **Quick** pill and opens the conversation it graded rather than a run-detail page, because it mints no run record — which is also why that row carries no Cancel and no Delete. For the full recipe, see [Evaluate captured sessions](/how-to/evaluate-sessions).
+
+When a targeted scenario carries a test data plan or structured starting records, the launcher states what the run will write into the connected store: a line beneath **This will run** counting the records it creates and the read-backs it performs, closing with the cleanup promise **"Removes only the records each test created."** That line appears from every **Run** affordance, not just the one with its own scenario picker.
 
 Runs ride out model-capacity throttling with automatic retry, and a capacity hiccup is excluded from quality metrics — it never masquerades as a drop in agent quality.
 
@@ -65,9 +71,9 @@ Runs ride out model-capacity throttling with automatic retry, and a capacity hic
 
 Click a scenario to open a two-level fly-in over the list. The first level is the scenario itself, with workflow-ordered tabs:
 
-- **Personas & Goals** — edit who pursues the goal and what the goal is.
+- **Personas & Goals** — edit who pursues the goal and what the goal is, and attach the **Files the simulated user can send** so the simulated customer has something to hand over mid-conversation.
 - **Expected Output** — the grading contract editor (next section).
-- **Test Data** — the environment this scenario runs against (below).
+- **Test Data** — the environment this scenario runs against and the plan it runs on (below).
 - **Sessions** — every conversation this scenario has produced, with a live count in the tab label. Click a session to stack a second-level panel over the first with that session's transcript, annotations, and evaluations — you drill in without ever losing your place in the list.
 
 The panel's **More** menu carries **Run & evaluate**, **Run only**, and **Delete scenario**.
@@ -76,19 +82,29 @@ The panel's **More** menu carries **Run & evaluate**, **Run only**, and **Delete
   <img src="/images/scenario-flyin-session.png" alt="The Scenarios list with a session panel open over it: the header shows a back chip reading the parent scenario's goal, the session id RUN-000013 and a Fail verdict, above Transcript, Annotations, Evaluations and Details tabs, with the transcript showing a user turn, Routed to and Tool used chips, and the agent's reply. The SCN-000002 row stays highlighted in the list behind." />
 </Frame>
 
-### Test Data is about the environment first
+### Test Data — the plan a scenario runs on
 
-It's natural to read a "Test Data" tab as *"list the records this run starts from."* That's not what it leads with. The tab is **lifecycle-first**: what it shows by default is the environment automatically selected for the agent you're testing, and the promise that Trust AI acquires it, runs against it, resets it, and releases it for you. In the common case there is nothing here to fill in.
+The **Test Data** tab answers a different question from Expected Output. Expected Output is the *agent behavior* contract; Test Data is about the records a test needs and what becomes of them afterwards.
 
-Two things sit past that default. A scenario can replace the environment's connector-owned lifecycle with an explicit adapter payload. And an **Advanced** disclosure holds the record-level controls — structured starting records, expected-state records, file import, and concurrency — for the cases that need them.
+It opens with the environment, because that part is settled for you: a **Default environment** strip names the environment every run of this scenario holds, pills it **Always used**, and states the promise — Trust AI acquires, runs, resets, and releases it every time. Where the project has no environment connected yet, that pill reads **Setup required** instead and nothing on the tab can run.
+
+Below the environment sits the scenario's **plan**: one reviewable description of the test-data work, rendered as five expandable step cards whose titles are full sentences — **"Create what this test needs"**, **"Run the conversation"**, **"Read back what the agent created"**, **"Check what should happen"**, and **"Clean up everything this test created"**. A scenario with no plan shows a **No test data yet** hero instead, offering **Set up with AI** — where the connection can be read for a schema — and **Add manually**. Those two, and **Edit plan** once a plan exists, all open the same docked drawer, whose tabs are **AI**, **Form**, and **JSON**. A drafted proposal is always yours to read before it replaces what is stored.
+
+Two things sit beside the plan rather than inside it. **How this test runs** is its own accordion and describes the run, not the records: whether this scenario **Runs alongside other tests (recommended)** or **Runs alone**. **Advanced test data** keeps the record-level controls — structured starting records, expected-state records, and file import — for the cases that need them.
+
+Cleanup is not optional and no surface offers to switch it off. The plan's clean-up card states its own scope: **"Removes the records this test created and tagged for the run — seeded records included."**
 
 The tab only offers what your connector actually supports, so you won't find a control here that can't do anything.
+
+<Card title="Test data" icon="database" href="/concepts/test-data">
+  The plan model in full — the five steps, the stores a plan reads and writes, the cleanup promise, and the per-run report of what actually happened.
+</Card>
 
 ## Expected output — the grading contract
 
 The keystone of a scenario is its **Expected Output** tab: the place you author what a passing conversation looks like. The editor has three sections:
 
-- **Expected behavior** — LLM-judge [evaluator](/concepts/evaluators) cards that grade qualities like tone, scope, or safety. The picker surfaces the evaluators best suited to this scenario first, under **Recommended for this scenario**, ahead of the full catalog.
+- **Expected behavior** — LLM-judge [evaluator](/concepts/evaluators) cards that grade qualities like tone, scope, or safety. The picker surfaces the evaluators best suited to this scenario first, under **Recommended for this scenario**, ahead of the full catalog. Attach a **Groundedness judge** and a **Reference material** subsection appears nested under this one: the source documents a groundedness check reads against are attached **per scenario**, never to the judge, and the scenario can't run until at least one is there.
 - **Expected actions** — the tools the agent must (or must not) use, with per-action parameter checks. Add one with **Add action**.
 - **Expected routes** — where the conversation should be routed. Add one with **Add route**.
 
@@ -106,12 +122,20 @@ This is why the recommended order is to define the scenario cheaply first and au
 
 Running a scenario simulates one session per attached persona — each persona genuinely pursues the goal against the agent under test. There are two run modes, both available from the list's **Run** split-button, the fly-in's **More** menu, and the empty Sessions tab:
 
-- **Run & evaluate** — simulate and grade. Creates an evaluation whose results land in [Evaluations](/concepts/evaluations), scored per persona with a dual headline: how often the agent passed, and how often the automated judges agreed with a human verdict.
+- **Run & evaluate** — simulate and grade. Creates an evaluation whose results land in [Evaluations](/concepts/evaluations), scored per persona. The finished run leads with two headline numbers — **Pass rate**, which grades the agent, and **Evaluator accuracy**, which grades the judges and appears only once some graded conversation carries a human verdict to measure them against. Below them, the results body opens with a **Conversations passed** stat captioned with the conversation set it was measured over.
 - **Run only** — simulate without grading. You get the sessions to read, and no run appears in the Evaluations list. This is the cheap way to produce the raw material for expected output.
 
 The split-button's primary **Run** action is the default graded run; the chevron offers the explicit choice.
 
 Every conversation a run produces is a **real Session**, linked back to its scenario. It appears on the scenario's Sessions tab and on the [Sessions](/concepts/sessions) surface, carrying a **Source** chip that reads **Scenario** and a **Simulated from** provenance card pointing back at the scenario that produced it. Nothing is throwaway: you can read, annotate, and re-grade these sessions like any other.
+
+### How a simulated conversation ends
+
+A simulated conversation closes by saying why it stopped. The line begins **"This conversation ended because "** and finishes with one of: *the customer got what they needed*, *the agent could not help with it*, *the customer gave up*, *the agent ended or transferred it*, or *it reached the length limit before finishing*. Where the simulated customer explained the decision itself, its own words are carried through verbatim.
+
+Read it as evidence, not as a verdict — two transcripts of the same length can stop for opposite reasons, and this is the line that tells them apart. A conversation with no recorded ending renders nothing at all, so an absent line means the record doesn't say, not that the outcome is unknown.
+
+Grading has one more state worth knowing here. When an action the agent itself runs returns an error, the conversation is not scored a pass or a fail: it reads amber as **Couldn't test** and leaves the pass-rate denominator, summarized as **"Not scored because an action the agent runs returned an error."** A run that hit them shows an amber count beside its pass rate, so a green rate never renders uncaveated.
 
 ### The define → run → learn loop
 
@@ -138,7 +162,7 @@ For the step-by-step recipe, see [Simulate with scenarios](/how-to/simulate-with
 
 - **New scenario** — the header button opens a short form: name, goal, personas. Expected output is deliberately deferred.
 - **Save as a scenario** from the [Playground](/concepts/playground) — an exploratory conversation you liked becomes a scenario with that conversation attached as its first linked session.
-- **Add recommended scenarios** — a starter catalog of ten safety scenarios mapped to the OWASP Agentic AI Top 10, adoptable in one move. Each comes paired with the recommended evaluators that score it well, surfaced as guidance in the Expected Output picker.
+- **Add recommended scenarios** — a starter catalog of ten adversarial probes, one per OWASP Agentic Top 10 failure mode. Adoption arrives graded: the safety checks that score each probe are created once and attached to the scenario as it lands, so a run grades it without you picking judges. The confirm step offers **Add without tailoring** or **Add & tailor to your agent**, which hands the batch to the [Trust Agent](/concepts/trust-agent) to customize each check against your connected agent's real tools and rules in the background. A catalog probe carries a name, a goal, its category, and that prose guidance — never expected actions, test data, or reference material, so it is still yours to ground in your own data. See [Recommended scenarios](/concepts/trust-library) and [Adopt the recommended security scenarios](/how-to/adopt-recommended-security-scenarios).
 - **Ask the [Trust Agent](/concepts/trust-agent)** — describe the behavior you want covered and let the assistant draft scenarios for you; it pauses for your approval before it writes anything.
 
 Note that **Source** on a session is a different idea from where a *scenario* came from: a session's Source chip is exactly one of **Scenario**, **Playground**, or **External**, and records how that conversation entered the system.
@@ -174,8 +198,10 @@ Scenario reads and edits go through the `/v1/scenarios` family — list, get, up
 ## Related concepts
 
 - **[Sessions](/concepts/sessions)** — the real conversations scenarios produce and link back to
+- **[Recommended scenarios](/concepts/trust-library)** — the ten OWASP-mapped probes behind **Add recommended scenarios**, and what tailoring does to them
+- **[Test data](/concepts/test-data)** — the plan model behind the **Test Data** tab, and the per-run report of what it did
 - **[Evaluators](/concepts/evaluators)** — the judges the Expected behavior section attaches
-- **[Evaluations](/concepts/evaluations)** — the graded runs, with per-persona results and the dual headline
+- **[Evaluations](/concepts/evaluations)** — the graded runs, their per-persona results, the headline metrics, and the run-health surfaces around them
 - **[Playground](/concepts/playground)** — the exploratory surface whose conversations you can save as scenarios
 - **[Annotations](/concepts/annotations)** — the human verdicts that judge accuracy is measured against
 - **[The evaluation loop](/concepts/evaluation-loop)** — the workflow scenario authoring is a step in
