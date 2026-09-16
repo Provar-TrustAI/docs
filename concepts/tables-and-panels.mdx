@@ -22,11 +22,17 @@ To resize, drag the handle at a header's right edge. To reorder, use the column 
 
 ### The column menu
 
-One gear button in the toolbar — its label reads **Columns** to a screen reader — opens the column menu: a list with one row per column, where each row is both a **visibility checkbox** and a **drag handle**. Check to show, uncheck to hide, drag to reorder — one popover, no separate settings. The same popover opens from the **Add column** affordance at the right edge of the header row. Its contents are grouped: **Hidden columns** lists the system columns currently hidden, and **Annotation columns** holds your human-graded ones alongside **New annotation column**.
+One gear button in the toolbar — its label reads **Columns** to a screen reader — opens the column menu: a list with one row per column, where each row is both a **visibility checkbox** and a **drag handle**. Check to show, uncheck to hide, drag to reorder — one popover, no separate settings. It lists *every* column, hidden ones included, under the head **Columns · drag to reorder**; on a surface that has human-graded columns, those are grouped apart from the rest.
 
-A surface can also mount its own control *above* the column list in the same popover. Run results do: a **View** toggle switching the results table between **By scenario** and **Flat** sits at the top of the gear popover rather than in the toolbar.
+**Add column**, at the right edge of the header row, is a second popover and a narrower one. It lists only the columns currently hidden — under **Hidden columns**, and **Annotation columns** for your human-graded ones — alongside a **New annotation column** row. It carries no drag handles and no checkboxes: it is the shortcut for putting one column back, not the place you arrange them. Use the gear for the arrangement.
+
+A surface can also mount its own control *above* the column list in the gear popover. Run results do: a **View** toggle switching the results table between **By scenario** and **Flat** sits at the top of that popover rather than in the toolbar.
 
 The arrangement you build here isn't throwaway — it's saved per view (see [Saved views persist your layout](#saved-views-persist-your-layout)).
+
+### Choosing filter values
+
+Where a filter offers a list of values to tick — tags, routes, personas — the whole row is the target, not the checkbox at its left edge. Click anywhere on the row and that value toggles once; click it again and it toggles back. The checkbox is there to show you the state rather than to be aimed at, which matters most on a long tag list where the label is far wider than the glyph.
 
 ### Selecting rows
 
@@ -46,7 +52,7 @@ List-shaped values — personas, tags, **Expected routes**, evaluators — rende
 
 The table's layout is not global state — it belongs to the active [saved view](/concepts/saved-views). Each view remembers its own filters, sort, and column layout: which columns are visible, their left-to-right order, and their widths. Switch views and the arrangement switches with them; **Set as default** makes a view the way a surface opens for you.
 
-The toolbar's **Save view** button is always visible — disabled with an explanatory tooltip when there's nothing to save — and its adjacent menu offers **Save as new view**, **Reset view**, and **Manage views**. Built-in views like **All sessions** or **Missing expected output** can never be overwritten: saving while one is active falls through to creating a new view, so the shared starting points stay stable for everyone.
+The toolbar's **Save view** button is always visible — disabled with an explanatory tooltip when there's nothing to save — and its adjacent menu offers exactly two items: **Save as new view** and **Reset view**. Built-in views like **All sessions** or **Missing expected output** can never be overwritten: saving while one is active falls through to creating a new view, so the shared starting points stay stable for everyone.
 
 ## The fly-in panel
 
@@ -64,6 +70,8 @@ A row click does one of three things, and which one is a property of the surface
 
 The fly-in is the common case and the rest of this section describes it. The two others are worth knowing because they change what "click a row" costs you: navigating away means coming back, and expanding means you never left.
 
+One kind of row on the Evaluations list doesn't navigate to a run page, because it has none. A row wearing a muted **Quick** pill is a quick evaluation: it graded a single conversation in place and minted no run record, so clicking it takes you to that conversation on [Sessions](/concepts/sessions) with its fly-in already open. The pill is the tell — if a row carries it, expect the transcript rather than a run.
+
 ### Expanding rows: grouped run results
 
 A run's results open **By scenario** by default, and that view has a layer the rest of the app doesn't. Its top-level rows are not results — they are one **scenario summary** per scenario, carrying a rollup verdict and a passed-of-total count, with the individual **Trial** rows nested beneath. Clicking a summary row **expands it in place** to reveal those Trial rows; it does not fly anything in, because there is no single record behind it to show.
@@ -74,14 +82,14 @@ Click a **Trial** row and the fly-in behaves normally. Switch the **View** toggl
   Grouped run results are the only place a row expands. If a row expands instead of opening a panel, it's a scenario summary, not a record.
 </Note>
 
-The two-level fly-in on Scenarios, one level at a time:
+The two-level fly-in on Scenarios, one level at a time. The scenario panel's tabs are **Personas & Goals**, **Expected Output**, **Test Data** and **Sessions**; the session panel that stacks over it carries **Transcript**, **Annotations**, **Evaluations**, **Test Data** and **Details**. Both screenshots below predate the two **Test Data** tabs, so each strip in them is one tab short of what you will see on screen.
 
-<Frame caption="Level one — the scenario panel, open on its Sessions tab. Its footer offers J / K and Esc only: this is the one fly-in without a fullscreen mode.">
+<Frame caption="Level one — the scenario panel, open on its Sessions tab. Its footer offers J / K and Esc only: this is the one fly-in without a fullscreen mode. Captured before the Test Data tab joined the strip between Expected Output and Sessions.">
   <img src="/images/tables-panels-scenario-panel.png" alt="The Scenarios list with the scenario fly-in open on SCN-000010, Refund status after return, showing 3 personas, 6 sessions and 2 evaluators, with the Sessions tab listing six linked sessions by readable id." />
 </Frame>
 
-<Frame caption="Level two — clicking a linked session stacks the session panel over the scenario panel. Both are the same width against the same edge, so the top one covers the one beneath: the ‹ chip naming the scenario is how you tell you are two levels deep, and Esc takes you back to it.">
-  <img src="/images/tables-panels-stacked-fly-in.png" alt="The nested session panel stacked over the scenario panel, its header carrying a back chip that names the parent scenario, the id RUN-000019, a red Fail verdict pill, the Transcript, Annotations, Evaluations and Details tabs, and a footer that now also offers F for fullscreen." />
+<Frame caption="Level two — clicking a linked session stacks the session panel over the scenario panel. Both are the same width against the same edge, so the top one covers the one beneath: the ‹ chip naming the scenario is how you tell you are two levels deep, and Esc takes you back to it. Captured before the Test Data tab joined this strip between Evaluations and Details.">
+  <img src="/images/tables-panels-stacked-fly-in.png" alt="The nested session panel stacked over the scenario panel, its header carrying a back chip that names the parent scenario, the id RUN-000019, a red Fail verdict pill, a four-tab strip reading Transcript, Annotations, Evaluations and Details, and a footer that also offers F for fullscreen." />
 </Frame>
 
 ### Keyboard contract
@@ -112,7 +120,7 @@ Three small primitives repeat across every surface, and they always mean the sam
 
 ### Verdict pills
 
-A verdict pill is never blank. It has a pass leg, a fail leg, and a neutral leg — and the neutral leg carries **two different labels**, because "nothing ran" and "something ran but produced no grade" are different facts:
+A verdict pill is never blank. It has a pass leg, a fail leg, a neutral leg and an amber one — and the neutral leg carries **two different labels**, because "nothing ran" and "something ran but produced no grade" are different facts:
 
 | State | What it means |
 |---|---|
@@ -120,12 +128,15 @@ A verdict pill is never blank. It has a pass leg, a fail leg, and a neutral leg 
 | **Fail** (red) | At least one failed — result cells say how many, e.g. **Failed 1 of 3**. |
 | **Not evaluated** (neutral) | Zero automated evaluations ran. A deliberate neutral badge, not an empty cell. |
 | **Not graded** (neutral) | An evaluation *did* run, but it produced no behavioural score — a lifecycle-only result, or one that hit an environment problem. |
+| **Couldn't test** (amber) | An action the agent itself runs returned an error, so there was nothing fair to grade. Run-results cells only. |
 
 The two neutral labels are not interchangeable, and neither is ever a fabricated **Pass** or a red **Fail**. If you see **Not graded**, there is a result to open; **Not evaluated** means there is nothing behind it yet.
 
+**Couldn't test** is amber rather than neutral grey on purpose. Like the neutral states it leaves the pass-rate denominator, but it is not an environment excuse: the failure came from the agent under test, so the calm grey of the neutral states would be reading the evidence wrong. Treat it as a conversation to go and open.
+
 The pill reflects automated evaluations only. A human **Verdict** [annotation](/concepts/annotations) is a separate signal — it grades the judges and never changes the pill. While a run is still scoring, the pill shows a **Scoring…** spinner.
 
-The pill *chrome* is not universal, though the vocabulary is. A run-results table paints its **Final verdict** cell as a flat chip — a coloured dot and coloured text, no fill or border — so that a dense matrix of rows doesn't read as a wall of badges. The soft-filled pill is reserved for panel headers and single-record readouts. Same four states, same words, lighter paint.
+The pill *chrome* is not universal, though the vocabulary is. A run-results table paints its **Final verdict** cell as a flat chip — a coloured dot and coloured text, no fill or border — so that a dense matrix of rows doesn't read as a wall of badges. The soft-filled pill is reserved for panel headers and single-record readouts. Same words, lighter paint.
 
 ### Source chips
 
