@@ -20,8 +20,11 @@ eventually gets skipped or done inconsistently — so the policy lives in
    service-internal + TDM preview; it stays unpublished.)
 2. **Decide the flag-gated excludes.** Check the tag's backend gates (`services/api/src/main.py`,
    `core/config.py`): any route family mounted only behind a gate that defaults OFF in production
-   is excluded via `--extra-exclude` (v2026.06.30.1: `^/v1/scenarios/\{[^}]+\}/test-data`).
-   Preview features are documented as preview in prose, not surfaced as GA endpoints.
+   is excluded via `--extra-exclude` (v2026.06.30.1: `^/v1/scenarios/\{[^}]+\}/test-data`;
+   v2026.09.09.2: autopilot, project snapshots, the OTLP receiver and the AgentCore pull-sync
+   spike). Preview features are documented as preview in prose, not surfaced as GA endpoints.
+   Verify each gate at the tag yourself — a default in `core/config.py` is evidence of a default,
+   nothing more, and a withdrawal of a path published today needs sign-off and a line in the PR.
 3. **Run it** from the docs repo root, archiving the outgoing pin beside the existing archives:
    ```bash
    python3 docs-plan/doc-kit/openapi-sanitize.py \
@@ -31,7 +34,8 @@ eventually gets skipped or done inconsistently — so the policy lives in
      --extra-exclude '<flag-gated-path-regex>'
    ```
 4. **Read the report, then gate:**
-   - The script hard-fails if `/paddington/` or `/v1/internal` survive anywhere in the output.
+   - The script hard-fails if `/paddington/` or `/v1/internal` survive anywhere in the output, or
+     if the codename survives outside a wire key or an enum literal.
    - Eyeball the Added/Removed path lists against the release notes — a removed path should have a
      "retired/deleted" story (e.g. `/v1/projects/{id}/members` → Access Center grants); an added
      family should match a shipped track. Surprises are findings, not noise.
@@ -43,9 +47,22 @@ eventually gets skipped or done inconsistently — so the policy lives in
 
 ## Policy notes (keep in sync with `AGENTS.md`)
 
-- **Wire-format keys are never renamed.** `emit_paddington_sessions` is the field's real name;
-  renaming it in docs would misdocument the API. Humanized `title`s are the reader-facing layer.
-  Only free-text descriptions get internal-route references reworded.
+- **Wire-format keys and enum values are never renamed.** `emit_paddington_sessions` is the
+  field's real name and `authored_via: paddington` is a value the API actually accepts; renaming
+  either would misdocument the API. They are the only places the codename may survive a run.
+- **Free text is sanitized; wire truth is not.** Rewriting is confined to `description`, `summary`
+  and `title` values — never keys, enum values, examples or `$ref`s. Inside those three:
+  - an internal route reference becomes "the corresponding in-app endpoint";
+  - "Paddington" becomes **the Trust Agent** (a `title` is a label, so it takes no article), and a
+    `PADDINGTON_*` env or config name becomes "the configured setting";
+  - citations of internal docs and source files (`AGENTS.md`, `docs/…`, `*.py`, `*.ts`,
+    `services/…`) and machine-local paths are dropped, or reworded to plain prose where the
+    sentence still needs a subject.
+  A `title` is reader-visible, so it is sanitized like any other prose: `AGENTS.md` calls the
+  shipped "Paddington Message" humanisation a product defect, and the pin must not reproduce it.
+- **When the codename gate fires, read the pointer it prints.** A new leak is either an app-side
+  docstring to fix upstream or a sanitization rule to extend — never a path to `--extra-exclude`
+  out of the reference.
 - `/v1/ready` and non-`/v1/` roots stay unpublished (matches every prior pin).
 - Orphaned-component pruning is safety, not cosmetics: internal-only schemas frequently carry
   internal vocabulary in their descriptions.

@@ -17,12 +17,120 @@ Policy (keep in sync with AGENTS.md content boundaries):
   - Drop flag-gated preview paths passed via --extra-exclude (e.g. TDM test-data routes while the
     backend gate defaults off in production).
   - Prune components no longer transitively referenced from the kept paths.
-  - Reword description strings that reference internal routes; NEVER rename wire-format keys or
-    field names (renaming them would misdocument the API — emit_paddington_sessions stays, with
-    its humanized title).
+  - Sanitize free text -- "description", "summary" and "title" values only, never keys, enum
+    values, examples or $refs. Internal route references, the "Paddington" codename, citations of
+    internal docs and source files, and machine-local paths are removed or reworded to plain
+    prose. NEVER rename wire-format keys or enum values: renaming them would misdocument the API
+    (emit_paddington_sessions and authored_via: paddington are the field's and the value's real
+    names and stay).
   - Stamp info.version; print a diff report (added/removed paths vs the current pin).
+  - Hard gate: refuse to write if /paddington/ or /v1/internal survive anywhere, or if the
+    codename survives outside a wire key or an enum literal.
 """
 import argparse, json, re, sys
+
+# --- free-text sanitization ------------------------------------------------
+# Applied to these keys only. Keys, enum values, examples and $refs are wire truth.
+FREE_TEXT_KEYS = ("description", "summary", "title")
+
+_ROUTE = re.compile(r"(:class:`)?(POST |GET )?/paddington/[^\s`]*`?")
+
+_DOC = r"(?:AGENTS|CONTRIBUTING)\.md"
+_SRC = r"(?:[\w.-]+/)*[\w.-]+\.(?:py|tsx?|jsx?|md|ya?ml|json)"
+# A citation: an internal doc or a source path, optionally backtick-wrapped, optionally with a
+# line range, a quoted section name, or a trailing ``symbol``.
+_CITE = (r"`{0,2}(?:" + _DOC + r"|" + _SRC + r")(?::\d+(?:-\d+)?)?`{0,2}"
+         r"(?:\s*(?:§|section)?\s*\"[^\"]{1,80}\")?(?:\s*``[^`]{1,60}``)?")
+_LED_CITE = re.compile(r",?\s*(?:[-–—]+\s*)?\b(?:see|per|at|in|e\.g\.)\s+" + _CITE, re.I)
+_DASH_CITE = re.compile(r"\s*[-–—]+\s*" + _CITE)
+_PAREN_CITE = re.compile(r"\s*\(\s*(?:(?:see|per|e\.g\.)\s+)?" + _CITE + r"\s*\)", re.I)
+_PAREN_CITE_PROSE = re.compile(r"\(\s*" + _CITE + r"\s*:\s*")
+_BARE_DOC = re.compile(r"`{0,2}" + _DOC + r"`{0,2}(?:\s*(?:§|section)?\s*\"[^\"]{1,80}\")?")
+_BARE_DESIGN = re.compile(r"`{0,2}docs/" + r"[\w./-]+(?::\d+(?:-\d+)?)?`{0,2}")
+_BARE_SRC = re.compile(r"`{0,2}" + _SRC + r"(?::\d+(?:-\d+)?)?`{0,2}")
+_LOCAL_PATH = re.compile(r"\s*`{0,2}(?:/Users|/home|/private/tmp|/var/folders|[A-Z]:\\\\)"
+                         r"[\w./\\-]*`{0,2}")
+
+# The codename. Reader-visible prose says "the Trust Agent". A preceding determiner keeps its own
+# article ("every Paddington turn" -> "every Trust Agent turn"), an attributive use after a
+# preposition takes none ("across Paddington turns" -> "across Trust Agent turns"), and a label
+# ("title") never takes one.
+_CODENAME_PAREN = re.compile(r"\s*\((?:[^()]{0,120})paddington(?:[^()]{0,120})\)", re.I)
+# An env/config identifier that carries the codename is internal deployment vocabulary, not a
+# wire key (those are lower case and stay verbatim -- anything else trips the hard gate below).
+_CODENAME_ENV = re.compile(r"`{0,2}\b[A-Z0-9_]*PADDINGTON[A-Z0-9_]*\b`{0,2}")
+_PREP = r"across|for|per|during|through|from|by|with|of|in|on|between|over"
+_CODENAME = re.compile(rf"\b(?:(?P<prep>{_PREP})\s+)?"
+                       r"(?:(?P<det>the|a|an|its|our|every|each|any|one|this|that)\s+)?"
+                       r"paddington(?P<poss>'s)?\b(?P<noun>(?=\s+[a-z]))?", re.I)
+
+
+def _codename_sub(m, article):
+    prep, det, poss = m.group("prep") or "", m.group("det") or "", m.group("poss") or ""
+    attributive = m.group("noun") is not None and not poss
+    lead = f"{prep} " if prep else ""
+    if det:
+        lead += f"{det} "
+    elif not (prep and attributive):
+        lead += article
+    return f"{lead}Trust Agent{poss}"
+
+
+def clean_text(s, key):
+    """Reword one free-text string. Returns the cleaned string."""
+    out = s
+    if "/paddington/" in out:
+        out = _ROUTE.sub("the corresponding in-app endpoint", out)
+    out = _CODENAME_PAREN.sub("", out)
+    out = _CODENAME_ENV.sub("the configured setting", out)
+    # internal doc + source-file citations, then anything left of them, then machine-local paths
+    out = _PAREN_CITE.sub("", out)
+    out = _LED_CITE.sub("", out)
+    out = _PAREN_CITE_PROSE.sub("(", out)
+    out = _DASH_CITE.sub("", out)
+    out = _BARE_DOC.sub("the house style", out)
+    out = _BARE_DESIGN.sub("the design notes", out)
+    out = _BARE_SRC.sub("the service code", out)
+    out = _LOCAL_PATH.sub("", out)
+    out = _CODENAME.sub(lambda m: _codename_sub(m, "" if key == "title" else "the "), out)
+    # tidy what the removals left behind (spaces/tabs only -- never reflow a description)
+    out = re.sub(r"[ \t]*\(\s*\)", "", out)
+    out = re.sub(r"\([ \t]+", "(", out)
+    out = re.sub(r"[ \t]*,[ \t]*\)", ")", out)
+    return out
+
+
+def clean(obj, key=None):
+    """Walk the spec, rewording FREE_TEXT_KEYS values only. Returns the rewrite count."""
+    n = 0
+    if isinstance(obj, dict):
+        for k, v in obj.items():
+            if isinstance(v, str) and k in FREE_TEXT_KEYS:
+                cleaned = clean_text(v, k)
+                if cleaned != v:
+                    obj[k] = cleaned
+                    n += 1
+            else:
+                n += clean(v, k)
+    elif isinstance(obj, list):
+        for v in obj:
+            n += clean(v, key)
+    return n
+
+
+def codename_leaks(node, ptr="", in_enum=False):
+    """Every surviving 'paddington' that is NOT a key or an enum/const literal."""
+    out = []
+    if isinstance(node, dict):
+        for k, v in node.items():
+            out += codename_leaks(v, f"{ptr}/{k}", in_enum=k in ("enum", "const"))
+    elif isinstance(node, list):
+        for i, v in enumerate(node):
+            out += codename_leaks(v, f"{ptr}/{i}", in_enum)
+    elif isinstance(node, str) and not in_enum and "paddington" in node.lower():
+        out.append((ptr, node[:120].replace("\n", " ")))
+    return out
+
 
 def refs_in(obj, acc):
     if isinstance(obj, dict):
@@ -80,21 +188,6 @@ def main():
                               if f"#/components/{section}/{k}" in live}
             pruned += before - len(comps[section])
 
-    # reword internal-route references in human-readable strings only (never keys)
-    def clean(obj):
-        n = 0
-        if isinstance(obj, dict):
-            for k, v in obj.items():
-                if isinstance(v, str) and "/paddington/" in v:
-                    obj[k] = re.sub(r"(:class:`)?(POST |GET )?/paddington/[^\s`]*`?",
-                                    "the corresponding in-app endpoint", v)
-                    n += 1
-                else:
-                    n += clean(v)
-        elif isinstance(obj, list):
-            for v in obj:
-                n += clean(v)
-        return n
     reworded = clean(spec)
 
     spec.setdefault("info", {})["version"] = args.version
@@ -104,6 +197,12 @@ def main():
     leaks = [w for w in ["/paddington/", "/v1/internal"] if w in out]
     if leaks:
         sys.exit(f"FATAL: sanitized spec still contains {leaks} — inspect before publishing")
+    survivors = codename_leaks(spec)
+    if survivors:
+        for ptr, text in survivors:
+            print(f"  LEAK {ptr}\n       {text}", file=sys.stderr)
+        sys.exit(f"FATAL: the codename survives in {len(survivors)} free-text value(s) — "
+                 "it is only allowed as a wire key or an enum literal")
 
     try:
         cur = json.load(open(args.target))
