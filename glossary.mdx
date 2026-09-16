@@ -77,7 +77,7 @@ The in-app assistant that does evaluation work alongside you. Everything in this
     The three modes on the composer's toggle. **Ask** clarifies real ambiguity first, then asks before each write. **Plan** researches and proposes a task list to confirm — it performs no writes at all. **Act** plans and executes end to end, and still does **not** skip approvals: every mutating write stops for you unless a standing approval covers it. Two other things share the word — MCP [act mode](#integrations), which is a property of a connected client's token, and the Playground's separate **Chat / Simulate** toggle.
   </Card>
   <Card title="Model" icon="cpu" href="/concepts/trust-agent">
-    The language model a chat turn runs on, picked on the new-chat launcher or in the composer and remembered from the last turn that ran. You pick from the models your workspace offers — a deployment decision, not a fixed list.
+    The language model a chat turn runs on, picked on the new-chat launcher or in the composer and remembered from the last turn that ran. You pick from the Claude models your workspace offers — a deployment decision, not a fixed list.
   </Card>
   <Card title="Thinking depth" icon="brain" href="/concepts/trust-agent">
     How hard the Trust Agent works a problem before answering, set per message on the composer's **Thinking** chip: **Standard**, **Brief**, **Balanced** (the default), or **Thorough**. Only the depths the chosen model declares are offered, the chip hides for a model with one, and each model's depths are its own scale rather than a ranking across vendors.
@@ -98,7 +98,7 @@ The in-app assistant that does evaluation work alongside you. Everything in this
     A human-in-the-loop decision the agent surfaces as a card that replaces the composer and **halts the run** until you answer. **Permission cards** gate writes; **single-** and **multi-question cards** gather clarification. One batch of changes is approved at a single, all-or-nothing card, and the resolved decision is recorded in the transcript as an audit trail.
   </Card>
   <Card title="Standing approval" icon="shield-check" href="/how-to/approve-agent-writes">
-    The durable, chat-wide version of a write approval, granted from a card's for-this-chat option. From then on the same **kind** of write commits with no card at all, and a chip in the composer shows the grant while it is live — its **turn off** control takes it back. Four things it can never cover: deleting items, saving an agent profile, bulk edits or deletions to requirements you already filed, and starting an unattended full run — a capability your workspace may not have.
+    The durable, chat-wide version of a write approval, granted from a card's for-this-chat option. From then on the same **kind** of write commits with no card at all, and a chip in the composer shows the grant while it is live — its **turn off** control takes it back. Four things it can never cover: deleting items, saving an agent profile, bulk edits or deletions to requirements you already filed, and starting an [Automatic Full Run](/how-to/run-an-automatic-full-run).
   </Card>
   <Card title="Write preview" icon="file-diff" href="/concepts/trust-agent">
     The rich preview on a permission card that shows a proposed write before you approve it — the **diff**, the **dependencies**, and the **proposed end state** — not a bare ID you'd have to trust blindly. Pairs with the [Approve an agent write](/how-to/approve-agent-writes) guide.
@@ -108,6 +108,9 @@ The in-app assistant that does evaluation work alongside you. Everything in this
   </Card>
   <Card title="Task" icon="list-checks" href="/concepts/trust-agent">
     A unit of work the Trust Agent plans and executes by composing Skills — how the assistant gets things done without you leaving the product. Each conversation is backed by a task, and recent chats live on the project's canonical task list.
+  </Card>
+  <Card title="Automatic Full Run" icon="sparkles" href="/how-to/run-an-automatic-full-run">
+    One unattended pass from a requirements document to a scored evaluation: requirements filed, scenarios written to cover them, checks built and attached, then every conversation run against your connected agent and graded. Started with the **/autorun** command or the **Evaluate agent** pill, approved once — and never on a standing approval, because it spends real credits with nobody watching. It runs on the server, so it survives closing the tab.
   </Card>
 </CardGroup>
 

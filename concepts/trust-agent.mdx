@@ -59,13 +59,13 @@ The agent thinks and answers in the open. Reasoning, text, and tool-call argumen
     Long messages keep the transcript readable: a long message *you* send collapses behind a **Show more** / **Show less** toggle, which appears only when the content actually overflows. The agent's replies stay fully expanded — the reply is the thing you came to read.
 
     <Frame caption="One landed turn, top to bottom. Notice that the tool-call card names the records the agent read — the reply below it is a summary of those records, not a substitute for them.">
-      <img src="/images/trust-agent-transcript.png" alt="The Trust Agent full view. The user's question sits at the top of the transcript, followed by a collapsed 'Thought for 1s' reasoning rail, a 'Reviewed evaluators' tool-call card listing the Tone and Completeness evaluators with their descriptions, and a markdown bullet list summarising what each one checks. A collapsed 'Answered in 8s · 6s thinking' line closes the reply; the composer at the bottom carries the plus attach chip, the Ask mode toggle, the Claude Opus 4.8 model chip and the Balanced thinking chip; and the side rail's Context section leads with the Refunds Concierge connected-agent card." />
+      <img src="/images/trust-agent-transcript.png" alt="The Trust Agent full view. The user's question sits at the top of the transcript, followed by a collapsed 'Thought for 1s' reasoning rail, a 'Reviewed evaluators' tool-call card listing the Tone and Completeness evaluators with their descriptions, and a markdown bullet list summarising what each one checks. A collapsed 'Answered in 8s · 6s thinking' line closes the reply; the composer at the bottom carries the plus attach chip, the Ask mode toggle, the model chip and the Balanced thinking chip; and the side rail's Context section leads with the Refunds Concierge connected-agent card." />
     </Frame>
   </Tab>
   <Tab title="Reasoning and model calls">
     The model's thinking streams into a collapsible **reasoning rail**. While the agent is working you see a live **Thinking… *Ns*** timer filling the wait; when the reasoning resolves it collapses to **Thought for *Xs***, expandable if you want to read what the agent considered. Reasoning is persisted with the chat, so a reopened conversation rebuilds its Thinking rails rather than losing them.
 
-    The trace goes one level deeper than tools: each underlying model request appears as a **Model call** step with a plain-language summary — a friendly model name and the token counts, like *Claude Opus 4.8 · 1180 in / 142 out* — and the raw request and response tucked behind an opt-in **Input**/**Output** disclosure. A raw model identifier or a JSON dump never reaches the surface.
+    The trace goes one level deeper than tools: each underlying model request appears as a **Model call** step with a plain-language summary — the friendly model name followed by its token counts, in the shape *· 1180 in / 142 out* — and the raw request and response tucked behind an opt-in **Input**/**Output** disclosure. A raw model identifier or a JSON dump never reaches the surface.
 
     Both trace kinds are provider-dependent, and the trace degrades honestly. Where the underlying model provider can't emit reasoning, there is simply no Thinking rail — not a blank frame or an error — and Model call steps appear only where the provider surfaces that request boundary.
 
@@ -169,7 +169,7 @@ Some limits are deliberate:
 - **Deletes never offer the chat scope.** An irreversible delete is confirmed every single time, whatever else you have granted.
 - **Saving an [Agent Profile](/concepts/agent-profile) is never covered either.** Authoring a profile replaces the picture every later evaluation reads, so it is confirmed each time.
 - **Bulk edits to existing requirements stay gated.** Saving a *new* requirement can ride a standing grant; changing or removing ones already filed cannot, even when they arrive inside a batch that is otherwise covered.
-- **Starting an unattended full run is never covered** — a capability your workspace may not have. An unattended run spends real credits against a live agent with nobody watching, so it is confirmed every time.
+- **Starting an [Automatic Full Run](/how-to/run-an-automatic-full-run) is never covered.** An unattended run spends real credits driving live conversations against your connected agent with nobody watching, so it is confirmed every time.
 - **A one-time approval still covers the batch the card represented.** If the card asked about saving twelve scenarios, approving once commits all twelve in that turn rather than stalling on the second one — but that coverage ends with the turn.
 
 <Accordion title="See a permission card">
@@ -195,7 +195,7 @@ The composer is where you drive the agent, and it's rich: an **Attach files** ch
 Where those controls sit depends on the shell. The full view has room to show them all in one row. The **docked panel** does not, so mode, model and **Thinking** collapse behind a single composer settings menu there — attach stays out in the open, because burying an upload is how attachments stop being found. The new-chat launcher carries mode, model and **Thinking** as well, so the first message of a conversation starts on the settings you meant.
 
 <Frame caption="Typing a slash opens the palette over the composer, and typing on narrows it to what matches. The chassis underneath keeps its controls in view — attach on the left, then the mode toggle, the model chip and the Thinking chip — so nothing you need is hidden behind a menu.">
-  <img src="/images/trust-agent-composer.png" alt="The Trust Agent composer with the slash palette open above it. The composer holds the text '/requirement', and under the palette's COMMANDS heading sit the commands that match it — /autorun, /build-evaluator, /capture-requirements and /data-discovery — each with a one-line description. The composer's control row shows the plus attach chip, the Ask mode toggle, the Claude Opus 4.8 model chip and the Balanced thinking chip." />
+  <img src="/images/trust-agent-composer.png" alt="The Trust Agent composer with the slash palette open above it. The composer holds the text '/requirement', and under the palette's COMMANDS heading sit the commands that match it — /autorun, /build-evaluator, /capture-requirements and /data-discovery — each with a one-line description. The composer's control row shows the plus attach chip, the Ask mode toggle, the model chip and the Balanced thinking chip." />
 </Frame>
 
 ### Attach files
@@ -244,7 +244,7 @@ On a project that has done nothing at all — no sessions, no scenarios, no eval
 
 Two chips sit side by side in the control row, and they are coupled: the second offers only what the first supports.
 
-The **model** chip picks which model the conversation runs on. It is a price-performance control — its hover says so, *Model — the price and quality the Trust Agent runs at* — and each row in the menu names a model with its vendor and a one-word posture underneath it, *frontier*, *balanced* or *fast*. What is in that menu is the models your workspace offers: the catalog is served by the back end and a deployment can narrow it, so read the menu rather than any list written down elsewhere. Your choice takes effect on the next message and the conversation carries on. The menu deliberately shows **no cost or latency figure** — you choose how much horsepower a conversation gets, not a billing readout in the middle of your work.
+The **model** chip picks which model the conversation runs on. It is a price-performance control — its hover says so, *Model — the price and quality the Trust Agent runs at* — and each row in the menu names a model with its vendor and a one-word posture underneath it, *frontier*, *balanced* or *fast*. What is in that menu is the Claude models your workspace offers: the catalog is served by the back end and a deployment can narrow it, so read the menu rather than any list written down elsewhere. Your choice takes effect on the next message and the conversation carries on. The menu deliberately shows **no cost or latency figure** — you choose how much horsepower a conversation gets, not a billing readout in the middle of your work.
 
 The **Thinking** chip sets how much the agent works through a problem before answering, one message at a time. Four depths ship, each with its own plain sentence:
 
@@ -267,7 +267,7 @@ Skills are first-class: reusable recipes the agent can run on demand, backing th
 
 <Tabs>
   <Tab title="Built-in skills">
-    The recipes that ship with the product — connecting an agent, exploring it, generating scenarios, building an evaluator, running an evaluation, authoring security coverage, analyzing failures, and more. In the skills editor each is marked **Built-in**.
+    The recipes that ship with the product — connecting an agent, exploring it, generating scenarios, building an evaluator, running an evaluation, authoring security coverage, analyzing failures, and more. One of them, **/autorun**, does the whole arc in a single approved pass: see [Run an Automatic Full Run](/how-to/run-an-automatic-full-run). In the skills editor each is marked **Built-in**.
 
     **Built-in skills are read-only.** Open one and you can read the whole recipe, but every field is disabled, there is no Delete, and there is no Save. Their slugs are reserved on the server as well, so a workspace skill can never shadow or override one. What you can always do is *run* them, from the **/** palette or by asking.
   </Tab>

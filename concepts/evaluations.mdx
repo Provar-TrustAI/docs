@@ -31,6 +31,8 @@ One **Evaluation Launcher** drives every run, and every entry point leads to the
 
 Nothing is enqueued by any of those clicks. They open the launcher; the run starts when you confirm inside it. However you arrive, the launcher shows a **fan-out preview** — exactly what will run, including the per-persona expansion for scenarios — before you commit.
 
+An eighth path skips the launcher entirely: an [Automatic Full Run](/how-to/run-an-automatic-full-run) launches its own graded scenarios run at the end of its pass. What lands here is an ordinary run — the same lifecycle, the same results — listed under the name of the Automatic Full Run that produced it, with no separate badge to look for.
+
 ### The Environment step
 
 A scenarios launch carries one more section below **This will run**: **Environment**, marked with a **New** pill. Its own line says what it selects — *"Selects the connected org or test data store, test identity, and cleanup used for this run."* You rarely start from nothing: the launcher preselects the first environment attached to the agent you chose and probes it in place, settling on **Ready to run** (or **Ready to run with limited trace data**) above a short list of what it checked — that the agent is active and ready, that the environment is available now, which test data store the run will use, and the cleanup promise **"Between tests: Removes only the records each test created."**
