@@ -1,5 +1,58 @@
 # Doc Kit — landing retros
 
+## 2026-09-16 — v2026.09.09.2 docs (worktrunk/docs-v2026-09-09-2 → main)
+
+**Documented:** Nine releases of drift closed in one cycle (v2026.08.14.1 → v2026.09.09.2, 919 app
+commits). 47 of 48 existing pages rewritten or corrected, five new pages — the recommended security
+scenarios catalog (OWASP Agentic Top 10) as concept + how-to, test data (plans, stores, run report)
+as concept + how-to, and the project Connections tab — plus AGENTS.md re-pinned (19 rules changed,
+three new blocks), nine changelog entries, and the API reference re-pinned 168 → 181 paths with six
+gate-policy withdrawals and a sanitizer that now scrubs the codename from free text. Six structural
+shifts drove most of the churn: the Connections redesign (project **Connections** tab, workspace
+**Connected orgs**), requirements as the enforced step-2 gate on Trust Agent writes, five
+denominator-excluded outcomes with amber **Couldn't test**, quick evaluations as first-class **Quick**
+rows, test data plans/run reports on by default, and the MCP surface going live with OAuth consent.
+
+**Convergence map:** lean `/doc-release-align` shape — pinned worktree + app booted at the tag →
+8 track mappers + 12 page auditors (20 agents, all Opus) → foundations in order (stubs+nav, AGENTS.md,
+changelog, OpenAPI) → 22 page tickets as one wave (20 concurrent) → mechanical trunk gates
+(broken-links, terminology sweep, rendered-anchor sweep, 51/51 HTTP 200, 51/51 no overflow at
+375 px) → two fresh-eyes cross-surface auditors → gardener batches → landing PR. No Linear
+audit-round tickets; writer self-verification + fresh-eyes audit substituted, as in v2026.08.03.2.
+PRs #226–#252 (+ gardener batches).
+
+**Harness events:** a session rate limit killed 8 of 20 wave-2 writers mid-task (13:20 MT); all eight
+resumed from their own worktrees with a RESUME preamble and zero rework (every partial edit was
+kept and re-verified). Repo auto-merge is disabled and the Mintlify preview check reports SKIPPED on
+trunk-targeted PRs, so the orchestrator merged each PR after a local `mint broken-links`. The app
+stack at the tag booted from the pinned worktree with `SKIP_VERIFY=1 pnpm start` (compose project
+name is fixed to `trust-ai`, so it reused the dev DB volume — the "Provar Testing" project with a
+real Salesforce connection was therefore available to writers). `captures/node_modules/` in
+`.gitignore` does not match the symlink inside worktrees.
+
+**Near-misses:** the impact map said "six models across two vendors" (P0 on two pages) — the deployed
+values pin a Claude-only allowlist, so AGENTS.md now bans any model count/vendor/default; three track
+files disagreed with each other on the "Couldn't test" apostrophe (source is straight; Mintlify renders
+it curly site-wide); the ticket text said standing approvals exclude four tools — code says three;
+"Show me where to start" is a follow-up chip after a turn, not a welcome pill; the tutorial's run step
+dead-ends on an uncaptured build (expected actions require a captured action catalog whose capture
+is gated behind the same step) — written as a real prerequisite rather than a promised path; two
+pages had documented the "Default test user" form fields as card labels (legacy form only); the
+Salesforce Disconnect dialog copy contradicts its own code (one record, not N projects). Three
+fragment links were dead because Mintlify keeps em dashes and curly apostrophes in heading ids and
+`mint broken-links` does not validate fragments.
+
+**Propagated:** rendered-anchor sweep added as a trunk gate (script in this cycle's scratchpad; worth
+promoting to `/doc-validate links`); `doc-terminology-guard` table re-synced (6 rows fixed, 11 added,
+incl. TDM/Trust Library/ASI-as-label/one-off/model-count rows); AGENTS.md gained the flag roster with
+defaults, the starter-catalog / MCP / test-data blocks, the "never hardcode a model or skill count"
+rule, and the preview ruling for Automatic Full Run; `openapi-sanitize.py` now rewrites the codename
+in free-text fields and hard-fails if it survives outside keys/enum literals; writer brief rule:
+wide markdown tables overflow at 375 px unless wrapped (Mintlify's wrapper is overflow-x: visible).
+Open for the next cycle: brand spelling (TrustAI vs Trust AI) ruling; the `concepts/trust-library`
+slug vs its "Recommended scenarios" title; 20 doc-clarifications for an operator (scratchpad GAPS.md,
+mirrored in the landing PR body).
+
 ## 2026-08-07 — v2026.08.03.2 docs (worktrunk/docs-v2026-08-03-2 → main)
 
 **Documented:** Eleven releases of drift closed in one cycle (v2026.06.30.1 → v2026.08.03.2).
