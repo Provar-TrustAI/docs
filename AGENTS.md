@@ -248,7 +248,7 @@ blocks fresh rather than from memory of the previous pin.
   card — never a card per item, and never a first-card grant that silently covers the rest. The
   per-batch cap is **50 items**; past it the agent is told to split the batch. A standing approval
   can **never** cover three things, each confirmed every time: **deleting items**, **saving an agent
-  profile**, and **starting an unattended full run** (the preview-gated capability below). Bulk
+  profile**, and **starting an Automatic Full Run** (`start_autopilot`, `tools/receipts.py:353`). Bulk
   mutating or deleting an existing requirement is likewise never covered, even though saving a new
   one is.
 - **Four** distinct failure states, quoted exactly:
@@ -281,10 +281,13 @@ blocks fresh rather than from memory of the previous pin.
 - **The backend wins on Act mode.** The runtime waits for approval on every mutating write. The
   mode-toggle subtitle still says "without pausing for approval" — that copy is stale; do not
   document it.
-- A chat turn has a **model** and a **thinking depth**, both chosen by you. **Never hardcode a model
-  count, a vendor list, or a default model.** The code serves six models across two vendors, but a
-  deployment pins its own allowlist, so what a reader sees is whatever their workspace offers — write
-  "the models your workspace offers". The composer's **Thinking** chip sets depth:
+- A chat turn has a **model** and a **thinking depth**, both chosen by you. **Customers can only
+  access Claude models in the picker** (operator, 2026-09-16), so a page may write "the Claude models
+  your workspace offers" — but **never a count, never a version name, never a default**. The code
+  serves several models and a deployment pins its own allowlist, so what a reader sees is whatever
+  their workspace offers; read the menu, never a list written down here. Alt text describing a
+  screenshot is covered by the same rule: write "the model chip", not the version it happens to
+  show. The composer's **Thinking** chip sets depth:
   **Standard / Brief / Balanced / Thorough**, default **Balanced**, offering only the depths the
   selected model declares and hiding entirely for a model with one. Do not write "per message" —
   the menu's own footer says **"Applies to this conversation, starting with your first message"**
@@ -587,13 +590,23 @@ failure, not a style nit.
 - Preview features are labeled preview, never GA. **Requirements and test data are NOT preview** —
   both default on in the tagged code and are documented as ordinary shipped surfaces, including
   `/v1/connect/environments*`. The **MCP surface** is not preview either, and is not flagged at all.
-- **Automatic Full Run is the one genuinely default-OFF capability in scope.** The sentence that used
-  to close this block — "nothing in the docs is currently preview-gated" — is **retired**, because it
-  is no longer safe to assert. The ruling: **omit Automatic Full Run from reader-facing docs**, or,
-  only after an operator confirms posture, label that one surface preview and hedge it. Nothing else
-  moves. While you are here, fix the trap in `snippets/preview-notice.mdx`: its usage example is
-  `<PreviewNotice surface="Test Data Management" />` — a surface this very rule declares *not*
-  preview, named with the banned codename.
+- **Automatic Full Run vocabulary.** **Automatic Full Run** is the product noun, capitalised, and
+  **`/autorun`** is the command that starts it (the palette paints the slug; the Welcome pill is
+  **Evaluate agent**). **"Autopilot" is build vocabulary and is never reader-visible** — not in prose,
+  not in a heading, not in alt text — even though it is all over the code (`domain/autopilot/`,
+  `autopilot_worker.py`, `autopilot_enabled`). The API-side product strings already say "Automatic
+  Full Run"; quote those, never the module names.
+- `snippets/preview-notice.mdx` is a shared component: **its usage example must never name a shipped
+  surface.** Keep the neutral `surface="&lt;surface name&gt;"` placeholder — the old example named a
+  surface these very rules declare *not* preview, using the banned codename, and a reader grepping
+  for that name landed on it.
+- **Automatic Full Run is ON in production** (operator, 2026-09-16) and is documented as an ordinary
+  shipped surface — not preview, not hedged, not omitted. The earlier omit-or-hedge ruling is
+  **retired**; so is the "nothing in the docs is currently preview-gated" sentence, because one thing
+  in scope genuinely is off: **shared-store test-data cleanup** (`ENABLE_TDM_SHARED_STORE`), which
+  stays undocumented entirely rather than hedged. The default `autopilot_enabled=False` at
+  `core/config.py:871` is a code default, not posture — exactly the distinction the box below draws.
+  The canonical page is `how-to/run-an-automatic-full-run.mdx`.
 
   > [!IMPORTANT]
   > **How to establish flag state — read this before writing about any gated surface.**
@@ -636,8 +649,9 @@ failure, not a style nit.
   >   test-data gate and never widen it.
   >
   > *Off — an environment opts in:*
-  > - `autopilot_enabled` — Automatic Full Run. Deliberately opt-in: an unattended run spends real
-  >   credits against a customer's agent with nobody watching. See the preview ruling above.
+  > - `autopilot_enabled` — Automatic Full Run. **Default off in code; ON in production** per the
+  >   operator, 2026-09-16 — document it as shipped. The code default is opt-in because an unattended
+  >   run spends real credits against a customer's agent with nobody watching.
   > - `ENABLE_PADDINGTON_MCP` — a read-only Salesforce MCP tool set on the Trust Agent. This is
   >   **not** the TrustAI MCP server; never conflate the two.
   > - `ENABLE_TDM_SHARED_STORE` — seeding into a customer's real store. Blocked on two named defects.

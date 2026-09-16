@@ -1,0 +1,135 @@
+---
+title: "Run an Automatic Full Run"
+icon: "sparkles"
+description: "Turn a requirements document into a scored evaluation without watching: what the run builds, the approval it always asks for, what the progress card shows, how to stop it, and where the results land."
+---
+
+An **Automatic Full Run** takes a requirements document all the way to a scored evaluation in one pass, with nobody watching. You approve it once, and TrustAI reads the document, files the [requirements](/concepts/requirements), writes [scenarios](/concepts/scenarios) that cover them, builds and attaches the [evaluators](/concepts/evaluators) that grade them, fills in the applicable expected output, then runs every conversation against your connected agent and scores it.
+
+The run happens on the server, not in your browser. Close the tab and it keeps going.
+
+It is the automated form of the same authoring workflow the [Trust Agent](/concepts/trust-agent) walks you through by hand — never a shortcut that leaves detached scenarios or unattached checks behind. Reach for it when you have a spec and want a benchmark; reach for the individual steps when you want a say at each stage.
+
+## Before you start
+
+Two things must exist before a run can begin, and the agent will not start one without them:
+
+- **A connected agent.** The run holds real conversations against a real agent, so without one every requirement and scenario it wrote would be unscoreable. With none connected you get *"The Automatic Full Run needs a connected agent to test against, and this project doesn't have one yet. Connect your agent first and the run can take it from there."* — and the agent offers to walk you through [connecting one](/how-to/manage-project-connections) right there rather than turning you away.
+- **A requirements document.** A PRD, a spec, an "agent requirements" doc — attached to the conversation with the **Attach files** (+) chip or dragged into the chat. If you have described your requirements in chat instead of in a file, that is [Capture requirements](/how-to/capture-requirements), not this.
+
+<Note>
+  **One run per project at a time.** Starting a second while one is live is refused with *"An Automatic Full Run is already in progress on this project. Wait for it to finish, or cancel it, before starting another."* Two runs would each write scenarios and attach checks over the other's half-finished state.
+</Note>
+
+A run **adds to** a project rather than replacing it. Existing requirements and scenarios stay where they are, and fitting coverage you already have is reused.
+
+## Start the run
+
+<Steps>
+  <Step title="Attach the document and ask">
+    Open the Trust Agent, attach your requirements document, and say what you want. Any of these reach the same recipe:
+
+    - **Ask in your own words** — "Here's our spec, build me a benchmark", "evaluate our agent against this", "set it all up, I don't want to babysit it".
+    - **Type the command.** `/` in the composer opens the palette; **/autorun** is listed there, described as *"Evaluate my agent end to end based on a requirements document."*
+    - **Click the pill.** On the Welcome screen, the **Evaluate agent** pill's first suggestion pre-fills the composer with *"/autorun Run an end-to-end evaluation of my agent from my requirements doc — requirements, scenarios, sessions, evaluators, and evaluations"*.
+
+    If several files are attached, the agent asks which one is the requirements document rather than guessing.
+  </Step>
+
+  <Step title="Read the preview">
+    {/* ACCURACY-AUDIT-PENDING */}
+    Before anything runs, the agent should show you what it read — expect the requirements it found in the document, how many of them describe something the agent must *never* do, the agent build it will test **by name**, how many scenarios it plans to write against the ceiling it is allowed, and roughly how long it will take as a range.
+
+    That preview is the whole basis of your consent. The agent under test is the part worth reading twice — approving a benchmark without knowing what it targets is not a meaningful approval.
+  </Step>
+
+  <Step title="Approve it">
+    The run is gated behind a standard [permission card](/how-to/approve-agent-writes), which reads **Start Automatic Full Run** over *"Read an uploaded requirements document and build a whole evaluation from it — requirements, scenarios, the checks that grade them, and a scored run against your connected agent. Keeps running after you close the tab."* The card names the document, never its identifier.
+
+    **You should see:** the card resolve, a one-line confirmation that the run has started, and the progress card appear in the transcript underneath it.
+  </Step>
+</Steps>
+
+<Warning>
+  **This approval is asked every single time, and a standing approval can never cover it.** An Automatic Full Run spends real credits driving live conversations against your connected agent with nobody watching, so it is deliberately held out of the "Always … in this chat" grant — along with deletes and authoring an agent profile. See [what a standing approval can never cover](/how-to/approve-agent-writes#standing-approvals).
+</Warning>
+
+## What you see while it runs
+
+Two surfaces report on a live run, and they do different jobs.
+
+**In the chat**, a progress card sits in the transcript where you approved it. It shows the run's name, an overall percentage, a remaining-time **range** (*"about 12–20 minutes left"*) and the five stages ticking off — each one turning into a hand-off link the moment its output exists, so you can go and read the scenarios while the conversations are still running:
+
+| When the stage finishes, the card reads | And offers |
+|---|---|
+| Requirements are filed | **See Requirements** |
+| Scenarios are written | **See Scenarios** |
+| Checks are built and attached | **See Evaluators** |
+| Conversations are run and scored | **See Sessions** |
+| Wrapped up | — |
+
+Underneath, while the run is live: *"You can close this tab — the run keeps going, and this card will show where it got to whenever you come back."* The card re-mounts from the stored transcript on every return visit, so hours later it shows the finished state in the same place you last looked.
+
+**Everywhere else in the project**, a slim one-line bar sits above the page: what the run is doing now (*"Writing scenarios to cover them"*, *"Running the conversations and scoring them"*), a progress bar, and the same remaining range. It is peripheral awareness while you work elsewhere, so it deliberately does not repeat the stage list — and it hides itself on the open chat view, where the transcript's card owns the story. Nothing renders at all when no run is live.
+
+<Note>
+  **The remaining time is always a range, and it sharpens.** A simulated conversation runs anywhere from one turn to its length limit depending on when the simulated customer is satisfied, so the spread is real. Early on the estimate comes from the shape of the work; once the conversations start it is measured from actual throughput, which is why the number moves.
+</Note>
+
+The run's own status reads **Queued**, **Running**, **Complete**, **Stopped** or **Canceled**.
+
+## Stop a run
+
+Use **Stop** on the slim progress bar — so from any project page other than the full-screen chat, where the bar is hidden. The control reads **Stopping…** while it takes effect; cancelling is cooperative, so the run genuinely may keep going for a moment rather than flipping to stopped the instant you click.
+
+Stopping does not roll anything back. The headline afterwards says so: *"Stopped. Anything the Automatic Full Run finished before that is still in your project."* Requirements, scenarios and checks the run already wrote are yours to keep, edit or run by hand.
+
+Once a run has reached a terminal state there is nothing to stop, and asking anyway returns *"That Automatic Full Run has already finished, so there's nothing to cancel."*
+
+## Where the results land
+
+A finished run reads *"Everything is in your project — requirements, scenarios, sessions, checks and scores."* and offers one door: **See the results in Evaluations**.
+
+Each stage's output lives on its ordinary tab — **Requirements**, **Scenarios**, **Evaluators**, **Sessions** — as first-class records you can edit, extend or re-run. Nothing the run produced is a special object.
+
+The scored run itself is an ordinary graded scenarios [evaluation](/concepts/evaluations), listed on the **Evaluations** page under the run's name. There is no separate badge to look for: the name is what tells you which run produced it.
+
+## Credits, and the honest edges
+
+An Automatic Full Run **spends real credits** against your connected agent — it drives a live conversation per scenario per trial and then grades each one. That is the reason it asks every time and the reason it is capped: the run writes the *fewest* scenarios that cover your requirements, one per requirement as the floor, and a hard ceiling on top of that. The run drives an ordinary graded evaluation, so its spend shows up the way any evaluation's does — see [Track credit usage](/how-to/track-credit-usage).
+
+Three things it deliberately does not do:
+
+- **It does not calibrate the checks.** Confirming that an automated judge agrees with a human needs the human. That is [Calibrate an evaluator](/how-to/calibrate-an-evaluator), and it is the one thing worth doing by hand afterwards.
+- **It does not guarantee it covered everything in your document.** Requirements it could not build real coverage for stay as **drafts** on the Requirements page, visibly, rather than being quietly marked done. Those drafts are the honest edge of what the run achieved.
+- **It does not replace the steps.** Everything it produced can be edited, extended or re-run by hand.
+
+## When something goes wrong
+
+A run that stops early always says what happened and what is still saved, because the person reading it was not watching at the time.
+
+| What happened | What it says, and what to do |
+|---|---|
+| The document had no readable text | It reads *"The requirements document couldn't be read. If it's a scanned or password-protected PDF, try a text-based version…"* — supply a text-based version of the file. |
+| Nothing testable was in the document | It reads *"The Automatic Full Run read the document but couldn't find any testable requirements in it."* — the document needs to describe what the agent should and shouldn't do in terms a test can check. |
+| The graded run failed | It reads *"The evaluation didn't finish. Your requirements, scenarios and checks are all saved — you can re-run the evaluation from the Evaluations page."* — everything up to the graded run landed, so nothing needs rebuilding. |
+| The run stopped waiting for the evaluation | It reads *"The evaluation is taking much longer than expected. It may still finish — check the Evaluations page."* — the evaluation itself may well still be going; look at it directly. |
+
+The first two are refused **before** anything is written, so a document the run cannot use never leaves a half-built project behind.
+
+## Related
+
+<CardGroup cols={2}>
+  <Card title="Trust Agent" icon="sparkles" href="/concepts/trust-agent">
+    The assistant that runs this recipe — its modes, the approval model, and the authoring workflow it enforces.
+  </Card>
+  <Card title="Approve an agent write" icon="shield-check" href="/how-to/approve-agent-writes">
+    The card that gates this run, and why a standing approval can never cover it.
+  </Card>
+  <Card title="Capture requirements" icon="list-checks" href="/how-to/capture-requirements">
+    The step-by-step alternative when you want to review the requirements before scenarios are written.
+  </Card>
+  <Card title="Evaluations" icon="chart-line" href="/concepts/evaluations">
+    Where the scored run lands, and how to read what it found.
+  </Card>
+</CardGroup>

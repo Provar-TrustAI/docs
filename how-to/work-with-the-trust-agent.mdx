@@ -38,7 +38,7 @@ This how-to walks you through a working session with the **Trust Agent** — the
     The Welcome composer is not a cut-down one, either. It carries the same **Ask / Plan / Act** toggle, model chip and **Thinking** chip a live conversation does, plus the attach chip — so you can set all of that before your first message rather than correcting it afterwards.
 
     <Frame caption="One click in: the pill is active and its two ready-made prompts are showing. The composer above is still empty — filling it takes the second click — but its mode, model and Thinking chips are already there to set.">
-      <img src="/images/howto-agent-welcome-pills.png" alt="The Trust Agent Welcome page: the greeting 'Hi, Dev. Let's get to work!', a line reading 'You haven't run any evaluations yet. Try one from the prompts below.', and an empty composer reading 'Ask anything or pick a suggestion below…' whose control row holds the plus attach chip, the Ask mode toggle, the Claude Opus 4.8 model chip and the Balanced thinking chip. Below sit four starter pills — Evaluate agent, Improve requirements, Summarize evaluations, Connect agent — with Improve requirements active over an inline panel listing its two prompts and a close control." />
+      <img src="/images/howto-agent-welcome-pills.png" alt="The Trust Agent Welcome page: the greeting 'Hi, Dev. Let's get to work!', a line reading 'You haven't run any evaluations yet. Try one from the prompts below.', and an empty composer reading 'Ask anything or pick a suggestion below…' whose control row holds the plus attach chip, the Ask mode toggle, the model chip and the Balanced thinking chip. Below sit four starter pills — Evaluate agent, Improve requirements, Summarize evaluations, Connect agent — with Improve requirements active over an inline panel listing its two prompts and a close control." />
     </Frame>
 
     **You should see:** the Welcome page render at `/projects/:id/agent` with no flag set; the same four pills whatever your Project already holds; clicking a pill expand its two prompts rather than fill the composer; clicking a prompt fill the composer; and your submitted prompt open a new chat at `?task=…` as turn one.
@@ -60,7 +60,7 @@ This how-to walks you through a working session with the **Trust Agent** — the
     </Note>
 
     <Frame caption="The full-page shell. Recent chats sits under the nav rows on the left — no floating selector — and the composer stays anchored at the bottom of the pane rather than scrolling away with the transcript.">
-      <img src="/images/howto-agent-full-page-shell.png" alt="The Trust Agent full-page shell: the Project's left nav with New chat, Playground, Requirements, Scenarios, Sessions, Evaluators, Evaluations and Project Settings above a Recent chats list; the transcript in the centre with two turns, each a collapsed 'Thought for 1s' rail over a tool-call card — 'Reviewed evaluators' listing Tone and Completeness, and 'Reviewed sessions' listing SES-000010 down to SES-000006 — with the streamed reply between them; the composer anchored at the bottom carrying the plus attach chip, the Ask mode toggle, the Claude Opus 4.8 model chip and the Balanced thinking chip; the side rail on the right, Context leading with the Refunds Concierge connected-agent card." />
+      <img src="/images/howto-agent-full-page-shell.png" alt="The Trust Agent full-page shell: the Project's left nav with New chat, Playground, Requirements, Scenarios, Sessions, Evaluators, Evaluations and Project Settings above a Recent chats list; the transcript in the centre with two turns, each a collapsed 'Thought for 1s' rail over a tool-call card — 'Reviewed evaluators' listing Tone and Completeness, and 'Reviewed sessions' listing SES-000010 down to SES-000006 — with the streamed reply between them; the composer anchored at the bottom carrying the plus attach chip, the Ask mode toggle, the model chip and the Balanced thinking chip; the side rail on the right, Context leading with the Refunds Concierge connected-agent card." />
     </Frame>
 
     **You should see:** a **Recent chats** section in the left nav listing your conversations most-recent-first, and the same chat thread persist as you switch shells and navigate between tabs.
@@ -98,7 +98,7 @@ This how-to walks you through a working session with the **Trust Agent** — the
   <Step title="Pick the model and how hard it thinks">
     Two chips sit together in the control row, and the second depends on the first.
 
-    Open the **model** chip and each row names a model with its vendor and a one-word posture underneath — *frontier*, *balanced* or *fast*. The list is the models your workspace offers, served by the back end, so read the menu rather than expecting a fixed set. It is a price-performance control and shows **no cost or latency figure**. Pick the frontier posture for reasoning-heavy authoring work, the fast one for lookups you just want answered.
+    Open the **model** chip and each row names a model with its vendor and a one-word posture underneath — *frontier*, *balanced* or *fast*. The list is the Claude models your workspace offers, served by the back end, so read the menu rather than expecting a fixed set. It is a price-performance control and shows **no cost or latency figure**. Pick the frontier posture for reasoning-heavy authoring work, the fast one for lookups you just want answered.
 
     Then open the **Thinking** chip and pick a depth: **Standard** (answers straight away), **Brief**, **Balanced**, or **Thorough** (thinks hardest, slower). **Balanced** is where a new conversation starts, so an ordinary turn already thinks before it answers — reach for **Thorough** when you are asking the agent to reason about a whole result set, and **Standard** when you want a fact back. The menu shows only the depths the selected model declares and disappears entirely for a model that declares one, so a missing chip means that model has no choice to offer, not that something failed.
 
@@ -108,7 +108,7 @@ This how-to walks you through a working session with the **Trust Agent** — the
       **Depths are not comparable across models.** **Thorough** on one model and **Thorough** on another are not the same amount of thinking, and they don't cost the same. Compare a depth against the same model, never across two.
     </Warning>
 
-    **You should see:** the model menu list what your workspace offers, each row carrying a vendor and a one-word posture; the **Thinking** menu offer its four depths with a plain sentence each, opening on **Balanced**; and the chip's label change to what you picked while the reply already on screen stays exactly as it was.
+    **You should see:** the model menu list the Claude models your workspace offers, each row carrying a vendor and a one-word posture; the **Thinking** menu offer its four depths with a plain sentence each, opening on **Balanced**; and the chip's label change to what you picked while the reply already on screen stays exactly as it was.
   </Step>
 
   <Step title="Read the streaming reply, tool-call cards, and side rail">

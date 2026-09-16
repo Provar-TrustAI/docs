@@ -107,6 +107,7 @@
               "how-to/simulate-with-scenarios",
               "how-to/adopt-recommended-security-scenarios",
               "how-to/author-expected-output-with-the-trust-agent",
+              "how-to/run-an-automatic-full-run",
               "how-to/author-test-data-for-a-scenario",
               "how-to/capture-requirements",
               "how-to/annotate-sessions",
