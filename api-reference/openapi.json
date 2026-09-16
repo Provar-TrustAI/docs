@@ -14864,6 +14864,264 @@
     }
    }
   },
+  "/v1/projects/{project_id}/autopilot-runs": {
+   "post": {
+    "tags": [
+     "autopilot",
+     "autopilot"
+    ],
+    "summary": "Start Autopilot Run",
+    "description": "Start an unattended run from a requirements document.\n\nReturns as soon as the run is queued. The pipeline executes in a\nworker and is unaffected by this connection closing \u2014 which is the\nentire reason the endpoint is shaped this way rather than streaming.",
+    "operationId": "start_autopilot_run_v1_projects__project_id__autopilot_runs_post",
+    "parameters": [
+     {
+      "name": "project_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Project Id"
+      }
+     },
+     {
+      "name": "wos_session",
+      "in": "cookie",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Wos Session"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/StartAutopilotInput"
+       }
+      }
+     }
+    },
+    "responses": {
+     "201": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/AutopilotRunResponse"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/projects/{project_id}/autopilot-runs/active": {
+   "get": {
+    "tags": [
+     "autopilot",
+     "autopilot"
+    ],
+    "summary": "Get Active Autopilot Run",
+    "description": "The project's in-flight run, or ``null``.\n\nThe progress panel's poll. Returns ``null`` rather than 404 for \"no\nrun\" because absence is the normal state, not an error.",
+    "operationId": "get_active_autopilot_run_v1_projects__project_id__autopilot_runs_active_get",
+    "parameters": [
+     {
+      "name": "project_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Project Id"
+      }
+     },
+     {
+      "name": "wos_session",
+      "in": "cookie",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Wos Session"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "anyOf": [
+          {
+           "$ref": "#/components/schemas/AutopilotRunResponse"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "title": "Response Get Active Autopilot Run V1 Projects  Project Id  Autopilot Runs Active Get"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/autopilot-runs/{run_id}": {
+   "get": {
+    "tags": [
+     "autopilot",
+     "autopilot"
+    ],
+    "summary": "Get Autopilot Run",
+    "description": "Status, progress and remaining-time estimate for one run.",
+    "operationId": "get_autopilot_run_v1_autopilot_runs__run_id__get",
+    "parameters": [
+     {
+      "name": "run_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Run Id"
+      }
+     },
+     {
+      "name": "wos_session",
+      "in": "cookie",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Wos Session"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/AutopilotRunResponse"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/autopilot-runs/{run_id}/cancel": {
+   "post": {
+    "tags": [
+     "autopilot",
+     "autopilot"
+    ],
+    "summary": "Cancel Autopilot Run",
+    "description": "Ask a run to stop at its next stage boundary.\n\nCooperative, not pre-emptive: the run finishes whatever it is in the\nmiddle of and stops cleanly rather than stranding a half-written\nstage. The response is the run's state at request time, so the UI\ncan show \"stopping\" immediately.",
+    "operationId": "cancel_autopilot_run_v1_autopilot_runs__run_id__cancel_post",
+    "parameters": [
+     {
+      "name": "run_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Run Id"
+      }
+     },
+     {
+      "name": "wos_session",
+      "in": "cookie",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Wos Session"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/AutopilotRunResponse"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
   "/v1/mcp/permissions/pending": {
    "get": {
     "tags": [
@@ -17171,6 +17429,252 @@
      "id"
     ],
     "title": "AuthUserResponse"
+   },
+   "AutopilotRunResponse": {
+    "properties": {
+     "id": {
+      "type": "string",
+      "title": "Id"
+     },
+     "project_id": {
+      "type": "string",
+      "title": "Project Id"
+     },
+     "name": {
+      "type": "string",
+      "title": "Name"
+     },
+     "status": {
+      "$ref": "#/components/schemas/AutopilotStatus"
+     },
+     "status_label": {
+      "type": "string",
+      "title": "Status Label"
+     },
+     "progress_percent": {
+      "type": "integer",
+      "maximum": 100.0,
+      "minimum": 0.0,
+      "title": "Progress Percent"
+     },
+     "current_stage": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/AutopilotStage"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "current_stage_label": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Current Stage Label"
+     },
+     "eta_low_seconds": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Eta Low Seconds"
+     },
+     "eta_high_seconds": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Eta High Seconds"
+     },
+     "eta_basis": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Eta Basis"
+     },
+     "evaluation_run_id": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Evaluation Run Id"
+     },
+     "error_message": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Error Message"
+     },
+     "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Created At"
+     },
+     "started_at": {
+      "anyOf": [
+       {
+        "type": "string",
+        "format": "date-time"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Started At"
+     },
+     "completed_at": {
+      "anyOf": [
+       {
+        "type": "string",
+        "format": "date-time"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Completed At"
+     },
+     "steps": {
+      "items": {
+       "$ref": "#/components/schemas/AutopilotStepResponse"
+      },
+      "type": "array",
+      "title": "Steps"
+     }
+    },
+    "type": "object",
+    "required": [
+     "id",
+     "project_id",
+     "name",
+     "status",
+     "status_label",
+     "progress_percent",
+     "created_at",
+     "steps"
+    ],
+    "title": "AutopilotRunResponse",
+    "description": "The full status payload, polled by the panel and read by the agent."
+   },
+   "AutopilotStage": {
+    "type": "string",
+    "enum": [
+     "extract_requirements",
+     "generate_scenarios",
+     "build_evaluators",
+     "run_evaluation",
+     "close_out"
+    ],
+    "title": "AutopilotStage",
+    "description": "The five stages, in execution order.\n\n``RUN_EVALUATION`` covers BOTH driving the conversations and grading\nthem. That is not a naming compromise \u2014 it is the shipped behaviour\nof a graded scenarios launch, which simulates each row and scores it\nin one worker task. Splitting them into two stages here would imply\na \"run only\" phase the pipeline deliberately does not use: the\nrun-only path is strictly sequential and writes no result rows, so\nit never advances ``evaluation_runs.updated_at`` and the stale\nreaper marks it failed while it is still working."
+   },
+   "AutopilotStatus": {
+    "type": "string",
+    "enum": [
+     "pending",
+     "running",
+     "completed",
+     "failed",
+     "canceled"
+    ],
+    "title": "AutopilotStatus",
+    "description": "Lifecycle of one autopilot run.\n\n``pending`` is the gap between the approved write and the worker\npicking the task up off Redis; it is a real, observable state (a user\nwho returns in that window must not be told the run failed), not a\ntransient.\n\n``failed`` is terminal and always carries ``error_message`` plus the\nstage that failed, because \"it failed\" without \"at what\" is not\nactionable for a user who was not watching."
+   },
+   "AutopilotStepResponse": {
+    "properties": {
+     "stage": {
+      "$ref": "#/components/schemas/AutopilotStage"
+     },
+     "label": {
+      "type": "string",
+      "title": "Label",
+      "description": "What this stage is called in the product."
+     },
+     "status": {
+      "$ref": "#/components/schemas/StepStatus"
+     },
+     "items_total": {
+      "type": "integer",
+      "title": "Items Total"
+     },
+     "items_done": {
+      "type": "integer",
+      "title": "Items Done"
+     },
+     "started_at": {
+      "anyOf": [
+       {
+        "type": "string",
+        "format": "date-time"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Started At"
+     },
+     "completed_at": {
+      "anyOf": [
+       {
+        "type": "string",
+        "format": "date-time"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Completed At"
+     },
+     "summary": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Summary",
+      "description": "One plain sentence describing what this stage produced."
+     }
+    },
+    "type": "object",
+    "required": [
+     "stage",
+     "label",
+     "status",
+     "items_total",
+     "items_done"
+    ],
+    "title": "AutopilotStepResponse"
    },
    "BatchLinkInput": {
     "properties": {
@@ -30905,6 +31409,52 @@
     "title": "SourceSessionProjection",
     "description": "Per-row projection of the live source Session for a materialised row.\n\nA DatasetRow materialised from a session (``origin_kind ==\n'session'``) carries an ``origin_session_id`` FK to the live\n``Session`` it was copied from. The Dataset Detail rows table's\nprototype column model is *session-shaped* \u2014 its ``SESSION_COLUMNS`` surface a transcript\npreview, routed-to topics, tools called, turn count, the session\ndate, the originating user, and a duration. None of that lives on\nthe DatasetRow itself (an Example is an immutable *copy* of\nconversation turns, not a live reference), so this block is a\nread-time projection of the source Session.\n\nIt is attached to :class:`DatasetRowResponse.source_session` only\nfor rows whose source session still exists. Rows materialised from\nan upload \u2014 or rows whose source session has since been deleted\n(``origin_session_id`` is ``ON DELETE SET NULL``) \u2014 carry\n``source_session = null``, so the FE only paints the session-shaped\ncolumns for rows that genuinely back them (absent fields must not surface zero-value\nplaceholders)."
    },
+   "StartAutopilotInput": {
+    "properties": {
+     "source_file_id": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Source File Id",
+      "description": "Identifier of the uploaded requirements document to read."
+     },
+     "document_text": {
+      "anyOf": [
+       {
+        "type": "string",
+        "maxLength": 200000
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Document Text",
+      "description": "Requirements text, when supplied directly instead of as an upload."
+     },
+     "name": {
+      "anyOf": [
+       {
+        "type": "string",
+        "maxLength": 255
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Name",
+      "description": "Optional label for this run. A readable one is generated when omitted."
+     }
+    },
+    "additionalProperties": false,
+    "type": "object",
+    "title": "StartAutopilotInput",
+    "description": "Everything needed to launch a run.\n\nNote what is absent: no scenario count, no evaluator configuration,\nno model selection. The pipeline decides those from the document,\nand exposing them here would turn a one-approval flow into a form."
+   },
    "StartingFieldInput": {
     "properties": {
      "key": {
@@ -30986,6 +31536,18 @@
     ],
     "title": "StartingRecordResponse",
     "description": "A stored starting-data record as returned to the editor."
+   },
+   "StepStatus": {
+    "type": "string",
+    "enum": [
+     "pending",
+     "running",
+     "completed",
+     "skipped",
+     "failed"
+    ],
+    "title": "StepStatus",
+    "description": "Per-stage lifecycle.\n\n``SKIPPED`` is distinct from ``COMPLETED`` on purpose: a stage that\nhad no work to do (no ``avoid`` requirements to probe, say) must not\nread as having done work, or the close-out summary overstates what\nthe run covered."
    },
    "SuggestRecordsInput": {
     "properties": {

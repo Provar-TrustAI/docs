@@ -21,10 +21,14 @@ eventually gets skipped or done inconsistently — so the policy lives in
 2. **Decide the flag-gated excludes.** Check the tag's backend gates (`services/api/src/main.py`,
    `core/config.py`): any route family mounted only behind a gate that defaults OFF in production
    is excluded via `--extra-exclude` (v2026.06.30.1: `^/v1/scenarios/\{[^}]+\}/test-data`;
-   v2026.09.09.2: autopilot, project snapshots, the OTLP receiver and the AgentCore pull-sync
+   v2026.09.09.2: project snapshots, the OTLP receiver and the AgentCore pull-sync
    spike). Preview features are documented as preview in prose, not surfaced as GA endpoints.
    Verify each gate at the tag yourself — a default in `core/config.py` is evidence of a default,
    nothing more, and a withdrawal of a path published today needs sign-off and a line in the PR.
+   The exclude list follows the feature's **confirmed deployment posture**, not the config default
+   alone: confirm with the deployment owner before withdrawing a family, because a gate that
+   defaults OFF may still be enabled in production (DEV-9126 re-published the two
+   `autopilot-runs` families DEV-9093 had excluded on the strength of `autopilot_enabled = False`).
 3. **Run it** from the docs repo root, archiving the outgoing pin beside the existing archives:
    ```bash
    python3 docs-plan/doc-kit/openapi-sanitize.py \
