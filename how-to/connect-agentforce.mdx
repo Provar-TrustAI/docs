@@ -1,17 +1,18 @@
 ---
 title: "Connect a Salesforce Agentforce agent"
 icon: "plug"
-description: "Connect an Agentforce agent in a Salesforce Sandbox by authorizing TrustAI once as an admin — in chat with the Trust Agent, or from Project Settings."
+description: "Connect an Agentforce agent in a Salesforce Sandbox — reuse an org your workspace already authorized, or authorize a new one once as an admin, in chat with the Trust Agent or from Project Settings."
 ---
 
 import { DeprecatedNotice } from "/snippets/deprecated-notice.mdx";
 
-This how-to connects a **Salesforce Agentforce** agent to a Trust AI [Project](/concepts/projects). You sign in to Salesforce once as an administrator and approve TrustAI — there is no consumer key, no secret, and no certificate to hand over. When you're done:
+This how-to connects a **Salesforce Agentforce** agent to a Trust AI [Project](/concepts/projects). If your workspace has already authorized the org, you reuse that authorization and go straight to picking an agent. If it hasn't, a Salesforce administrator signs in once and approves TrustAI — there is no consumer key, no secret, and no certificate to hand over. When you're done:
 
 - Trust AI can drive your live Agentforce agent: simulations and evaluation runs open a real session in your org, and those conversations land in the Project as [Sessions](/concepts/sessions)
 - The agent you picked becomes the Project's current [Agent Version](/concepts/agent-versions), selectable when you launch an Evaluation
+- Trust AI starts reading that agent's make-up in the background — see [What happens after you connect](#what-happens-after-you-connect)
 
-Agentforce is one of **four** platforms in the **Add a connection** picker, in this order: **AWS Bedrock AgentCore**, **Salesforce Agentforce**, **Claude Managed Agent**, **Conversational HTTP agent**. See [Connect an AWS Bedrock AgentCore agent](/how-to/connect-agentcore), [Connect a Claude Managed Agent](/how-to/connect-claude-managed-agent), and [Connect a Conversational HTTP agent](/how-to/connect-http-agent) for the other three. This page covers Agentforce only.
+Agentforce is one of **four** platforms in the connect wizard's platform picker, in this order: **AWS Bedrock AgentCore**, **Salesforce Agentforce**, **Claude Managed Agent**, **Conversational HTTP agent**. See [Connect an AWS Bedrock AgentCore agent](/how-to/connect-agentcore), [Connect a Claude Managed Agent](/how-to/connect-claude-managed-agent), and [Connect a Conversational HTTP agent](/how-to/connect-http-agent) for the other three. This page covers Agentforce only.
 
 <Warning>
   **Use a Sandbox, not production.** Approving TrustAI sets up a connected app in the org you sign in to, so only connect this to a Salesforce Sandbox. The **Project Settings** connect form repeats this above the authorize button; the in-chat card does not.
@@ -24,21 +25,40 @@ Agentforce is one of **four** platforms in the **Add a connection** picker, in t
 ## Prerequisites
 
 - A **Salesforce Sandbox** with an Agentforce agent that is **activated**. An agent that exists but has never been turned on lists fine and then refuses to open a session — see [Troubleshooting](#troubleshooting).
-- A **Salesforce administrator** — you, or someone who can sign in while you wait. This is a one-time sign-in, not an ongoing role.
+- A **Salesforce administrator** — you, or someone who can sign in while you wait. This is a one-time sign-in, not an ongoing role, and you skip it entirely when you [reuse an org your workspace already authorized](#reuse-an-org-your-workspace-already-authorized).
 - Your org's URL, for example `https://myorg--dev.sandbox.my.salesforce.com`. Whatever is in your browser address bar works; TrustAI trims it to the org and shows you the host it will connect to.
 - A **Trust AI Project**. If you don't have one, start with [Your first 10 minutes in Trust AI](/tutorials/quickstart).
 
-You do **not** need a consumer key, a consumer secret, a certificate, or a private key. When the admin approves, TrustAI deploys its own **External Client App** into the org (named `TrustAI_Agent_Eval_…`) and keeps the credentials server-side.
+You do **not** need a consumer key, a consumer secret, a certificate, or a private key. When the admin approves, TrustAI deploys its own **External Client App** into the org and keeps the credentials server-side. TrustAI creates, names, and manages that app itself — you never see it in the connect flow.
+
+New connections also arrive ready to run against an unmodified agent: they verify identity conversationally rather than injecting a session variable a stock Agentforce agent rejects, and test data signs in as the agent connection, so there is no second credential form between connecting and running data-grounded tests.
+
+## Reuse an org your workspace already authorized
+
+A Salesforce org is authorized once for the whole workspace, not once per Project. Both connect routes below make the same offer, before either asks anyone to sign in, when the workspace already holds an admin authorization for an org you can reach — from this Project or from another one:
+
+> **Reuse a Salesforce connection you already have**
+> *"Your workspace already authorized this org. Reuse one here — no need to sign in or set it up again."*
+
+Each candidate is one org, listing the connection's name, the org host, how widely it is already used — **Already connected in your workspace**, or *"Already connected in your workspace, in 3 projects"* — and a **Connected** setup badge, since only a finished setup is offered. Beside each is a **Use this connection** button.
+
+**Use this connection** clones that connection into this Project, pointed at the same already-provisioned org, with no agent chosen yet. No administrator signs in, no second External Client App is deployed, and you land straight on the agent picker. The wizard pins the exact org you picked, so an older connection to the same host can't be saved against by accident.
+
+The panel appears only when there is something to reuse, and only offers orgs that finished setup and were made by admin authorization — an org still **Setting up**, waiting on **Needs admin**, or sitting at **Setup failed** is withheld, and so are the legacy sign-in methods. If reuse can't complete, the offer says so — *"We couldn't reuse that connection just now. Please try again, or connect the org directly."* — and the authorize path below is still there.
+
+For the workspace-wide view of which orgs exist and which Projects use each one, see [Manage Salesforce connections](/how-to/manage-salesforce-connections).
 
 ## Connect in chat with the Trust Agent
 
-The fastest route is to ask the [Trust Agent](/concepts/trust-agent) — try *"Connect my Salesforce Agentforce agent."* It completes the whole connection in the conversation: it first checks whether an agent is already connected, then opens a secure connection card. Nothing you type in the card is visible to the model or stored in the chat.
+The fastest route is to ask the [Trust Agent](/concepts/trust-agent) — try *"Connect my Salesforce Agentforce agent."* It completes the whole connection in the conversation: it first checks whether something is already connected, then opens a secure connection card. Nothing you type in the card is visible to the model or stored in the chat.
+
+Asking to connect and asking to *add another* agent are different requests, and the agent tells them apart — an existing connection no longer swallows a fresh-setup request.
 
 <Steps>
   <Step title="Enter your org URL">
     The card opens on **Your Salesforce org** (**Step 1 of 3**, with **Org · Sign-in · Review** as the progress chips). Paste your org URL into **Salesforce instance URL**. The card echoes the host it will use — *"We'll connect to `myorg--dev.sandbox.my.salesforce.com`"* — then click **Continue**.
 
-    If that org is already connected in this Project, the card says so and offers **Use this connection** instead of a second authorization. If it's connected in another of your Projects, it offers to reuse that connection here.
+    This step carries both reuse offers. If the workspace already authorized an org you can reach, the **Reuse a Salesforce connection you already have** panel is on screen before you type anything. If the org you type is already connected in *this* Project, the more specific notice **"You're already connected to this org"** replaces it, naming that connection and offering **Use this connection** alongside **Connect a new one**.
 
     **You should see:** the org preview line resolve to your Sandbox host, and **Continue** become clickable.
   </Step>
@@ -52,7 +72,7 @@ The fastest route is to ask the [Trust Agent](/concepts/trust-agent) — try *"C
   </Step>
 
   <Step title="Choose your agent">
-    A freshly provisioned connection has no agent selected yet, so the Trust Agent follows up with the in-chat agent picker. TrustAI lists the agents in that org — by name, never a raw id — and you pick the one to test. Your choice is saved onto the connection that was just created; nothing is reconnected.
+    A freshly provisioned connection has no agent selected yet, so the Trust Agent follows up with the in-chat agent picker. Agentforce agents discover themselves after the authorization returns. TrustAI lists them by name, never a raw id, and you pick the one to test. Your choice is saved onto the connection that was just created; nothing is reconnected.
 
     **You should see:** your org's agents listed by name, and the one you pick recorded against the connection.
   </Step>
@@ -64,47 +84,68 @@ The fastest route is to ask the [Trust Agent](/concepts/trust-agent) — try *"C
   </Step>
 </Steps>
 
+### What the Trust Agent does next
+
+Connecting is the first step of a guided setup, and the agent keeps going from there rather than handing you back an empty project:
+
+- **It starts reading your agent's make-up** — its topics, its actions, and the operating rules Salesforce itself declares for it — as a background capture you don't have to ask for. See [What happens after you connect](#what-happens-after-you-connect).
+- **Its next-step suggestion follows your project's real state**, re-read each turn rather than remembered from earlier in the conversation.
+- **When it's time to file [Requirements](/concepts/requirements)**, it drafts a curated list from what the connected agent actually does, shows every draft in the conversation, and files the whole batch under a **single approval card** — all-or-nothing, numbered exactly as you read them. There is no card per requirement and no scoping question first.
+
+You can also remove a connection from the chat; the agent confirms before it does.
+
 ## Connect from Project Settings
 
-The same connection, without the chat. On the create path this is a **two-step wizard**: authorize first, pick your agent second. There is no sign-in-method choice to make here — the admin-authorize path *is* the create path.
+The same connection, without the chat. On the create path this is a **two-step wizard**: authorize (or reuse) first, pick your agent second. There is no sign-in-method choice to make here — the admin-authorize path *is* the create path.
+
+<DeprecatedNotice
+  what="Key/secret and certificate sign-in for Salesforce"
+  instead="a one-time admin authorization, or reusing an org the workspace already authorized"
+  who="connections that already use them" />
+
+The three legacy modes have no create route at all: they appear only on the edit form of a connection that already uses one, and a default build offers no way back into that form.
 
 <Steps>
-  <Step title="Open the connection form">
-    In your Project, open **Project Settings**, select the **Connection** tab, and click **Add connection**. On **Add a connection**, choose **Salesforce Agentforce**.
+  <Step title="Open the connect wizard">
+    In your Project, open **Project Settings**, select the **Connections** tab, and click **Connect an agent**. On the platform picker, choose **Salesforce Agentforce**.
 
-    The platform is fixed from here: the form's header is a breadcrumb (**Connections › Add › Salesforce Agentforce**) with a **Change** link back to the picker, not a platform selector you set on the form.
+    The wizard runs inside the Connections tab, so it has one page header — **Connect an agent**, with *"Choose the platform your agent runs on, then give TrustAI what it needs to reach it. Once it's connected you can say where its test data lives."* — and one escape, **Back to connections**, present on every step. There is no breadcrumb, no separate **New connection** heading, and no per-step **Cancel**.
 
-    **You should see:** **New connection** with a **Salesforce Agentforce** chip, and exactly two fields — **Connection Name** and **Salesforce instance URL**.
+    The platform is fixed from here: it reads as a **Salesforce Agentforce** chip under the header, with a **Change** link back to the picker, not a selector you set on the form.
+
+    **You should see:** the header guidance switch to *"Give TrustAI what it needs to reach your Salesforce Agentforce agent…"*, and two fields — **Connection Name** and **Salesforce instance URL**.
   </Step>
 
-  <Step title="Name it, then authorize">
+  <Step title="Reuse, or name it and authorize">
     Give the connection a **Connection Name** you'll recognize later, like `Agentforce Sandbox`, and enter your org URL in **Salesforce instance URL**. TrustAI echoes the host it will connect to underneath.
 
-    Click **Authorize in Salesforce with an administrator account**. Salesforce opens in a new tab and the form tells you so: *"We've opened Salesforce in a new tab. Approve TrustAI with an administrator account — this page continues automatically once the connection is ready."*
+    If the **Reuse a Salesforce connection you already have** panel is on this step, clicking **Use this connection** finishes here and takes you to step 2 — no authorization, no admin. The clone carries the name of the connection you reused, not the one you typed. Otherwise, click **Authorize in Salesforce with an administrator account**. Salesforce opens in a new tab and the form tells you so: *"We've opened Salesforce in a new tab. Approve TrustAI with an administrator account — this page continues automatically once the connection is ready."*
 
     There is no **Save** on this step, and nothing to test yet — the connection is created in your org when the admin approves. The Salesforce tab closes itself when it's finished, and the form you started in advances to step 2 on its own.
 
-    **You should see:** the sandbox caution above the button, and **Cancel** as the only other control.
+    **You should see:** the sandbox caution above the button, and the reuse panel above that if your workspace has an org to offer.
   </Step>
 
   <Step title="Pick the agent and save">
     Step 2 opens with **Salesforce org connected — `myorg--dev.sandbox.my.salesforce.com`. Now choose the agent to test.** TrustAI runs **Find agents** for you against the saved connection, tells you how many it found, and lists them by name in **Agent** — pick yours. If discovery can't reach your org, **Enter agent ID manually** is still there as an escape hatch.
 
-    Leave **Run agent as** on its default — *Authenticated integration user (Employee Agent)* — unless your agent is a Service Agent, which runs as its own assigned user.
+    Leave **Run agent as** on its default — *Authenticated integration user (Employee Agent) (default)* — unless your agent is a Service Agent, which runs as its own assigned user.
 
     Click **Save changes**. (The button reads **Save changes**, not "Save connection": the connection already exists, and saving records your agent choice onto it rather than creating a second one.)
 
-    **You should see:** the connection listed on the **Connection** tab with its platform, and your chosen agent as the **Current agent version**.
+    **You should see:** **Back to connections** return you to the **Connections** tab with your connection on it as a card — its name, a **Salesforce Agentforce** chip, the org host, and a reachability pill.
   </Step>
 
   <Step title="Test the connection">
-    **Test Connection** sits beside **Save changes** on step 2, and on the connection's **Edit** form afterwards. TrustAI signs in to your org, lists its agents, and opens one real session against the agent you picked, then closes it. Nothing is sent to the agent, so the test costs no conversation and leaves none behind.
+    **Test Connection** sits beside **Save changes** on step 2. TrustAI signs in to your org, lists its agents, and opens one real session against the agent you picked, then closes it. Nothing is sent to the agent, so the test costs no conversation and leaves none behind.
+
+    Run it before you leave the wizard. A default build has no route back into a saved connection's form, so this is the pass where **Test Connection** is in front of you.
 
     **You should see:** **Connection verified**, or a specific line naming what stopped it.
   </Step>
 </Steps>
 
-<Frame caption="The whole round-trip from Project Settings, recorded against a real sandbox. The wait is compressed — the bootstrap genuinely takes about a minute, and the card reports what it is doing throughout ('Finishing secure connection', 'Minting credentials', 'Verifying the connection'). The approving admin's username is blurred; nothing else is altered.">
+<Frame caption="The Project Settings round-trip against a real sandbox. Recorded before the Connections redesign, so its opening leg shows the retired Connection tab and an Add connection button, it carries card chrome the wizard no longer renders, and it predates the reuse panel now on step 1. From the authorize hand-off onward — the Salesforce approval, the automatic return, picking the agent, Connection verified — it matches what ships. The wait is compressed; the card genuinely takes about a minute and reports what it is doing throughout ('Finishing secure connection', 'Minting credentials', 'Verifying the connection'). The approving admin's username is blurred; nothing else is altered.">
   <video controls muted playsInline className="w-full rounded-xl" src="/images/demos/d1-salesforce-authorize.mp4"></video>
 </Frame>
 
@@ -125,31 +166,45 @@ Where the three checks render as three rows depends on where you ran the test:
 
 A connection whose selected agent cannot open a session is not verified, however clean the first two checks were — every run launched against it would die with no session.
 
+## What happens after you connect
+
+### The agent's profile is captured for you
+
+Connecting queues a capture of the agent's [profile](/concepts/agent-profile) — its topics, its actions, and the operating rules Salesforce declares for it, shown in the platform's own words. You don't have to find a refresh action first.
+
+Two details are worth knowing:
+
+- **It reads the version that is actually live.** Capture resolves the org's active agent version and follows Salesforce's own planner-to-topic-to-action links, rather than assuming the highest-numbered one. When several versions exist and the active one can't be identified, it refuses rather than guessing, and an empty capture is never reported as a finished one.
+- **Each action's input parameters are captured when the org declares them** — the parameter name, its declared type, whether it's required, and any allowed values. Nothing is inferred: an action the org publishes no schema for says so rather than rendering an empty table that reads like "no parameters".
+
+On a default build the profile's live entry point is the Playground topbar; the Connections tab does not open it. See [Review an agent profile](/how-to/review-an-agent-profile).
+
+### Customize environment — the rest of the connection's setup
+
+Everything a connection needs after it exists lives on its card on the **Connections** tab, behind the **Customize environment** expander. It opens the card downward in place rather than navigating away.
+
+| Section | What it holds |
+| --- | --- |
+| **Test data stores** | One row per store, each opening a fly-in, plus **Add a store**. A Salesforce connection arrives with a default store — **This agent's Salesforce org** — that signs in as the agent connection itself. |
+| Reset behaviour | A sentence, not a control: *"Between tests: Removes only the records each test created."* Cleanup runs on every run and nothing offers to turn it off. |
+| **How many tests may run at once** | A number from 1 to 10, saved per connection when you leave the field or press Enter. Its helper reads *"Tests share this connection's test user; cleanup keeps runs isolated."* |
+| **Run tests as different users (permission sets)** | Salesforce only, and collapsed until you open it. Add a reusable test user per row — **Test user 1**, **Test user 2** — with **Add test user** and **Save test users**. With none added it reads **No additional test users yet**: *"Tests run as this connection's own user. Add one to run a scenario as a specific Salesforce user instead."* |
+
+**Remove** on the card is scoped to this Project. Its confirmation is **Remove this agent connection?**, and it says so: *"Connections to this Salesforce org in other projects stay unchanged. The Salesforce app stays installed in your org, so you can connect it again later."* To take the org itself back out of Salesforce, use **Disconnect** on [Connected orgs](/how-to/manage-salesforce-connections).
+
+### Traces settle after the conversation ends
+
+Salesforce publishes a conversation's execution trace on its own schedule, and Trust AI says so on screen rather than leaving you to guess:
+
+> The agent's platform has not published this conversation's execution trace yet. Traces usually land 11-13 minutes after a conversation ends.
+
+Grading waits, but not forever. An evaluation result whose checks need the trace shows *"Salesforce hasn't published this session's trace yet. TrustAI keeps checking for up to 30 minutes, then grades these checks automatically."* If nothing arrives in that window, the banner changes to *"Salesforce did not publish this session's trace within 30 minutes, so these checks could not be graded. The transcript checks below are unaffected."* The 30 minutes is the grading wait; it is not a claim about how long a trace takes.
+
 ## Where Agentforce sessions come from
 
 Agentforce sessions in Trust AI are the conversations **Trust AI drives**: simulations and evaluation runs against the live agent in your Sandbox.
 
 Historical import is a different thing and it is not available for Agentforce. Your connection does appear in the **Sync now** dropdown on the Sessions page, grouped under **Salesforce Agentforce** — but picking it reports that sync isn't supported for the platform and imports nothing. Pulling past production conversations works for AWS Bedrock connections only today.
-
-## Legacy sign-in methods
-
-<DeprecatedNotice
-  what="Key/secret and certificate sign-in for Salesforce"
-  instead="the one-time admin authorization above"
-  who="connections that already use them" />
-
-In **Project Settings**, the **Sign-in method** selector appears only when you **edit** an existing connection, where it offers, in order:
-
-- **Authorize TrustAI as an admin (recommended)**
-- **External Client App key + secret (legacy)**
-- **Certificate-based JWT (legacy)**
-- **Username + password (legacy)**
-
-Use it to keep an older connection working, or to move one onto the recommended path.
-
-The chat card is the one exception, and it is worth knowing so you can walk past it: on a **new** connection, its sign-in step carries a collapsed **Advanced / legacy sign-in options** link that reveals two of the legacy modes, labelled **Key and secret** and **Certificate (JWT)** there. Leave it collapsed. **Authorize TrustAI (recommended)** is already selected, and each legacy mode asks you to hand over credentials the admin authorization never needs.
-
-Secrets on the legacy modes stay write-only: a saved value shows as **Configured** with the placeholder `•••• configured — leave blank to keep existing`, and a blank field keeps what's already stored.
 
 ## Troubleshooting
 
@@ -168,14 +223,18 @@ Secrets on the legacy modes stay write-only: a saved value shows as **Configured
     *"TrustAI signed in, but the run-as user can't open the selected agent. The user is missing the agent's permission set."* Assign the selected agent's permission set to that user in Salesforce, then test again. The connection itself is fine — this is an org-side grant.
   </Accordion>
 
-  <Accordion title="Starting a session as the run-as user was refused">
-    *"TrustAI signed in, but starting a session as the run-as user was refused. The connected app isn't issuing named-user tokens yet, so the agent can't run as your chosen user."* Ask your Salesforce admin to turn on named-user token issuance for the External Client App used for this connection, then test again.
-  </Accordion>
-
   <Accordion title="Salesforce opened, but the form never continued">
-    The form advances when the authorization lands, so a form still sitting on step 1 means the approval didn't complete — a non-admin account, a cancelled consent screen, or a closed tab. Click **Authorize in Salesforce with an administrator account** again to restart it. If the kickoff itself fails, the reason appears inline above the button rather than as a silently dead click.
+    An authorization that was abandoned, declined, or that expired replaces the *"We've opened Salesforce…"* line rather than leaving it sitting there as a promise nothing can keep. An expired attempt reads *"That connection attempt timed out. Check the org URL and try again."*; anything else carries the reason Salesforce or the setup gave. The button relabels to **Try authorizing again** — click it to start over.
 
     In chat, the recovery is the same card: ask the Trust Agent to connect again and authorize from there.
+  </Accordion>
+
+  <Accordion title="A picture sent to the agent is refused">
+    *"This agent doesn't support uploads of this type."* The org is not entitled to image upload in Agentforce, so the turn fails and the message is never sent. This is an org-side entitlement, not a connection setting — ask your Salesforce administrator to enable image upload for the agent, then try again.
+  </Accordion>
+
+  <Accordion title="An occasional run fails and the next one works">
+    A token-exchange connection can lose a race at the token bridge under concurrency. Trust AI retries only that case, because it is positively transient; every permanent configuration fault still surfaces immediately rather than being retried into a slow failure. If a failure repeats, treat it as real and re-test the connection.
   </Accordion>
 
   <Accordion title="Sync now reports that sync isn't supported">
@@ -187,6 +246,7 @@ Connections, their platform config, and the connection test are also readable on
 
 ## Related reading
 
+- **[Manage Salesforce connections](/how-to/manage-salesforce-connections)** — the workspace-wide **Connected orgs** inventory, and Disconnect vs Delete
 - **[Projects](/concepts/projects)** — the workspace that owns the connection
 - **[Sessions](/concepts/sessions)** — what the driven conversations become
 - **[Agent Versions](/concepts/agent-versions)** — how the connected agent is tracked and pinned to an Evaluation

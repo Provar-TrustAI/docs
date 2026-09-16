@@ -1,10 +1,15 @@
 /**
- * Capture: Workspace Settings → Connections.
+ * Capture: Workspace Settings → Connected orgs.
  *
  * Output:
  *   ../images/workspace-settings-connections.png
- *     The Connections tab with its one connection row — org My Domain host,
- *     lifecycle badge, Used by, Sign-in, and the Disconnect / Delete pair.
+ *     The Connected orgs tab with its one connection row — org My Domain host,
+ *     the reachability pill (plus a setup badge when setup is unfinished),
+ *     Used by, Sign-in, and the Disconnect / Delete pair.
+ *
+ * The tab was renamed from "Connections" to "Connected orgs" at v2026.08.24.1
+ * so it stops colliding with a project's own Connections tab. The route is
+ * unchanged; only the strings this script asserts moved.
  *
  * ## Why this one does NOT use gotoSurface()
  *
@@ -20,9 +25,9 @@
  * re-implements the same guard by hand, and then some:
  *
  *   1. `access-center-panel-connections` — the panel testid the route's own tab
- *      contract owns. Present only when the Connections route actually matched.
- *   2. The tab strip's Connections tab must be the SELECTED one. A sibling tab
- *      route also renders the shell, so the panel alone is not proof.
+ *      contract owns. Present only when the route actually matched.
+ *   2. The tab strip's Connected orgs tab must be the SELECTED one. A sibling
+ *      tab route also renders the shell, so the panel alone is not proof.
  *   3. `workspace-connection-row` must exist — the empty state and the loading
  *      skeleton both satisfy the panel assertion, and neither is worth shipping.
  *   4. The row must name a real Salesforce host, carry a badge, and offer both
@@ -31,17 +36,25 @@
  *
  * ## What this instance actually holds
  *
- * One live `salesforce_agentforce` connection, `trustaidev`, pointed at
+ * One live `salesforce_agentforce` connection, pointed at
  * `provar--trustaidev.sandbox.my.salesforce.com`, authorized by admin token
- * exchange and used by the one project (`Acme refunds CSAT`). No fixture work
- * was needed — nothing on this surface renders placeholder text.
+ * exchange and used by the one project (`Provar Testing`). No fixture work was
+ * needed — nothing on this surface renders placeholder text.
  *
- * Its lifecycle badge reads **Needs admin**, and that is REAL, not a staging
- * artefact: the org-side agent isn't activated, so the last health probe came
- * back unreachable and `derive_salesforce_lifecycle_status` falls through to
- * `needs_admin` (services/gateway/src/domain/hosts/schemas.py). Turning that
- * badge green would mean forging a live-integration health state, so the shot
- * ships the state the instance is genuinely in and the caption names it.
+ * Its setup finished, so it shows NO setup badge — `unfinishedSetupStatus`
+ * suppresses `active` deliberately, because "Connected" is also the
+ * reachability pill's word and two verdicts using it would contradict each
+ * other (apps/web/src/lib/salesforce-connection-lifecycle.ts). What the row
+ * carries instead is the probe pill, and whichever of its four phrases the
+ * instance genuinely reports is the one that ships.
+ *
+ * ## The sidebar has to name a real project
+ *
+ * The rail's project switcher shows the LAST project visited, and this route
+ * is workspace-scoped, so a cold run leaves whatever was there before —
+ * including scratch projects named after a ticket, which must never reach a
+ * reader-visible image. The script visits the project it is about to talk
+ * about first, so the switcher names it.
  *
  * ## Viewport
  *
@@ -59,8 +72,34 @@
 import { expect, test } from "@playwright/test";
 import { settle } from "../lib/helpers";
 
-test("workspace settings connections tab", async ({ page }) => {
+/** The API this instance serves; the harness's own override is honoured. */
+const API_BASE = process.env.TRUSTAI_API_URL ?? "http://localhost:8000";
+
+/** The project listed under "Used by" — and the name the sidebar must show. */
+const USED_BY_PROJECT = process.env.TRUSTAI_CAPTURE_PROJECT ?? "Provar Testing";
+
+test("workspace settings connected orgs tab", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 760 });
+
+  // Seat the sidebar's project switcher on the project that actually uses the
+  // connection, so the shot never carries a scratch project's name.
+  const projects = await (
+    await page.request.get(`${API_BASE}/v1/projects`)
+  ).json();
+  const owner = (projects.items ?? []).find(
+    (project: { name: string }) => project.name === USED_BY_PROJECT
+  );
+  if (!owner) {
+    throw new Error(
+      `No project named "${USED_BY_PROJECT}" on this instance — the sidebar would name ` +
+        "whatever was visited last. Point USED_BY_PROJECT at the project under 'Used by'."
+    );
+  }
+  await page.goto(`/projects/${owner.id}/settings/connections`);
+  await page
+    .locator('[data-testid="connect-agent-action"]')
+    .waitFor({ state: "visible", timeout: 20_000 });
+
   await page.goto("/workspace/settings/connections");
 
   // (1) The route matched, not the SPA fallback.
@@ -76,10 +115,10 @@ test("workspace settings connections tab", async ({ page }) => {
     );
   }
 
-  // (2) Connections is the SELECTED tab — a sibling tab renders the same shell.
+  // (2) Connected orgs is the SELECTED tab — a sibling renders the same shell.
   await expect(
-    page.getByRole("tab", { name: "Connections" }),
-    "The Connections tab is not the selected tab — the shot would show a different panel"
+    page.getByRole("tab", { name: "Connected orgs" }),
+    "The Connected orgs tab is not the selected tab — the shot would show a different panel"
   ).toHaveAttribute("aria-selected", "true");
 
   // (3) A real row, not the empty state and not the loading skeleton.
@@ -121,13 +160,15 @@ test("workspace settings connections tab", async ({ page }) => {
     "No Delete button"
   ).toBeVisible();
 
-  // A lifecycle badge must be present. Which one is whatever the instance is
-  // genuinely in — asserting a specific status here would invite forging it.
-  const badge = row.getByText(
-    /^(Connected|Setting up|Needs admin|Setup failed)$/
-  );
-  await expect(badge, "The row shows no lifecycle badge").toBeVisible();
-  console.log(`lifecycle badge in frame: "${await badge.innerText()}"`);
+  // The reachability pill is always rendered; the setup badge only while setup
+  // still has something to say. Which phrase either shows is whatever the
+  // instance genuinely reports — asserting a specific one invites forging it.
+  const healthPill = row.locator('[data-testid="workspace-connection-health"]');
+  await expect(
+    healthPill,
+    "The row shows no reachability pill — that pill is always rendered, so this is a broken row"
+  ).toBeVisible();
+  console.log(`reachability pill in frame: "${await healthPill.innerText()}"`);
 
   // Nothing clipped: the card is a flex row that wraps rather than scrolls, but
   // prove the page itself is not scrolled sideways before shooting.
