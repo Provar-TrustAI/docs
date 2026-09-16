@@ -4,7 +4,7 @@ icon: "sliders-horizontal"
 description: "The boundary around one agent under evaluation — and the workspace-level resources every project draws on."
 ---
 
-A Project is the boundary around a single agent (or a small fleet of closely related agents) under evaluation. Sessions, Scenarios, Evaluators, Evaluations, and Annotations each belong to exactly one Project.
+A Project is the boundary around a single agent (or a small fleet of closely related agents) under evaluation. Sessions, Scenarios, Requirements, Evaluators, Evaluations, and Annotations each belong to exactly one Project.
 
 Some things deliberately do **not** stop at that boundary. People, teams, credits, the Trust Agent's skills, and an authorized Salesforce org are workspace-level: you set them up once and every Project draws on them. Knowing which is which is the fastest way to find a setting you can't locate — half of "where is this configured?" is really "is this project-scoped or workspace-scoped?"
 
@@ -12,12 +12,17 @@ Some things deliberately do **not** stop at that boundary. People, teams, credit
 
 | Scope | What lives there |
 | --- | --- |
-| **Project** | Sessions, Scenarios, Evaluators, Evaluations, Annotations, this Project's connections, and its own access grants |
+| **Project** | Sessions, Scenarios, Requirements, test data, Evaluators, Evaluations, Annotations, this Project's connections, and its own access grants |
 | **Workspace** | Members and identity, Teams, project access, credits, the Trust Agent's skills, and the Salesforce orgs Trust AI is authorized in |
 
-Project work happens under the Project you have selected in the sidebar. Workspace setup lives in **Workspace Settings**, which has six tabs: **Members**, **Teams**, **Project access**, **Credits**, **Connections**, and **General**.
+Project work happens under the Project you have selected in the sidebar. Workspace setup lives in **Workspace Settings**, which has six tabs: **Members**, **Teams**, **Project access**, **Credits**, **Connected orgs**, and **General**.
 
-A Project's own **Settings** page carries **General**, **Connection**, and **Members**.
+A Project's own **Settings** page carries three tabs: **General**, **Connections**, and **Members**.
+
+Two surfaces the Project boundary has grown are worth calling out, because both are easy to look for at the workspace level and neither lives there:
+
+- **[Requirements](/concepts/requirements)** — what this agent must do and must never do, with coverage computed against this Project's scenarios and evaluators. It has its own sidebar entry inside the Project.
+- **[Test data](/concepts/test-data)** — the records a scenario prepares, reads back, checks and cleans up. A plan is authored on the scenario; where those records live is set per connected agent, on **Settings → Connections**.
 
 <Tip>
   Agent versions are not a Project surface you manage by hand. They are discovered through a connection — the connection summary shows the **Current agent version** it's pointed at — and an Evaluation pins one when it runs. See [Agent Versions](/concepts/agent-versions).
@@ -40,7 +45,7 @@ In both cases you're answering one question: "Do these things deserve to share a
 
 ## Connecting an agent
 
-In **Settings → Connection**, **Add connection** opens a picker — "Choose the agent platform you want to connect to this project" — with four platforms:
+On **Settings → Connections**, **Connect an agent** opens a page of its own — "Choose the platform your agent runs on, then give Trust AI what it needs to reach it. Once it's connected you can say where its test data lives." — listing four platforms:
 
 <CardGroup cols={2}>
   <Card title="AWS Bedrock AgentCore" icon="cloud" href="/how-to/connect-agentcore">
@@ -59,16 +64,19 @@ In **Settings → Connection**, **Add connection** opens a picker — "Choose th
 
 A Project can hold several connections at once, and they are peers rather than alternatives. Ingestion, evaluation-time invocation, and agent-version discovery all flow through the connection the work belongs to.
 
+Each connected agent is a card on the tab, and **Customize environment** expands it in place: where that agent's test data lives, how its records are cleaned up between tests, how many tests may run against it at once, and — for Salesforce — the test users the tests run as. That is why a Project owns its test-data configuration rather than the workspace. See [Manage a project's connections](/how-to/manage-project-connections) for the tab itself — checking whether a connection is reachable, customizing its environment, and removing one.
+
 Classic **AWS Bedrock Agents** connections are the one exception: an existing one keeps working and stays editable, but the picker no longer offers it for a new connection.
 
 Connection secrets are write-only. Once saved, the field shows a **Configured** pill and the placeholder `•••• configured — leave blank to keep existing` — Trust AI never displays the value again.
 
-### Two connect in the chat, two in the form
+### Connect in the form, or ask the Trust Agent
 
-Ask the Trust Agent "help me connect my agent" and it starts by checking what is already connected, so you don't reconnect something that works. What happens next depends on the platform:
+All four platforms have a form on **Settings → Connections**. Two of them can also be connected without leaving a conversation.
 
-- **Claude Managed Agent and Salesforce Agentforce connect inside the conversation.** The Trust Agent opens a secure card. You never touch the connection form for either one. Credentials are typed into a secure field in that card — they never enter the transcript and are never read by the model.
-- **AWS Bedrock AgentCore and Conversational HTTP agents are set up in the form.** The Trust Agent points you to **Settings → Connection** rather than collecting those credentials in chat.
+Ask the Trust Agent "help me connect my agent" and it starts by checking what is already connected, so you don't reconnect something that works. For **Claude Managed Agent** and **Salesforce Agentforce** it then opens a secure card in the chat: credentials are typed into a secure field in that card — they never enter the transcript and are never read by the model. For **AWS Bedrock AgentCore** and **Conversational HTTP agents** it points you at **Settings → Connections** instead.
+
+Neither route is the "real" one. The in-chat card and the form create the same connection, and either can be used for the two platforms that offer both.
 
 ### Salesforce: an admin authorizes Trust AI
 
@@ -86,15 +94,15 @@ If a connection saves before an agent has been chosen, the Trust Agent opens an 
 
 Authorizing a Salesforce org is a workspace-level act, and this is the single most useful thing to know about connection scope: **you authorize an org once, not once per Project.**
 
-When you connect an org that your workspace already reached in another Project, the in-chat wizard offers to reuse it — "Reuse a Salesforce connection you already have", with a **Use this connection** button per org. Reusing points the current Project at the same already-provisioned org, with no second admin sign-in and no re-provisioning.
+When you connect an org that your workspace already reached in another Project, both routes offer to reuse it — the Salesforce step of **Connect an agent**, and the in-chat card — under the panel **"Reuse a Salesforce connection you already have"**, with a **Use this connection** button per org and an availability line reading **"Already connected in your workspace"**. Reusing points the current Project at the same already-provisioned org, with no second admin sign-in and no re-provisioning.
 
-**Workspace Settings → Connections** is where you see the result. Each org appears once — named by its My Domain host, never a raw id — with:
+**Workspace Settings → Connected orgs** is where you see the result. Each org appears once — named by its My Domain host, never a raw id — with:
 
 - **Used by** — the Projects that use that org
 - **Sign-in** — **Admin authorization**, **App key & secret**, **Certificate (JWT)**, or **Username & password**
 - Its connection status, and **Disconnect** or **Delete**
 
-**Disconnect** tears down the External Client App Trust AI deployed in the org, so it's offered only for connections Trust AI provisioned. A connection wired to an app your admin created offers **Delete** only. Both act on the org, not on one Project: each removes the connection from every Project listed under **Used by**. **Delete** leaves the org-side app in place so you can reconnect later; **Disconnect** does not.
+**Disconnect** tears down the External Client App Trust AI deployed in the org, so it's offered only for connections Trust AI provisioned. A connection wired to an app your admin created offers **Delete** only. The two reach different ends, and the difference is worth reading before you click either: **Delete** removes the connection from every Project listed under **Used by** and leaves the org-side app in place, so you can reconnect straight away; **Disconnect** removes the app from the org — which stops every Project that reuses it — but deletes only the one connection record that owns the app. See [Manage Salesforce connections](/how-to/manage-salesforce-connections).
 
 Both the reuse offer and the workspace list respect your access: you see only the Projects you can reach, and reuse candidates only for a Project you could edit.
 
@@ -105,25 +113,44 @@ Connections to the other three platforms have no equivalent — each belongs to 
 Access has two layers.
 
 - **Workspace membership** — people join through **Workspace Settings → Members**, where invitations are sent and managed. See [Administer workspace access](/how-to/administer-workspace-access). Identity is federated through your workspace's SSO identity provider.
-- **Per-Project grants** — a Project's **Settings → Members** tab shows the **Project access** panel: who can reach this Project, and whether each grant is direct or inherited from a team. **Add access** opens **Grant access**, where you give a person or a team **Viewer** or **Editor**.
+- **Per-Project grants** — a Project's **Settings → Members** tab shows the **Project access** panel: who can reach this Project, and whether each grant is direct or inherited from a team. **Add access** opens **Grant access**, where you give a person or a team **Viewer**, **Editor**, or **Admin**.
 
-Project **Owner** is conferred when a Project is created. It is not a grantable tier and it does not transfer.
+The Project tier ladder is **Viewer → Editor → Admin → Owner**, and the last rung behaves differently from the first three:
+
+| Tier | What it confers | How you get it |
+| --- | --- | --- |
+| **Viewer** | Read this Project's content. | Granted — directly, or through a team. |
+| **Editor** | Create, edit, and delete this Project's content, and edit the Project's name and description. | Granted — directly, or through a team. |
+| **Admin** | Everything an Editor can do, plus sharing the Project and archiving or restoring it. | Granted — directly, or through a team. |
+| **Owner** | Everything an Admin can do, plus handing the Project on to someone else. | Conferred at creation. Never granted — moved only by **Transfer ownership**. |
+
+A Project has exactly one Owner, so making somebody the owner necessarily un-owners whoever holds it now. That is why it is a transfer rather than a grant: **Transfer ownership**, in the Project access panel's footer, names both halves of the swap and steps the outgoing owner down to Admin. The owner's own row in the panel reads a static **Owner** badge with no tier picker and no revoke — their access is not managed through grants at all. See [Administer workspace access](/how-to/administer-workspace-access) for the dialog and who may open it.
 
 The Project boundary holds for **Admins** too: a workspace Admin who isn't a member of a Project doesn't automatically see its contents. Content access resolves against the Project's own grants. Managing access is a separate power from having it: an Admin can grant access to any Project in the workspace, including to themselves, but until that grant exists the Project's contents stay closed to them.
 
 **The workspace Owner is not an exception.** An Owner without a grant on a Project is denied that Project's content exactly as anyone else would be, and a Projects list is built from your grants — so an Owner holding no grants sees an empty list rather than the whole workspace. Owning the workspace is the power to *grant* yourself access, not to bypass the check. Read the boundary as "everyone, Owners included". See [Multi-tenancy](/concepts/multi-tenancy) for how that decision is enforced.
 
+One deliberate exception sits outside content: a workspace Owner or Admin can **transfer ownership** of a Project without holding a grant on it. That is the offboarding backstop — when a Project's owner leaves, somebody has to be able to re-home it — and it confers no ability to read the Project.
+
 ## Importing sessions
 
-The Sessions page header carries one primary control: **Sync now**, a dropdown listing the Project's connected agents grouped by source system. Picking an agent syncs that agent only — there is deliberately no "sync everything" action, so an import is always one deliberate choice.
+The Sessions page header carries two controls, **Sync now** and **Evaluate**. **Sync now** is a dropdown listing the Project's connected agents grouped by source system. Picking an agent syncs that agent only — there is deliberately no "sync everything" action, so an import is always one deliberate choice. **Evaluate** is not part of importing: it opens the evaluation launcher over the sessions your current view holds. See [Evaluations](/concepts/evaluations).
 
 ## Working with Projects
 
-**Create new project** in the Project switcher spins one up from a name and an optional description. Names are unique within a workspace; if one is taken, Trust AI asks you to choose another.
+**Create new project** in the Project switcher spins one up from a name and an optional description. Names are unique among the *live* Projects in a workspace; if one is taken, Trust AI asks you to choose another. A workspace **Guest** does not get the affordance at all — Guests work in the Projects they are invited to, and a workspace Admin creates new ones.
 
-**Settings → General** is where you rename a Project, edit its description, and — from the **Danger zone** — delete it permanently. Deletion asks you to type the Project's name to confirm.
+**Settings → General** is where you rename a Project and edit its description. Both are Editor-tier edits, so anyone who can author inside the Project can fix a typo in its name.
 
-Some Projects are created and owned by Trust AI itself. The one you're most likely to meet is **TrustAI Agent Sessions**: the auto-managed Project that collects conversations with the Trust Agent when a workspace turns capture on. **System-managed Projects cannot be deleted or archived** — the Danger zone is hidden on them and the API refuses the request. To remove one, turn capture off in **Workspace Settings → General**.
+### Archiving, not deleting
+
+The same page's second section is **Archive project**, and there is no Danger zone and no permanent-delete button anywhere on it. Archiving is reversible retention, in the app's own words: it hides the Project "from active views while preserving its history, settings, members, prompts, responses, and artifacts. Archived projects remain protected and can be restored." The confirm dialog is headed **Archive**, naming the Project, and asks you to type that name to confirm.
+
+Archiving and restoring are Admin-tier acts on the Project. To restore, open the Project switcher: archived Projects are listed under **Archived projects**, each row carrying a **Restore** action. The switcher stays available even when a workspace has no live Project left, so an archived Project is never stranded.
+
+One consequence worth planning around: archiving frees the Project's name for reuse, because uniqueness is enforced among live Projects only. If a new Project has since claimed the name, restoring the archived one is refused until one of them is renamed.
+
+Some Projects are created and owned by Trust AI itself. The one you're most likely to meet is **TrustAI Agent Sessions**: the auto-managed Project that collects conversations with the Trust Agent when a workspace turns capture on. **System-managed Projects cannot be archived** — the **Archive project** section is hidden on them and the API refuses the request. To remove one, turn capture off in **Workspace Settings → General**.
 
 Developers who want the underlying endpoints can find the full request and response shapes in the [API Reference](/api-reference).
 

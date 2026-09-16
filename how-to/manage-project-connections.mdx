@@ -4,4 +4,181 @@ icon: "plug"
 description: "Add, check, customize, and remove the agent connections a project tests from the Connections tab in project settings."
 ---
 
-This how-to covers the Connections tab in project settings. It is being written for the current release.
+A project's **Connections** tab holds the agents that project tests, one card per connection. Each card answers what the agent is, whether TrustAI can reach it right now, where its test data lives, how many tests may run against it at once, and — for Salesforce — which users those tests run as.
+
+One tab covers all of it. The two tabs that used to split this job, **Connection** and **Environments & Connections**, are gone, and the bookmarks that pointed at them land here instead.
+
+## Open the Connections tab
+
+Click **Project Settings** in the sidebar, then **Connections**. The project settings strip is **General · Connections · Members**, and **Connections** is the second tab. The route is stable, so a refresh or a bookmark lands back on it.
+
+<Frame caption="One connection card with Customize environment open. The name, the platform pill and the reachability pill sit on the card's top row; the expander below holds the connection's test data store, the fixed reset sentence, the concurrency field and the collapsed Salesforce run-as section.">
+  <img src="/images/settings-connections-tab.png" alt="Project settings on the Connections tab. The heading Connections is followed by the subtitle about agents this project tests, a link to Connected orgs, and a Connect an agent button. Below, a strip reads 1 agent connection, 1 test data store. A card headed Customer Service Assistant carries a Salesforce Agentforce pill, the host provar--trustaidev.sandbox.my.salesforce.com, a green Connected pill and a Remove button. Its open Customize environment section shows a Test data stores heading with Add a store, a row named This agent's Salesforce org, the sentence Between tests: Removes only the records each test created., a How many tests may run at once field set to 1, and a collapsed Run tests as different users (permission sets) row." />
+</Frame>
+
+The panel is headed **Connections** and subtitled *"The agents this project tests. Open one to say where its test data lives and how many tests may run against it at once."*
+
+Under that, once the project has at least one connection, a strip counts what you have — **"2 agent connections · 3 test data stores"**. It is suppressed while the tab is loading, when the tab cannot load, and when there is nothing connected yet, so it never reports a count it has not read.
+
+<Note>
+  Three retired routes redirect here and replace themselves in your history, so the back button still works: `/settings/connection` (the old **Connection** tab), `/settings/environments` (the old **Environments & Connections** tab) and `/settings/connection-setup` (the retired step-by-step wizard).
+</Note>
+
+## Connect an agent
+
+The fastest route is to ask the [Trust Agent](/concepts/trust-agent) — try *"Connect my Salesforce Agentforce agent."* It opens a secure connection card in the conversation and finishes the whole connection there. Nothing you type into that card reaches the model or the chat history.
+
+To do it yourself, click **Connect an agent**. It sits beside the tab heading, and a project with no connections yet repeats it as the hero action under **No agents connected yet** — *"Connect the agent you want to test. Once it's connected you can say where its test data lives."* Both go to the same place.
+
+The wizard opens inside the tab rather than replacing it. There is one page header, **Connect an agent**, and one escape, **Back to connections**, present at every step — no breadcrumb, no per-step Cancel. Step one asks you to *"Choose the platform your agent runs on, then give TrustAI what it needs to reach it"*; later steps name the platform you picked.
+
+Four platforms are on offer, each with its own guide:
+
+| Platform | Guide |
+|---|---|
+| **AWS Bedrock AgentCore** | [Connect an AWS Bedrock AgentCore agent](/how-to/connect-agentcore) |
+| **Salesforce Agentforce** | [Connect a Salesforce Agentforce agent](/how-to/connect-agentforce) |
+| **Claude Managed Agent** | [Connect a Claude Managed Agent](/how-to/connect-claude-managed-agent) |
+| **Conversational HTTP agent** | [Connect a Conversational HTTP agent](/how-to/connect-http-agent) |
+
+When the wizard finishes it returns you to this tab, with the new connection as a card.
+
+## Read a connection card
+
+The card's top row is the agent's name, a pill naming its platform, and — on the right — a reachability pill and **Remove**. Under the name sits one line of context: how the connection is reached, or, when something is wrong, what is wrong.
+
+A card answers two different questions, and it uses a different set of words for each. They are not interchangeable, and neither maps onto the other.
+
+### Is setup finished?
+
+A setup badge appears beside the name **only while setup still has something to say**. A connection that finished setting up shows no badge at all — the absence is the good news.
+
+| Badge | What it means |
+|---|---|
+| **Setting up** | TrustAI is still finishing setup, in your Salesforce org or on its own side. |
+| **Needs admin** | An administrator has to sign in and finish authorizing before this connection can be used. |
+| **Setup failed** | Setup did not complete. Connect the agent again to retry. |
+
+**Connected** is the fourth state in this set, and it is the one the card leaves unsaid.
+
+### Can TrustAI reach it right now?
+
+The reachability pill is always there, and it reports the last connection probe.
+
+| Pill | What it means |
+|---|---|
+| **Connected** | The last probe reached the agent. |
+| **Partly reachable** | The probe got through to some of what it checked, not all of it. |
+| **Can’t reach it** | The last probe failed. |
+| **Not checked yet** | Nothing has been probed. |
+
+Health is never guessed green: a connection nobody has probed says **Not checked yet** rather than borrowing a status from somewhere else.
+
+<Warning>
+  The Trust Agent's side rail carries its own health chip for the agent you are chatting about — **Not checked / Healthy / Degraded / Unreachable**. That is a third vocabulary on a third surface. Do not translate a rail chip into a card pill or the other way round; read each in its own words.
+</Warning>
+
+When both a setup badge and an unhappy reachability pill are on screen, the sub-line explains the setup problem rather than the probe — unfinished setup is the thing you can act on, and it usually explains the failed probe anyway.
+
+## Customize environment
+
+**Customize environment** is the expander on each card. It opens the card downward in place, so you never lose your position in the list, and it holds four things.
+
+### Test data stores
+
+A store is a place this agent's tests read and write data. **Add a store** appears beside the section heading, and again inside the empty state, and both open the same form; its submit button reads **Add store**.
+
+Only Salesforce ships a store automatically. A new Salesforce connection arrives with one named **This agent's Salesforce org**, which signs in with the agent connection's own credentials — nothing extra to enter. Every other platform starts with none and says so: *"No test data store — add one if this agent uses Salesforce or a database."* A Salesforce connection whose store has not been minted yet reads *"This connection's default store hasn't been created yet — add one to say where its test data lives."*
+
+Each store is a row summarizing itself in plain words — store type, where it points, how test data sits inside it, and the field every test record is tagged with. A Salesforce default store reads *"Salesforce org · this agent's org · test data alongside existing records, tagged ScenarioRunId\_\_c"*.
+
+Click a row to open **Test data store settings**, a fly-in with two sections: **How it connects** (**Store type**, **Signs in as**) and **Where test data goes** (where records land, and the field they are tagged in). A store that inherits the connection's sign-in offers **Use separate credentials** to give it its own; one that already has its own offers **Edit this store**. A store that came with the agent connection cannot be removed — a connection with no store simply runs no test data.
+
+For what a store is for and how a scenario uses one, see [Test data](/concepts/test-data).
+
+### What happens between tests
+
+Under the stores, one sentence: **"Between tests: Removes only the records each test created."**
+
+That is a statement, not a setting. There is no chooser, no toggle, and no way to turn cleanup off — the engine removes exactly the rows a test created and leaves everything else alone. Read it as the guarantee it is.
+
+<Note>
+  A scenario's own test data plan states its cleanup in a different sentence, about the records that plan seeded as well as the ones the test created. The two sentences describe two scopes and are deliberately worded differently. Don't read either as a paraphrase of the other — see [Test data](/concepts/test-data).
+</Note>
+
+### How many tests may run at once
+
+**How many tests may run at once** takes a number from **1** to **10**. It saves when you leave the field or press Enter — never on every keystroke — and **Saving…** appears beside the field while the write is in flight. A connection that has never had the setting reads **1**.
+
+The helper under it says why the number matters: *"Tests share this connection's test user; cleanup keeps runs isolated."* Raising it runs more conversations against the same agent at the same time.
+
+<Note>
+  A Salesforce connection also carries a separate **Default conversations at once** setting, which is how many conversations an *evaluation* opens in the org at once by default. Do not read it as this field under another name — they are two different settings, and changing one does not change the other.
+</Note>
+
+### Run tests as different users (Salesforce)
+
+The last section is collapsed, and appears only on a Salesforce Agentforce connection that signs in as a named user: **Run tests as different users (permission sets)**.
+
+Add a reusable Salesforce user here and a scenario can pick it by name, so you can test how the agent behaves for a read-only support rep versus a manager. Until you add one, the section reads **No additional test users yet** — *"Tests run as this connection's own user. Add one to run a scenario as a specific Salesforce user instead."*
+
+<Steps>
+  <Step title="Add a user">
+    Click **Add test user**. The new row is headed **Test user 1** (then **Test user 2**, and so on) and takes three values: a display name, the Salesforce username the agent signs in as, and a short reference key a scenario uses to select it — letters, numbers, dots, underscores or hyphens, no spaces.
+  </Step>
+  <Step title="Save">
+    Click **Save test users**. Every row must be complete and every reference key and username unique, or the button stays disabled. A save confirms with *"Saved these run-as users."*; a failure reads *"We couldn't save those users. Try again."* and keeps your rows.
+  </Step>
+</Steps>
+
+You can hold up to **20** test users on one connection.
+
+<Note>
+  Two fields named **Default test user** and **Additional test users (permission sets)** exist on the Salesforce connection form, but they render only for a connection using one of the legacy sign-in methods, and there is no door to that form from this tab. On a connection made the current way — a one-time admin authorization — the section above is the whole story.
+</Note>
+
+## Remove a connection
+
+**Remove** is at the right of the card's top row. It asks first, under the title **Remove this agent connection?**, and the body names what survives:
+
+> This removes **&lt;connection name&gt;** and its test data setup from this project only. Connections to this Salesforce org in other projects stay unchanged. The Salesforce app stays installed in your org, so you can connect it again later. You can't undo this.
+
+A non-Salesforce connection gets the same promise in its own words — other projects are untouched, and nothing is removed from the service that hosts the agent, so you can connect it again later.
+
+Confirm with **Remove connection**. Removing a connection also archives the agent versions it provided, so the Playground and the evaluation launcher stop offering agents that could only fail.
+
+## What is not on this tab
+
+- **There is no Edit.** A saved connection's own settings — credentials, sign-in method, the agent it points at — have no edit door on this surface. Removing and connecting again is the shipped path.
+- **There is no Agent Profile entry point.** A connection's [Agent Profile](/concepts/agent-profile) is opened from the **Playground** topbar, not from a card here. See [Review an Agent Profile](/how-to/review-an-agent-profile).
+
+## Connected orgs: the workspace picture
+
+This tab is one project's agents. The workspace has a second, different surface, linked from under the subtitle: *"Every Salesforce org your workspace has connected, and the projects using each one, is listed under Connected orgs."*
+
+**Connected orgs** is the fifth tab in **Workspace Settings**, and it lists Salesforce orgs — one row per org, the projects using each, how it signs in, and the two ways to remove it. Neither list is a subset of the other: an org authorized once for the workspace can be reused by several projects, and an agent connected here is set up in this project. Only Salesforce has that workspace-wide scope; the other three platforms belong to the project they were created in.
+
+The link carries this project with it, so the way back from **Connected orgs** returns you here rather than to whichever project happens to be listed first. For what lives on that tab, see [Manage Salesforce connections](/how-to/manage-salesforce-connections).
+
+The agent a connection points at is what an evaluation pins as its [Agent Version](/concepts/agent-versions).
+
+## Who can do what
+
+{/* ACCURACY-AUDIT-PENDING */}
+Access follows your project tier, and the tiers do not all reach the same actions here. Removing a connection asks for more than changing one, because removing is what disposes of a credential.
+
+| Task | Project tier |
+|---|---|
+| See the tab, the cards and their stores | **Viewer** |
+| Connect an agent, find agents, test a connection | **Editor** |
+| Add or change a test data store, set how many tests may run at once, save test users | **Editor** |
+| Remove an agent connection | **Admin** |
+
+A project's **Owner**, and a workspace **Owner**, reach all of it.
+
+## When the tab cannot load
+
+Two failures read differently, and the difference matters.
+
+- **"You don't have access to these connections"** — *"This project's connections are visible to the people a workspace admin has given access. Ask an admin to add you, then try again."* Nothing is broken; you have not been granted the project.
+- **"Couldn't load your connections"** — *"We reached the workspace but the connection registry didn't respond. Your connections are safe — this is a display problem."* Click **Try again**. Your connections are still there; the tab could not read them.
