@@ -14,13 +14,18 @@ A profile is a **record**, not a probe. It was captured at a point in time again
 
 ## What a profile captures
 
-A profile records three kinds of fact about a build:
+A profile records four kinds of fact about a build:
 
 - **Identity and behavior** — how the agent presents itself, and how it's configured to behave.
-- **Tools** — the actions it exposes, each with the schema it advertised at capture time.
+- **Declared rules** — the operating rules the connected platform publishes for this agent, carried word for word and evidenced back to the exact place each one was read from. They render as **Critical behavioral rules**. Nothing is summarized into a rule: a platform that publishes a policy document has that document ride along as a source instead, because splitting a document into rules would be invention.
+- **Tools** — the actions it exposes, each with the inputs it published at capture time and the platform's own answer to *does this action ask the person first?*
 - **Knowledge sources** — the material it can draw on to answer.
 
-Tool schemas are worth a special note. Capture stores the exact bytes it recorded, content-addressed alongside the revision, and reading a schema later serves **those** bytes back. The provider is never re-contacted, so a schema you read today cannot quietly have changed underneath a review you did yesterday.
+Where the catalog groups into subject areas, the profile also carries **Topics this version covers**. A platform that declares its own groupings — Salesforce Agentforce does — has them carried across one for one; otherwise the topics are inferred by grouping the agent's own actions. The section names which of the two you are reading, and it is simply absent when nothing groups.
+
+Tool inputs are worth a special note. Capture stores the exact bytes it recorded, content-addressed alongside the revision, and reading them later serves **those** bytes back. The provider is never re-contacted, so an input contract you read today cannot quietly have changed underneath a review you did yesterday.
+
+The confirm gate has three answers, never two: **Asks the person first**, **Runs without asking**, and **Not published by the platform**. The third is not a quiet "no" — it means the platform never said, which is a different fact to plan an approval or a decline scenario around.
 
 ## The versioned unit is the revision
 
@@ -47,6 +52,8 @@ The profile surface is built around one commitment: **absence is always a named 
 
 ### Lifecycle
 
+You rarely start a capture by hand. Connecting an agent queues its first profile capture automatically, in the background, so a build is usually already capturing — or already captured — by the time you go looking. A queue that could not be placed never blocks the connection; the capture is still there to request from the profile panel.
+
 A capture moves through five states, and the pill reads exactly:
 
 | Pill | Means |
@@ -57,7 +64,9 @@ A capture moves through five states, and the pill reads exactly:
 | **Profile failed** | Capture ran and didn't succeed |
 | **Profile out of date** | A profile exists, but the build has moved on |
 
-One label deliberately differs by location. A connection's version row reads **Profile available**, while the profile fly-in's own header reads **Version-pinned profile** — the header names the pinning contract rather than repeating the entry point's status. They're describing the same healthy profile from two vantage points; it isn't an inconsistency to be reconciled.
+One outcome deliberately moved out of the success column. A Salesforce Agentforce capture that reached the org but read no tools and no operating instructions is recorded as **Profile failed**, not as an empty profile stamped ready — an identity-only record presented as complete is worse than no record at all. The failure names the fix rather than the fault: check that the connected user can read the agent's active version and its topics and actions, then capture again.
+
+One label differs by vantage point. **Profile available** is the capture lifecycle's own word for a healthy profile; the profile fly-in's header reads **Version-pinned profile** instead, naming the pinning contract rather than repeating a status you have already clicked through. Same healthy profile, two vocabularies — and since the fly-in is where a profile opens, **Version-pinned profile** is the one you actually see.
 
 ### Coverage
 
@@ -90,12 +99,15 @@ Capability discovery reaches **three** platforms:
 
 Anything else, including **AWS Bedrock AgentCore**, isn't profiled. An AgentCore connection says so directly — *"Agent profiling isn't available for this connection yet."* — and offers no retry, because retrying wouldn't change the answer. That's a platform limit, not a failure to work around.
 
+Salesforce Agentforce capture reads through the same admin authorization every new connection is created with, records each action's declared inputs, and reads the agent version that is actually live in the org. Where several candidate versions exist and the live one can't be identified, capture says so rather than guessing at the highest-numbered one — a profile of the wrong version would be a confident, wrong answer.
+
 A connection on a supported platform can still come back unsuccessful — an unreachable endpoint, a half-configured connector, missing credentials. Those are **Profile failed**, they carry a plain-language reason, and they *are* worth retrying.
 
 ## Where you find one
 
-- **A connection card's Current agent version row** — the profile's lifecycle pill sits with the version it describes; click through to open it.
-- **The Playground topbar** — the info button opens the profile for the agent you're talking to.
+**The Playground topbar.** Open the [Playground](/concepts/playground), pick the build in the agent picker, and press the info button beside it — its tooltip reads **Agent profile**. The profile opens as a fly-in over the conversation, so you never lose your place, and **Esc** closes it.
+
+That is the only door at this release. A connection card used to carry a row that opened the profile beside the build it describes, but that row belonged to the retired two-tab connection settings; the single **Connections** tab that replaced them has no profile entry point yet.
 
 ## Next step
 
