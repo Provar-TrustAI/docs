@@ -14,7 +14,7 @@ This is the on-ramp for a team whose agent runs on **Salesforce Agentforce**. It
   Two different "agents" meet on this page. The **Agentforce agent** you're connecting is *your* agent — the one under test, tracked as an [Agent Version](/concepts/agent-versions). The **Trust Agent** is the in-app assistant that helps you do the connecting. They share a word and nothing else.
 </Note>
 
-<Frame caption="The whole on-ramp in one sitting — an empty workspace, the connection wizard, and a first conversation with the connected agent. Voiced walkthrough, about three minutes.">
+<Frame caption="The whole on-ramp in one sitting — an empty workspace, the connection wizard, and a first conversation with the connected agent. Voiced walkthrough, about three minutes. Two legs have moved since it was recorded: it opens on the retired Connection tab rather than today's Connections tab and its Connect an agent action, and the chat it ends on has different starter prompts. The middle — authorize in Salesforce, the automatic return, picking your agent, Connection verified — is what ships.">
   <video controls playsInline className="w-full rounded-xl" src="/images/demos/get-started-walkthrough.mp4"></video>
 </Frame>
 
@@ -58,7 +58,9 @@ Work through this before you open the connection form. A missing item shows up l
 
 ### What TrustAI deploys
 
-You hand over no consumer key, consumer secret, certificate, or password. When your administrator approves, TrustAI deploys that External Client App — named `TrustAI_Agent_Eval_<suffix>` — into the org, along with a permission set that authorizes the run-as user for it. TrustAI creates, names, and manages that app itself.
+You hand over no consumer key, consumer secret, certificate, or password. When your administrator approves, TrustAI deploys that External Client App into the org, along with a permission set that authorizes the run-as user for it. TrustAI creates, names, and manages that app itself — you never see it in the connect flow.
+
+That deployment happens on the **first** authorization of an org. A second Project pointed at the same org reuses the authorization the workspace already holds, so no admin signs in and no second app is deployed — see Step 1 below.
 
 Removing the connection later is two different actions with different blast radii — read [Manage Salesforce connections](/how-to/manage-salesforce-connections) before you use either.
 
@@ -67,14 +69,24 @@ Removing the connection later is two different actions with different blast radi
 The fastest route is to ask the Trust Agent; the steps below are the manual path, in short. Full detail: [Connect a Salesforce Agentforce agent](/how-to/connect-agentforce).
 
 <Note>
-  *Ask the Trust Agent:* "Connect my Salesforce Agentforce agent." It checks whether something is already connected, asks for your org URL, and hands you the authorization card. You don't name a run-as user on this path — the connection runs as the administrator who authorizes it.
+  *Ask the Trust Agent:* "Connect my Salesforce Agentforce agent." It checks whether something is already connected, asks for your org URL, and hands you the authorization card — or, if your workspace already authorized that org, offers to reuse it instead of signing anyone in. You don't name a run-as user on this path: a new authorization runs as the administrator who approves it.
 </Note>
 
 <Steps>
   <Step title="Start a connection">
-    In **Project Settings → Connection**, click **Add connection** and choose **Salesforce Agentforce**. Give the connection a **Connection Name** you'll recognize later — "Agentforce Sandbox" beats "Salesforce 1" — and enter your org's URL in **Salesforce instance URL**. There is no sign-in method to choose: admin authorization is how a Salesforce connection is created.
+    In **Project Settings**, open the **Connections** tab and click **Connect an agent**, then choose **Salesforce Agentforce**. The wizard runs inside that tab: one header reading **Connect an agent**, and **Back to connections** as the way out of any step.
+
+    Give the connection a **Connection Name** you'll recognize later — "Agentforce Sandbox" beats "Salesforce 1" — and enter your org's URL in **Salesforce instance URL**. There is no sign-in method to choose: authorizing as an admin is how a **new** org connection is created.
 
     **You should see:** the host Trust AI will use echoed back under the field.
+  </Step>
+
+  <Step title="Reuse an authorization, if there is one">
+    If your workspace has already authorized this org — in this Project or another one you can reach — this step offers it before it asks anyone to sign in: **Reuse a Salesforce connection you already have**, with **Use this connection** beside each org.
+
+    Take it. Reusing clones the connection into this Project pointed at the same org, with no agent chosen yet, so you skip straight to picking your agent. No administrator signs in, and no second External Client App is deployed. If there is nothing to reuse, this panel doesn't appear at all — carry on with the next step.
+
+    **You should see:** either the reuse panel with your org listed, or the authorize button on its own.
   </Step>
 
   <Step title="Authorize once, in Salesforce">
@@ -86,7 +98,7 @@ The fastest route is to ask the Trust Agent; the steps below are the manual path
   </Step>
 
   <Step title="Pick your agent">
-    Trust AI lists the Agentforce agents in the org by name — pick yours in **Agent**. If nothing is listed, click **Find agents** to run the search again. Leave **Run agent as** on its default unless your agent is a Service Agent.
+    Trust AI lists the Agentforce agents in the org by name — pick yours in **Agent**. If nothing is listed, click **Find agents** to run the search again. Leave **Run agent as** on its default — *Authenticated integration user (Employee Agent) (default)* — unless your agent is a Service Agent.
 
     **You should see:** your agent listed by name rather than by an identifier you had to look up.
   </Step>
@@ -94,18 +106,21 @@ The fastest route is to ask the Trust Agent; the steps below are the manual path
   <Step title="Test, then save">
     Click **Test Connection** first. Trust AI signs in, lists your agents, and opens and immediately closes one real session against the agent you picked — it sends no message, so the test costs no agent turn. The form reports a single summary line; for the three checks behind it, and the exact message and fix for each failure, see [What the connection test checks](/how-to/connect-agentforce#what-the-connection-test-checks).
 
-    Then click **Save changes**. Saving records your agent choice and closes the form, returning you to the **Connection** tab — which is why you test first, since **Test Connection** lives on that form.
+    Then click **Save changes**. Saving records your agent choice, and **Back to connections** returns you to the **Connections** tab — which is why you test first, since **Test Connection** lives on the wizard's step and a default build offers no route back into a saved connection's form.
 
-    **You should see:** **Connection verified** from the test, then your connection listed on the **Connection** tab once you save. Workspace Settings → **Connections** shows the org with lifecycle **Connected** and sign-in **Admin authorization**.
+    **You should see:** **Connection verified** from the test, then your connection on the **Connections** tab as a card — its name, a **Salesforce Agentforce** chip, the org host, and a green **Connected** reachability pill. Workspace Settings → **Connected orgs** shows the org with sign-in **Admin authorization**; a finished setup shows no setup badge there, just that same reachability pill.
   </Step>
 </Steps>
 
 ## Watch the connection end to end
 
-The wizard leg of this page — authorize, the hand-off to Salesforce, the automatic return, picking an agent, **Connection verified** — is recorded on the how-to: [watch it there](/how-to/connect-agentforce#connect-from-project-settings). The walkthrough video above covers the same ground in the flow of the whole setup.
+The wizard leg of this page — authorize, the hand-off to Salesforce, the automatic return, picking an agent, **Connection verified** — is recorded on the how-to: [watch it there](/how-to/connect-agentforce#connect-from-project-settings). That recording predates the Connections tab too, so read its caption: the authorize leg is accurate, the approach to it has moved. The walkthrough video above covers the same ground in the flow of the whole setup.
 
 ## What to expect after connecting
 
+- **The Trust Agent keeps going.** Connecting is the first step of a guided setup, not the end of one. It starts a background read of your agent's make-up — its topics, its actions, and the operating rules Salesforce declares for it — so you don't have to go looking for a capture action. See [Review an agent profile](/how-to/review-an-agent-profile). Two honest limits at this release: the agent's source instruction text does not cross the platform's API boundary, and exact action input schemas are unavailable for newer-generation Agentforce agents, which is why tool-schema coverage there reads **Partial**.
+- **It drafts your first [Requirements](/concepts/requirements) from what your agent actually does.** Every draft is shown in the conversation, and the whole batch files under a single approval card — all-or-nothing, numbered as you read them. Its next-step suggestion follows your project's real state each turn rather than a fixed script.
+- **A stock agent works without extra setup.** New connections verify identity conversationally rather than injecting a session variable an unmodified Agentforce agent rejects, and test data signs in as the agent connection itself, so nothing asks you for a second set of credentials.
 - **Sessions come from Trust AI driving your agent** — observe-only explorations, simulated [Scenarios](/concepts/scenarios), and evaluation runs. Each lands in the Project as a [Session](/concepts/sessions). Historical import of past production conversations isn't available for Agentforce today: **Sync now** lists your Agentforce agent, then reports that sync isn't supported for the platform.
 - **Step-level trace evidence needs extra setup in Salesforce.** To see the agent's internal steps rather than just the transcript, more has to be turned on org-side than the connection itself needs. Where it works, Data 360 is live and **Agentforce Session Tracing** and **Audit and Feedback** are on — Trust AI doesn't check for any of these and no message names them, so confirm with your Salesforce admin. {/* ACCURACY-AUDIT-PENDING: Data 360 provisioned and live, Agentforce Session Tracing, and Audit and Feedback are required for step-level trace evidence — attested only by an engineering runbook, with no code check or user-facing message. Verify against the app on the release tag */}
 - **Traces settle late.** Salesforce publishes trace data on its own schedule — expect roughly 11 to 13 minutes, typically, before a run's step evidence is complete. Salesforce does not backfill sessions from before tracing was turned on.
