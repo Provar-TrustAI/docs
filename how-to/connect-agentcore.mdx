@@ -9,7 +9,7 @@ This how-to connects an **AWS Bedrock AgentCore** agent to a Trust AI [Project](
 - Your AgentCore agent's conversations import into the Project as [Sessions](/concepts/sessions) — on demand with **Sync now**, or automatically if you set up streaming
 - The connected agent appears as an [agent version](/concepts/agent-versions) you can pick when you launch an Evaluation, and on each session's Details
 
-AgentCore is one of four platforms in the **Add connection** picker, alongside [Salesforce Agentforce](/how-to/connect-agentforce), [Claude Managed Agent](/how-to/connect-claude-managed-agent), and [Conversational HTTP agent](/how-to/connect-http-agent). Each has its own setup path and its own guide; this page covers AgentCore only.
+AgentCore is one of four platforms in the **Connect an agent** picker, alongside [Salesforce Agentforce](/how-to/connect-agentforce), [Claude Managed Agent](/how-to/connect-claude-managed-agent), and [Conversational HTTP agent](/how-to/connect-http-agent). Each has its own setup path and its own guide; this page covers AgentCore only.
 
 Before you start, it's worth asking the [Trust Agent](/concepts/trust-agent) whether an agent is already connected — try *"Is an agent connected to this project?"* It checks the project's connected agents and tells you what it finds, so you don't reconnect something that already works. The AgentCore connection itself is made in a guided wizard in Project Settings, described below.
 
@@ -19,9 +19,13 @@ Before you start, it's worth asking the [Trust Agent](/concepts/trust-agent) whe
   This setup creates a **cross-account IAM role** that Trust AI assumes to reach your AWS account, protected by an External ID baked into the setup package. Coordinate with whoever owns AWS security in your team before creating the role. Use the setup package the wizard generates — don't hand-author the policies.
 </Warning>
 
+<Note>
+  Connections used to live on two separate project settings tabs. They don't any more: the settings strip reads **General · Connections · Members**, and an old link or bookmark to either retired tab lands on **Connections** instead of a dead page.
+</Note>
+
 ### The wizard does not save your place
 
-The setup wizard holds everything in the page: the region you typed, the role ARN you pasted, and which of the three steps you're on. Leaving the Connection tab — opening another settings tab, going to Sessions, closing the browser tab — drops all of it. When you come back you get step one again, with the region reset to its `us-east-1` default and the role ARN gone. There is no draft and no resume.
+The setup wizard holds everything in the page: the region you typed, the role ARN you pasted, and which of the three steps you're on. Leaving it — **Back to connections**, another settings tab, Sessions, closing the browser tab — drops all of it. When you come back you get step one again, with the region reset to its `us-east-1` default and the role ARN gone. There is no draft and no resume.
 
 That matters because getting a role ARN means waiting on an AWS admin, which can take hours or days. So plan the setup as **two visits**:
 
@@ -42,9 +46,11 @@ Nothing is lost by walking away after the first visit — the package is the onl
 
 <Steps>
   <Step title="Open the setup wizard">
-    In your Project, open **Project Settings**, select the **Connection** tab, and click **Add connection**. On the "Add a connection" picker, choose **AWS Bedrock AgentCore**.
+    In your Project, open **Project Settings**, select the **Connections** tab, and click **Connect an agent**. The picker opens in place, headed **Connect an agent**, with one card per platform. Choose **AWS Bedrock AgentCore**.
 
     **You should see:** a "Connect your AgentCore agent" pane with three progress chips — **Region**, **AWS setup**, **Role ARN**. The wizard walks you through one step at a time.
+
+    The wizard stays inside the Connections tab for the whole flow: there is no breadcrumb and no separate heading of its own, and the one way out of any step is **Back to connections** in the page header. The AgentCore branch carries no Cancel button — that escape is it.
   </Step>
 
   <Step title="Enter the region">
@@ -69,7 +75,7 @@ Nothing is lost by walking away after the first visit — the package is the onl
   </Step>
 
   <Step title="When the ARN arrives, return to the Role ARN step">
-    Re-open **Project Settings → Connection → Add connection → AWS Bedrock AgentCore**, enter the same **region** again, click **Continue**, then click **I have the role ARN**. That puts you on the **Role ARN** step, where the rest of the setup happens in one pass.
+    Re-open **Project Settings → Connections → Connect an agent → AWS Bedrock AgentCore**, enter the same **region** again, click **Continue**, then click **I have the role ARN**. That puts you on the **Role ARN** step, where the rest of the setup happens in one pass.
   </Step>
 
   <Step title="Paste the role ARN and check access">
@@ -81,7 +87,7 @@ Nothing is lost by walking away after the first visit — the package is the onl
     - **Choose the agent to connect** — the account has multiple AgentCore runtimes. Pick the one this Project should track; each runtime carries a **Ready** or **Needs review** badge. A connection tracks exactly one runtime — add another connection for a second agent.
     - **AWS role needs an admin update** — the role is reachable but missing required access. The pane lists the exact missing IAM actions as chips. Send the setup package to your admin again, then click **Check access** to recheck.
     - **AWS couldn't assume this role** — double-check the role ARN, the AWS account number, and that the role's trust policy lets Trust AI assume it.
-    - **Role connected, no ready agent found yet** — the role works but no runtime is ready. You can click **Save role connection** now and return to Connection settings after an AgentCore runtime and Memory are ready.
+    - **Role connected, no ready agent found yet** — the role works but no runtime is ready. You can click **Save role connection** now and come back to the Connections tab after an AgentCore runtime and Memory are ready.
 
     One guardrail to know about: the wizard rejects AWS SSO reserved roles outright, and warns on roles that look person-bound (names containing things like `sso`, `federated`, or `personal`). Saved connections need a dedicated Trust AI cross-account role protected by an External ID — a role tied to a person signing in won't work.
 
@@ -99,11 +105,22 @@ Nothing is lost by walking away after the first visit — the package is the onl
 
 ## What the saved connection shows
 
-Back on the **Connection** tab, the saved connection carries two things worth knowing about.
+**Back to connections** — or finishing the wizard — returns you to the **Connections** tab, where the agent is now a card. It leads with the name you gave it and an **AWS Bedrock AgentCore** chip, and a sub-line underneath names the runtime and region this connection tracks.
 
-**Current agent version.** A row on the connection card names the agent version this connection tracks and opens its [Agent Profile](/concepts/agent-profile). For AgentCore that panel opens on the never-generated empty state — *"No profile has been generated for this agent build yet."* — with a **Generate profile** button, exactly like any other platform. Press it and the capture comes straight back as *"Agent profiling isn't available for this connection yet."*, a plain statement with no retry offered. Automatic capability discovery isn't implemented for AgentCore, so a capture could never succeed — this is a platform limit, not a failure to work around. Nothing else about the connection is affected.
+The card answers two different questions in two vocabularies, and they are not interchangeable:
 
-**AgentCore connection.** A panel summarising what's ready now for the project: **Agent connected**, and **Simulations and evaluations** — the second reads **Ready** once the connection has both a runtime and a working sign-in, and **Needs setup** until then. Its next step points you at the Sessions sync, which this panel calls **Sync latest** — the button in the Sessions header is labelled **Sync now**. Same action, two labels.
+- **Is setup finished?** A setup badge — **Setting up**, **Needs admin** or **Setup failed** — shown only while setup still has something to say. A connection that finished setting up carries no badge at all; the absence is the good news. While a badge is there, the sub-line carries its detail instead of the coordinate.
+- **Can Trust AI reach it right now?** A reachability pill — **Connected**, **Partly reachable**, **Can’t reach it** or **Not checked yet**. A connection nobody has probed reads **Not checked yet**; health is never fabricated green.
+
+Two controls sit on the card. **Customize environment** expands it downward in place — where this connection's test data lives, how it resets between tests, and how many tests may run against it at once. **Remove** is the only other connection-level action. There is no **Edit**: a saved agent connection has no door back into the form on this surface.
+
+See [Manage a project's connections](/how-to/manage-project-connections) for what the expander holds and what removing a connection does.
+
+### AgentCore is the one platform that can't be profiled
+
+Capability discovery is implemented for Conversational HTTP, Claude Managed Agent and Salesforce Agentforce — not for AgentCore. The [Agent Profile](/concepts/agent-profile) fly-in opens from the **Playground** topbar, on the info button beside the agent picker; there is no profile entry point on the Connections tab for any platform.
+
+Open it against an AgentCore agent and you get the never-generated empty state — *"No profile has been generated for this agent build yet."* — with a **Generate profile** button, exactly like any other platform. Press it and the capture comes straight back as *"Agent profiling isn't available for this connection yet."*, a plain statement with no retry offered. This is a platform limit, not a failure to work around, and nothing else about the connection is affected.
 
 ## Optional: stream sessions automatically
 
@@ -114,23 +131,21 @@ Back on the **Connection** tab, the saved connection carries two things worth kn
 
 Both are required to reconstruct sessions, and your AWS account keeps control of the subscription filters.
 
-On the saved connection this handoff becomes a card headed **Send sessions to TrustAI**. Until both log groups are delivering, its status reads one of two ways — **Not set up**, or **Partially streaming** when only one of the two log groups is arriving. Once both are delivering, the card gives way to a green **Streaming sessions** chip on the connection header, and you no longer need to sync by hand.
+Once both log groups are delivering, sessions arrive on their own and you no longer need to sync by hand. The Connections tab carries no streaming status of its own — its reachability pill answers whether Trust AI can reach the agent, not whether logs are flowing — so the way to confirm streaming is working is to look at **Sessions** and see new conversations land without a sync. Until then, **Sync now** stays the way to pull them in.
 
-The card lists the two log groups, each labelled **Receiving logs** or **No logs received yet** so you can see which half is missing — but only once Trust AI has a destination for your region. Until then the card names no log groups at all: it shows **Not set up** and points you at **Sync latest** in the meantime.
-
-If Trust AI hasn't enabled session import for your region yet, the wizard says so too — the **Session import** tile on the **AWS setup** step reads **Pending for this region**. You can still connect the role now, and Trust AI provides the CloudWatch setup steps once the region is enabled.
+If Trust AI hasn't enabled session import for your region yet, the wizard says so — the **Session import** tile on the **AWS setup** step reads **Pending for this region**, and the setup package carries a short note in place of the console steps. You can still connect the role now, and Trust AI provides the CloudWatch setup steps once the region is enabled.
 
 ## Other sign-in methods
 
 The admin-handoff role — **AWS role from admin setup (recommended)** — is the way to connect. The AgentCore connection form also carries other **Sign-in method** options: **Local AWS profile (local development only)**, **AWS access keys (advanced fallback)**, **OAuth token**, and **JWT token**. They live in the full manual form, which the wizard hides behind **Advanced setup for developers → Open full manual form**, and they are not the supported path for a production connection.
 
-Whatever method you use, secrets are write-only, exactly as on the other three connectors: reopening a saved connection shows the credential field **blank**, carrying a **Configured** status pill and the placeholder `•••• configured — leave blank to keep existing`. Leave it blank to keep the stored value; type a new one to replace it. The value itself is never displayed back.
+Whatever method you use, the credential is write-only: it is stored on save and never displayed back, on any surface or in any API response. To change one, connect the agent again with the new value — a saved agent connection cannot be reopened from the Connections tab, so there is no form to edit it in.
 
 ## Troubleshooting
 
 <AccordionGroup>
   <Accordion title="I left the wizard and it forgot everything">
-    Expected, unfortunately. The wizard keeps its state in the page only, so any navigation away resets it to the first step. Nothing is broken and nothing was half-saved: re-open **Add connection → AWS Bedrock AgentCore**, re-enter your region, click **Continue** and then **I have the role ARN**, and you're back at the step that matters. The setup package you already sent your admin is still valid.
+    Expected, unfortunately. The wizard keeps its state in the page only, so any navigation away resets it to the first step. Nothing is broken and nothing was half-saved: re-open **Connections → Connect an agent → AWS Bedrock AgentCore**, re-enter your region, click **Continue** and then **I have the role ARN**, and you're back at the step that matters. The setup package you already sent your admin is still valid.
   </Accordion>
 
   <Accordion title="Check access fails with 'AWS couldn't assume this role'">
@@ -153,14 +168,14 @@ Whatever method you use, secrets are write-only, exactly as on the other three c
     The role works, but discovery found no ready AgentCore runtime. Confirm:
 
     1. The **region** you entered matches where the agent is actually deployed — the role and discovery are region-scoped.
-    2. The AgentCore **runtime and its Memory are ready** in that region — check the AgentCore console. You can save the role connection now and come back to Connection settings once they're ready.
+    2. The AgentCore **runtime and its Memory are ready** in that region — check the AgentCore console. You can save the role connection now and come back to the Connections tab once they're ready.
   </Accordion>
 
   <Accordion title="Sync now imports nothing or misses recent conversations">
     A sync pulls recent activity from your account's CloudWatch logs, so:
 
     1. Make sure the agent has had **invocations recently** — a quiet agent syncs zero sessions, which the toast reports honestly.
-    2. If conversations exist but don't arrive, recheck access from the Connection tab — a role that lost its CloudWatch Logs Insights access can discover agents but not pull sessions. The missing-actions chips will show what's gone.
+    2. If conversations exist but don't arrive, recheck access by running the connect wizard again — **Connections → Connect an agent → AWS Bedrock AgentCore** — and pasting the same role ARN at **Check access**. A role that lost its CloudWatch Logs Insights access can discover agents but not pull sessions, and the missing-actions chips will show what's gone.
     3. If you expected sessions to appear **without syncing**, that's the streaming setup — see [Stream sessions automatically](#optional-stream-sessions-automatically) above. Until both log groups are delivering, sessions arrive only when you sync.
   </Accordion>
 </AccordionGroup>

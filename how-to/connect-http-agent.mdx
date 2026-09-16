@@ -129,15 +129,17 @@ A tool's `parameters` schema is stored byte-for-byte alongside the profile revis
 
 <Steps>
   <Step title="Open the connection form">
-    In your Project, open **Project Settings**, select the **Connection** tab, and click **Add connection**.
+    In your Project, open **Project Settings**, select the **Connections** tab, and click **Connect an agent**.
 
-    The **Add a connection** picker shows four platform cards: **AWS Bedrock AgentCore**, **Salesforce Agentforce**, **Claude Managed Agent**, and — fourth — **Conversational HTTP agent**. Choose the last one.
+    The picker opens in place under a page header reading **Connect an agent** — *"Choose the platform your agent runs on, then give TrustAI what it needs to reach it."* — with four platform cards laid out two by two: **AWS Bedrock AgentCore**, **Salesforce Agentforce**, **Claude Managed Agent**, and — fourth — **Conversational HTTP agent**. Choose the last one.
 
-    <Frame caption="Four cards, one per connectable platform — Conversational HTTP agent is the last of them, and the only one that isn't a named vendor.">
-      <img src="/images/connect-http-platform-picker.png" alt="The Connection tab of Project Settings showing the Add a connection picker: four platform cards laid out two by two — AWS Bedrock AgentCore, Salesforce Agentforce, Claude Managed Agent, and Conversational HTTP agent, the last described as connecting any agent that accepts AG-UI run requests and streams AG-UI events over SSE." />
+    <Frame caption="The platform picker, inside the Connections tab: four cards, one per connectable platform. Conversational HTTP agent is the last of them, and the only one that isn't a named vendor.">
+      <img src="/images/connect-http-platform-picker.png" alt="Project settings on the Connections tab, the settings strip reading General, Connections, Members. The step is headed Connect an agent with Back to connections at the right, above the instruction to choose the platform your agent runs on. Four platform cards are laid out two by two — AWS Bedrock AgentCore, Salesforce Agentforce, Claude Managed Agent, and Conversational HTTP agent, the last described as connecting any agent that accepts AG-UI run requests and streams AG-UI events over SSE." />
     </Frame>
 
-    **You should see:** the connection form, headed **Conversational HTTP agent**, with the platform's one-line description under it: *"Connect any agent that accepts AG-UI run requests and streams AG-UI events over SSE."*
+    **You should see:** the connection form in place of the cards, still under the **Connect an agent** header, led by a **Conversational HTTP agent** chip with a **Change** link beside it and the platform's one-line description underneath: *"Connect any agent that accepts AG-UI run requests and streams AG-UI events over SSE."*
+
+    The wizard stays inside the Connections tab for the whole flow: there is no breadcrumb, no heading of its own, and no Cancel. **Back to connections** in the page header is the one way out of any step.
   </Step>
 
   <Step title="Fill in the connection">
@@ -155,7 +157,7 @@ A tool's `parameters` schema is stored byte-for-byte alongside the profile revis
     | **Agent mode** | **Act** (the default), **Plan**, or **Ask**. |
 
     <Frame caption="Choosing Bearer token is what makes the Bearer token field appear — it isn't on the form until then. Run and Health endpoints arrive already filled in, and Remote project is left blank.">
-      <img src="/images/connect-http-connection-form.png" alt="The Conversational HTTP agent connection form: Connection Name 'Refunds agent (staging)', an https Agent base URL, Run endpoint pre-filled with /agui/run, Health endpoint with /health, Sign-in method set to Bearer token, a masked Bearer token field reading 'Entered once and stored securely — it is never shown back.', an empty Remote project box, Agent mode on Act, and the Test Connection, Cancel and Save connection controls." />
+      <img src="/images/connect-http-connection-form.png" alt="The Conversational HTTP agent connection form under the Connect an agent header, with Back to connections at the right. A Conversational HTTP agent chip and a Change link sit above Connection Name 'Refunds agent (staging)', an https Agent base URL, Run endpoint pre-filled with /agui/run, Health endpoint with /health, Sign-in method set to Bearer token, a masked Bearer token field helped by 'Entered once and stored securely — it is never shown back.', an empty Remote project box, Agent mode on Act, and Test Connection and Save connection at the foot of the form." />
     </Frame>
 
     <Note>
@@ -176,9 +178,7 @@ A tool's `parameters` schema is stored byte-for-byte alongside the profile revis
   </Step>
 
   <Step title="Save the connection">
-    Click **Save connection**.
-
-    **You should see:** the new connection listed in the Connection tab, showing its name and **Conversational HTTP agent**, with **Edit** to reopen the form.
+    Click **Save connection**. You land back on the **Connections** tab with the new connection on it as a card — see [What the connection card says](#what-the-connection-card-says).
 
     Saving also registers the agent as an Agent Version labeled with your connection name — that's what you pick in the evaluation launcher.
   </Step>
@@ -190,6 +190,23 @@ A tool's `parameters` schema is stored byte-for-byte alongside the profile revis
   </Step>
 </Steps>
 
+## What the connection card says
+
+On the **Connections** tab the saved connection is a card. It leads with the name you gave it and a **Conversational HTTP agent** chip, and the sub-line underneath names the base URL this connection reaches. No credential appears on the card — there is no values grid and no masked secret anywhere on it.
+
+Two status reads sit to the right of the name, and they answer different questions:
+
+- **Is setup finished?** A setup badge — **Setting up**, **Needs admin** or **Setup failed** — shown only while setup still has something to say. A connection that finished setting up shows no badge at all; the absence is the good news.
+- **Can TrustAI reach it right now?** A reachability pill — **Connected**, **Partly reachable**, **Can’t reach it** or **Not checked yet**. A connection nobody has probed reads **Not checked yet**; health is never fabricated green.
+
+Under the name, **Customize environment** expands the card downward in place — where this connection's test data lives, how it resets between tests, and how many tests may run against it at once. See [Manage a project's connections](/how-to/manage-project-connections) for what that expander holds and what each status word means.
+
+## Remove a connection
+
+**Remove**, at the right of the card's top row, is the only connection-level action besides the expander. There is no **Edit**: once a Conversational HTTP connection is saved there is no door back into the form it was created in, and no way to change a stored value in place. To change the base URL, a path, the token or the agent mode, connect the agent again and remove the old connection.
+
+**Remove** asks first, under the title **Remove this agent connection?**. It names the connection and says the removal takes it and its test data setup out of **this project only** — connections to this agent in other projects stay unchanged, nothing is removed from the service that hosts it, so you can connect it again later. It closes with *"You can’t undo this."* The buttons are **Cancel** and **Remove connection**.
+
 ## Sign-in and the bearer token
 
 **Sign-in method** offers exactly two choices.
@@ -197,15 +214,15 @@ A tool's `parameters` schema is stored byte-for-byte alongside the profile revis
 - **No authentication** — the default. Trust AI sends no `Authorization` header on runs, health checks, or capability reads. Use it only where the network already restricts who can reach the agent.
 - **Bearer token** — reveals a **Bearer token** field. Trust AI sends `Authorization: Bearer <token>` on every call it makes to your agent: runs, health checks, and capability reads alike. Choosing this without entering a token is rejected.
 
-The token is **write-only**. On a new connection the help text reads *"Entered once and stored securely — it is never shown back."* Once saved, reopening the connection shows a **Configured** status pill, the placeholder `•••• configured — leave blank to keep existing`, and *"A value is already saved and is never shown. Leave blank to keep it, or type a new value to replace it."*
+The token is **write-only**. On the form the help text reads *"Entered once and stored securely — it is never shown back."*, and that is the whole contract: the saved value is never displayed back on any surface, in any form, or in any API response.
 
-That means editing a connection never requires you to re-enter the token. Save with the field blank and the stored token is kept; type a new value only when you're rotating it.
+There is also no door back to it. A saved agent connection cannot be reopened from the **Connections** tab, so a token is not rotated in place — connect the agent again with the new token, confirm the new card reads **Connected**, then remove the connection that held the old one.
 
 ## Capture an Agent Profile
 
 Conversational HTTP is one of three platforms whose capability discovery is implemented — alongside **Claude Managed Agent** and **Salesforce Agentforce**. (AWS Bedrock AgentCore is not: it reports *"Agent profiling isn't available for this connection yet."*)
 
-On the connection card, the **Current agent version** row opens the profile fly-in. With no profile yet it reads *"No profile has been generated for this agent build yet."* — click **Generate profile**.
+The profile opens from the **Playground** topbar: pick the build in the agent picker, then press the info button beside it, tooltipped **Agent profile**. That is the only entry point — there is no profile door on the Connections tab, for this platform or any other. With no profile yet the fly-in reads *"No profile has been generated for this agent build yet."* — click **Generate profile**.
 
 Capture reads `/agui/capabilities` once and builds an immutable **profile revision** from what it finds. A profile built from the manifest above renders:
 
@@ -216,18 +233,22 @@ Capture reads `/agui/capabilities` once and builds an immutable **profile revisi
 
 ### What the coverage pills will say
 
-Coverage is not simply "did you publish the block". Two of the four areas can never read **Captured** from a capabilities manifest, however complete it is, so don't read a **Partial** there as something you left out:
+Coverage is not simply "did you publish the block". Each area takes its own signals, and one of the four can never read **Captured** from a capabilities manifest however complete it is — so don't read that **Partial** as something you left out:
 
 | Area | Captured | Partial | Limited |
 |---|---|---|---|
-| **Tool schemas** | every published tool was readable | some were | the manifest published none |
+| **Agent identity and behavior summary** | a description **and** a readable account of how the agent is told to behave | one of the two | neither |
+| **Tool inputs** | every tool reachable **and** carrying its exact input schema | some tools, or names with no schemas | no tools, or none reachable |
 | **Policy and knowledge sources** | every published source was readable | some were | the manifest published none |
-| **Agent identity and behavior summary** | never on capture | your `agent.description` was read | no description published |
-| **System instructions and observed behavior** | never on capture | your `prompts` block was read | no prompts published |
+| **System instructions and observed behavior** | never on a discovery-only capture | your `prompts` block was read | no prompts published |
 
-The last two are honest gaps, not misconfiguration. **Captured** on identity additionally needs behavioral rules, and capture records none — a discovered revision is provider-grounded only, so the panel says *"No behavioral rules were captured for this version."* **Captured** on the fourth row additionally needs sampled conversations or safe probes, and capture runs neither: it reads one endpoint and stops. Both rows settle at **Partial** on a fully populated manifest.
+The second signal on the identity row is satisfied two ways, because platforms differ in how they publish behavior: either declared behavioral rules, or readable operating instructions. A supported `prompts` block counts as the second kind, so **a manifest carrying both an `agent.description` and a supported `prompts` block reads Captured on identity** — you are not penalized for a platform that ships one form rather than the other.
 
-The row's pill then reads **Profile available**, and the fly-in header reads **Version-pinned profile**. Reviewing is per-revision: **Approve** or **Request changes**. See [Agent Profile](/concepts/agent-profile) for what a revision is and why review doesn't carry forward.
+**Tool inputs** is stricter than "did you publish the block". It counts contracts, not names: a catalog read by name with no `parameters` schema behind it settles at **Partial**, which is exactly what you need to know before writing an expectation about a tool's arguments.
+
+Only the fourth row is pinned at **Partial** by a capture like this one, however complete your manifest. Its second signal is sampled conversations or safe probes, and capture runs neither — it reads one endpoint and stops. Read that **Partial** as scope, not as something you left out.
+
+The fly-in header then settles on **Version-pinned profile** (**Profile available** is the capture lifecycle's own word for the same healthy state). Reviewing is per-revision: **Approve** or **Request changes**. See [Agent Profile](/concepts/agent-profile) for what a revision is and why review doesn't carry forward, and [Review an Agent Profile](/how-to/review-an-agent-profile) for the walk-through.
 
 ## Troubleshooting
 
@@ -256,11 +277,11 @@ The row's pill then reads **Profile available**, and the fly-in header reads **V
   <Accordion title="The profile capture failed">
     Profile capture reads `/agui/capabilities` under the base URL — a fixed path the **Run endpoint** field does not control. If that route 404s, or returns something that isn't a JSON object, capture fails while ordinary conversations keep working.
 
-    The row's pill reads **Profile failed** and the fly-in names the cause — *"The last profile capture failed: The agent's capability endpoint returned status 404, so no catalog could be read."* Serve the manifest at that exact path, then click **Try capturing again**. (**Generate profile** is the never-captured empty state's button; once a capture has failed, the retry control replaces it.)
+    The fly-in reads **Profile failed** and names the cause — *"The last profile capture failed: The agent's capability endpoint returned status 404, so no catalog could be read."* Serve the manifest at that exact path, then click **Try capturing again**. (**Generate profile** is the never-captured empty state's button; once a capture has failed, the retry control replaces it.)
   </Accordion>
 
-  <Accordion title="The saved connection card shows a masked 'Secret Access Key'">
-    That summary card is shared with the AWS connectors and mislabels the Conversational HTTP secret. It does not mean an AWS key was stored — your bearer token is what's masked there. Click **Edit** to see the connection's real values; the token itself is never shown back on any surface.
+  <Accordion title="I need to change the base URL, a path, or the token">
+    There is no **Edit** on a saved agent connection, so nothing on it is changed in place. Connect the agent again with the corrected values, check the new card reads **Connected**, then **Remove** the one that didn't work. Removing takes the connection and its test data setup out of this project only — see [Manage a project's connections](/how-to/manage-project-connections).
   </Accordion>
 </AccordionGroup>
 
