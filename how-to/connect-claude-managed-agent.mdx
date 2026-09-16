@@ -14,7 +14,7 @@ Trust AI's role with this connector is deliberately narrow: it observes the agen
 There are **two ways to connect**, and they save the same connection:
 
 - **In the chat** with the [Trust Agent](/concepts/trust-agent), through a secure connection card. This is the fast path and the one to reach for first.
-- **From the connection form** in **Project Settings → Connection**. Use it when you're already in Settings, or when you need to edit or delete a connection that exists.
+- **From the connection form** in **Project Settings → Connections**. Use it when you're already in Settings, or when the chat isn't where you are.
 
 <Note>
   Two different "agents" meet on this page. The **Claude Managed Agent** you're connecting is *your* agent — the one under test, tracked as an [Agent Version](/concepts/agent-versions). The **Trust Agent** is the in-app assistant that helps you do the connecting. They share a word and nothing else.
@@ -64,9 +64,9 @@ You'll also need a **Trust AI Project**. If you don't have one yet, start with [
   <Step title="Connect">
     Click **Connect**. Trust AI saves the connection and immediately runs a real check against it — see [The check that runs on save](#the-check-that-runs-on-save).
 
-    The Trust Agent then reports the result in plain language — **Connected to** followed by your agent's name when the check came back healthy, or *"Connection set up — the health check came back …"* naming the health outcome — *unreachable*, for example — when it didn't. The reason behind an unhealthy result is recorded on the connection itself, not written into the chat; you read it on the connection's health. No key and no secret go back into the conversation.
+    The Trust Agent then reports the result in plain language — **Connected to** followed by your agent's name when the check came back healthy, or *"Connection set up — the health check came back …"* naming the outcome — *unreachable*, for example — when it didn't. That word is the chat's own phrasing of the result, not the pill you'll see on the Connections card; see [What the connection card says](#what-the-connection-card-says). The reason behind an unhealthy result is recorded on the connection itself, not written into the chat. No key and no secret go back into the conversation.
 
-    **Not now** closes the card without connecting; the Trust Agent replies *"You closed the connection card. I'll wait for your next message."* A closed card leaves that line and nothing else — there is no button on it to bring it back. Ask the Trust Agent to connect again and it opens a fresh card.
+    **Close setup** closes the card without connecting; the Trust Agent replies *"Connection setup closed. Nothing was connected. Ask me to connect an agent when you're ready."* A closed card leaves that line and nothing else — there is no button on it to bring it back. Ask the Trust Agent to connect again and it opens a fresh card.
   </Step>
 </Steps>
 
@@ -80,20 +80,20 @@ This is the reason the card exists, and it is worth being precise about.
 - If you paste something that looks like an API key into the chat by mistake, Trust AI strips it before it is stored; the Trust Agent sees `[redacted API key]` and will ask you to use the card instead.
 
 <Note>
-  A saved key is write-only everywhere afterwards. It is never displayed back — not on the connection card, not in the edit form, not in API responses. To change it, you enter a new one.
+  A saved key is write-only everywhere afterwards. It is never displayed back — not on the connection card, not in any form, not in API responses. To change it, you connect the agent again with a new one.
 </Note>
 
 ## Connect from Project Settings
 
-The connection form is the manual path, and the only place to edit or delete a connection that already exists.
+The connection form is the manual path. It is where you go when you'd rather fill in a form than talk to the Trust Agent, and it saves exactly the same connection.
 
 <Steps>
   <Step title="Open the connection form">
-    In your Project, open **Project Settings**, select the **Connection** tab, and click **Add connection**.
+    In your Project, open **Project Settings**, select the **Connections** tab, and click **Connect an agent**.
 
-    **You should see:** the **Add a connection** picker with **four** platform cards — **AWS Bedrock AgentCore**, **Salesforce Agentforce**, **Claude Managed Agent**, and **Conversational HTTP agent**. Choose **Claude Managed Agent**.
+    **You should see:** a page headed **Connect an agent** with **four** platform cards under it — **AWS Bedrock AgentCore**, **Salesforce Agentforce**, **Claude Managed Agent**, and **Conversational HTTP agent**. Choose **Claude Managed Agent**.
 
-    The form opens under a breadcrumb reading Connections › Add › Claude Managed Agent, headed **New connection** with a **Claude Managed Agent** chip and a **Change** link beside it. There is no field to set the platform — you already chose it in the picker.
+    The form opens in place, still under the **Connect an agent** heading, with a **Claude Managed Agent** chip, a **Change** link beside it and the platform's one-line description underneath. There is no field to set the platform — you already chose it in the picker. The one way out of any step is **Back to connections** in the page header; the form shows no Cancel of its own.
   </Step>
 
   <Step title="Name the connection and fill in the three values">
@@ -109,35 +109,50 @@ The connection form is the manual path, and the only place to edit or delete a c
   </Step>
 
   <Step title="Test the connection (optional)">
-    **Test Connection** runs one authenticated probe against the agent and environment as entered, and reports success or the reason it failed above the buttons.
-
-    On a new, unsaved connection the test saves nothing. On an **existing** connection opened with **Edit**, the test is anchored to that saved connection: any secret you left blank is backed by the stored one, and the result is recorded against the connection's health.
+    **Test Connection** runs one authenticated probe against the agent and environment as entered, and reports success or the reason it failed above the buttons. Nothing is saved by the test.
 
     The test is optional — the check that actually matters runs on save.
   </Step>
 
   <Step title="Save the connection">
-    Click **Save connection**.
-
-    **You should see:** the connection in the **Connections** list, with a card showing **Region**, **Workspace ID**, **Agent**, **Environment**, and the **Anthropic API key** as a masked value. Where discovery resolved a human name, the card leads with that name and prints the stored identifier beneath it.
-
-    Below those values, a **Current agent version** row names the registered [Agent Version](/concepts/agent-versions) and opens its [Agent Profile](/concepts/agent-profile) — what that build of your agent exposes.
+    Click **Save connection**. You land back on the **Connections** tab with the new connection on it — see [What the connection card says](#what-the-connection-card-says).
   </Step>
 </Steps>
 
 ## The check that runs on save
 
-Saving a Claude Managed Agent connection is not a silent write. Trust AI opens one short-lived, authenticated session against the agent and environment you picked, records what happened, and shows it as the connection's health. Editing the connection re-runs it, so a corrected credential is re-checked rather than leaving a stale result.
+Saving a Claude Managed Agent connection is not a silent write. Trust AI opens one short-lived, authenticated session against the agent and environment you picked, records what happened, and that result is what the connection's reachability pill reports.
 
-A connection's health reads as one of **Not checked**, **Healthy**, **Degraded**, or **Unreachable**. The check on save records **Healthy** when the session opened and **Unreachable** when it didn't — and an **Unreachable** result carries the reason, for example *"Anthropic API key invalid or expired."*, so you can fix the right field instead of guessing.
+The check records a reachable connection when the session opened and an unreachable one when it didn't — and an unreachable result carries the reason, for example *"Anthropic API key invalid or expired."*, so you can fix the right field instead of guessing.
 
-A connection is saved either way. **Unreachable** means the credentials didn't work, not that nothing was stored: open the connection with **Edit**, correct the value, and save again.
+A connection is saved either way. An unreachable result means the credentials didn't work, not that nothing was stored. There is no form to go back and correct it in, so the fix is to connect the agent again with the corrected value and remove the connection that didn't work.
 
-## Edit or delete a connection
+## What the connection card says
 
-**Edit** reopens the form on the saved connection. The **Anthropic API key** field is blank and carries a **Configured** status pill plus the placeholder `•••• configured — leave blank to keep existing` — the stored key has no representation in the form, so it can't be shown back. Leave it blank to keep the existing key; type a new one to replace it. Because the stored key isn't available to the form, **Find agents** needs you to re-enter the key before it will search again, and says so.
+On the **Connections** tab the saved connection is a card. It leads with the name you gave it and a **Claude Managed Agent** chip, and the sub-line names the Anthropic workspace it points at. No credential appears on the card — there is no values grid and no masked secret.
 
-The delete button does not remove the connection on the spot. It opens a confirmation dialog headed **Delete connection**, naming the connection and warning that *Trust AI will stop pulling sessions and new evaluations cannot run until a connection is re-added*, with **Cancel** and **Delete**.
+Two status reads sit to the right of the name, and they answer different questions:
+
+- **Is setup finished?** A setup badge — **Setting up**, **Needs admin** or **Setup failed** — shown only while setup still has something to say. A connection that finished setting up carries no badge at all; the absence is the good news.
+- **Can Trust AI reach it right now?** A reachability pill — **Connected**, **Partly reachable**, **Can’t reach it** or **Not checked yet**. A connection nobody has probed reads **Not checked yet**; health is never fabricated green.
+
+<Note>
+  Those are the Connections vocabulary, and they are not the only health words in the product. The Trust Agent's side rail describes its **Connected agent** with a different four — **Not checked**, **Healthy**, **Degraded**, **Unreachable** — and the chat's own connect receipt phrases the same result differently again. Three surfaces, three sets of words for a related question; read each in its own place.
+</Note>
+
+Under the name, **Customize environment** expands the card in place — where this connection's test data lives, how it resets between tests, and how many tests may run against it at once. See [Manage a project's connections](/how-to/manage-project-connections) for what the expander holds and what each status word means.
+
+### Where the Agent Profile opens
+
+There is no profile entry point on the Connections tab, for this platform or any other. A connected build's [Agent Profile](/concepts/agent-profile) opens from the **Playground** topbar: pick the build in the agent picker, then press the info button beside it, tooltipped **Agent profile**.
+
+Capture for a Claude Managed Agent lists the agent's real tool catalog from the MCP servers its own configuration declares — a metadata read, not a conversation with the agent. An agent that declares no such server, or one whose server doesn't answer, comes back as a name-only profile with the tool-catalog gap stated in plain words; it is never a failed capture and never a fabricated empty catalog. [Review an Agent Profile](/how-to/review-an-agent-profile) walks the fly-in.
+
+## Remove a connection
+
+**Remove** on the card is the only connection-level action besides the expander. There is no **Edit**: once a Claude Managed Agent connection is saved, there is no door back into the form it was created in, and no way to change a stored value in place. To change the key, the region, the workspace, the agent or the environment, connect the agent again and remove the old connection.
+
+**Remove** opens a confirmation dialog headed **Remove this agent connection?**. It names the connection and says the removal takes it and its test data setup out of **this project only** — connections to the same agent in other projects stay unchanged, nothing is removed from the service that hosts it, and you can connect it again later. It closes with *"You can’t undo this."* The buttons are **Cancel** and **Remove connection**. Removing also archives the agent versions the connection provided, so the Playground and the evaluation launcher stop offering an agent that could only fail — see [Manage a project's connections](/how-to/manage-project-connections).
 
 ## Where sessions come from
 
@@ -159,7 +174,7 @@ Connected Agent Versions are also readable programmatically — see the [API Ref
   <Accordion title="Find agents is disabled, or says to enter the key first">
     Discovery is gated on all three typed values — **Anthropic API key**, **AWS Region**, and **Workspace ID**. Fill in whichever is missing.
 
-    On an **Edit** form the message is *"Re-enter your API key to search again."* That is expected: the saved key is write-only, so the form has nothing to search with until you paste one.
+    Discovery never runs against a stored key. The form only ever searches with a key you typed into it in this sitting, because a saved key is write-only and has no representation the form could read back.
   </Accordion>
 
   <Accordion title="Find agents returns nothing">
@@ -169,15 +184,15 @@ Connected Agent Versions are also readable programmatically — see the [API Ref
   <Accordion title="The connection saved but reads Unreachable">
     The check that runs on save couldn't open a session with the values as stored. The result carries the reason:
 
-    1. An invalid or expired **Anthropic API key** — the saved key is never shown back, so if in doubt, edit the connection and paste it again.
+    1. An invalid or expired **Anthropic API key** — the saved key is never shown back, so if in doubt, assume it and connect again with a fresh one.
     2. An **AWS Region** that isn't where the workspace runs.
     3. An **Agent** and **Environment** that don't belong together — an agent paired with an environment it isn't published to won't resolve.
 
-    Fix the field and save; the check re-runs on every edit that changes the connection.
+    A saved connection can't be corrected in place. Connect the agent again with the right value, confirm the new card reads **Connected**, then **Remove** the one that didn't work.
   </Accordion>
 
   <Accordion title="The agent doesn't appear in the evaluation launcher">
-    The launcher lists connected Agent Versions. Confirm the connection saved — it should be in the **Connections** list under **Project Settings → Connection** — and that you're launching from the same Project the connection belongs to. Asking the Trust Agent *"Which agent is connected now?"* is the quickest cross-check.
+    The launcher lists connected Agent Versions. Confirm the connection saved — it should be a card under **Project Settings → Connections** — and that you're launching from the same Project the connection belongs to. Asking the Trust Agent *"Which agent is connected now?"* is the quickest cross-check.
   </Accordion>
 
   <Accordion title="Sync now doesn't import my agent's past conversations">
