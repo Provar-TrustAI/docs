@@ -8,7 +8,7 @@ An Agent Version **names one build of the agent under test**. It is the pin an E
 
 The record itself is deliberately thin — a label plus the metadata its connector supplied. It is an **identity**, not a configuration dump. What a build can actually *do* — its tools, its knowledge sources, how it identifies itself — lives in that build's [Agent Profile](/concepts/agent-profile).
 
-One exception up front: an Evaluation can also grade [Sessions](/concepts/sessions) that already happened. Those runs judge recorded transcripts and never invoke your agent, so they carry no pinned Agent Version.
+One exception up front: an Evaluation can also grade [Sessions](/concepts/sessions) that already happened. Those runs replay each recorded conversation against the project's connected agent rather than pinning a build to simulate against, so they carry no pinned Agent Version.
 
 If Sessions are the raw material, [Scenarios](/concepts/scenarios) the test bed, and [Evaluators](/concepts/evaluators) the rubric, then Agent Versions are **what's being judged**. Server messages sometimes call one an "agent build" — for example, *"This agent build is not linked to a saved connection"*. Same thing.
 
@@ -45,7 +45,7 @@ An Agent Version record holds:
 - **Who created it and when** — an audit trail only. It does not gate access.
 - **Archived state** — set when the build no longer matches the connected runtime. See [Lifecycle](#lifecycle).
 
-That is the whole record. In particular, an Agent Version **does not** store your agent's prompt, its model, its tool schemas, or its retrieval configuration, and it has **no description field and no tags**. Those things are properties of the running agent, and Trust AI reads them by capturing an [Agent Profile](/concepts/agent-profile) against the build — not by copying them into the version row.
+That is the whole record. In particular, an Agent Version **does not** store your agent's prompt, its model, its tool schemas, or its retrieval configuration, and it has **no description field and no tags**. Those things are properties of the running agent, and TrustAI reads them by capturing an [Agent Profile](/concepts/agent-profile) against the build — not by copying them into the version row.
 
 <Note>
   **The record is not immutable — the pin is by reference.** A version's label can be renamed, and a run stores a reference to the version rather than a frozen copy of its name. Rename a version and past runs pinned to it display the new label. What stays fixed is *which build* a finished run went against.
@@ -57,21 +57,21 @@ Agent Versions arrive through **connectors**. Four platforms connect today — n
 
 - **AWS Bedrock AgentCore** — a guided setup flow connects the runtime, and its builds sync into the Project automatically. Discovery stays reconciled with what's deployed: a build that no longer matches the connected runtime is archived, and pointing the connection back at it revives the record.
 - **Salesforce Agentforce** — connect an Agentforce agent in your Salesforce org. See [Connect Salesforce Agentforce](/how-to/connect-agentforce).
-- **Claude Managed Agent** — connect an Anthropic Managed Agent on Claude Platform. Trust AI observes the agent and relays its responses; the agent runs its own tools.
-- **Conversational HTTP agent** — connect **any agent that accepts AG-UI run requests and streams AG-UI events over SSE**. This is the escape hatch for a platform Trust AI has no dedicated connector for: if your agent speaks AG-UI over HTTP, it connects like the rest.
+- **Claude Managed Agent** — connect an Anthropic Managed Agent on Claude Platform. TrustAI observes the agent and relays its responses; the agent runs its own tools.
+- **Conversational HTTP agent** — connect **any agent that accepts AG-UI run requests and streams AG-UI events over SSE**. This is the escape hatch for a platform TrustAI has no dedicated connector for: if your agent speaks AG-UI over HTTP, it connects like the rest.
 
 ### What the Connections tab reports
 
 Every connected agent is a **card** on the tab, naming the agent, its platform, and the coordinates it points at. The card answers two separate questions in two vocabularies that are easy to mistake for one:
 
 - **Is setup finished?** — a setup badge reading **Connected**, **Setting up**, **Needs admin**, or **Setup failed**. It shows only while setup still has something to say.
-- **Can Trust AI reach it right now?** — a reachability pill reading **Connected**, **Partly reachable**, **Can’t reach it**, or **Not checked yet**. A connection nobody has probed reads **Not checked yet** rather than a fabricated green.
+- **Can TrustAI reach it right now?** — a reachability pill reading **Connected**, **Partly reachable**, **Can’t reach it**, or **Not checked yet**. A connection nobody has probed reads **Not checked yet** rather than a fabricated green.
 
 **Customize environment** expands the card downward in place, without leaving the tab. It holds that connection's test data stores, what happens to records between tests, how many tests may run against it at once, and — on Salesforce — its optional test users. [Manage a project's connections](/how-to/manage-project-connections) walks the tab end to end.
 
 ### Connecting a Salesforce org
 
-Salesforce connections are created by **authorizing Trust AI once as a Salesforce admin**. The new-connection form asks for the org URL and then hands you a single action — *Authorize in Salesforce with an administrator account*. There are no keys, no secret, and no certificate to hand over, and the form warns you to point it at a Sandbox rather than production, because approving Trust AI provisions a connected app in whichever org you sign in to.
+Salesforce connections are created by **authorizing TrustAI once as a Salesforce admin**. The new-connection form asks for the org URL and then hands you a single action — *Authorize in Salesforce with an administrator account*. There are no keys, no secret, and no certificate to hand over, and the form warns you to point it at a Sandbox rather than production, because approving TrustAI provisions a connected app in whichever org you sign in to.
 
 Three older sign-in methods — **External Client App key + secret**, **Certificate-based JWT**, and **Username + password** — are each labelled **(legacy)** and appear only when you edit a connection that already uses one. They exist to keep existing setups working. Do not build a new connection around them.
 
@@ -87,13 +87,13 @@ One thing holds across every connector: **connection secrets stay secret.** Priv
 
 The fastest path for the two platforms it covers is to ask the **Trust Agent** to connect your agent: its in-chat connect card handles Claude Managed Agent and Salesforce Agentforce, collecting credentials inside the card so no secret ever reaches the conversation. Every other platform is set up from **Project Settings → Connections**, through **Connect an agent**.
 
-Archiving an Agent Version in Trust AI does not affect the source runtime.
+Archiving an Agent Version in TrustAI does not affect the source runtime.
 
 ## Pinned at run time
 
 When you launch a scenario-driven Evaluation, the launcher's **Agent** step asks which connected agent simulates each scenario — the run pins that build, and its results carry the pin. When you drive the run through the Trust Agent instead, it confirms which agent build it will run against before simulating, and tells you plainly if none is connected. **Re-run** on a finished run restores the original run's configuration, including its pinned agent and Evaluators — everything but **Repeat each test case**, which resets to 1.
 
-Evaluations launched from Sessions skip this step entirely: grading a recorded transcript needs no agent, so no version is pinned.
+Evaluations launched from Sessions skip this step entirely: there is no build to choose, so no version is pinned.
 
 You can also see the pin after the fact, on a session's **Details** tab — but the row is labelled differently depending on what the session ran against:
 
@@ -149,7 +149,7 @@ All three reduce to the same primitive: Evaluation runs that held the Scenarios 
 
 You do everything around Agent Versions from the app, usually by asking the Trust Agent:
 
-- **See what's connected** — ask the Trust Agent which agent builds are connected in the Project; the manual view is **Project Settings → Connections**, where each card names the agent, its platform, the coordinates it points at, and whether Trust AI could reach it.
+- **See what's connected** — ask the Trust Agent which agent builds are connected in the Project; the manual view is **Project Settings → Connections**, where each card names the agent, its platform, the coordinates it points at, and whether TrustAI could reach it.
 - **Connect a new platform** — ask the Trust Agent to connect a Claude Managed Agent or a Salesforce Agentforce agent, or add any of the four platforms yourself from **Connections → Connect an agent**.
 - **Backfill past sessions** — click **Sync now** in the Sessions page header and pick the connected agent. AgentCore only; every other platform writes its sessions as they happen.
 - **Pin one at run time** — pick the build in the launcher's **Agent** step, or tell the Trust Agent which build to evaluate.

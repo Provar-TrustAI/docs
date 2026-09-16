@@ -16,7 +16,7 @@ For what the catalog *is* — the ten probes, what they do and do not cover, and
 
 ## Prerequisites
 
-- A **Trust AI account** with access to the [project](/concepts/projects) you are adding to, and permission to create scenarios in it — adopting writes to the project
+- A **TrustAI account** with access to the [project](/concepts/projects) you are adding to, and permission to create scenarios in it — adopting writes to the project
 - Adding scenarios needs nothing else. **Tailoring** needs a **connected agent with a captured [agent profile](/concepts/agent-profile)** on that project
 - Running the probes afterwards needs a connected agent, because every run drives a real one
 
@@ -56,7 +56,7 @@ The [Trust Agent](/concepts/trust-agent) knows this job and will route you to th
     **Hide details** collapses it again. Expand a few before you select: two probes that look similar at the name level often pair with different checks.
 
     <Frame caption="Goal hijack expanded: the probe's goal, then What a safe agent does and Graded by under Details. The chip reads the category, never the standard's code.">
-      <img src="/images/scenarios-recommended-modal.png" alt="The Add recommended scenarios dialog. Under the heading GOAL HIJACK, the entry 'User pastes hidden instructions to hijack the agent' is expanded, showing What a safe agent does and Graded by: Resists prompt injection, Stays within scope, No unauthorized commitments. A Select all 10 control sits above the list, and the footer carries Cancel, Add without tailoring and a disabled Add & tailor to your agent with the note Connect an agent to tailor these." />
+      <img src="/images/scenarios-recommended-modal.png" alt="The Add recommended scenarios dialog. Under the heading GOAL HIJACK, the entry 'User pastes hidden instructions to hijack the agent' is expanded, showing What a safe agent does and Graded by: Resists prompt injection, Stays within scope, No unauthorized commitments. A Select all control sits above the list, and the footer carries Cancel, Add without tailoring and a disabled Add & tailor to your agent with the note Connect an agent to tailor these." />
     </Frame>
 
     **You should see:** the disclosure flip to **Hide details**, and both **What a safe agent does:** and **Graded by:** appear under the entry.
@@ -65,7 +65,7 @@ The [Trust Agent](/concepts/trust-agent) knows this job and will route you to th
   <Step title="Pick what you want">
     Tick entries individually, or use **Select all *N*** above the list to take everything selectable in one click — on a project that has adopted none of them, that is all ten. Once they are all on the control reads **Deselect all** and clears the selection, so it is its own undo.
 
-    Entries already in your project render muted and cannot be ticked. They carry an **In your project** pill, and **Select all *N*** never counts them, so *N* falls as you adopt more of the catalog over time.
+    Entries already in your project render muted and cannot be ticked. They carry an **In your project** pill, and **Select all *N*** never counts them, so *N* falls as you adopt more of the catalog over time. A muted entry shows its full description instead of the **Details** toggle, so there is nothing to expand on one you already hold.
 
     Both confirm actions stay disabled until you have selected at least one entry.
 
@@ -154,7 +154,7 @@ If you chose **Add & tailor to your agent**, adoption has already finished and s
 
 ## Run the probes and read the results
 
-Adopted probes are ordinary scenarios, so you run them the way you run anything else — select them on the **Scenarios** list, use the **Run** split-button, and confirm in the evaluation launcher. The full recipe, including personas and repeats, is in [Simulate with scenarios](/how-to/simulate-with-scenarios).
+Adopted probes are ordinary scenarios, so you run them the way you run anything else — select them on the **Scenarios** list, use the **Run** split-button, and confirm in the evaluation launcher. That manual path is ungated. Asking the **Trust Agent** to run them is not: it refuses until each probe is linked to a requirement and carries expected actions or routes, which the catalog does not ship. The full recipe, including personas and repeats, is in [Simulate agents with scenarios](/how-to/simulate-with-scenarios).
 
 Two things are worth knowing before you read a security run's pass rate.
 

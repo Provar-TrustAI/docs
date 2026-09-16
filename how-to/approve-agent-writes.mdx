@@ -75,7 +75,7 @@ Once you've read the preview, you have three ways to resolve a permission card.
 
     **Approving once covers the batch that card represented, not one record.** If the agent is partway through a repeated series — filing four requirements, generating scenarios — a single approval lets the rest of that series through **for the remainder of that turn**. It does not carry into your next message: the next turn asks again.
 
-    Some writes are held back from that batch behavior and are approved strictly one at a time, under two different rules. Three are held back for **what the write is** — a **delete**, **authoring an agent profile**, and **starting an unattended full run** (a preview capability your workspace may not have). One more is held back for **what is inside the batch** — a bulk edit with a requirement mixed into it. Both rules also bound what a standing approval can cover; see the exclusions under [Standing approvals](#standing-approvals).
+    Some writes are held back from that batch behavior and are approved strictly one at a time, under two different rules. Three are held back for **what the write is** — a **delete**, **authoring an agent profile**, and **starting an unattended full run** (a capability your workspace may not have). One more is held back for **what is inside the batch** — a bulk edit with a requirement mixed into it. Both rules also bound what a standing approval can cover; see the exclusions under [Standing approvals](#standing-approvals).
 
     **Filing requirements is the worked example of the batch behavior.** When the agent drafts a set of requirements for you, it does not ask a scoping question first and it does not raise a card per requirement. The whole set goes behind **one** card that lists every requirement — each one's title and a one-line summary, in the order they will be filed — so you are never asked to approve a count you cannot read. The decision is all-or-nothing: approve and the set lands in a single write, in that same order, so the `REQ-{n}` handles come out numbered exactly as the card listed them. If one entry fails, nothing is saved at all. A batch tops out at **50** requirements; past that the agent splits the work across more than one card.
 
@@ -147,13 +147,13 @@ There is no confirmation step and nothing to undo — turning a grant off only r
 
   - **A delete.** An irreversible removal is confirmed every time, and the for-this-chat option is not even offered on a delete card.
   - **Authoring an agent profile.** That write replaces the profile every evaluation in the project reads from, so it is confirmed each time.
-  - **Starting an unattended full run.** This one is a preview capability and may not be turned on for your workspace at all. Where it is, it spends real credits driving live conversations against your connected agent with nobody watching, so it is confirmed every time rather than handed to a grant.
+  - **Starting an unattended full run.** This is a capability your workspace may not have. Where it exists, it spends real credits driving live conversations against your connected agent with nobody watching, so it is confirmed every time rather than handed to a grant.
 
   One more is excluded for **what is inside the batch**: a requirement mixed into a bulk edit. A grant for scenario edits covers a bulk change to scenarios, but if a requirement rides along in that same batch the whole batch falls back to a card — a scenario grant can never quietly commit a requirement change. Saving a *new* requirement is grantable, so authoring a set in one sitting does not make you confirm each one; bulk-changing or deleting requirements that already exist never is.
 </Warning>
 
 <Note>
-  **A standing approval is not MCP act mode.** Act mode is a property of one bearer token, chosen once on the MCP consent screen, that lets an outside client write without a per-change approval — a different mechanism on a different surface, and granting either one never grants the other. See [MCP integration](/concepts/mcp-integration).
+  **Three different things are called "Act."** A **standing approval** is the Trust Agent's durable, chat-wide grant, described above. MCP **act mode** is a property of one bearer token, chosen once on the MCP consent screen, that lets an outside client write without a per-change approval. The Trust Agent's **Act** is a third thing again — one of its three in-product operating modes, and it still stops for every mutating write. Separate mechanisms on separate surfaces; granting one never grants another. See [MCP integration](/concepts/mcp-integration) and [Work with the Trust Agent](/how-to/work-with-the-trust-agent).
 </Note>
 
 ## Answer a question card
@@ -173,7 +173,7 @@ For one open-ended clarification, you get a single-question card. It offers the 
 When the agent needs several inputs, it raises a **multi-question flow card**. It's stepped: questions come one at a time with a progress row ("Question N of M"), and you can go **back** to a previous question to change an earlier answer before submitting. Nothing is sent until you submit the batch — then all your answers go to the agent together. Each question carries the same drafted choices and write-in option as the single-question card.
 
 <Frame caption="Mid-flow, on question two of three: the progress row counts the steps, Back is live so you can revise the answer you already gave, and nothing has reached the agent yet — Next, not Submit.">
-  <img src="/images/approve-writes-question-flow.png" alt="A multi-question flow card in the Trust Agent composer slot. Above the question, a progress row reads 'QUESTION 2 OF 3' with three step dots, the first filled and the second current. The question 'Which kind of evaluator fits?' offers LLM judge, document-faithfulness, structured match, a 'let me recommend' option and an 'Or type your own answer…' row, with an enabled Back button on the left of the footer and Next on the right." />
+  <img src="/images/approve-writes-question-flow.png" alt="A multi-question flow card in the Trust Agent composer slot. Above the question, a progress row reads 'QUESTION 2 OF 3' with three step dots, the first filled and the second current. The question 'Which kind of evaluator fits?' offers LLM judge, Groundedness judge, a 'let me recommend' option and an 'Or type your own answer…' row, with an enabled Back button on the left of the footer and Next on the right." />
 </Frame>
 
 For a clickable walkthrough of the multi-question flow end to end, see the live demo in [Work with the Trust Agent](/how-to/work-with-the-trust-agent).

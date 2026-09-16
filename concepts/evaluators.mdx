@@ -4,7 +4,7 @@ icon: "ruler"
 description: "Reusable judges that score sessions — plain-language rules you write, or a built-in rubric that grounds every claim in your source material."
 ---
 
-An Evaluator is a reusable judgment function. You define it once in a [Project](/concepts/projects), attach it to the [Scenarios](/concepts/scenarios) it should grade, and it gets reused across many [Evaluations](/concepts/evaluations) — against whatever [Agent Version](/concepts/agent-versions) you're testing. The same Evaluators scoring the same scenarios across two Agent Versions is **the apples-to-apples comparison** Trust AI is built around.
+An Evaluator is a reusable judgment function. You define it once in a [Project](/concepts/projects), attach it to the [Scenarios](/concepts/scenarios) it should grade, and it gets reused across many [Evaluations](/concepts/evaluations) — against whatever [Agent Version](/concepts/agent-versions) you're testing. The same Evaluators scoring the same scenarios across two Agent Versions is **the apples-to-apples comparison** TrustAI is built around.
 
 ## The kinds of Evaluator
 
@@ -12,7 +12,7 @@ Evaluators differ by *how they decide*, and that determines what each one is goo
 
 <CardGroup cols={2}>
   <Card title="LLM judge" icon="brain">
-    Plain-language grading rules applied by an AI judge at evaluation time. The right tool for **qualitative judgment** — politeness, completeness, helpfulness, staying in scope. Scores pass/fail or on a 1–5 scale.
+    Plain-language grading rules applied by an AI judge at evaluation time. The right tool for **qualitative judgment** — politeness, completeness, helpfulness, staying in scope. Authored pass/fail, or on a 1–5 shape with a pass cutoff; either way the judge is asked for a pass or a fail.
   </Card>
   <Card title="Groundedness judge" icon="file-check">
     Checks that every factual claim in a reply is supported by the scenario's **reference material** — the kind that catches a hallucinated or contradicted answer. Always pass/fail.
@@ -40,7 +40,7 @@ This one works differently enough from the others to be worth its own explanatio
 Its contract, in its own words:
 
 - It breaks each agent reply into individually checkable claims.
-- It checks every claim against the scenario's attached reference material — and a claim only counts as supported when there's a quote that Trust AI **verifies actually appears** in the document.
+- It checks every claim against the scenario's attached reference material — and a claim only counts as supported when there's a quote that TrustAI **verifies actually appears** in the document.
 - It fails when any claim contradicts the material, or when unsupported claims cross the threshold — currently strict, so any unsupported claim fails.
 - When it can't verify the evidence either way, it returns **Needs review** rather than guessing. It never silently passes or fails on uncertainty.
 
@@ -58,7 +58,7 @@ For the step-by-step recipe — attaching reference material, running the judge,
 
 ## Start from the recommended library
 
-A new project doesn't start from a blank slate. Trust AI ships **11 recommended evaluators**: five **Quality** presets (Tone is professional, Answer is complete, Answers the question, Accomplished the goal, Internally consistent) and six **Safety** presets (PII is handled safely, Stays within scope, No unauthorized commitments, No toxic or abusive language, Free of unfair bias, Resists prompt injection). A matching catalog of [recommended scenarios](/concepts/trust-library) covers the same ground on the Scenarios surface.
+A new project doesn't start from a blank slate. TrustAI ships **11 recommended evaluators**: five **Quality** presets (Tone is professional, Answer is complete, Answers the question, Accomplished the goal, Internally consistent) and six **Safety** presets (PII is handled safely, Stays within scope, No unauthorized commitments, No toxic or abusive language, Free of unfair bias, Resists prompt injection). A matching catalog of [recommended scenarios](/concepts/trust-library) covers the same ground on the Scenarios surface.
 
 **Internally consistent** is the one worth reading twice, because it checks less than you might assume. It grades a reply against the conversation, the agent's own tool calls, and the expected response: it fails a reply that contradicts itself or an earlier turn, and one that states a specific — an order number, an amount, a policy name — as settled fact when nothing in front of the judge established it. It does not check facts against source material. That is the Groundedness judge's job, and it needs reference material to do it.
 
@@ -115,7 +115,7 @@ One more amber read belongs beside those, and it isn't a verdict the judge produ
 
 On the create form, the **Tailor with AI** box drafts the rules for you: describe what the evaluator should check in one sentence, click **Draft for my agent**, and draft pass/fail rules prefill the editor. You review and edit them — nothing is saved until you save.
 
-For how to write rules that hold up, see [Write an effective LLM-judge prompt](/how-to/write-llm-judge-prompt).
+For how to write rules that hold up, see [Write grading rules and judge prompts](/how-to/write-llm-judge-prompt).
 
 ## Attaching Evaluators to Scenarios
 
@@ -127,7 +127,7 @@ At run time, an [Evaluation](/concepts/evaluations) applies each scenario's atta
 
 ## Calibration — the loop that makes LLM judges trustworthy
 
-An LLM judge is useful only if it agrees with informed humans. Trust AI measures this in two places — the **Calibrate** tab checks the judge against the pass/fail verdicts you recorded on scenarios, and **evaluator accuracy** on run results measures agreement with the human **Verdict** annotations on sessions. In both, the ground truth is **your verdicts**: on the **Verdict** annotation column, a human verdict grades the judges — it never overrides the automated verdict. That rule is scoped to that column, not universal. Groundedness results are the exception: a reviewer can override a per-claim verdict there and the score recomputes (see [Annotations](/concepts/annotations)).
+An LLM judge is useful only if it agrees with informed humans. TrustAI measures this in two places — the **Calibrate** tab checks the judge against the pass/fail verdicts you recorded on scenarios, and **evaluator accuracy** on run results measures agreement with the human **Verdict** annotations on sessions. In both, the ground truth is **your verdicts**: on the **Verdict** annotation column, a human verdict grades the judges — it never overrides the automated verdict. That rule is scoped to that column, not universal. Groundedness results are the exception: a reviewer can override a per-claim verdict there and the score recomputes (see [Annotations](/concepts/annotations)).
 
 ### The Calibrate tab
 
@@ -148,7 +148,7 @@ Evaluation run results lead with a dual headline: the **Pass rate** grades the a
 
 ## In the app
 
-- **Evaluators list** — every evaluator in the project, with kind, score type, and any **Recommended** provenance chips. **Add recommended** and **New evaluator** live in the header.
+- **Evaluators list** — every evaluator in the project, with kind, score type, and any **Recommended** provenance chips. **Add recommended** and **New evaluator** live in the header; on an empty project the same catalog opens from the **Add recommended evaluators** hero instead.
 - **Create flow** — pick the **Kind** (LLM judge or Groundedness judge), name and describe it, then either author grading rules — by hand or with **Tailor with AI** — or, for a Groundedness judge, optionally add guidance. The kind is fixed once created.
 - **Side panel** — click any evaluator to open its panel. The tabs render in this order: **Overview** (recent trend), **Criteria** (the grading rules, committed with **Save grading rules** — labelled **What it checks** on a Structured match), **Calibrate** (LLM judges only), then **Runs** (run history, with a count once the evaluator has any). Calibrate sits between Criteria and Runs on purpose: Criteria owns the rules, and Calibrate is what proves them.
 - **Safe delete** — the app checks references first, per evaluator. Select rows on the list and the bulk bar offers **Delete**; the confirmation says how many scenarios will stop grading with what you're deleting, names any check it can't touch — *"N evaluators can't be deleted — they're in use and will be skipped"* — and goes ahead with the rest rather than failing the whole batch. When nothing in the selection can go, the dialog is titled **Can't delete these evaluators** and gives each one's reason: used by an evaluation that is still running, or used in evaluations whose results still hold its scores.
@@ -166,7 +166,7 @@ Each calibration run snapshots the rules it tested along with its agreement metr
 
 ## Why we explicitly reject other framings
 
-Trust AI's Evaluator vocabulary deliberately differs from some adjacent ecosystems:
+TrustAI's Evaluator vocabulary deliberately differs from some adjacent ecosystems:
 
 - **Not "metric."** Metrics are continuous scalars (latency, token count). Evaluators produce judgments — pass/fail or rubric-anchored — and the product distinguishes these.
 - **Not "test."** Tests pass or fail without nuance. Evaluators carry reasoning — when an LLM judge fails a result, the reasoning is part of it, which is how you debug agent regressions.
@@ -193,5 +193,5 @@ Developers who want the underlying endpoints and request/response shapes can fin
 - **[Scenarios](/concepts/scenarios)** — where Evaluators attach, via Expected Output
 - **[Evaluations](/concepts/evaluations)** — the runs that apply Evaluators to scenarios and sessions
 - **[The evaluation loop](/concepts/evaluation-loop)** — Evaluators drive step 8, calibrate and tighten
-- **[Write an effective LLM-judge prompt](/how-to/write-llm-judge-prompt)** — practical rule-writing guide
+- **[Write grading rules and judge prompts](/how-to/write-llm-judge-prompt)** — practical rule-writing guide
 - **[Check answers against source material](/how-to/check-answers-against-source-material)** — the Groundedness judge end to end, from reference material to the per-claim report

@@ -4,7 +4,7 @@ icon: "chart-line"
 description: "Apply the Evaluator you authored across the scenarios you curated — the first scored run against a live agent."
 ---
 
-Finishing this tutorial completes the click-path through the evaluation loop; the agent-led capstone, [Evaluate with the Trust Agent](/tutorials/evaluate-with-the-trust-agent), drives the same loop by conversation. With the [scenarios](/concepts/scenarios) you curated in [the quickstart](/tutorials/quickstart) and the [Evaluator](/concepts/evaluators) you authored in [Build your first Evaluator](/tutorials/build-first-evaluator), you'll now **run an [Evaluation](/concepts/evaluations)** — the moment Trust AI produces its first piece of evidence about your agent's behavior.
+Finishing this tutorial completes the click-path through the evaluation loop; the agent-led capstone, [Evaluate with the Trust Agent](/tutorials/evaluate-with-the-trust-agent), drives the same loop by conversation. With the [scenarios](/concepts/scenarios) you curated in [the quickstart](/tutorials/quickstart) and the [Evaluator](/concepts/evaluators) you authored in [Build your first Evaluator](/tutorials/build-first-evaluator), you'll now **run an [Evaluation](/concepts/evaluations)** — the moment TrustAI produces its first piece of evidence about your agent's behavior.
 
 By the end you'll have:
 
@@ -13,7 +13,7 @@ By the end you'll have:
 - A second run against a different [Agent Version](/concepts/agent-versions) (where available), read side by side with the first
 - A concrete idea of what to do next based on what you saw
 
-Configuring the run and reading the results are a few minutes of clicking each. How long the run itself takes is not a Trust AI number — it is however long your agent takes to hold each conversation, multiplied by how many conversations you launched. Watch the run's progress counter rather than the clock; step 3 shows you where it is.
+Configuring the run and reading the results are a few minutes of clicking each. How long the run itself takes is not a TrustAI number — it is however long your agent takes to hold each conversation, multiplied by how many conversations you launched. Watch the run's progress counter rather than the clock; step 3 shows you where it is.
 
 ## Before you start
 
@@ -35,7 +35,7 @@ One thing to check before launching: **evaluators travel with each scenario**, n
 
     The agent proposes the run and waits for your approval before anything launches. Or set it up by hand: open **Scenarios**, select the scenarios you want (or select none to run the whole view), and click **Run** — the split button's default is **Run & evaluate**. (The chevron also offers **Run only**, which simulates without grading; skip that for now.)
 
-    Either path opens the same **Evaluation Launcher** — one modal that drives every run in Trust AI. You can also reach it from the Evaluations page via **New evaluation**, where you first choose what to evaluate: scenarios (simulate with an agent) or sessions (grade recorded conversations directly).
+    Either path opens the same **Evaluation Launcher** — one modal that drives every run in TrustAI. You can also reach it from the Evaluations page via **New evaluation**, where you first choose what to evaluate: scenarios (simulate with an agent) or sessions (replay recorded conversations against the connected agent and grade the new answers — see [Evaluate captured sessions](/how-to/evaluate-sessions)).
 
     Notice the **Evaluators** section is read-only: *"Inherited from each scenario — graded automatically, no picking needed."* If it instead says the scenarios don't carry any evaluators yet, go back and add your Evaluator on each scenario's **Expected Output** tab first.
 
@@ -49,7 +49,7 @@ One thing to check before launching: **evaluators travel with each scenario**, n
 
     The **Agent** selector answers one question: *which connected agent simulates each scenario*. Pick the agent your Project has connected — if you connected one during [the quickstart](/tutorials/quickstart), it's in this list. If multiple are connected, pick the production one for your first run; you'll run against another version in step 5.
 
-    **What's happening underneath:** a scenarios run always **simulates**. For every scenario, each attached persona plays out the scenario's goal against this agent in a live conversation — Trust AI doesn't replay stored responses, it gets fresh ones from the agent under test. That's also why each persona gets its own scored result.
+    **What's happening underneath:** a scenarios run always **simulates**. For every scenario, each attached persona plays out the scenario's goal against this agent in a live conversation — TrustAI doesn't replay stored responses, it gets fresh ones from the agent under test. That's also why each persona gets its own scored result.
 
     Below the agent sits **Repeat each test case** — a **1 / 2 / 3 / 4** selector, with the hint *"Repeat each case to measure how reliably the agent passes. More repeats take longer to run."* Leave it at **1** for your first run: one attempt per case, one result per case, a plain pass rate to read. Raise it later when you want to know whether a pass was luck — [the Evaluations concept page](/concepts/evaluations) covers what the repeated-run headline tells you.
 
@@ -72,14 +72,14 @@ One thing to check before launching: **evaluators travel with each scenario**, n
 
     What happens in the background, in roughly this order:
 
-    1. For each scenario × persona pair, Trust AI simulates a fresh conversation with your agent
+    1. For each scenario × persona pair, TrustAI simulates a fresh conversation with your agent
     2. Each conversation is captured as a real Session — it appears in your Sessions list with Source **Scenario**, linked back to the scenario that produced it (the "Evaluation results are Sessions, too" pattern, expanded in [the Evaluations concept page](/concepts/evaluations#evaluation-results-are-sessions-too))
     3. The evaluators inherited from each scenario grade each result and produce a verdict + reasoning
     4. The headline numbers roll up on the run detail page
 
     If you launched from the Scenarios list, you stay right there: each in-flight scenario shows a live **Generating…** badge that settles as it finishes. Open the run's detail page and the status pill reads **Running**, with a progress line beneath the run name counting *N* / *M* completed. That counter — not a stopwatch — is how you tell a slow run from a stuck one. While the run is in flight the header offers **Cancel run** (and a confirm dialog: canceling keeps every result already scored, but the run can't be resumed). When it settles, the pill reads **Completed**.
 
-    We don't publish an expected duration, because there isn't one to publish: the wall-clock time is your agent's conversation latency times the number of simulations you launched, and Trust AI doesn't control either. Judge progress by the counter.
+    We don't publish an expected duration, because there isn't one to publish: the wall-clock time is your agent's conversation latency times the number of simulations you launched, and TrustAI doesn't control either. Judge progress by the counter.
 
     The pipeline is also built not to lie to you about infrastructure: model-capacity throttling is retried automatically with backoff, and one bad result can't sink the whole run.
 
@@ -130,7 +130,7 @@ One thing to check before launching: **evaluators travel with each scenario**, n
 
     One more headline you may meet later: if you raised **Repeat each test case** at launch *and* the run graded something, it leads with a **Pass^K** reliability rate instead of a pass rate — the share of cases that passed *every* attempt, with the full curve on hover. Graded results are the gate, not the repeat count: a repeated run with nothing behaviorally scored still leads with **Not graded**. You left the selector at **1**, so you'll see the plain pass rate.
 
-    **You should see:** an Evaluation that tells a story — pass rate, one summary row per scenario and persona, and the reasoning behind each verdict. This is the evidence Trust AI exists to produce.
+    **You should see:** an Evaluation that tells a story — pass rate, one summary row per scenario and persona, and the reasoning behind each verdict. This is the evidence TrustAI exists to produce.
   </Step>
 
   <Step title="Run it again — and against another Agent Version">
@@ -148,7 +148,7 @@ One thing to check before launching: **evaluators travel with each scenario**, n
 
     By hand: open the finished run, click **Re-run**, check that **Repeat each test case** still matches the first run, and change **only the Agent** to the other build. When it completes, open both runs from the Evaluations list — in two tabs works well — and read them side by side: the headline pass rates, then the results tables, summary row by summary row. A pass that became a fail is a regression; a fail that became a pass is an improvement.
 
-    There's no dedicated run-vs-run comparison view yet — the side-by-side reading is manual (or delegated to the Trust Agent, which is exactly the kind of cross-referencing it's good at). This is still the regression-tracking habit Trust AI is built around: same scenarios, same evaluators, different agent, and the diff is your evidence. [Compare two Agent Versions](/how-to/compare-agent-versions) is the full workflow — matched configuration, reading the flipped cases, making the ship call.
+    There's no dedicated run-vs-run comparison view yet — the side-by-side reading is manual (or delegated to the Trust Agent, which is exactly the kind of cross-referencing it's good at). This is still the regression-tracking habit TrustAI is built around: same scenarios, same evaluators, different agent, and the diff is your evidence. [Compare two Agent Versions](/how-to/compare-agent-versions) is the full workflow — matched configuration, reading the flipped cases, making the ship call.
   </Step>
 </Steps>
 
@@ -174,9 +174,9 @@ Finishing this tutorial closes one full round of the evaluation loop, click by c
     Go deeper on personas and goals — the machinery behind every scenario run you just launched.
   </Card>
   <Card title="Connect another agent" icon="plug" href="/how-to/connect-agentcore">
-    Bring a second agent (or a second environment of the same agent) into Trust AI. Same shape, narrower scope.
+    Bring a second agent (or a second environment of the same agent) into TrustAI. Same shape, narrower scope.
   </Card>
   <Card title="API Reference" icon="code" href="/api-reference">
-    Every endpoint, request shape, and response shape — the source of truth for programmatic Trust AI usage.
+    Every endpoint, request shape, and response shape — the source of truth for programmatic TrustAI usage.
   </Card>
 </CardGroup>

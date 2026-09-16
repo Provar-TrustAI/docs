@@ -4,9 +4,9 @@ icon: "git-branch"
 description: "Run the same scenarios and Evaluators against two pinned builds, hold the repeat count steady, and read the two grouped result sets against each other."
 ---
 
-This how-to walks through the **regression-tracking workflow** Trust AI is built around: evaluating two [Agent Versions](/concepts/agent-versions) on the same scenarios under the same [Evaluators](/concepts/evaluators), so the only variable between the two runs is the build itself.
+This how-to walks through the **regression-tracking workflow** TrustAI is built around: evaluating two [Agent Versions](/concepts/agent-versions) on the same scenarios under the same [Evaluators](/concepts/evaluators), so the only variable between the two runs is the build itself.
 
-One honest framing note before you start: **Trust AI does not have a dedicated run-vs-run comparison view today.** There is no Compare button and no side-by-side diff surface. The comparison is a workflow — two [Evaluation](/concepts/evaluations) runs with identical configuration except the Agent Version, read against each other on the run detail pages and the Evaluations list. This page shows you how to do that read quickly and trust what it tells you.
+One honest framing note before you start: **TrustAI does not have a dedicated run-vs-run comparison view today.** There is no Compare button and no side-by-side diff surface. The comparison is a workflow — two [Evaluation](/concepts/evaluations) runs with identical configuration except the Agent Version, read against each other on the run detail pages and the Evaluations list. This page shows you how to do that read quickly and trust what it tells you.
 
 Two nouns to keep straight on this page: an **Agent Version** is a pinned snapshot of *your* agent under test — the thing being graded. The **Trust Agent** is the in-app assistant you delegate the work to. They are different things.
 
@@ -61,14 +61,14 @@ Same scenarios, same Evaluators, same environment. **Re-run** does most of this 
     *Ask the Trust Agent:* "Run an evaluation of my order-status scenarios against the current production build, repeating each case three times."
     </Note>
 
-    The Trust Agent proposes the run — confirming which scenarios, Evaluators, and agent build it will use — and you approve it before anything launches (see [Approve agent writes](/how-to/approve-agent-writes)).
+    The Trust Agent proposes the run — confirming which scenarios, Evaluators, and agent build it will use — and you approve it before anything launches (see [Approve an agent write](/how-to/approve-agent-writes)).
 
     To do it by hand: from the Project's **Evaluations** list, click **New evaluation**. The launcher opens as a modal titled **New evaluation**, with its fields in this order:
 
     | Field | What it does |
     | --- | --- |
     | **Evaluation name** | Names the run on the Evaluations page. Pre-filled, editable. |
-    | **What to evaluate** | **Sessions** or **Scenarios**. Scenarios simulates fresh conversations; Sessions grades transcripts you already have. |
+    | **What to evaluate** | **Sessions** or **Scenarios**. Scenarios simulates fresh conversations; Sessions replays conversations you already have against the connected agent and grades the new answers. |
     | **Evaluators** | Picked by you on the Sessions source; **inherited from each scenario**, read-only, on the Scenarios source. |
     | **Agent** | Which connected agent simulates each scenario — this is the Agent Version being pinned. Scenarios source only. |
     | **Repeat each test case** | The four-option repeat picker: 1, 2, 3, or 4. |
@@ -109,12 +109,12 @@ Same scenarios, same Evaluators, same environment. **Re-run** does most of this 
 
     The Trust Agent reads both runs and reports the numbers back in plain language; the same numbers lead each run's detail page for you to check yourself. A finished run's subtitle composes its segments in this order:
 
-    1. **The behavioral headline** — `Pass^K NN%` on a repeated run, or `NN% pass rate` on a single-attempt one. `Pass^K` is the share of test cases that passed *every* attempt; hover or focus it to reveal the full curve, from passing once to passing every time. A run with nothing behaviorally graded reads **Not graded** instead.
+    1. **The behavioral headline** — `Pass^K NN%` on a repeated run, or `NN% pass rate` on a single-attempt one. `Pass^K` is the share of test cases that passed *every* attempt; hover or focus it to reveal the full curve, from passing once to passing every time. A run with nothing behaviorally graded reads **Not graded** instead — refined to **Run only — nothing was graded** for a deliberate simulation, or **Not graded — no evaluators** for a graded run that inherited none.
     2. **Evaluator accuracy** — how often the Evaluators' combined verdict agreed with a human's session verdict. Present only when annotated cases exist to measure against.
     3. **Completion** — `N of M trials completed` on a repeated run, `N of M completed` on a single-attempt one. Neutral evidence of how much finished, not a pass count.
     4. **Ran** — the absolute date the run finished.
 
-    Read the first two together. If the behavioral headline dropped but evaluator accuracy held steady, the agent likely regressed. If evaluator accuracy moved sharply between two runs on the same scenarios, treat the headline delta with suspicion — the judges, not the agent, may be the story. Calibrate the Evaluator before making a ship decision (see [Calibrate an Evaluator](/how-to/calibrate-an-evaluator)).
+    Read the first two together. If the behavioral headline dropped but evaluator accuracy held steady, the agent likely regressed. If evaluator accuracy moved sharply between two runs on the same scenarios, treat the headline delta with suspicion — the judges, not the agent, may be the story. Calibrate the Evaluator before making a ship decision (see [Calibrate an evaluator](/how-to/calibrate-an-evaluator)).
 
     Two things keep the numbers honest across runs:
 
@@ -131,7 +131,7 @@ Same scenarios, same Evaluators, same environment. **Re-run** does most of this 
 
     The Trust Agent can pull both runs' results and run a structured failure analysis on the candidate. To read it yourself, open the two run details in two browser tabs and compare them scenario by scenario.
 
-    **Results open grouped, not flat.** The default view is **By scenario**: one summary per scenario, with a chevron to expand it. Each summary carries a **Final verdict** chip plus a reliability quote — `2/3` means two of three graded attempts passed. The rollup is strict: a scenario reads **Pass** only if *every* graded attempt passed, **Fail** otherwise, and **Not graded** when no attempt produced a behavioral score.
+    **Results open grouped, not flat.** The default view is **By scenario**: one summary per scenario, with a chevron to expand it. Each summary carries a **Final verdict** chip plus a reliability quote — `2/3` means two of three graded attempts passed. Where some attempts could not be tested at all, a passing rollup reads **Pass among scored** and the summary adds an amber *N* **couldn't test** caption, so the quote is never mistaken for the whole story. Expand it and each per-evaluator cell reads `N/M passed`, with `N not scored` beneath where checks were skipped. The rollup is strict: a scenario reads **Pass** only if *every* graded attempt passed, **Fail** otherwise, and **Not graded** when no attempt produced a behavioral score.
 
     That strictness is what makes grouped results the better comparison surface. Line the two runs' summaries up and the delta you read is a reliability delta, not a coin flip:
 
@@ -163,13 +163,13 @@ Same scenarios, same Evaluators, same environment. **Re-run** does most of this 
     - **Block and investigate.** Real regressions in a category that matters. Hand the failing results to the team owning the agent, with links to the two runs as the artifact.
     - **Ship with caveats.** Improvements in one category, tolerable regressions in low-priority surface area. Document the caveats where your team records deploy decisions, and watch the next cycle's runs.
 
-    Trust AI keeps the evidence durable either way: every run stays pinned to its Agent Version, so the Evaluations list doubles as your index of past comparisons. Each run's line shows the Agent Version label beneath the run name alongside a sortable **Overall pass rate** and **Evaluator accuracy**.
+    TrustAI keeps the evidence durable either way: every run stays pinned to its Agent Version, so the Evaluations list doubles as your index of past comparisons. Each run's line shows the Agent Version label beneath the run name alongside a sortable **Overall pass rate** and **Evaluator accuracy**.
 
     <Warning>
-    The Evaluations page header is **not** a trend line. Its subtitle reads *"N completed runs · N in last 7 days · X% avg pass rate · last 7 days"*, and every segment of it is computed in the browser over the runs the page has already loaded — the most recent 100 — counting only the completed ones. The average narrows further, to runs that completed inside the last seven days, and its segment disappears entirely when none did. Read drift by scanning down the version labels and their pass rates in the table, not from the header average.
+    The Evaluations page header is **not** a trend line. Its subtitle reads *"N completed runs · N in last 7 days · X% avg pass rate · last 7 days"*, and every segment of it is computed in the browser over the runs the page has already loaded — the most recent 100 — counting only the completed ones. The average narrows further, to runs that completed inside the last seven days, and its segment disappears entirely when none did. The loaded rows include quick evaluations, which count as completed, so they feed both the run count and the average. Read drift by scanning down the version labels and their pass rates in the table, not from the header average.
     </Warning>
 
-    Note that the decision itself lives with your team: Trust AI doesn't have a promote-to-production action or a notes field on Agent Versions today, so record the rationale in your deploy process, linking the two runs.
+    Note that the decision itself lives with your team: TrustAI doesn't have a promote-to-production action or a notes field on Agent Versions today, so record the rationale in your deploy process, linking the two runs.
   </Step>
 </Steps>
 
@@ -201,6 +201,6 @@ Alongside it, each run's results are readable individually, and the evaluations 
 - **[Agent Versions](/concepts/agent-versions)** — what's being compared, and how builds get pinned
 - **[Evaluations](/concepts/evaluations)** — the runs the comparison is built from, and the `Pass^K` headline in full
 - **[Run your first Evaluation](/tutorials/run-first-evaluation)** — the tutorial that produces your baseline run
-- **[Calibrate an Evaluator](/how-to/calibrate-an-evaluator)** — for when the comparison reveals calibration edges, not agent regressions
-- **[Write an effective LLM-judge prompt](/how-to/write-llm-judge-prompt)** — tightening the rubric a calibration edge exposed
+- **[Calibrate an evaluator](/how-to/calibrate-an-evaluator)** — for when the comparison reveals calibration edges, not agent regressions
+- **[Write grading rules and judge prompts](/how-to/write-llm-judge-prompt)** — tightening the rubric a calibration edge exposed
 - **[The evaluation loop](/concepts/evaluation-loop)** — where version comparison sits in the larger loop

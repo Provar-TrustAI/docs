@@ -1,12 +1,12 @@
 ---
-title: "Annotate Sessions"
+title: "Annotate sessions"
 icon: "tag"
-description: "Grade captured Sessions in place — set Verdict and Severity inline in the table, add a reviewer note in the fly-in, and create your own typed annotation columns. Needs Editor access."
+description: "Grade captured sessions in place — set Verdict and Severity inline in the table, add a reviewer note in the fly-in, and create your own typed annotation columns. Needs Editor access."
 ---
 
-This how-to walks you through grading captured [Sessions](/concepts/sessions) with typed [Annotations](/concepts/annotations) — the human-judgment layer that makes every automated judge accountable. After you've worked through it:
+This how-to walks you through grading captured [sessions](/concepts/sessions) with typed [Annotations](/concepts/annotations) — the human-judgment layer that makes every automated judge accountable. After you've worked through it:
 
-- You can set a **Verdict** (Pass / Fail) and a **Severity** on a Session without leaving the table
+- You can set a **Verdict** (Pass / Fail) and a **Severity** on a session without leaving the table
 - You can write a **Reviewer note** in the fly-in's **Annotations** tab and sweep through a batch with the keyboard
 - You can create a custom annotation column of any of the five types
 - You know what your Verdict is *for*: it grades the judges — it never changes the automated verdict
@@ -19,7 +19,7 @@ Annotating is hands-on judgment work — you do it directly on the Sessions surf
 
 ## Prerequisites
 
-- A **Trust AI account** with **Editor** access to the [Project](/concepts/projects) you're grading in. **Every write on this page needs it** — setting a Verdict, setting a Severity, saving a note, adding a column. A **Viewer** can open the Sessions list, read every annotation column, and read every value already recorded, but the first save is refused: the value paints, then rolls back, and a **Couldn't save** message appears. If that happens to you, ask a workspace admin to raise your grant on the project — see [Administer workspace access](/how-to/administer-workspace-access).
+- A **TrustAI account** with **Editor** access to the [Project](/concepts/projects) you're grading in. **Every write on this page needs it** — setting a Verdict, setting a Severity, saving a note, adding a column. A **Viewer** can open the Sessions list, read every annotation column, and read every value already recorded, but the first save is refused: the value paints, then rolls back, and a **Couldn't save** message appears. If that happens to you, ask a workspace admin to raise your grant on the project — see [Administer workspace access](/how-to/administer-workspace-access).
 - Sessions in the Project to grade — synced from a connected agent, or generated in-product by scenario runs, the Playground, or evaluations (any **Source** works: **Scenario**, **Playground**, or **External**)
 
 ## Grade sessions in place
@@ -92,7 +92,7 @@ Annotating is hands-on judgment work — you do it directly on the Sessions surf
 
 You don't have to go back to the Sessions list to grade a case you're already looking at. Open any result row on an evaluation run and the result fly-in carries its own **Annotations** tab, immediately after **Transcript**.
 
-It is the same editor over the same data — the identical schema-driven controls, bound to the conversation the result was scored on. A Verdict you set there is the Verdict on that Session, and it appears in the Sessions table the moment you look. The same **Editor** requirement applies.
+It is the same editor over the same data — the identical schema-driven controls, bound to the conversation the result was scored on. A Verdict you set there is the Verdict on that session, and it appears in the Sessions table the moment you look. The same **Editor** requirement applies.
 
 One limit worth knowing: the tab needs a conversation to attach to. A result whose Session can't be resolved shows **This evaluation's conversation Session is unavailable** instead of the tab strip, and there is nothing to annotate on it.
 
@@ -100,7 +100,7 @@ One limit worth knowing: the tab needs a conversation to attach to. A result who
 
 Your **Verdict** is Session-level ground truth, and it has exactly one job: grading the judges.
 
-- **It feeds Evaluator accuracy.** A run's detail page carries two headline numbers: **Pass rate** grades the *agent* — how often it passed. **Evaluator accuracy** grades the *judges* — how often the evaluators' combined verdict agreed with the human Verdict on each case. Cases without a human Verdict can't contribute and are excluded; a run with no annotated cases shows no accuracy number at all. The more Sessions you grade, the more the accuracy figure means.
+- **It feeds Evaluator accuracy.** A run's detail page carries two headline numbers: **Pass rate** grades the *agent* — how often it passed. **Evaluator accuracy** grades the *judges* — how often the evaluators' combined verdict agreed with the human Verdict on each case. Cases without a human Verdict can't contribute and are excluded; a run with no annotated cases shows no accuracy number at all. The more sessions you grade, the more the accuracy figure means.
 - **It never overrides the automated verdict.** The header pill is derived from automated evaluations only. Your Verdict lives beside it, not on top of it.
 - **It can't be deleted out from under you.** The **Verdict** column is reserved — it can't be removed, and the column creator refuses a new column named "Verdict" with **Verdict is a built-in column and can't be recreated.** The ground-truth channel is always there.
 
@@ -126,7 +126,7 @@ Once a column exists, its **key and its type are fixed — for every column, not
 
 Deleting a column doesn't erase the values recorded against it, but creating a replacement from the dialog gives the new column its own key, so it starts empty. Pick the type deliberately the first time.
 
-Once a batch is graded, the natural next move is to run the judges over it — selecting Sessions raises a bulk-actions bar whose primary action is **Evaluate**. [Evaluate sessions](/how-to/evaluate-sessions) is that guide.
+Once a batch is graded, the natural next move is to run the judges over it — selecting sessions raises a bulk-actions bar whose primary action is **Evaluate**. [Evaluate sessions](/how-to/evaluate-sessions) is that guide.
 
 <Note>
   The annotation schema and each Session's cell values ride the sessions API; request and response shapes live in the [API Reference](/api-reference).
@@ -168,7 +168,7 @@ Once a batch is graded, the natural next move is to run the judges over it — s
   </Accordion>
 
   <Accordion title="Evaluator accuracy is blank on my run">
-    Accuracy only exists where a human Verdict exists. If none of the run's cases carry one, the headline hides rather than showing a meaningless zero. Grade the Sessions the run covers, and accuracy resolves on runs that include them.
+    Accuracy only exists where a human Verdict exists. If none of the run's cases carry one, the headline hides rather than showing a meaningless zero. Grade the sessions the run covers, and accuracy resolves on runs that include them.
   </Accordion>
 </AccordionGroup>
 
@@ -180,4 +180,4 @@ Once a batch is graded, the natural next move is to run the judges over it — s
 - **[Evaluators](/concepts/evaluators)** — the judges your ground truth is measuring
 - **[Administer workspace access](/how-to/administer-workspace-access)** — where Viewer and Editor grants on a project are made and changed
 - **[Saved views](/concepts/saved-views)** — persist the slice-and-columns setup you grade from
-- **[Write an effective LLM-judge prompt](/how-to/write-llm-judge-prompt)** — what to fix when your Verdicts and the judges keep disagreeing
+- **[Write grading rules and judge prompts](/how-to/write-llm-judge-prompt)** — what to fix when your Verdicts and the judges keep disagreeing

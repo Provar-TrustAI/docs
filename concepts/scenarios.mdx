@@ -4,7 +4,7 @@ icon: "flask-conical"
 description: "Flat, first-class test cases — a name, a user goal, personas, and an authored expected output — that evaluations score an agent against."
 ---
 
-A **scenario** is one test case worth scoring your agent on: a name, the goal a simulated user is trying to accomplish, the personas who pursue it, and an authored **expected output** — the grading contract that says what a passing conversation looks like. Every project has one flat **Scenarios** list, and each scenario carries a stable, reader-visible id like `SCN-000123`. You define a scenario cheaply, run it to simulate real conversations, and learn its expected output from a session you like — that loop is the heart of evaluating an agent in Trust AI.
+A **scenario** is one test case worth scoring your agent on: a name, the goal a simulated user is trying to accomplish, the personas who pursue it, and an authored **expected output** — the grading contract that says what a passing conversation looks like. Every project has one flat **Scenarios** list, and each scenario carries a stable, reader-visible id like `SCN-000123`. You define a scenario cheaply, run it to simulate real conversations, and learn its expected output from a session you like — that loop is the heart of evaluating an agent in TrustAI.
 
 <Note>
   **Formerly Datasets.** Earlier releases organized test cases as rows inside collections. As of v2026.06.30.1 those collections are gone: there is one flat Scenarios list per project, each scenario is a first-class entity, and the conversations it produces are real [Sessions](/concepts/sessions) linked back to it. The surface lives at `/projects/:id/scenarios`; the old `/projects/:id/datasets` address redirects there, so stale bookmarks still land in the right place.
@@ -49,7 +49,7 @@ The page ships with two built-in [saved views](/concepts/saved-views): **All sce
 
 ### Every Run affordance opens the launcher
 
-**Run** doesn't start anything on its own. Whichever way you reach it — the header's **Run** split-button, the bulk-actions bar after selecting scenarios, or **Run & evaluate** in a fly-in — you land in the shared **Evaluation launcher** modal first. You confirm what to evaluate, which agent version to run against, and how many times to **Repeat each test case**; nothing is enqueued until you launch from inside it.
+**Run** doesn't start anything on its own. Whichever way you reach it — the header's **Run** split-button, the bulk-actions bar after selecting scenarios, or **Run & evaluate** in a fly-in — you land in the shared **Evaluation launcher** modal first. You confirm what to evaluate and which agent version to run against; nothing is enqueued until you launch from inside it. **Repeat each test case** is asked for only on a graded, run-minting launch — it is hidden on **Run only** and on a single-item launch, because neither has anything to repeat.
 
 What happens next depends on what you launched:
 
@@ -57,9 +57,10 @@ What happens next depends on what you launched:
 |---|---|
 | **Run only** (simulate, no grading) | Stays on the Scenarios list, live in-flight badges settling as each finishes |
 | A **quick evaluation** from a session fly-in | Stays put — the fly-in reports the verdict, and the graded conversation also lands on the Evaluations list |
-| **Run & evaluate** | Navigates to the new run's detail page |
+| **Run & evaluate** on a selection from the list | Navigates to the new run's detail page |
+| **Run & evaluate** in a single scenario's fly-in | Stays put — it grades one conversation in place and mints no run |
 
-So "stay on the list and watch the badges" is the ungraded story. A graded run takes you to its results, because that's where the grading it just produced lives.
+So "stay on the list and watch the badges" is the ungraded story. A launch that mints a run takes you to its results, because that's where the grading it just produced lives; a single-item launch grades in place and has no run page to go to.
 
 A **quick evaluation** grades one session in place from its own fly-in, and it is visible well beyond that fly-in. It announces itself with a **Quick evaluation started** toast, reports progress as **Scoring check 2 of 3…** while the judges land, and finishes with a **Quick evaluation finished** toast carrying a **View** action. Its row on the Evaluations list wears a muted **Quick** pill and opens the conversation it graded rather than a run-detail page, because it mints no run record — which is also why that row carries no Cancel and no Delete. For the full recipe, see [Evaluate captured sessions](/how-to/evaluate-sessions).
 
@@ -86,7 +87,7 @@ The panel's **More** menu carries **Run & evaluate**, **Run only**, and **Delete
 
 The **Test Data** tab answers a different question from Expected Output. Expected Output is the *agent behavior* contract; Test Data is about the records a test needs and what becomes of them afterwards.
 
-It opens with the environment, because that part is settled for you: a **Default environment** strip names the environment every run of this scenario holds, pills it **Always used**, and states the promise — Trust AI acquires, runs, resets, and releases it every time. Where the project has no environment connected yet, that pill reads **Setup required** instead and nothing on the tab can run.
+It opens with the environment, because that part is settled for you: a **Default environment** strip names the environment every run of this scenario holds, pills it **Always used**, and states the promise — TrustAI acquires, runs, resets, and releases it every time. Where the project has no environment connected yet, that pill reads **Setup required** instead and nothing on the tab can run.
 
 Below the environment sits the scenario's **plan**: one reviewable description of the test-data work, rendered as five expandable step cards whose titles are full sentences — **"Create what this test needs"**, **"Run the conversation"**, **"Read back what the agent created"**, **"Check what should happen"**, and **"Clean up everything this test created"**. A scenario with no plan shows a **No test data yet** hero instead, offering **Set up with AI** — where the connection can be read for a schema — and **Add manually**. Those two, and **Edit plan** once a plan exists, all open the same docked drawer, whose tabs are **AI**, **Form**, and **JSON**. A drafted proposal is always yours to read before it replaces what is stored.
 
@@ -156,13 +157,13 @@ Putting the pieces together, the opinionated workflow is:
   </Step>
 </Steps>
 
-For the step-by-step recipe, see [Simulate with scenarios](/how-to/simulate-with-scenarios).
+For the step-by-step recipe, see [Simulate agents with scenarios](/how-to/simulate-with-scenarios).
 
 ## Where scenarios come from
 
 - **New scenario** — the header button opens a short form: name, goal, personas. Expected output is deliberately deferred.
 - **Save as a scenario** from the [Playground](/concepts/playground) — an exploratory conversation you liked becomes a scenario with that conversation attached as its first linked session.
-- **Add recommended scenarios** — a starter catalog of ten adversarial probes, one per OWASP Agentic Top 10 failure mode. Adoption arrives graded: the safety checks that score each probe are created once and attached to the scenario as it lands, so a run grades it without you picking judges. The confirm step offers **Add without tailoring** or **Add & tailor to your agent**, which hands the batch to the [Trust Agent](/concepts/trust-agent) to customize each check against your connected agent's real tools and rules in the background. A catalog probe carries a name, a goal, its category, and that prose guidance — never expected actions, test data, or reference material, so it is still yours to ground in your own data. See [Recommended scenarios](/concepts/trust-library) and [Adopt the recommended security scenarios](/how-to/adopt-recommended-security-scenarios).
+- **Add recommended scenarios** — a starter catalog of ten adversarial probes, one per OWASP Agentic Top 10 (2026) failure mode. Adoption arrives graded: the safety checks that score each probe are created once and attached to the scenario as it lands, so a run grades it without you picking judges. The confirm step offers **Add without tailoring** or **Add & tailor to your agent**, which hands the batch to the [Trust Agent](/concepts/trust-agent) to customize each check against your connected agent's real tools and rules in the background. A catalog probe carries a name, a goal, its category, and that prose guidance — never expected actions, test data, or reference material, so it is still yours to ground in your own data. See [Recommended scenarios](/concepts/trust-library) and [Adopt the recommended security scenarios](/how-to/adopt-recommended-security-scenarios).
 - **Ask the [Trust Agent](/concepts/trust-agent)** — describe the behavior you want covered and let the assistant draft scenarios for you; it pauses for your approval before it writes anything.
 
 Note that **Source** on a session is a different idea from where a *scenario* came from: a session's Source chip is exactly one of **Scenario**, **Playground**, or **External**, and records how that conversation entered the system.

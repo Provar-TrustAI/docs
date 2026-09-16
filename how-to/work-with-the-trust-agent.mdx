@@ -18,11 +18,11 @@ This how-to walks you through a working session with the **Trust Agent** — the
 
 ## Prerequisites
 
-- A **Trust AI account** with access to at least one [Project](/concepts/projects)
+- A **TrustAI account** with access to at least one [Project](/concepts/projects)
 - A Project with at least one connected agent or ingested [Sessions](/concepts/sessions), so the agent has real records to act on
 
 <Note>
-  **The agent will route you backwards if the Project isn't ready.** Authoring runs in a fixed order, enforced at run time: no scenarios until a [requirement](/concepts/requirements) is saved, no expected output, test data, simulation or run until each requirement has an evaluator created **and** attached. Ask for a later step on a bare Project and the agent explains what's missing and offers to do that first, rather than failing halfway. [Capture requirements](/how-to/capture-requirements) is the step most people meet first.
+  **The agent will route you backwards if the Project isn't ready.** Authoring runs in a fixed order, enforced at run time: no scenarios until a [requirement](/concepts/requirements) is saved, no expected output or test data until each requirement has an evaluator created **and** attached, and no simulation or run until each linked scenario also carries expected actions or routes. Ask for a later step on a bare Project and the agent explains what's missing and offers to do that first, rather than failing halfway. [Capture requirements](/how-to/capture-requirements) is the step most people meet first.
 </Note>
 
 ## Work with the agent
@@ -172,7 +172,7 @@ This how-to walks you through a working session with the **Trust Agent** — the
 
     The write-approval flow in full — the permission card, the rich preview, approve-and-execute, and the audit echo — is its own recipe.
 
-    **You should see:** a create / update / delete proposal pause behind a permission card before it runs, and a receipt of your decision left in the transcript. The exception is a write already covered by a standing approval you granted earlier in this chat: that one commits with no card at all, and the chip above the composer is the only thing that tells you why. To work through that flow end to end, continue to [Approve agent writes](/how-to/approve-agent-writes).
+    **You should see:** a create / update / delete proposal pause behind a permission card before it runs, and a receipt of your decision left in the transcript. The exception is a write already covered by a standing approval you granted earlier in this chat: that one commits with no card at all, and the chip above the composer is the only thing that tells you why. To work through that flow end to end, continue to [Approve an agent write](/how-to/approve-agent-writes).
   </Step>
 
   <Step title="Connect an agent without leaving the chat">
@@ -181,9 +181,9 @@ This how-to walks you through a working session with the **Trust Agent** — the
     - **Salesforce Agentforce** opens a *stepped* card: progress chips across the top, a counter that opens at **Step 1 of 3**, and the first step headed **Your Salesforce org**. **Continue** advances it, and **Back** appears once you are past the first step.
     - **Claude Managed Agent** opens a *single form* — no steps and no counter. You enter the API key, AWS region, and workspace, press **Find agents**, then pick your **Agent** and **Environment** from the lists discovery returns and press **Connect**.
 
-    Both cards carry **Not now** to back out.
+    Both cards carry **Close setup** to back out; the agent confirms nothing was connected and waits.
 
-    Credentials typed into that card go straight to Trust AI over a separate call. They are never part of the conversation the model reads and never appear in the transcript — the card says so, and the only thing handed back to the agent when you finish is the outcome: connected or not, which agent, and its health.
+    Credentials typed into that card go straight to TrustAI over a separate call. They are never part of the conversation the model reads and never appear in the transcript — the card says so, and the only thing handed back to the agent when you finish is the outcome: connected or not, which agent, and its health.
 
     **You should see:** a connection card open inside the chat — stepped for Agentforce, a single form for a Claude Managed Agent — the run wait while you complete it, and the new connection lead the side rail's **Context** section as the **Connected agent** card on the next turn that touches your records. For the full platform-by-platform setup, see [Connect Agentforce](/how-to/connect-agentforce) and [Connect a Claude managed agent](/how-to/connect-claude-managed-agent).
   </Step>
@@ -209,7 +209,7 @@ This how-to walks you through a working session with the **Trust Agent** — the
   </Accordion>
 
   <Accordion title="I asked the agent to change something and nothing happened yet">
-    Writes pause for approval. The agent surfaces a permission card describing the change and waits — nothing is created, updated, or deleted until you approve. The exception is a write already covered by a standing approval you granted earlier in this chat: that one commits without asking again, and the chip above the composer tells you it is in force. See [Approve agent writes](/how-to/approve-agent-writes).
+    Writes pause for approval. The agent surfaces a permission card describing the change and waits — nothing is created, updated, or deleted until you approve. The exception is a write already covered by a standing approval you granted earlier in this chat: that one commits without asking again, and the chip above the composer tells you it is in force. See [Approve an agent write](/how-to/approve-agent-writes).
   </Accordion>
 
   <Accordion title="I sent a message while the agent was still replying">
@@ -249,11 +249,11 @@ This how-to walks you through a working session with the **Trust Agent** — the
 ## Related reading
 
 - **[Trust Agent](/concepts/trust-agent)** — the concept page: the runtime, the full shell / transcript / side-rail model, and the disambiguation from Agent Versions in depth
-- **[Approve agent writes](/how-to/approve-agent-writes)** — the human-in-the-loop write-approval flow this page points to
-- **[Simulate with Scenarios](/how-to/simulate-with-scenarios)** — drive the agent against personas and goals in the Playground
+- **[Approve an agent write](/how-to/approve-agent-writes)** — the human-in-the-loop write-approval flow this page points to
+- **[Simulate agents with scenarios](/how-to/simulate-with-scenarios)** — drive the agent against personas and goals in the Playground
 - **[Evaluate with the Trust Agent](/tutorials/evaluate-with-the-trust-agent)** — the end-to-end walkthrough that ties this into a full evaluation
 - **[Capture requirements](/how-to/capture-requirements)** — the step the agent routes you to first, and the gate every later step waits on
 - **[Manage Trust Agent skills](/how-to/manage-trust-agent-skills)** — the recipes behind the **/** palette, and how to write your own
 - **[Requirements](/concepts/requirements)** — what the agent must do and must never do, and how coverage is computed
-- **[MCP integration](/concepts/mcp-integration)** — the same tools published for an agent outside Trust AI to drive
+- **[MCP integration](/concepts/mcp-integration)** — the same tools published for an agent outside TrustAI to drive
 - **[Agent Versions](/concepts/agent-versions)** — the *other* "agent": the customer's agent under test, never explained here, only kept distinct

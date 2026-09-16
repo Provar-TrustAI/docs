@@ -18,7 +18,7 @@ This is a hands-on admin surface, so you work in the UI directly.
 
 ## Prerequisites
 
-- A **Trust AI account** in the workspace you want to administer
+- A **TrustAI account** in the workspace you want to administer
 - A workspace role that can manage members, teams, and access — **Owner** or **Admin** (the app describes the Admin role as "Manage members, teams & access")
 
 Both halves of that gate are real. A member or guest never sees the **Workspace Settings** row in the sidebar footer, and if they reach the surface by a saved link they get a card reading "Workspace management is admin-only" instead of the tabs. The server enforces it independently: an admin-only read like the members roster is refused before the identity provider is even called, so hiding the door is a convenience, not the control.
@@ -221,7 +221,7 @@ Reading the card in full — what draws on the pool, and what happens as you app
 
 **Connected orgs** lists the Salesforce orgs your *workspace* is connected to — one card per org, showing which projects use it, its connection state, and how it signs in (for a connection made the recommended way, **Admin authorization**).
 
-Every card offers **Delete**, which removes the connection from Trust AI across every project listed under **Used by** and leaves your Salesforce org untouched. **Disconnect** appears **only on connections made by admin authorization**, because those are the only ones with a Trust AI–deployed app to remove; a connection wired to an app your own admin created offers **Delete** alone.
+Every card offers **Delete**, which removes the connection from TrustAI across every project listed under **Used by** and leaves your Salesforce org untouched. **Disconnect** appears **only on connections made by admin authorization**, because those are the only ones with a TrustAI–deployed app to remove; a connection wired to an app your own admin created offers **Delete** alone.
 
 Disconnect is not Delete with a teardown on top. It removes the app from your Salesforce org — which stops every project that reuses the org — but deletes only the one connection record that owns that app, so any other project under **Used by** is left pointing at an app that no longer exists. Both actions are destructive and both ask you to confirm.
 

@@ -11,7 +11,7 @@ It lives at `/projects/:id/agent` and is the default, flag-free experience on ev
 <Note>
   **The Trust Agent is not an Agent Version.** They share the word "agent," but they are different concepts:
 
-  - The **Trust Agent** (this page) is *your* assistant inside Trust AI — the thing that helps you build and run evaluations.
+  - The **Trust Agent** (this page) is *your* assistant inside TrustAI — the thing that helps you build and run evaluations.
   - An **[Agent Version](/concepts/agent-versions)** is the *customer's agent under test* — a pinned snapshot of the agent you are judging.
 
   The Trust Agent helps you evaluate Agent Versions. It is never itself "a version." Everywhere this page says "the agent," it means the Trust Agent.
@@ -169,6 +169,7 @@ Some limits are deliberate:
 - **Deletes never offer the chat scope.** An irreversible delete is confirmed every single time, whatever else you have granted.
 - **Saving an [Agent Profile](/concepts/agent-profile) is never covered either.** Authoring a profile replaces the picture every later evaluation reads, so it is confirmed each time.
 - **Bulk edits to existing requirements stay gated.** Saving a *new* requirement can ride a standing grant; changing or removing ones already filed cannot, even when they arrive inside a batch that is otherwise covered.
+- **Starting an unattended full run is never covered** — a capability your workspace may not have. An unattended run spends real credits against a live agent with nobody watching, so it is confirmed every time.
 - **A one-time approval still covers the batch the card represented.** If the card asked about saving twelve scenarios, approving once commits all twelve in that turn rather than stalling on the second one — but that coverage ends with the turn.
 
 <Accordion title="See a permission card">
@@ -185,7 +186,7 @@ If your workspace has already connected the same Salesforce org in another proje
 
 When a connection is provisioned by admin authorization, its secrets stay server-side, so agent discovery runs there too: a follow-up **choose-agent card** refreshes the saved connection's agent list and lets you pick your agent **by name**, in the chat, without reconnecting.
 
-The full approval flow — the card types, the rich previews, and what "approve and execute" actually does to your data — is the subject of its own guide: [Approve agent writes](/how-to/approve-agent-writes).
+The full approval flow — the card types, the rich previews, and what "approve and execute" actually does to your data — is the subject of its own guide: [Approve an agent write](/how-to/approve-agent-writes).
 
 ## The composer, modes, and skills
 
@@ -279,7 +280,7 @@ Creating, editing, enabling and disabling the ones your team owns is its own rec
 
 An **@**-mention is pre-loaded and grounded: mention a known entity and it's handed to the agent directly, so the agent skips a redundant search to go find it.
 
-The tools the agent drives inside the product are also published over a standard protocol, so an agent *outside* Trust AI — the assistant in your editor, a job in your pipeline — can do the same work without this chat surface: see [MCP integration](/concepts/mcp-integration).
+The tools the agent drives inside the product are also published over a standard protocol, so an agent *outside* TrustAI — the assistant in your editor, a job in your pipeline — can do the same work without this chat surface: see [MCP integration](/concepts/mcp-integration).
 
 ## Grounding: what the agent knows before it writes
 
@@ -314,7 +315,7 @@ The core workflow is six steps. Each one is finished when the project *has* some
   **Step 2 is a gate, not a nudge.** Ask the agent to generate scenarios before a single requirement is saved and it refuses — **Draft and save the requirements first. I can guide you through that now before we continue.** — and routes you into capturing them instead. The later steps chain the same way: setting expected output, setting test data, simulating and running all refuse until each requirement has an evaluator created **and** attached to its scenarios. A plan that skips requirements dead-ends. [Capture requirements](/how-to/capture-requirements) is the recipe for that step.
 </Warning>
 
-Exploring the agent, shaping personas, adding adversarial security coverage aligned to the OWASP Agentic AI Top 10, and curating scenarios are all **enrichment**. The agent offers them where they add something, and they can make a step stronger — but none of them blocks a step, replaces one, or is a reason to skip one.
+Exploring the agent, shaping personas, adding adversarial security coverage aligned to the OWASP Agentic Top 10 (2026), and curating scenarios are all **enrichment**. The agent offers them where they add something, and they can make a step stronger — but none of them blocks a step, replaces one, or is a reason to skip one.
 
 **"Show me where to start" picks up wherever you actually are.** It is not a tutorial that restarts. The agent says what the project already has, in one plain sentence, before it says what to do next — so coming back after a week lands you on the next real step rather than at the top, and work you did in the UI between chats counts. Everything it reports is state you can check yourself in the project's own tabs.
 
@@ -324,7 +325,7 @@ When the agent generates test coverage, it creates flat, persona-and-goal [scena
 
 You don't need to know the plumbing to use the agent, but a little context helps. The Trust Agent runs on one unconditional streaming runtime: the front end consumes a streaming event protocol, and the back end emits those events from the agent loop, with the model streaming over an OpenAI-compatible path. The agent's markdown is rendered **in your browser**, from the streamed text, through a sanitizing pipeline — nothing arrives as pre-built HTML. This is the single runtime on every project; there's no second implementation behind a flag.
 
-This is the seam where latency lives, and it's worth being precise about it: any wait you feel is the **upstream model's thinking time**, surfaced honestly by the Thinking timer and a working indicator. It is not a runtime timer, not an SLA, and not a bug. How long it takes depends on the model you selected, the depth you asked for, and the infrastructure it runs on — which is exactly why the agent shows a live timer while you wait and an [**Answered in …** breakdown](#where-the-replys-time-went) afterwards, instead of promising a number.
+This is the seam where latency lives, and it's worth being precise about it: any wait you feel is the **upstream model's thinking time**, surfaced honestly by the Thinking timer and a working indicator. It is not a runtime timer, not an SLA, and not a bug. How long it takes depends on the model you selected, the depth you asked for, and the infrastructure it runs on — which is exactly why the agent shows a live timer while you wait and an [**Answered in …** breakdown](#where-the-reply’s-time-went) afterwards, instead of promising a number.
 
 ### What a turn costs
 
@@ -396,5 +397,5 @@ The Trust Agent surface is designed to meet WCAG AA contrast, and the interrupt 
 - **[Scenarios](/concepts/scenarios)** — the flat, persona-and-goal test cases the agent generates and acts on
 - **[Playground](/concepts/playground)** — the chat-and-simulate surface that pairs with the agent
 - **[Multi-tenancy](/concepts/multi-tenancy)** — the organization boundary the agent's writes are scoped to
-- **[MCP integration](/concepts/mcp-integration)** — the same tools, published for an agent outside Trust AI to drive
+- **[MCP integration](/concepts/mcp-integration)** — the same tools, published for an agent outside TrustAI to drive
 - **[Projects](/concepts/projects)** — the workspace the Trust Agent works inside

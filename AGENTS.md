@@ -15,6 +15,10 @@
 **Vocabulary is pinned to `v2026.09.09.2`.** Every rule below was verified against a read-only
 worktree at that tag. Where the shipped app and a release note disagree, the app wins. Where the app
 disagrees with *itself* — it does, in several places called out below — the rule here is the answer.
+The cross-surface gardener pass for this release re-verified and amended several rules in place —
+the sessions replay model, the test-user label scoping, the Requirements filter chips, thinking-depth
+scope, the `2/3 passed` carve-out, and the product-name ruling in *Style preferences* — so read those
+blocks fresh rather than from memory of the previous pin.
 
 ---
 
@@ -122,7 +126,9 @@ disagrees with *itself* — it does, in several places called out below — the 
   something a reader will see on screen, and never attribute a button or a tab to it. The product
   noun for the catalog is **recommended scenarios** (and, for checks, **recommended evaluators**).
   The two shipped entry points are **Add recommended evaluators** and **Add recommended scenarios**;
-  they are not interchangeable.
+  they are not interchangeable. Scope the evaluators one by surface: the **Evaluators** page header
+  button reads **Add recommended**, while the empty-state hero and the modal title read **Add
+  recommended evaluators**. Both ship; name whichever the reader is looking at.
 - The starter safety scenarios are **10 recommended scenarios, one per OWASP Agentic Top 10 (2026)
   category**, mapped one to one. Name the category in the product's friendly words — **Goal hijack ·
   Tool misuse · Identity & privilege · Poisoned knowledge source · Unsafe command execution · Context
@@ -170,7 +176,11 @@ disagrees with *itself* — it does, in several places called out below — the 
   **"Trial N of K"** (fly-in switcher). `Pass^K` is headline notation only — never write bare "K"
   or "trials" in reader-facing prose.
 - Results default to **By scenario**; the flat table is the explicit **Flat** view.
-- Quote a reliability read as `2/3`, not "2 of 3 passed".
+- Quote a reliability read as `2/3`, not "2 of 3 passed". **One verbatim-UI carve-out:** the
+  collapsed per-evaluator cell on a run's results matrix literally renders `2/3 passed`
+  (`matrix-column-derivation.tsx:109`), with an `N not scored` caption beneath it where checks were
+  skipped, and a grouped summary whose rollup passes despite untestable attempts is labelled
+  **Pass among scored** with an amber `N couldn't test` caption. Quote those surfaces as they ship.
 - **Five outcomes leave the pass-rate denominator; only four of them are the environment's fault.**
   Exclusion and attribution are separate axes — never write "four denominator-excluded classes"
   again. The excluded set is `runtime_blocked`, `infra_failure`, `harness_failure`, `access_blocked`
@@ -183,7 +193,12 @@ disagrees with *itself* — it does, in several places called out below — the 
 - The evaluation-reliability lexicon is frozen to exactly three terms, and nothing else may be coined
   on these screens: **Couldn't test**, **Not scored**, **Unverified**. Quote **Couldn't test** with a
   **straight** apostrophe (U+0027) — that is the byte the app ships, and it is deliberately not
-  uniform across the product (the connections pill **Can't reach it** ships a typographic one). The
+  uniform across the product (the connections pill **Can’t reach it** ships a typographic one).
+  **This is a source rule, not a rendering claim:** Mintlify's typographer converts a straight
+  apostrophe on the way out, so the published page displays **Couldn’t test** curly. Write the
+  straight byte anyway — it is what the source, and any future extraction from these files, is
+  matched against. The connection strings are the opposite case: they ship curly, so they are
+  written curly (`Can’t reach it`, `You can’t undo this.`, `This agent’s Salesforce org`). The
   reader-facing noun for what a run grades on these surfaces is **conversation / conversations** —
   not "row", not "case", not "example".
 - Run health has its own surfaces and its own words: the run list carries an amber count beside the
@@ -199,6 +214,17 @@ disagrees with *itself* — it does, in several places called out below — the 
   run-detail page. It mints no run record, so those rows carry no Cancel and no Delete. Never write
   the wire value `one_off`, and never "one-off evaluation" — reconcile older docs to **quick
   evaluation**.
+- **Scenarios simulate; sessions replay.** A bulk evaluation launched from the Sessions source does
+  **not** grade the stored transcript: the worker re-sends each row's stored input turns to the live
+  agent through the gateway and grades the answer it gives now (`evaluation_worker.py:14-20`;
+  `service.py:3150` — "Rule 1 — scenarios simulate; sessions replay", with
+  `simulate_at_eval_time=is_scenarios`). So a bulk sessions run needs a connected agent, even though
+  the launcher shows no Environment section for it. The **only** path that grades a stored
+  transcript is the single-session **quick evaluation** from a session's own fly-in
+  (`service.py:3220` — "grade the chosen session's STORED transcript in place"). The launcher's
+  shipped line **"No conversations are simulated."** means no *scenario* is played out — never that
+  the agent is not called. Never write "graded as they are", "no agent is invoked", "needs no
+  agent", "read-only grading" or "nothing is re-sent" of a bulk sessions run.
 - **Run comparison is an endpoint, not a screen.** Nothing renders it in the app at this tag and the
   MCP surface does not expose it, so cover it by reference only, hedged, and treat today's shape as
   provisional. Its verdict vocabulary is a closed set that never borrows row-verdict words:
@@ -258,9 +284,11 @@ disagrees with *itself* — it does, in several places called out below — the 
 - A chat turn has a **model** and a **thinking depth**, both chosen by you. **Never hardcode a model
   count, a vendor list, or a default model.** The code serves six models across two vendors, but a
   deployment pins its own allowlist, so what a reader sees is whatever their workspace offers — write
-  "the models your workspace offers". The composer's **Thinking** chip sets depth per message:
+  "the models your workspace offers". The composer's **Thinking** chip sets depth:
   **Standard / Brief / Balanced / Thorough**, default **Balanced**, offering only the depths the
-  selected model declares and hiding entirely for a model with one. Write "thinking depth", never
+  selected model declares and hiding entirely for a model with one. Do not write "per message" —
+  the menu's own footer says **"Applies to this conversation, starting with your first message"**
+  (`welcome-page.tsx:178`). Quote that sentence rather than restating the scope in your own words. Write "thinking depth", never
   "reasoning effort" (the wire name), and never present a depth as comparable across vendors — each
   is its own scale.
 - A settled reply carries a timing line reading **"Answered in 42s · 31s thinking"**, collapsed by
@@ -328,9 +356,12 @@ disagrees with *itself* — it does, in several places called out below — the 
   rail's **Not checked / Healthy / Degraded / Unreachable** — three vocabularies, three surfaces.
 - **Agent** and **Environment** are discover-then-pick selects populated by a **Find agents**
   button — never "Agent ID" / "Environment ID".
-- The execution-identity vocabulary is **test user**, everywhere a person reads it. Settings:
-  **Default test user** and **Additional test users (permission sets)**. The card's disclosure reads
-  "Run tests as different users (permission sets)". The in-chat connect card keeps **Run-as user**.
+- The execution-identity vocabulary is **test user**, everywhere a person reads it. On the shipped
+  Connections card the disclosure reads **Run tests as different users (permission sets)**, and
+  inside it each row is **Test user *N***, added with **Add test user** and committed with **Save
+  test users**; with none added it reads **No additional test users yet**. **Default test user** and
+  **Additional test users (permission sets)** are the *connection edit form's* labels only — scope
+  them there, and never present them as what the card shows. The in-chat connect card keeps **Run-as user**.
   The backend words **execution identity** and **execution user** are banned from these surfaces, so
   retire **Default execution user** and **Permission test identities** from the docs with them —
   neither renders on the Connections surface at this tag. Never "Integration user". One carve-out:
@@ -497,9 +528,9 @@ failure, not a style nit.
 - Type reads "The agent must do this" / "The agent must never do this"; the fly-in chip for `avoid`
   is **Must-not**. Never surface the wire enum `achieve` / `avoid`.
 - **Gaps** = Uncovered + Partially covered. Source is **Manual / Document / Chat / Import** (a
-  requirement written through MCP is stamped as agent-authored). The saved-view chips are a fixed
-  three — **All / Gaps / Failing** — with *All requirements* the only seeded built-in, alongside the
-  ordinary table controls: show/hide, reorder, resize, save a view, set as default, fullscreen.
+  requirement written through MCP is stamped as agent-authored). **All / Gaps / Failing** are a fixed three **filter
+  chips** — not saved views, and neither renameable nor extendable. The only built-in *saved view*
+  is **All requirements**. Both sit alongside the ordinary table controls: show/hide, reorder, resize, save a view, set as default, fullscreen.
 - Requirements are the **step-2 gate of the Trust Agent's enforced authoring workflow**, and the gate
   is a runtime refusal rather than a nudge: asking the agent to generate scenarios before any
   requirement exists is refused with **"Draft and save the requirements first. I can guide you
@@ -524,6 +555,12 @@ failure, not a style nit.
   Trust Agent; the UI is the observation pane and manual fallback. No inline curl/SDK in guides or
   concepts — one API Reference pointer per page; the API Reference tab owns endpoints.
 - Every page must reflow with no horizontal overflow at 375 px (responsive is an audit dimension).
+  **A markdown table wider than three short columns must sit in its own**
+  `<div style={{ overflowX: "auto" }}>`: Mintlify's own table wrapper does not scroll, so an
+  unwrapped wide table pushes the whole page sideways at 375 px. Keep tables to two or three narrow
+  columns, or wrap them.
+- **The product name in prose is TrustAI**; the formal site name Provar Trust AI stays only where it
+  is already the site name. (Editorial ruling this cycle — reversible.)
 
 ## Content boundaries
 

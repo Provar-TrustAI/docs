@@ -1,15 +1,15 @@
 ---
 title: "Connect a Claude Managed Agent"
 icon: "plug"
-description: "Connect an Anthropic Managed Agent on Claude Platform on AWS to a Trust AI Project — in the chat with the Trust Agent, or from the connection form in Project Settings."
+description: "Connect an Anthropic Managed Agent on Claude Platform on AWS to a TrustAI Project — in the chat with the Trust Agent, or from the connection form in Project Settings."
 ---
 
-This how-to connects a **Claude Managed Agent** — an Anthropic Managed Agent running on Claude Platform on AWS — to a Trust AI [Project](/concepts/projects). When you're done:
+This how-to connects a **Claude Managed Agent** — an Anthropic Managed Agent running on Claude Platform on AWS — to a TrustAI [Project](/concepts/projects). When you're done:
 
 - The agent is registered as an [Agent Version](/concepts/agent-versions) you can pick when you launch an Evaluation
-- Trust AI can drive conversations against it — explorations, simulated scenarios, and scored evaluation runs — and each conversation lands in the Project as a [Session](/concepts/sessions)
+- TrustAI can drive conversations against it — explorations, simulated scenarios, and scored evaluation runs — and each conversation lands in the Project as a [Session](/concepts/sessions)
 
-Trust AI's role with this connector is deliberately narrow: it observes the agent and relays its responses, while the agent runs its own tools. You are not redeploying or reconfiguring the agent — you're pointing Trust AI at it.
+TrustAI's role with this connector is deliberately narrow: it observes the agent and relays its responses, while the agent runs its own tools. You are not redeploying or reconfiguring the agent — you're pointing TrustAI at it.
 
 There are **two ways to connect**, and they save the same connection:
 
@@ -34,7 +34,7 @@ Whichever path you take, you type **three** values and **pick** two:
 
 You don't look the **Agent** and **Environment** up. Both surfaces gate them behind a **Find agents** button that reads your workspace and turns them into dropdowns of human names — the underlying identifiers are stored, never typed.
 
-You'll also need a **Trust AI Project**. If you don't have one yet, start with [Your first 10 minutes in Trust AI](/tutorials/quickstart).
+You'll also need a **TrustAI Project**. If you don't have one yet, start with [Your first 10 minutes in TrustAI](/tutorials/quickstart).
 
 ## Connect in the chat
 
@@ -62,7 +62,7 @@ You'll also need a **Trust AI Project**. If you don't have one yet, start with [
   </Step>
 
   <Step title="Connect">
-    Click **Connect**. Trust AI saves the connection and immediately runs a real check against it — see [The check that runs on save](#the-check-that-runs-on-save).
+    Click **Connect**. TrustAI saves the connection and immediately runs a real check against it — see [The check that runs on save](#the-check-that-runs-on-save).
 
     The Trust Agent then reports the result in plain language — **Connected to** followed by your agent's name when the check came back healthy, or *"Connection set up — the health check came back …"* naming the outcome — *unreachable*, for example — when it didn't. That word is the chat's own phrasing of the result, not the pill you'll see on the Connections card; see [What the connection card says](#what-the-connection-card-says). The reason behind an unhealthy result is recorded on the connection itself, not written into the chat. No key and no secret go back into the conversation.
 
@@ -75,9 +75,9 @@ You'll also need a **Trust AI Project**. If you don't have one yet, start with [
 This is the reason the card exists, and it is worth being precise about.
 
 - The Trust Agent opens the card by calling a tool whose arguments carry only the platform and the project. There is no field on that call a secret could travel in.
-- Your key is typed into the card and sent straight to Trust AI's backend. It is not part of the conversation, so the model that is helping you never sees it.
+- Your key is typed into the card and sent straight to TrustAI's backend. It is not part of the conversation, so the model that is helping you never sees it.
 - What comes back to the conversation when you finish is the **outcome only** — whether the connection is live, the human names of the agent and environment you picked, and the health result. The saved connection's own id rides along as a routing key and is never rendered anywhere you can see it. No key, no secret.
-- If you paste something that looks like an API key into the chat by mistake, Trust AI strips it before it is stored; the Trust Agent sees `[redacted API key]` and will ask you to use the card instead.
+- If you paste something that looks like an API key into the chat by mistake, TrustAI strips it before it is stored; the Trust Agent sees `[redacted API key]` and will ask you to use the card instead.
 
 <Note>
   A saved key is write-only everywhere afterwards. It is never displayed back — not on the connection card, not in any form, not in API responses. To change it, you connect the agent again with a new one.
@@ -121,7 +121,7 @@ The connection form is the manual path. It is where you go when you'd rather fil
 
 ## The check that runs on save
 
-Saving a Claude Managed Agent connection is not a silent write. Trust AI opens one short-lived, authenticated session against the agent and environment you picked, records what happened, and that result is what the connection's reachability pill reports.
+Saving a Claude Managed Agent connection is not a silent write. TrustAI opens one short-lived, authenticated session against the agent and environment you picked, records what happened, and that result is what the connection's reachability pill reports.
 
 The check records a reachable connection when the session opened and an unreachable one when it didn't — and an unreachable result carries the reason, for example *"Anthropic API key invalid or expired."*, so you can fix the right field instead of guessing.
 
@@ -134,7 +134,7 @@ On the **Connections** tab the saved connection is a card. It leads with the nam
 Two status reads sit to the right of the name, and they answer different questions:
 
 - **Is setup finished?** A setup badge — **Setting up**, **Needs admin** or **Setup failed** — shown only while setup still has something to say. A connection that finished setting up carries no badge at all; the absence is the good news.
-- **Can Trust AI reach it right now?** A reachability pill — **Connected**, **Partly reachable**, **Can’t reach it** or **Not checked yet**. A connection nobody has probed reads **Not checked yet**; health is never fabricated green.
+- **Can TrustAI reach it right now?** A reachability pill — **Connected**, **Partly reachable**, **Can’t reach it** or **Not checked yet**. A connection nobody has probed reads **Not checked yet**; health is never fabricated green.
 
 <Note>
   Those are the Connections vocabulary, and they are not the only health words in the product. The Trust Agent's side rail describes its **Connected agent** with a different four — **Not checked**, **Healthy**, **Degraded**, **Unreachable** — and the chat's own connect receipt phrases the same result differently again. Three surfaces, three sets of words for a related question; read each in its own place.
@@ -146,7 +146,7 @@ Under the name, **Customize environment** expands the card in place — where th
 
 There is no profile entry point on the Connections tab, for this platform or any other. A connected build's [Agent Profile](/concepts/agent-profile) opens from the **Playground** topbar: pick the build in the agent picker, then press the info button beside it, tooltipped **Agent profile**.
 
-Capture for a Claude Managed Agent lists the agent's real tool catalog from the MCP servers its own configuration declares — a metadata read, not a conversation with the agent. An agent that declares no such server, or one whose server doesn't answer, comes back as a name-only profile with the tool-catalog gap stated in plain words; it is never a failed capture and never a fabricated empty catalog. [Review an Agent Profile](/how-to/review-an-agent-profile) walks the fly-in.
+Capture for a Claude Managed Agent lists the agent's real tool catalog from the MCP servers its own configuration declares — a metadata read, not a conversation with the agent. An agent that declares no such server, or one whose server doesn't answer, comes back as a name-only profile with the tool-catalog gap stated in plain words; it is never a failed capture and never a fabricated empty catalog. [Review an agent profile](/how-to/review-an-agent-profile) walks the fly-in.
 
 ## Remove a connection
 
@@ -158,7 +158,7 @@ Capture for a Claude Managed Agent lists the agent's real tool catalog from the 
 
 A Claude Managed Agent connection has no historical session import. The **Sync now** dropdown on the Sessions page lists every connected agent grouped by platform, but historical sync supports AWS Bedrock AgentCore only. Picking a Claude Managed Agent there returns a typed *"Sync not supported"* message naming the platform, rather than silently importing nothing.
 
-Sessions for this connector are created when Trust AI drives the agent:
+Sessions for this connector are created when TrustAI drives the agent:
 
 - **Explorations** the Trust Agent runs after connecting, so you can watch your agent working before anything is scored
 - **Simulated conversations** — from the [Playground](/concepts/playground), or fanned out per persona when an evaluation runs [scenarios with simulation](/how-to/simulate-with-scenarios)

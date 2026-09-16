@@ -188,7 +188,7 @@ This is worth being precise about, because it changes what you should expect to 
 
 Saving is the only thing that turns a Playground conversation into a session, and because saving always attaches a scenario, a saved Playground conversation always reads **Source: Scenario** — never **Source: Playground**. The Sessions list's **Playground** source value exists for interactive captures finalized without a scenario link; the Playground's own save flow does not produce one.
 
-Because a saved conversation is a real session, you can grade it directly, as it is: sessions are first-class evaluation targets, and the Sessions surface's primary **Evaluate** action grades the conversations that already happened. The [Sessions](/concepts/sessions) page owns that surface.
+Because a saved conversation is a real session, you can grade it without authoring a scenario first: sessions are first-class evaluation targets. Its own fly-in's **Evaluate** grades the stored transcript in place; the Sessions list's bulk **Evaluate** replays each conversation against the connected agent and grades the new answer. The [Sessions](/concepts/sessions) page owns that surface.
 
 ### Where the provenance card comes from
 

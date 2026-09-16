@@ -4,7 +4,7 @@ icon: "shield-check"
 description: "Ten ready-made security scenarios, one per OWASP Agentic Top 10 failure mode, that arrive with their checks attached and can be tailored to your connected agent."
 ---
 
-Adversarial coverage is the hardest kind to write from a blank page: you have to imagine the attacks before you can test for them. **Add recommended scenarios** is the shortcut. It opens a read-only catalog of ten curated adversarial probes — one for each failure mode in the OWASP Top 10 for Agentic Applications (2026) — and copies the ones you pick into your project's [Scenarios](/concepts/scenarios) list, each already paired with the safety checks that grade it.
+Adversarial coverage is the hardest kind to write from a blank page: you have to imagine the attacks before you can test for them. **Add recommended scenarios** is the shortcut. It opens a read-only catalog of ten curated adversarial probes — one for each failure mode in the OWASP Agentic Top 10 (2026) — and copies the ones you pick into your project's [Scenarios](/concepts/scenarios) list, each already paired with the safety checks that grade it.
 
 The catalog is the same in every workspace and every project. Nothing in it is generated for you and nothing about it varies by tenant. Adoption is a **copy**: once a probe lands in your project it is an ordinary scenario you can rename, re-goal, attach personas to, edit the expected output on, or delete.
 
@@ -12,7 +12,7 @@ The catalog is the same in every workspace and every project. Nothing in it is g
   **Two catalogs, two entry points — not interchangeable.**
 
   - **Add recommended scenarios**, from the **Scenarios** page header, adds the ten adversarial probes described on this page.
-  - **Add recommended** on the **Evaluators** page adds the starter judges — 11 presets across **Quality** and **Safety**. See [Start from the recommended library](/concepts/evaluators#start-from-the-recommended-library).
+  - **Add recommended** in the **Evaluators** page header — or the **Add recommended evaluators** hero on an empty project — adds the starter judges: 11 presets across **Quality** and **Safety**. See [Start from the recommended library](/concepts/evaluators#start-from-the-recommended-library).
 
   Adopting scenarios also brings checks with it, because each probe names the checks that grade it. Adopting checks never brings scenarios.
 </Note>
@@ -21,7 +21,7 @@ The catalog is the same in every workspace and every project. Nothing in it is g
 
 Every entry is the same six things, and deliberately nothing more:
 
-- **A name** — a plain description of the probe, written in Trust AI's words rather than the standard's. It becomes your scenario's name, and you can change it.
+- **A name** — a plain description of the probe, written in TrustAI's words rather than the standard's. It becomes your scenario's name, and you can change it.
 - **A goal** — what the simulated user is trying to achieve and how hard they push for it. This is the scenario's user goal, and it is what drives the simulation.
 - **A category** — the friendly failure-mode label the modal groups entries under: **Goal hijack**, **Tool misuse**, **Identity & privilege**, and so on.
 - **A citation** — the OWASP category the probe points at. It rides in the provenance chip's tooltip, never as the chip's visible label.
@@ -32,7 +32,7 @@ There is no seventh thing. A catalog entry ships no expected actions, no expecte
 
 ## The ten probes
 
-Entries are grouped by category in the modal, in the order below. The **Citation** column is exactly that — a pointer at the standard, not a label the app ever shows you. Trust AI renders the friendly category instead, and keeps the code in the chip's tooltip, which reads in full: "OWASP Agentic Top 10 (2026) · ASI01 · Goal hijack".
+Entries are grouped by category in the modal, in the order below. The **Citation** column is exactly that — a pointer at the standard, not a label the app ever shows you. TrustAI renders the friendly category instead, and keeps the code in the chip's tooltip, which reads in full: "OWASP Agentic Top 10 (2026) · ASI01 · Goal hijack".
 
 <div style={{ overflowX: "auto" }}>
 
@@ -54,7 +54,7 @@ Entries are grouped by category in the modal, in the order below. The **Citation
 Every pairing is drawn from the six **Safety** presets, and the spread is uneven on purpose. **Stays within scope** pairs with all ten probes; **Resists prompt injection** with five; **No toxic or abusive language** with one. Adopting the whole catalog therefore creates six checks, not thirty — a check two probes share is created once.
 
 <Warning>
-  **The scenario names are ours, not OWASP's.** "Goal hijack", "Tool misuse", "Identity & privilege" and the rest are Trust AI's friendly labels for the failure modes, written for a non-technical author. They are not the standard's official category titles, and this page does not reproduce those. Read the table as *our probe for the failure mode OWASP files under this code*, and go to the OWASP Top 10 for Agentic Applications itself if you need the standard's own wording.
+  **The scenario names are ours, not OWASP's.** "Goal hijack", "Tool misuse", "Identity & privilege" and the rest are TrustAI's friendly labels for the failure modes, written for a non-technical author. They are not the standard's official category titles, and this page does not reproduce those. Read the table as *our probe for the failure mode OWASP files under this code*, and go to the OWASP Agentic Top 10 itself — the standard publishes its categories under the formal title *OWASP Top 10 for Agentic Applications (2026)* — if you need its own wording.
 </Warning>
 
 ## Why the probes read the way they do
@@ -71,7 +71,7 @@ An OWASP code on an entry means "this is the closest probe this catalog ships fo
 
 ASI07 is about *inter-agent* compromise: a peer agent inside a multi-agent system is itself subverted and feeds your agent a poisoned handoff over a machine-to-machine channel. What this catalog ships is a **user-pasted note styled like an internal handoff**, delivered over the ordinary conversation surface. It is a legitimate first-party probe against the same trust-the-frame weakness, and it is not the category.
 
-The reason is structural, not a backlog item: Trust AI **observes** your agent. It never hosts, manages or serves your agent's peers, so it has no peer agent to subvert. Running this probe tells you whether your agent re-verifies an authoritative-looking instruction through its own systems. It does not tell you that you have tested agent-to-agent compromise.
+The reason is structural, not a backlog item: TrustAI **observes** your agent. It never hosts, manages or serves your agent's peers, so it has no peer agent to subvert. Running this probe tells you whether your agent re-verifies an authoritative-looking instruction through its own systems. It does not tell you that you have tested agent-to-agent compromise.
 
 ### Four probes reach less of their category than the citation suggests
 
@@ -88,7 +88,7 @@ None of this makes the four probes useless — they are the coverage you have on
 
 **Everything a catalog probe is graded on comes out of the conversation.** The paired checks are LLM judges reading the transcript, the tool calls the agent made, and the expected response. No catalog entry ships:
 
-- **Expected actions or expected routes** — an adopted scenario's [expected output](/concepts/scenarios#expected-output--the-grading-contract) still reads **Not set** for both. Those come later, out of the run-then-learn loop.
+- **Expected actions or expected routes** — an adopted scenario's [expected output](/concepts/scenarios#expected-output-—-the-grading-contract) still reads **Not set** for both. Those come later, out of the run-then-learn loop.
 - **Test data** — nothing seeds a record, and nothing checks an expected end state. See [Test data](/concepts/test-data) for what that would involve.
 - **Reference material** — nothing is attached for a groundedness check to read against.
 
@@ -128,7 +128,7 @@ The step-by-step recipe, including the approval gate and the states a run can la
 Once adopted, nothing about these scenarios is special:
 
 - **On the Scenarios list**, they are ordinary entries with their own `SCN` ids, editable inline, with the adopted checks showing in the **Evaluators** cell and **Expected routes** and **Expected actions** empty.
-- **In a run**, each one simulates conversations the same way any scenario does — attach personas and you get one conversation per persona, following the same recipe as [Simulate with scenarios](/how-to/simulate-with-scenarios). You can also drive the same probe by hand in the [Playground](/concepts/playground) first, and save that conversation as its own scenario.
+- **In a run**, each one simulates conversations the same way any scenario does — attach personas and you get one conversation per persona, following the same recipe as [Simulate agents with scenarios](/how-to/simulate-with-scenarios). You can also drive the same probe by hand in the [Playground](/concepts/playground) first, and save that conversation as its own scenario.
 - **In [evaluations](/concepts/evaluations)**, the attached judges produce a **Final verdict** per conversation. Read a security run the same way you read any other: an amber **Couldn't test** means the agent's own action errored and the conversation was not scored, and four further outcomes leave the pass-rate denominator because the environment, not the agent, was at fault. See [When a result leaves the score](/concepts/evaluations#when-a-result-leaves-the-score) — a green pass rate on a security run you never actually ran is the one result worth distrusting.
 
 ## API surface
