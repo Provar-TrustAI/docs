@@ -28,7 +28,7 @@ The fastest way to persona-and-goal coverage is to let the [Trust Agent](/concep
 
 <Steps>
   <Step title="Open the Scenarios list">
-    *Ask the Trust Agent:* "Show me my scenarios," or open the **Scenarios** nav item on your Project yourself — it lands at `/projects/:id/scenarios` (old dataset links redirect here). Every scenario is one entry in a flat table with a stable **ID** (like `SCN-000123`). Clicking a scenario opens its detail fly-in — with one exception worth learning early: six of the nine visible cells edit in place instead (**Scenario**, **User Goal**, **Personas**, **Evaluators**, **Verdict**, **Tags**), so a click there starts an edit and never opens the fly-in. Click **ID**, **Expected routes**, **Expected actions**, or **Sessions** to open it.
+    *Ask the Trust Agent:* "Show me my scenarios," or open the **Scenarios** nav item on your Project yourself — it lands at `/projects/:id/scenarios` (old dataset links redirect here). Every scenario is one entry in a flat table with a stable **ID** (like `SCN-000123`). Clicking a scenario opens its detail fly-in — with one exception worth learning early: five of the nine visible cells edit in place instead (**Scenario**, **User Goal**, **Personas**, **Evaluators**, **Verdict**), so a click there starts an edit and never opens the fly-in. **Tags** edits in place too, once you reveal that column. Click **ID**, **Expected routes**, **Expected actions**, or **Sessions** to open the fly-in.
 
     The table defines **eleven** columns. Nine are visible out of the box — **ID**, **Scenario**, **User Goal**, **Personas**, **Expected routes**, **Expected actions**, **Evaluators**, **Verdict**, and **Sessions**. The other two, **Created** and **Tags**, ship hidden; reveal either from the **Add column** control at the right end of the header. **Created** is doing work even while hidden: it is the table's default sort key, descending, so the scenario you just authored is the one at the top.
     <Frame caption="The nine default columns run ID → Sessions, with Add column at the right end. The last five rows here were adopted from Add recommended scenarios, so their expected output is still Not set — that deferral is the loop working, not a gap.">
@@ -41,17 +41,29 @@ The fastest way to persona-and-goal coverage is to let the [Trust Agent](/concep
   <Step title="Create one with New scenario">
     Click **New scenario**. The modal collects only three things — a **Name** (required), a **Goal** (required — what the simulated user is trying to achieve), and **Personas** (optional; the label reminds you it's "one session per persona on each run"). Its sub-copy states the deferral outright: "Define how to simulate. You'll set expected output later — usually from a session you like." Click **Create scenario**.
 
-    Two shortcuts worth knowing. **Add recommended scenarios** in the page header opens a starter catalog of ten adversarial probes — one per OWASP Agentic Top 10 failure mode, grouped by category, each with a **Details** disclosure showing what a safe agent does and which judges pair with it. Nothing is ticked when the modal opens: it says "Pick the ones you want and we'll add them to your scenarios," and the confirm adds only your selection. Scenarios already in the project are shown muted and can't be re-adopted. Separately, the **Name**, **Goal**, **Personas**, **Evaluators**, **Verdict**, and **Tags** cells are all editable inline on the table — no modal round-trip to adjust a scenario later.
+    Write the goal as the situation and the outcome the customer wants, not as the answer. The verdict is protected either way: a simulated customer will not state, suggest, or confirm the specific values its own goal asks it to verify, so a goal that happens to mention an order number can't be turned into a leading question the agent passes by repeating it back. Naming the answer still makes for a duller test, because the conversation stops being about whether the agent can find it.
+
+    Two shortcuts worth knowing. **Add recommended scenarios** in the page header opens a starter catalog of ten adversarial probes — one per OWASP Agentic Top 10 failure mode, grouped by category, each with a **Details** disclosure showing **What a safe agent does:** and **Graded by:**. Nothing is ticked when the modal opens, and a **Select all *N*** control sits above the list; scenarios already in the project are shown muted and can't be re-adopted. The footer is three controls, not one confirm: **Cancel**, **Add without tailoring**, and **Add & tailor to your agent**. Tailoring hands the batch to the Trust Agent to customize each check against your connected agent's real tools and rules in the background — with no agent connected it's disabled under the nudge "Connect an agent to tailor these", while plain adoption stays available. Either way the safety checks that grade each probe arrive created and attached. See [Adopt the recommended security scenarios](/how-to/adopt-recommended-security-scenarios) for that whole flow.
+
+    Separately, the **Name**, **Goal**, **Personas**, **Evaluators**, and **Verdict** cells are editable inline on the table — no modal round-trip to adjust a scenario later.
 
     **You should see:** your scenario appear in the table with its own ID, personas attached, and no expected output yet.
   </Step>
 
   <Step title="Manage your personas (once)">
-    Open **Manage personas** from the Scenarios page header (the same modal also opens from any **Personas** cell's popover footer). The list is deliberately spare — a **Persona** column and a **Description** column — and at most one persona carries a **Default** badge. The default persona is the one you can't delete; its row is not selectable. Open a persona to edit it and you get the number that matters for blast radius: "Used in *N* scenarios across this project," repeated in the delete confirmation.
+    Open **Manage personas** from the Scenarios page header (the same modal also opens from any **Personas** cell's popover footer). The list is deliberately spare — three columns, **Persona**, **Source**, and **Description** — and at most one persona carries a **Default** badge. **Source** reads **Manual** or **Chat**, the same two words the Requirements list uses, so you can tell the personas your team wrote from the ones the Trust Agent drafted; a persona whose source the list has no word for leaves the cell empty rather than guessing. The default persona is the one you can't delete; its row is not selectable. Open a persona to edit it and you get the number that matters for blast radius: "Used in *N* scenarios across this project," repeated in the delete confirmation.
 
     Personas are referenced by **name** everywhere — chips, columns, and pickers. A scenario with no persona attached still runs, and its results are labelled **Default persona**.
 
-    **You should see:** a persona list with a single **Default** badge, and a usage count on the persona editor rather than on the list.
+    **You should see:** three columns ending in **Description**, a **Source** of **Manual** or **Chat** on each row, a single **Default** badge, and a usage count on the persona editor rather than on the list.
+  </Step>
+
+  <Step title="Attach the files the simulated user can send">
+    A scenario can carry pictures its simulated customer may hand the agent mid-conversation — a receipt, an error message, a photo of a damaged item. Open the scenario's fly-in, stay on **Personas & Goals**, and use the **Files the simulated user can send** section. Attach the file, then describe it under **What each file shows**, within the count and size limits the section states for your workspace.
+
+    The description is the working part. As the section's own helper puts it: "Your agent sees the real file. The simulated user never does, and decides from your description alone when — or whether — to send one." A description that says no more than the file name earns a nudge, because it tells the simulated customer nothing about when the picture is worth sending.
+
+    **You should see:** the attached file listed, a description field per file, and a nudge on any description that only repeats the file name.
   </Step>
 </Steps>
 
@@ -62,7 +74,7 @@ The **Verdict** column is an inline **Pass** / **Fail** toggle on each scenario,
 Mark them because something downstream consumes them: these verdicts are the ground truth an evaluator's **Calibrate** tab samples when it checks how well a judge agrees with a person. With nothing marked, calibration has nothing to sample. See [Calibrate an evaluator](/how-to/calibrate-an-evaluator).
 
 <Note>
-  This is a different surface from the session-level **Verdict** [annotation](/concepts/annotations), which grounds the **Evaluator accuracy** figure on a finished run. Two verdicts, two jobs — don't reach for one expecting the other.
+  This is a different surface from the session-level **Verdict** [annotation](/concepts/annotations), which is what evaluator accuracy is measured against on a finished run. Two verdicts, two jobs — don't reach for one expecting the other.
 </Note>
 
 ## Generate sessions by running the scenario
@@ -84,7 +96,9 @@ A scenario generates sessions by being **run**: each run simulates one fresh per
 
   <Step title="Confirm the fan-out and launch">
     Choosing **Run only** opens the evaluation launcher, titled **Run scenario** for a single target and **Run scenarios** for several. Pick the **connected agent** to drive, and check the **This will run** preview — it counts one simulated conversation per attached persona. A goal-only scenario with no personas still runs one conversation, with the simulated user enacting the goal. The confirm button reads **Run N conversations**.
-    <Frame caption="Read the middle tile and the confirm button together — three attached personas means three simulated conversations, and Run only grades none of them.">
+
+    If any targeted scenario carries a test data plan or structured starting records, one more line sits directly under that preview, stating what the run will write into the connected store: the records it creates, the read-backs it performs, and the cleanup promise **"Removes only the records each test created."** It renders from every **Run** affordance — page header, bulk bar, and both fly-ins — so it is the last thing you read before launching, wherever you launched from.
+    <Frame caption="Three attached personas means three simulated conversations, and Run only grades none of them. This scenario carries no test data plan, so the launcher states no records line between the preview and Environment.">
       <img src="/images/simulate-run-launcher.png" alt="The Run scenario launcher over the Scenarios list: an Agent picker set to Refunds Concierge, a This will run preview reading 1 scenario then 3 conversations simulated then not graded, an Environment section reporting Ready to run, and a Run 3 conversations confirm button." />
     </Frame>
 
@@ -104,7 +118,7 @@ The **Playground** is the hands-on counterpart: drive a connected agent yourself
 
 <Steps>
   <Step title="Drive a conversation">
-    Open the Playground at `/projects/:id/playground` and pick a connected agent — the picker groups agents by source system. A segmented **Chat / Simulate** toggle controls the mode. On **Chat**, you type each message yourself and the connected agent replies live. On **Simulate**, a config modal takes exactly **one goal**, **one persona**, and a run mode — **Full auto** ("Simulates the whole conversation end-to-end") or **Stay in the loop** ("Suggests each user turn as you go") — and the persona-versus-agent conversation auto-drives. The **History** menu lists your real prior sessions so you can reopen an earlier run.
+    Open the Playground at `/projects/:id/playground` and pick a connected agent — the picker groups agents by source system. A segmented **Chat / Simulate** toggle controls the mode. On **Chat**, you type each message yourself and the connected agent replies live. On **Simulate**, a config modal takes exactly **one goal**, **one persona**, and a run mode — **Full auto** ("Simulates the whole conversation end-to-end") or **Stay in the loop** ("Suggests each user turn as you go") — and the persona-versus-agent conversation auto-drives. The **History** menu lists the project's past simulated runs — not only the ones you drove here — so you can reopen an earlier conversation; its own helper line says "Conversations remain in History when you start a new one."
     <Frame caption="One goal, one persona, one run mode — the Playground never fans out. Full auto plays the whole conversation; Stay in the loop hands you each user turn to approve.">
       <img src="/images/simulate-playground-modal.png" alt="The Playground's Simulate a conversation modal: a Goal box reading 'Get a firm date for the refund on the return you already delivered', a single-select Persona field set to Frustrated regular, and two run-mode cards — Full auto selected, Stay in the loop beside it." />
     </Frame>
@@ -116,6 +130,8 @@ The **Playground** is the hands-on counterpart: drive a connected agent yourself
     The save control is the database icon in the Playground toolbar — **Save this conversation as a scenario**. It appears the moment you start a session and then stays there for the rest of it: it is never hidden mid-conversation and never greyed out. What it does depends on where the conversation has got to. Once there has been a real exchange, it opens the save form; before that, it tells you what's missing — the tooltip reads "Send a message and get a reply first," and clicking gives you "Send a message and get a reply before saving as a scenario."
 
     The form is the same lightweight intake as **New scenario** — **Name**, **Goal**, **Personas** — and saving creates a new scenario with the conversation you just ran attached as its session, Source **Scenario**. Expected output is deliberately deferred: the fresh scenario reads as missing expected output until you author it, and the Playground starts a clean session so the same run can't be saved twice.
+
+    If the conversation carried pictures, they come across into the new scenario's own file library, and the **Saved as a scenario.** toast gains a line naming how many came over and — where any stayed behind against the scenario's limits — which ones and why. A save that carried no pictures says nothing extra.
 
     **You should see:** the save control present but non-committal before the first reply, and afterwards a new scenario on the Scenarios list whose **Sessions** tab already holds the captured conversation.
   </Step>
@@ -163,7 +179,7 @@ Expected Output is the scenario's grading contract, and the loop is designed so 
 </Steps>
 
 <Note>
-  **Expected Output is not the only contract on a scenario.** The **Test Data** tab beside it is the *backend data* setup — which environment the scenario runs against, and the data-plane lifecycle used around each run — where Expected Output is the *agent behavior* contract. Its default state reads **Environment default**: "This scenario uses the environment's default lifecycle. The plan may be neutral, but TrustAI still acquires, resets, and releases the environment for every run." **Configure scenario lifecycle (advanced)** and **Advanced test data** (manual records, state checks, imports, concurrency) sit below it. The matching **Environment** section in the run launcher selects the connected org or data plane, test identity, and cleanup for that run. Deleting a scenario removes its test data along with its expected-output rubric — the delete confirmation says so.
+  **Expected Output is not the only contract on a scenario.** The **Test Data** tab beside it covers the records a test needs, where Expected Output covers agent behavior. It opens with the environment selected for the agent you're testing, marked **Always used**, and the promise that Trust AI acquires, runs, resets, and releases it every time. Below that sits the scenario's **plan**, as five step cards — "Create what this test needs", "Run the conversation", "Read back what the agent created", "Check what should happen", and "Clean up everything this test created". A scenario with no plan shows a **No test data yet** hero offering **Add manually**, plus **Set up with AI** where the connection supports drafting; **Edit plan** opens the same docked **AI** / **Form** / **JSON** drawer once a plan exists. **How this test runs** is a separate accordion holding **Runs alongside other tests (recommended)** or **Runs alone**, and **Advanced test data** keeps the record-level controls. Deleting a scenario removes its test data along with its expected-output rubric — the delete confirmation says so. Full model: [Test data](/concepts/test-data) and [Author test data for a scenario](/how-to/author-test-data-for-a-scenario).
 </Note>
 
 ## Run and evaluate
@@ -176,7 +192,7 @@ Expected Output is the scenario's grading contract, and the loop is designed so 
   <Step title="Launch a graded run">
     Use **Run & evaluate** — from the **Run** split-button, the fly-in **More** menu, or the Sessions tab. The launcher opens as **Run & evaluate scenario**, or **Run & evaluate scenarios** when more than one is targeted. Name the run, check the fan-out preview, pick the connected agent, and launch with **Run evaluation**. The evaluators come from each scenario's Expected Output — they're inherited into the run, read-only, not re-picked. A scenario run **always simulates** fresh conversations; there is no replay opt-in to remember.
 
-    A graded launch also offers **Repeat each test case**: a **1 / 2 / 3 / 4** selector that reruns every case that many times so the run can report how *reliably* the agent passes, not just whether it passed once. More repeats take longer. The selector is deliberately absent on **Run only** and on a single-scenario one-off — neither produces the graded results a reliability read is built from.
+    A graded launch also offers **Repeat each test case**: a **1 / 2 / 3 / 4** selector that reruns every case that many times so the run can report how *reliably* the agent passes, not just whether it passed once. More repeats take longer. The selector is deliberately absent on **Run only** and on a quick evaluation — the first grades nothing, and the second mints no run to repeat.
 
     Unlike **Run only**, a graded launch from the page header takes you straight to the new run's detail page. Launch the same run from a scenario fly-in and you stay where you are, with the fly-in open.
 
@@ -184,7 +200,9 @@ Expected Output is the scenario's grading contract, and the loop is designed so 
   </Step>
 
   <Step title="Read the per-persona results">
-    The finished run leads with a dual headline: **Pass rate** grades the *agent*, and **Evaluator accuracy** grades the *judges* — how often the automated evaluators agreed with a person's session-level verdict. Below it, a per-persona matrix scores every attached persona on its own, with plain-English hints where personas diverge. Each result's transcript is badged **Simulated** or **Replayed**, and **Open session** takes you to the exact session that was graded.
+    The finished run leads with one headline stat — **Conversations passed** — captioned with the conversation set it was measured over, so the denominator never has to be guessed at. Below it, a per-persona matrix scores every attached persona on its own, with plain-English hints where personas diverge. Each result's transcript is badged **Simulated** or **Replayed**, and **Open session** takes you to the exact session that was graded.
+
+    Read two things in the matrix besides Pass and Fail. A conversation where an action the agent ran returned an error reads amber as **Couldn't test** and leaves the pass-rate denominator rather than being scored — which is why the run list shows an amber count beside a pass rate. And each simulated transcript closes by saying why it stopped, starting **"This conversation ended because "** and finishing with the customer getting what they needed, the agent not being able to help, the customer giving up, the agent ending or transferring it, or the length limit arriving first. That is what separates two same-length transcripts with the same verdict; a conversation with no recorded ending shows no line at all.
     <Frame caption="Under the headline, every attached persona gets its own row — its transcript, its final verdict, and a column per judge and per structural check. The amber line under each preview is that row's divergence hint.">
       <img src="/images/simulate-run-detail-personas.png" alt="An evaluation run detail page titled 'Refund status after return · persona sweep': a 0% pass rate headline reading 0 of 3 conversations passed, over a results matrix with one row per persona — Frustrated regular, First-time buyer and Terse power user — each showing a transcript preview, a divergence hint, and Fail chips under the Final verdict, Refund timeline accuracy, Tone, Expected actions and Expected routes columns." />
     </Frame>
@@ -222,6 +240,14 @@ Expected Output is the scenario's grading contract, and the loop is designed so 
     A **Groundedness judge** is attached to it and the scenario has no documents. That judge grades claims against reference material, so with none attached there is nothing to grade against, and the run is blocked rather than silently scored. Open the scenario's **Expected Output** tab and use **Add reference material**, or remove the judge. The launcher names the blocking scenarios so a multi-scenario run is fixable in one pass.
   </Accordion>
 
+  <Accordion title="I adopted the recommended scenarios — what is the Trust Agent doing in the background?">
+    You chose **Add & tailor to your agent**, so the scenarios were added and a background Trust Agent run started customizing each attached check against your connected agent's real tools and rules. A persistent **Tailoring started** toast carries an **Open chat** action if you want to watch; adopt again while that run is still working and you get **A tailoring run is already in progress** instead, because the second batch joins the first rather than starting a rival run. Tailoring never gates adoption — **Add without tailoring** puts the same scenarios and checks in place immediately. See [Adopt the recommended security scenarios](/how-to/adopt-recommended-security-scenarios).
+  </Accordion>
+
+  <Accordion title="A conversation in my run says Couldn't test">
+    An action the agent itself ran returned an error, so there is no behavior to grade: the conversation reads amber as **Couldn't test**, leaves the pass-rate denominator, and is summarized as "Not scored because an action the agent runs returned an error." It is not a fail and it is not a pass — treat it as a run-health signal and re-run once the agent's action works. The run list shows an amber count beside the pass rate so a green rate never renders uncaveated.
+  </Accordion>
+
   <Accordion title="My saved scenario says it's missing expected output">
     By design. **Save as a scenario** and **New scenario** deliberately defer the grading contract — the loop is define cheap, run, then set expected output from a session you like. Open the scenario's **Expected Output** tab to author it; until then the scenario shows up in the **Missing expected output** saved view.
   </Accordion>
@@ -234,6 +260,9 @@ Expected Output is the scenario's grading contract, and the loop is designed so 
 ## Related reading
 
 - **[Scenarios](/concepts/scenarios)** — the concept page: what a scenario is, the flat list, the fly-in, and the Expected Output contract
+- **[Recommended scenarios](/concepts/trust-library)** — the ten OWASP-mapped probes behind **Add recommended scenarios**, and what tailoring changes
+- **[Adopt the recommended security scenarios](/how-to/adopt-recommended-security-scenarios)** — the adopt-and-tailor recipe in full
+- **[Test data](/concepts/test-data)** — the plan behind the **Test Data** tab, and the per-run report of what it did
 - **[Playground](/concepts/playground)** — the concept page: Chat vs Simulate, the connected-agent picker, and capture in depth
 - **[Evaluations](/concepts/evaluations)** — the evaluation model behind **Run & evaluate** and the dual-headline results
 - **[Evaluators](/concepts/evaluators)** — the LLM judge and Groundedness judge kinds the Expected behavior section attaches
