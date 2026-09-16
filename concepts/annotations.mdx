@@ -47,9 +47,9 @@ The consequence worth internalising: **calibrating a judge does not read your Se
 Annotation happens where the Sessions already are — there is no separate review surface:
 
 - **Inline in the Sessions table.** **Verdict** and **Severity** cells are editable directly in the table, so a reviewer can sweep down the list without opening anything. The Verdict column shows by default; other annotation columns can be shown from the column menu.
-- **In the Session fly-in.** The fly-in's **Annotations** tab is the full schema-driven editor for every column, alongside the **Transcript**, **Evaluations**, and **Details** tabs. The same panel appears when you drill into a session from a scenario. An edit made in a table cell repaints any open panel for that Session, so the two never disagree.
+- **In the Session fly-in.** The fly-in's **Annotations** tab is the full schema-driven editor for every column, alongside the **Transcript**, **Evaluations**, **Test Data**, and **Details** tabs. The same panel appears when you drill into a session from a scenario. An edit made in a table cell repaints any open panel for that Session, so the two never disagree.
 
-<Frame caption="One Session, both entry points: the highlighted row's Verdict and Severity cells carry the same Fail and major the fly-in's Annotations tab is showing — an edit in either place repaints the other.">
+<Frame caption="One Session, both entry points: the highlighted row's Verdict and Severity cells carry the same Fail and major the fly-in's Annotations tab is showing — an edit in either place repaints the other. Captured before the Test Data tab joined the fly-in strip.">
   <img src="/images/annotations-two-places.png" alt="The Sessions table with the Verdict and Severity columns shown, and the fly-in open over it on the Annotations tab. The highlighted row RUN-000012 reads Fail and major in its table cells, while the panel shows the same Fail verdict, major severity, and a Reviewer note reading 'Promised a refund without checking the policy window.'" />
 </Frame>
 
@@ -59,7 +59,7 @@ To work through Sessions in volume, filter the list to the slice you care about 
 
 A Session can carry two verdicts at once, and they never overwrite each other:
 
-- The **automated verdict** — the pill produced by [Evaluations](/concepts/evaluations): **Pass**, **Fail**, **Not evaluated** (nothing ran), or **Not graded** (something ran but produced no behavioural score). Only automated results set it.
+- The **automated verdict** — the pill produced by [Evaluations](/concepts/evaluations): **Pass**, **Fail**, **Not evaluated** (nothing ran), or **Not graded** (something ran but produced no behavioural score). Only automated results set it. {/* ACCURACY-AUDIT-PENDING */} On a run's own results there is a fifth, amber state — **Couldn't test**, where an action the agent itself runs returned an error. It leaves the pass-rate denominator like the neutrals do, but it is attributed to the agent under test rather than to the environment, so it never carries the grey "not the agent's fault" reading. Back on the Session, a run that ended that way shows as **Not graded**.
 - The **human Verdict annotation** — your Pass / Fail judgment in the Verdict column.
 
 The rule: **your Verdict annotation grades the judges — it never overwrites the automated verdict.** When a Session carries both, Trust AI compares them, and the agreement rate surfaces as the **Evaluator accuracy** headline on evaluation results. A Session where the two disagree is exactly the signal worth investigating: either the agent's behavior is subtle, or the Evaluator's rubric needs work.
