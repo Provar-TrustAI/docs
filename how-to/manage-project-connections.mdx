@@ -88,7 +88,7 @@ When both a setup badge and an unhappy reachability pill are on screen, the sub-
 
 A store is a place this agent's tests read and write data. **Add a store** appears beside the section heading, and again inside the empty state, and both open the same form; its submit button reads **Add store**.
 
-Only Salesforce ships a store automatically. A new Salesforce connection arrives with one named **This agent's Salesforce org**, which signs in with the agent connection's own credentials — nothing extra to enter. Every other platform starts with none and says so: *"No test data store — add one if this agent uses Salesforce or a database."* A Salesforce connection whose store has not been minted yet reads *"This connection's default store hasn't been created yet — add one to say where its test data lives."*
+Only Salesforce ships a store automatically. A new Salesforce connection arrives with one named **This agent’s Salesforce org**, which signs in with the agent connection's own credentials — nothing extra to enter. Every other platform starts with none and says so: *"No test data store — add one if this agent uses Salesforce or a database."* A Salesforce connection whose store has not been minted yet reads *"This connection's default store hasn't been created yet — add one to say where its test data lives."*
 
 Each store is a row summarizing itself in plain words — store type, where it points, how test data sits inside it, and the field every test record is tagged with. A Salesforce default store reads *"Salesforce org · this agent's org · test data alongside existing records, tagged ScenarioRunId\_\_c"*.
 
@@ -118,7 +118,7 @@ The helper under it says why the number matters: *"Tests share this connection's
 
 ### Run tests as different users (Salesforce)
 
-The last section is collapsed, and appears only on a Salesforce Agentforce connection that signs in as a named user: **Run tests as different users (permission sets)**.
+The last section is collapsed, and appears on a Salesforce Agentforce connection — including one made by the one-time admin authorization, which is itself a named-user sign-in: **Run tests as different users (permission sets)**.
 
 Add a reusable Salesforce user here and a scenario can pick it by name, so you can test how the agent behaves for a read-only support rep versus a manager. Until you add one, the section reads **No additional test users yet** — *"Tests run as this connection's own user. Add one to run a scenario as a specific Salesforce user instead."*
 
@@ -134,14 +134,14 @@ Add a reusable Salesforce user here and a scenario can pick it by name, so you c
 You can hold up to **20** test users on one connection.
 
 <Note>
-  Two fields named **Default test user** and **Additional test users (permission sets)** exist on the Salesforce connection form, but they render only for a connection using one of the legacy sign-in methods, and there is no door to that form from this tab. On a connection made the current way — a one-time admin authorization — the section above is the whole story.
+  Two fields named **Default test user** and **Additional test users (permission sets)** exist on the Salesforce connection *edit* form, and there is no door to that form from this tab. On this surface the section above is the whole story.
 </Note>
 
 ## Remove a connection
 
 **Remove** is at the right of the card's top row. It asks first, under the title **Remove this agent connection?**, and the body names what survives:
 
-> This removes **&lt;connection name&gt;** and its test data setup from this project only. Connections to this Salesforce org in other projects stay unchanged. The Salesforce app stays installed in your org, so you can connect it again later. You can't undo this.
+> This removes **&lt;connection name&gt;** and its test data setup from this project only. Connections to this Salesforce org in other projects stay unchanged. The Salesforce app stays installed in your org, so you can connect it again later. You can’t undo this.
 
 A non-Salesforce connection gets the same promise in its own words — other projects are untouched, and nothing is removed from the service that hosts the agent, so you can connect it again later.
 
@@ -150,7 +150,7 @@ Confirm with **Remove connection**. Removing a connection also archives the agen
 ## What is not on this tab
 
 - **There is no Edit.** A saved connection's own settings — credentials, sign-in method, the agent it points at — have no edit door on this surface. Removing and connecting again is the shipped path.
-- **There is no Agent Profile entry point.** A connection's [Agent Profile](/concepts/agent-profile) is opened from the **Playground** topbar, not from a card here. See [Review an Agent Profile](/how-to/review-an-agent-profile).
+- **There is no Agent Profile entry point.** A connection's [Agent Profile](/concepts/agent-profile) is opened from the **Playground** topbar, not from a card here. See [Review an agent profile](/how-to/review-an-agent-profile).
 
 ## Connected orgs: the workspace picture
 

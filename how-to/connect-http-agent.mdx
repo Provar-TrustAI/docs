@@ -1,16 +1,16 @@
 ---
 title: "Connect a Conversational HTTP agent"
 icon: "plug"
-description: "Connect any agent that accepts AG-UI run requests and streams AG-UI events over SSE — the contract your endpoint must implement, the connection form, and what Trust AI does with it."
+description: "Connect any agent that accepts AG-UI run requests and streams AG-UI events over SSE — the contract your endpoint must implement, the connection form, and what TrustAI does with it."
 ---
 
-This how-to connects a **Conversational HTTP agent** — any agent you host yourself that speaks the AG-UI wire protocol over HTTP — to a Trust AI [Project](/concepts/projects). It is the connector for an agent that isn't on a named vendor platform: your own service, a framework runtime, an internal gateway.
+This how-to connects a **Conversational HTTP agent** — any agent you host yourself that speaks the AG-UI wire protocol over HTTP — to a TrustAI [Project](/concepts/projects). It is the connector for an agent that isn't on a named vendor platform: your own service, a framework runtime, an internal gateway.
 
 When you're done:
 
 - The agent is registered as an [Agent Version](/concepts/agent-versions) you can pick when you launch an Evaluation
-- Trust AI can drive conversations against it from the [Playground](/concepts/playground), and each one is a conversation you can save and reuse
-- Trust AI can capture an [Agent Profile](/concepts/agent-profile) for it — the identity, tool catalog, and knowledge sources your agent publishes
+- TrustAI can drive conversations against it from the [Playground](/concepts/playground), and each one is a conversation you can save and reuse
+- TrustAI can capture an [Agent Profile](/concepts/agent-profile) for it — the identity, tool catalog, and knowledge sources your agent publishes
 
 This is the one connector where **you may control the agent on the other end**. So this page states the contract precisely enough to build against, before it walks the form.
 
@@ -26,7 +26,7 @@ It is still worth asking afterwards. *"Which agent version is connected now?"* i
 
 ## What your agent must implement
 
-Trust AI is a **client** of your agent. It never deploys, reconfigures, or hosts anything — it makes outbound HTTP calls to endpoints you already run. Your agent runs its own tools; Trust AI observes and records.
+TrustAI is a **client** of your agent. It never deploys, reconfigures, or hosts anything — it makes outbound HTTP calls to endpoints you already run. Your agent runs its own tools; TrustAI observes and records.
 
 Three endpoints matter, all relative to the **Agent base URL** you'll enter on the form:
 
@@ -42,7 +42,7 @@ Three endpoints matter, all relative to the **Agent base URL** you'll enter on t
 
 ### The run endpoint
 
-Trust AI posts one AG-UI `RunAgentInput` document per turn and reads back a Server-Sent Events stream.
+TrustAI posts one AG-UI `RunAgentInput` document per turn and reads back a Server-Sent Events stream.
 
 The request body carries the conversation so far, plus a small fixed frame:
 
@@ -60,18 +60,18 @@ The request body carries the conversation so far, plus a small fixed frame:
 }
 ```
 
-- **`threadId`** is stable for the life of one conversation, so your agent can keep its own thread state. Trust AI mints it on the first turn and replays it afterwards.
-- **`messages`** is the full history Trust AI holds, ending with the new user turn. A persona's system prompt, when a simulation supplies one, is prepended as a `system` message.
-- **`tools`** always advertises one front-end tool, `request_permission`. See [Approvals](#approvals-and-request-permission) below.
+- **`threadId`** is stable for the life of one conversation, so your agent can keep its own thread state. TrustAI mints it on the first turn and replays it afterwards.
+- **`messages`** is the full history TrustAI holds, ending with the new user turn. A persona's system prompt, when a simulation supplies one, is prepended as a `system` message.
+- **`tools`** always advertises one front-end tool, `request_permission`. See [Approvals](#approvals-and-request_permission) below.
 - **`forwardedProps.mode`** carries the **Agent mode** you pick on the form.
 
 The response must be `text/event-stream` with standard `data: {json}` frames — one JSON object per event, blank-line separated. Lines beginning with `:` are treated as keep-alives and ignored. A frame whose payload isn't valid JSON ends the run with *"The HTTP agent returned a malformed SSE event."*
 
-### The events Trust AI reads
+### The events TrustAI reads
 
-Emit AG-UI events. Trust AI projects these onto its own taxonomy and ignores the rest:
+Emit AG-UI events. TrustAI projects these onto its own taxonomy and ignores the rest:
 
-| Event | What Trust AI does with it |
+| Event | What TrustAI does with it |
 |---|---|
 | `TEXT_MESSAGE_CONTENT` | Appends `delta` to the visible reply |
 | `REASONING_MESSAGE_CONTENT` / `REASONING_MESSAGE_END` | Records reasoning separately from the reply |
@@ -85,9 +85,9 @@ Emit AG-UI events. Trust AI projects these onto its own taxonomy and ignores the
 
 ### Approvals and `request_permission`
 
-Trust AI advertises a `request_permission` tool on every run. If your agent calls it and the run finishes without a result for that call, Trust AI holds the turn open as an approval gate rather than treating it as a completed reply. Resolving the gate sends a `role: "tool"` result message on the next run against the same `threadId`, so your agent can resume the same thread.
+TrustAI advertises a `request_permission` tool on every run. If your agent calls it and the run finishes without a result for that call, TrustAI holds the turn open as an approval gate rather than treating it as a completed reply. Resolving the gate sends a `role: "tool"` result message on the next run against the same `threadId`, so your agent can resume the same thread.
 
-You don't have to use it. An agent that never calls `request_permission` simply never raises a gate. See [Approve agent writes](/how-to/approve-agent-writes) for the reviewer's side of that flow.
+You don't have to use it. An agent that never calls `request_permission` simply never raises a gate. The reviewer's side of *this* gate is the transcript's own approval prompt, in the Playground or in a run — a different mechanism from the Trust Agent's permission card, which gates writes the Trust Agent itself proposes.
 
 ### The capabilities endpoint
 
@@ -113,8 +113,8 @@ A tool's `parameters` schema is stored byte-for-byte alongside the profile revis
 
 ## Prerequisites
 
-- A **Trust AI Project**. If you don't have one, start with [Your first 10 minutes in Trust AI](/tutorials/quickstart).
-- Your agent's **base URL**, reachable from Trust AI. Three separate rules apply, and each is rejected in its own words — match the message to the rule rather than reading them as one:
+- A **TrustAI Project**. If you don't have one, start with [Your first 10 minutes in TrustAI](/tutorials/quickstart).
+- Your agent's **base URL**, reachable from TrustAI. Three separate rules apply, and each is rejected in its own words — match the message to the rule rather than reading them as one:
 
   | The base URL | Message on save |
   |---|---|
@@ -161,7 +161,7 @@ A tool's `parameters` schema is stored byte-for-byte alongside the profile revis
     </Frame>
 
     <Note>
-      **Agent mode is not the Trust Agent's mode.** The Trust Agent's own **Ask / Plan / Act** modes govern the in-app assistant. This field is a value Trust AI forwards to *your* agent as `forwardedProps.mode` on every run, and Trust AI does not interpret it. If your agent ignores `forwardedProps`, the setting has no effect.
+      **Agent mode is not the Trust Agent's mode.** The Trust Agent's own **Ask / Plan / Act** modes govern the in-app assistant. This field is a value TrustAI forwards to *your* agent as `forwardedProps.mode` on every run, and TrustAI does not interpret it. If your agent ignores `forwardedProps`, the setting has no effect.
     </Note>
 
     <Warning>
@@ -170,7 +170,7 @@ A tool's `parameters` schema is stored byte-for-byte alongside the profile revis
   </Step>
 
   <Step title="Test the connection">
-    Click **Test Connection**. Trust AI makes one `GET` to your **Health endpoint** under the base URL — with the `Authorization: Bearer …` header attached when the sign-in method is **Bearer token**, and no auth header when it isn't. Nothing is saved by the test, and your run endpoint is not called.
+    Click **Test Connection**. TrustAI makes one `GET` to your **Health endpoint** under the base URL — with the `Authorization: Bearer …` header attached when the sign-in method is **Bearer token**, and no auth header when it isn't. Nothing is saved by the test, and your run endpoint is not called.
 
     **You should see:** *"TrustAI reached the conversational agent successfully."*
 
@@ -211,8 +211,8 @@ Under the name, **Customize environment** expands the card downward in place —
 
 **Sign-in method** offers exactly two choices.
 
-- **No authentication** — the default. Trust AI sends no `Authorization` header on runs, health checks, or capability reads. Use it only where the network already restricts who can reach the agent.
-- **Bearer token** — reveals a **Bearer token** field. Trust AI sends `Authorization: Bearer <token>` on every call it makes to your agent: runs, health checks, and capability reads alike. Choosing this without entering a token is rejected.
+- **No authentication** — the default. TrustAI sends no `Authorization` header on runs, health checks, or capability reads. Use it only where the network already restricts who can reach the agent.
+- **Bearer token** — reveals a **Bearer token** field. TrustAI sends `Authorization: Bearer <token>` on every call it makes to your agent: runs, health checks, and capability reads alike. Choosing this without entering a token is rejected.
 
 The token is **write-only**. On the form the help text reads *"Entered once and stored securely — it is never shown back."*, and that is the whole contract: the saved value is never displayed back on any surface, in any form, or in any API response.
 
@@ -248,13 +248,13 @@ The second signal on the identity row is satisfied two ways, because platforms d
 
 Only the fourth row is pinned at **Partial** by a capture like this one, however complete your manifest. Its second signal is sampled conversations or safe probes, and capture runs neither — it reads one endpoint and stops. Read that **Partial** as scope, not as something you left out.
 
-The fly-in header then settles on **Version-pinned profile** (**Profile available** is the capture lifecycle's own word for the same healthy state). Reviewing is per-revision: **Approve** or **Request changes**. See [Agent Profile](/concepts/agent-profile) for what a revision is and why review doesn't carry forward, and [Review an Agent Profile](/how-to/review-an-agent-profile) for the walk-through.
+The fly-in header then settles on **Version-pinned profile** (**Profile available** is the capture lifecycle's own word for the same healthy state). Reviewing is per-revision: **Approve** or **Request changes**. See [Agent Profile](/concepts/agent-profile) for what a revision is and why review doesn't carry forward, and [Review an agent profile](/how-to/review-an-agent-profile) for the walk-through.
 
 ## Troubleshooting
 
 <AccordionGroup>
   <Accordion title="Test Connection says it could not reach the agent health endpoint">
-    *"TrustAI could not reach the agent health endpoint. Check the URL and network access, then retry."* means the request never got an HTTP response — wrong host, wrong port, or a network path that doesn't exist from Trust AI's side. Confirm the base URL resolves and is reachable **from Trust AI**, not just from your laptop: a `localhost` URL points at Trust AI's own runtime, not yours.
+    *"TrustAI could not reach the agent health endpoint. Check the URL and network access, then retry."* means the request never got an HTTP response — wrong host, wrong port, or a network path that doesn't exist from TrustAI's side. Confirm the base URL resolves and is reachable **from TrustAI**, not just from your laptop: a `localhost` URL points at TrustAI's own runtime, not yours.
   </Accordion>
 
   <Accordion title="Test Connection reports a status code">
@@ -291,5 +291,4 @@ The fly-in header then settles on **Version-pinned profile** (**Profile availabl
 - **[Agent Versions](/concepts/agent-versions)** — how the connected agent is tracked
 - **[Agent Profile](/concepts/agent-profile)** — what capture records, and how review works
 - **[Playground](/concepts/playground)** — driving the agent by hand, and simulating personas
-- **[Approve agent writes](/how-to/approve-agent-writes)** — the reviewer's side of an approval gate
 - **[Connect a Claude Managed Agent](/how-to/connect-claude-managed-agent)** · **[Connect an AWS Bedrock AgentCore agent](/how-to/connect-agentcore)** · **[Connect a Salesforce Agentforce agent](/how-to/connect-agentforce)** — the other three platforms in the picker

@@ -1,14 +1,14 @@
 ---
 title: "The evaluation loop"
 icon: "refresh-cw"
-description: "How Scenarios, Sessions, Evaluators, and Evaluations feed each other — the workflow Trust AI is built around."
+description: "How Scenarios, Sessions, Evaluators, and Evaluations feed each other — the workflow TrustAI is built around."
 ---
 
-The Trust AI workflow is a **loop, not a line**. Each step feeds the next; the output of the final step closes back to the start. Every concept page in this section is one verb in this loop. Read this page to see how they connect.
+The TrustAI workflow is a **loop, not a line**. Each step feeds the next; the output of the final step closes back to the start. Every concept page in this section is one verb in this loop. Read this page to see how they connect.
 
 ## In one paragraph
 
-You **write the Requirements** — what your agent must do and must never do, in the language your business uses. You **define Scenarios** — persona-plus-goal test cases you author yourself, save from a Playground chat, adopt from the recommended starters, or ask the Trust Agent to draft. You **run them**: each persona simulates a conversation against your connected agent, and every simulated conversation lands as a real **Session** next to the ones synced from your runtime. You read those sessions and **author each scenario's Expected Output** — the grading contract — picking actions, routes, judge criteria, and reference material from vocabulary Trust AI learned from real sessions. You **run an Evaluation** from one unified launcher, against scenarios (live simulation) or against sessions that already happened (judge-only grading), scoped to a specific **Agent Version**, repeating each test case up to four times if you want a reliability read. Results group **by scenario** and lead with **Pass rate**, joined by **Evaluator accuracy** once human verdicts exist to grade the judges against. You **record verdicts** — the ground truth the judges are measured against — then **calibrate** each judge until it agrees with your reviewers. Then you tighten the scenarios, re-run, and the loop continues.
+You **write the Requirements** — what your agent must do and must never do, in the language your business uses. You **define Scenarios** — persona-plus-goal test cases you author yourself, save from a Playground chat, adopt from the recommended starters, or ask the Trust Agent to draft. You **run them**: each persona simulates a conversation against your connected agent, and every simulated conversation lands as a real **Session** next to the ones synced from your runtime. You read those sessions and **author each scenario's Expected Output** — the grading contract — picking actions, routes, judge criteria, and reference material from vocabulary TrustAI learned from real sessions. You **run an Evaluation** from one unified launcher, against scenarios (live simulation) or against sessions that already happened (replayed to the connected agent, and the new answers graded), scoped to a specific **Agent Version**, repeating each test case up to four times if you want a reliability read. Results group **by scenario** and lead with **Pass rate**, joined by **Evaluator accuracy** once human verdicts exist to grade the judges against. You **record verdicts** — the ground truth the judges are measured against — then **calibrate** each judge until it agrees with your reviewers. Then you tighten the scenarios, re-run, and the loop continues.
 
 ## The diagram
 
@@ -43,9 +43,9 @@ One arrow is not optional, though. If you drive the loop through the [Trust Agen
 
 ## Before the loop: connect and profile
 
-Every loop runs against a **connection**. Trust AI connects to four agent platforms, each with its own setup flow: **AWS Bedrock AgentCore**, **Salesforce Agentforce**, **Claude Managed Agent**, and the **Conversational HTTP agent** (any agent that accepts AG-UI run requests and streams AG-UI events over SSE). Syncing is read-only — Trust AI never modifies the source runtime.
+Every loop runs against a **connection**. TrustAI connects to four agent platforms, each with its own setup flow: **AWS Bedrock AgentCore**, **Salesforce Agentforce**, **Claude Managed Agent**, and the **Conversational HTTP agent** (any agent that accepts AG-UI run requests and streams AG-UI events over SSE). Syncing is read-only — TrustAI never modifies the source runtime.
 
-Once an agent is connected, generate an **Agent Profile**: a structured read of what a specific **Agent Version** can actually do — its topics, tools, routes, and guardrails — so you write scenarios against the real surface instead of guessing at it. Keep the two nouns apart: an **Agent Version** is the pinned snapshot under test; an **Agent Profile** is a description *of* that version, and its versioned unit is the **profile revision**.
+Once an agent is connected its **Agent Profile** is captured for you, in the background: a structured read of what a specific **Agent Version** can actually do — its topics, tools, routes, and guardrails — so you write scenarios against the real surface instead of guessing at it. Keep the two nouns apart: an **Agent Version** is the pinned snapshot under test; an **Agent Profile** is a description *of* that version, and its versioned unit is the **profile revision**.
 
 - The profile card carries a lifecycle pill — **Profile queued**, **Profile in progress**, **Profile available**, **Profile failed**, or **Profile out of date** — plus a never-generated empty state with a **Generate profile** button.
 - Coverage reads **Captured**, **Partial**, or **Limited** — never a percentage.
@@ -75,18 +75,18 @@ A **Scenario** is a first-class test case: a name, a goal, the personas that wil
 
 Four ways to get scenarios, cheapest first:
 
-- **Adopt starters.** Click **Add recommended scenarios** to adopt curated safety scenarios mapped to the OWASP Agentic AI Top 10 — coverage before you've written a word.
+- **Adopt starters.** Click **Add recommended scenarios** to adopt curated safety scenarios mapped to the OWASP Agentic Top 10 (2026) — coverage before you've written a word.
 - **Ask the Trust Agent.** Describe what your agent should and shouldn't do; the Trust Agent drafts behavior and security scenarios for you.
 - **Save from the Playground.** Had a conversation worth keeping? **Save as a scenario** turns it into a scenario with the conversation already attached as its first session.
 - **Author by hand.** Name, goal, personas. Expected output is deliberately deferred — you'll set it later, usually from a session you like.
 
 Defining scenarios is deliberately cheap. The product's opinion: write the test case first, let real runs teach you what "correct" looks like.
 
-**Read more:** [Scenarios](/concepts/scenarios) · [Simulate with scenarios](/how-to/simulate-with-scenarios)
+**Read more:** [Scenarios](/concepts/scenarios) · [Simulate agents with scenarios](/how-to/simulate-with-scenarios)
 
 ### 3. Simulate and observe
 
-Run a scenario and Trust AI simulates it against your connected agent — one conversation per persona per goal. Each simulated conversation is persisted as a real **Session**, linked back to its scenario, sitting alongside the sessions synced from your runtime. Nothing about a generated session is second-class: same transcript view, same annotations, same evaluations.
+Run a scenario and TrustAI simulates it against your connected agent — one conversation per persona per goal. Each simulated conversation is persisted as a real **Session**, linked back to its scenario, sitting alongside the sessions synced from your runtime. Nothing about a generated session is second-class: same transcript view, same annotations, same evaluations.
 
 Sessions arrive from three directions, and the **Source** column tells you which: **Scenario** (simulated from a scenario run or evaluation), **Playground** (an interactive capture finalized without a scenario link), or **External** (synced from your connected runtime). A conversation you save in the [Playground](/concepts/playground) reads **Scenario**, because saving there always attaches one. Source is hidden by default — show it from the column menu when the mix matters.
 
@@ -104,7 +104,7 @@ The **Expected Output** is a scenario's grading contract — the keystone of the
 
 Structural checks live here on Expected Output, not on a standalone evaluator.
 
-You don't type these from memory. The options come from vocabulary Trust AI **learned from your real sessions** — the actions and routes your agent actually uses. That's why this step comes after simulation: run the scenario, open a session where the agent did the right thing, and encode what you saw as the contract.
+You don't type these from memory. The options come from vocabulary TrustAI **learned from your real sessions** — the actions and routes your agent actually uses. That's why this step comes after simulation: run the scenario, open a session where the agent did the right thing, and encode what you saw as the contract.
 
 Reference material is attached **per scenario**, never on the evaluator — the same Groundedness judge grades different scenarios against different documents.
 
@@ -112,12 +112,12 @@ Reference material is attached **per scenario**, never on the evaluator — the 
 
 ### 5. Run an Evaluation
 
-Every run starts from one place: the **Evaluation Launcher**, opened from **New evaluation** on the Evaluations list, from **Run & evaluate** on scenarios, or from **Evaluate** on sessions. The launcher shows a fan-out preview of exactly what will run under **This will run**, and it grades two kinds of source:
+Every run starts from one place: the **Evaluation Launcher**. It opens wherever a run can begin — **New evaluation** on the Evaluations list, **Run & evaluate** on scenarios, **Evaluate** on sessions, and the rest of the set in [Launching a run](/concepts/evaluations#launching-a-run). The launcher shows a fan-out preview of exactly what will run under **This will run**, and it grades two kinds of source:
 
 - **Scenarios** — live simulation: each persona enacts its goal against the Agent Version you picked, and the judges plus the scenario's Expected Output grade the result.
-- **Sessions** — grade the conversations that **already happened**. The judges read each captured session and score it; nothing is re-sent to your agent, and the session is never modified.
+- **Sessions** — grade the conversations that **already happened**, by replaying them: each session's stored user message goes back to your connected agent and the reply it gives *now* is graded. The stored session is never modified.
 
-A scenarios launch carries one section a sessions launch doesn't: **Environment**, below the fan-out preview. It names the connected org or test data store, test identity and cleanup the run will use, preselects the environment attached to the agent you chose, and probes it — the run button waits until that probe reads **Ready to run**. A sessions launch grades transcripts that already exist, so it needs no agent and shows no Environment section at all. See [Test data](/concepts/test-data) for what the choice changes.
+A scenarios launch carries one section a sessions launch doesn't: **Environment**, below the fan-out preview. It names the connected org or test data store, test identity and cleanup the run will use, preselects the environment attached to the agent you chose, and probes it — the run button waits until that probe reads **Ready to run**. A sessions launch shows no Environment section at all, though it still needs a connected agent to replay against. See [Test data](/concepts/test-data) for what the choice changes.
 
 **Repeat each test case** is a `1 | 2 | 3 | 4` picker on the launcher. Leave it at 1 for a single attempt; raise it and every case is replicated that many times, because an agent that passes once isn't an agent that passes reliably. The picker shows on any graded run-minting launch — both sources — and is hidden on the two launches that have nothing to repeat: a quick evaluation (which mints no run) and a **Run only** simulation (which produces no pass/fail signal). A repeated run leads with a **Pass^K** reliability headline.
 
@@ -185,7 +185,7 @@ It does **not** extend to the whole judge family. A **Groundedness judge** decom
 
 Tightening feeds every earlier step: a judge that over-rejects gets a sharper rule, a scenario that no longer reflects reality gets edited or safely deleted, a gap in coverage gets a new scenario. Then you re-run — **Re-run** on any finished run reopens the launcher pre-filled with that run's scenarios or sessions, its evaluators, and its Agent Version, all still editable. One field it does **not** carry over: **Repeat each test case** resets to 1, so a re-run of a repeated run is a single-attempt run unless you raise the picker again. Set it back before you launch if you want the reliability read.
 
-**Read more:** [Evaluators](/concepts/evaluators) · [Calibrate an Evaluator](/how-to/calibrate-an-evaluator) · [Write an effective LLM-judge prompt](/how-to/write-llm-judge-prompt)
+**Read more:** [Evaluators](/concepts/evaluators) · [Calibrate an evaluator](/how-to/calibrate-an-evaluator) · [Write grading rules and judge prompts](/how-to/write-llm-judge-prompt)
 
 ## The Trust Agent can drive the loop
 
@@ -202,7 +202,7 @@ The prototype below shows the shape of one of those pauses — a clarifying-ques
 
 The prose above, not the prototype, is the authority on shipped behavior — the embed's question copy is illustrative.
 
-**Read more:** [The Trust Agent](/concepts/trust-agent) · [Approve agent writes](/how-to/approve-agent-writes) · [Work with the Trust Agent](/how-to/work-with-the-trust-agent)
+**Read more:** [The Trust Agent](/concepts/trust-agent) · [Approve an agent write](/how-to/approve-agent-writes) · [Work with the Trust Agent](/how-to/work-with-the-trust-agent)
 
 ## Where this fits in your team's workflow
 

@@ -23,7 +23,7 @@ A scenario's test data is authored as a single **plan**, and the plan is what a 
 
 - **Create what this test needs** — the records the agent should find when the conversation starts. Each one gets a plain-language label ("The cracked-screen case"), and every later step refers to it by that label rather than by an id.
 - **Run the conversation** — "The persona speaks with the agent; its goal can use the seeded values."
-- **Read back what the agent created** — after the conversation, Trust AI re-reads the matching records. A read-back collects what it found for the run report, and grades any field you gave an expected value.
+- **Read back what the agent created** — after the conversation, TrustAI re-reads the matching records. A read-back collects what it found for the run report, and grades any field you gave an expected value.
 - **Check what should happen** — the expected end state. Only the changes listed here should happen, and only the objects the read-back names are checked — nothing outside the plan.
 - **Clean up everything this test created** — any cleanup steps you wrote, plus the automatic sweep described below.
 
@@ -69,7 +69,7 @@ Two sentences ship, and they answer different questions — don't swap them:
 {/* ACCURACY-AUDIT-PENDING */}
 The sweep runs whether or not the plan lists cleanup steps of its own. Where the plan named the records it created, the sweep targets those records specifically and removes them in the reverse of the order they were created, so a child record goes before the parent it depends on. Cleanup steps you wrote run first, and the sweep adds to them rather than replacing them.
 
-A plan is allowed to reach wider than that. A cleanup step that tidies up after the agent often has to — nothing marks a record the agent created, so the step has to say something broader, like "every case whose status is New". Trust AI does not refuse such a plan; it asks somebody entitled to make the call to agree on the record, with **Dismiss** and **Confirm and save**, and it stores who agreed alongside the plan so the next person can see that somebody did. A drafted plan is warned about the same way rather than withheld.
+A plan is allowed to reach wider than that. A cleanup step that tidies up after the agent often has to — nothing marks a record the agent created, so the step has to say something broader, like "every case whose status is New". TrustAI does not refuse such a plan; it asks somebody entitled to make the call to agree on the record, with **Dismiss** and **Confirm and save**, and it stores who agreed alongside the plan so the next person can see that somebody did. A drafted plan is warned about the same way rather than withheld.
 
 There is one boundary that is not yours to agree past: the objects the connection was set up to work with. A plan reaching outside that allowlist is declined outright, and the refusal names what is inside it, so you learn what you can ask for.
 
@@ -87,10 +87,10 @@ Both carry **View the test data plan**, which takes you back to the scenario the
 
 On a run's detail table, an **End state** column appears only when at least one result actually graded on end state. Its absence on a transcript-graded run is correct, not a missing column.
 
-## How Trust AI works out which Salesforce objects a test can use
+## How TrustAI works out which Salesforce objects a test can use
 
 {/* ACCURACY-AUDIT-PENDING */}
-Drafting a plan for a Salesforce agent needs to know which objects that agent touches, and Trust AI works it out rather than asking you to list them. It walks from the agent to its actions; for an action that runs a Flow it reads the **active** version of that Flow and takes the objects that version actually reads, creates, updates, or deletes — never inferring them from the Flow's name. It then narrows the result to the objects the connected user is permitted to read.
+Drafting a plan for a Salesforce agent needs to know which objects that agent touches, and TrustAI works it out rather than asking you to list them. It walks from the agent to its actions; for an action that runs a Flow it reads the **active** version of that Flow and takes the objects that version actually reads, creates, updates, or deletes — never inferring them from the Flow's name. It then narrows the result to the objects the connected user is permitted to read.
 
 Two things about that are worth knowing before you trust the result:
 

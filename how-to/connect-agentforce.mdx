@@ -6,11 +6,11 @@ description: "Connect an Agentforce agent in a Salesforce Sandbox — reuse an o
 
 import { DeprecatedNotice } from "/snippets/deprecated-notice.mdx";
 
-This how-to connects a **Salesforce Agentforce** agent to a Trust AI [Project](/concepts/projects). If your workspace has already authorized the org, you reuse that authorization and go straight to picking an agent. If it hasn't, a Salesforce administrator signs in once and approves TrustAI — there is no consumer key, no secret, and no certificate to hand over. When you're done:
+This how-to connects a **Salesforce Agentforce** agent to a TrustAI [Project](/concepts/projects). If your workspace has already authorized the org, you reuse that authorization and go straight to picking an agent. If it hasn't, a Salesforce administrator signs in once and approves TrustAI — there is no consumer key, no secret, and no certificate to hand over. When you're done:
 
-- Trust AI can drive your live Agentforce agent: simulations and evaluation runs open a real session in your org, and those conversations land in the Project as [Sessions](/concepts/sessions)
+- TrustAI can drive your live Agentforce agent: simulations and evaluation runs open a real session in your org, and those conversations land in the Project as [Sessions](/concepts/sessions)
 - The agent you picked becomes the Project's current [Agent Version](/concepts/agent-versions), selectable when you launch an Evaluation
-- Trust AI starts reading that agent's make-up in the background — see [What happens after you connect](#what-happens-after-you-connect)
+- TrustAI starts reading that agent's make-up in the background — see [What happens after you connect](#what-happens-after-you-connect)
 
 Agentforce is one of **four** platforms in the connect wizard's platform picker, in this order: **AWS Bedrock AgentCore**, **Salesforce Agentforce**, **Claude Managed Agent**, **Conversational HTTP agent**. See [Connect an AWS Bedrock AgentCore agent](/how-to/connect-agentcore), [Connect a Claude Managed Agent](/how-to/connect-claude-managed-agent), and [Connect a Conversational HTTP agent](/how-to/connect-http-agent) for the other three. This page covers Agentforce only.
 
@@ -19,7 +19,7 @@ Agentforce is one of **four** platforms in the connect wizard's platform picker,
 </Warning>
 
 <Note>
-  Setting Trust AI up for the first time? [From zero to a connected Salesforce agent](/get-started/connect-your-agentforce-agent) is the shorter on-ramp — how you get access, what to prepare in your Salesforce org before you start, and this connection in brief. Come back here for the full detail.
+  Setting TrustAI up for the first time? [From zero to a connected Salesforce agent](/get-started/connect-your-agentforce-agent) is the shorter on-ramp — how you get access, what to prepare in your Salesforce org before you start, and this connection in brief. Come back here for the full detail.
 </Note>
 
 ## Prerequisites
@@ -27,7 +27,7 @@ Agentforce is one of **four** platforms in the connect wizard's platform picker,
 - A **Salesforce Sandbox** with an Agentforce agent that is **activated**. An agent that exists but has never been turned on lists fine and then refuses to open a session — see [Troubleshooting](#troubleshooting).
 - A **Salesforce administrator** — you, or someone who can sign in while you wait. This is a one-time sign-in, not an ongoing role, and you skip it entirely when you [reuse an org your workspace already authorized](#reuse-an-org-your-workspace-already-authorized).
 - Your org's URL, for example `https://myorg--dev.sandbox.my.salesforce.com`. Whatever is in your browser address bar works; TrustAI trims it to the org and shows you the host it will connect to.
-- A **Trust AI Project**. If you don't have one, start with [Your first 10 minutes in Trust AI](/tutorials/quickstart).
+- A **TrustAI Project**. If you don't have one, start with [Your first 10 minutes in TrustAI](/tutorials/quickstart).
 
 You do **not** need a consumer key, a consumer secret, a certificate, or a private key. When the admin approves, TrustAI deploys its own **External Client App** into the org and keeps the credentials server-side. TrustAI creates, names, and manages that app itself — you never see it in the connect flow.
 
@@ -181,20 +181,18 @@ On a default build the profile's live entry point is the Playground topbar; the 
 
 ### Customize environment — the rest of the connection's setup
 
-Everything a connection needs after it exists lives on its card on the **Connections** tab, behind the **Customize environment** expander. It opens the card downward in place rather than navigating away.
+Everything a connection needs after it exists lives on its card on the **Connections** tab, behind the **Customize environment** expander. It opens the card downward in place rather than navigating away, and it is the same expander on every platform — [Manage a project's connections](/how-to/manage-project-connections#customize-environment) documents what it holds.
 
-| Section | What it holds |
-| --- | --- |
-| **Test data stores** | One row per store, each opening a fly-in, plus **Add a store**. A Salesforce connection arrives with a default store — **This agent's Salesforce org** — that signs in as the agent connection itself. |
-| Reset behaviour | A sentence, not a control: *"Between tests: Removes only the records each test created."* Cleanup runs on every run and nothing offers to turn it off. |
-| **How many tests may run at once** | A number from 1 to 10, saved per connection when you leave the field or press Enter. Its helper reads *"Tests share this connection's test user; cleanup keeps runs isolated."* |
-| **Run tests as different users (permission sets)** | Salesforce only, and collapsed until you open it. Add a reusable test user per row — **Test user 1**, **Test user 2** — with **Add test user** and **Save test users**. With none added it reads **No additional test users yet**: *"Tests run as this connection's own user. Add one to run a scenario as a specific Salesforce user instead."* |
+Two parts of it are Salesforce-specific:
+
+- **A default test data store arrives with the connection** — named **This agent’s Salesforce org**, signing in as the agent connection itself, so there is nothing extra to enter. Every other platform starts with none.
+- **Run tests as different users (permission sets)** is Salesforce only. It lets a scenario run as a named Salesforce user rather than as the connection's own. See [Run tests as different users](/how-to/manage-project-connections#run-tests-as-different-users-salesforce).
 
 **Remove** on the card is scoped to this Project. Its confirmation is **Remove this agent connection?**, and it says so: *"Connections to this Salesforce org in other projects stay unchanged. The Salesforce app stays installed in your org, so you can connect it again later."* To take the org itself back out of Salesforce, use **Disconnect** on [Connected orgs](/how-to/manage-salesforce-connections).
 
 ### Traces settle after the conversation ends
 
-Salesforce publishes a conversation's execution trace on its own schedule, and Trust AI says so on screen rather than leaving you to guess:
+Salesforce publishes a conversation's execution trace on its own schedule, and TrustAI says so on screen rather than leaving you to guess:
 
 > The agent's platform has not published this conversation's execution trace yet. Traces usually land 11-13 minutes after a conversation ends.
 
@@ -202,7 +200,7 @@ Grading waits, but not forever. An evaluation result whose checks need the trace
 
 ## Where Agentforce sessions come from
 
-Agentforce sessions in Trust AI are the conversations **Trust AI drives**: simulations and evaluation runs against the live agent in your Sandbox.
+Agentforce sessions in TrustAI are the conversations **TrustAI drives**: simulations and evaluation runs against the live agent in your Sandbox.
 
 Historical import is a different thing and it is not available for Agentforce. Your connection does appear in the **Sync now** dropdown on the Sessions page, grouped under **Salesforce Agentforce** — but picking it reports that sync isn't supported for the platform and imports nothing. Pulling past production conversations works for AWS Bedrock connections only today.
 
@@ -234,11 +232,11 @@ Historical import is a different thing and it is not available for Agentforce. Y
   </Accordion>
 
   <Accordion title="An occasional run fails and the next one works">
-    A token-exchange connection can lose a race at the token bridge under concurrency. Trust AI retries only that case, because it is positively transient; every permanent configuration fault still surfaces immediately rather than being retried into a slow failure. If a failure repeats, treat it as real and re-test the connection.
+    A token-exchange connection can lose a race at the token bridge under concurrency. TrustAI retries only that case, because it is positively transient; every permanent configuration fault still surfaces immediately rather than being retried into a slow failure. If a failure repeats, treat it as real and re-test the connection.
   </Accordion>
 
   <Accordion title="Sync now reports that sync isn't supported">
-    Expected — see [Where Agentforce sessions come from](#where-agentforce-sessions-come-from). Your Agentforce sessions are the ones Trust AI creates by driving the agent.
+    Expected — see [Where Agentforce sessions come from](#where-agentforce-sessions-come-from). Your Agentforce sessions are the ones TrustAI creates by driving the agent.
   </Accordion>
 </AccordionGroup>
 

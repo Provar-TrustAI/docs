@@ -1,13 +1,13 @@
 ---
-title: "Connect an MCP client to Trust AI"
+title: "Connect an MCP client to TrustAI"
 icon: "plug"
-description: "Point Claude Code, Codex, or any MCP client at your Trust AI workspace: add the server, authenticate through your workspace sign-in, choose an access level, and confirm the connection works."
+description: "Point Claude Code, Codex, or any MCP client at your TrustAI workspace: add the server, authenticate through your workspace sign-in, choose an access level, and confirm the connection works."
 ---
 
-Trust AI is an [MCP server](/concepts/mcp-integration), so the agent you already work in can do evaluation work here directly. Connecting it is two steps and about a minute: add a URL, then approve one consent screen in your browser. There is no key to generate, nothing to paste, and no configuration screen to find.
+TrustAI is an [MCP server](/concepts/mcp-integration), so the agent you already work in can do evaluation work here directly. Connecting it is two steps and about a minute: add a URL, then approve one consent screen in your browser. There is no key to generate, nothing to paste, and no configuration screen to find.
 
 <Note>
-  **The base URL is your own workspace's address** — the same origin you sign in to Trust AI at. Every command below writes it as `<your-workspace-url>`; substitute yours. If you are not sure what it is, it is the origin in your browser's address bar when you are using Trust AI.
+  **The base URL is your own workspace's address** — the same origin you sign in to TrustAI at. Every command below writes it as `<your-workspace-url>`; substitute yours. If you are not sure what it is, it is the origin in your browser's address bar when you are using TrustAI.
 
   **The trailing slash matters.** The endpoint is `/v1/mcp/`. Without the slash the server answers with a redirect, and not every MCP client follows a redirect on a POST.
 </Note>
@@ -33,7 +33,7 @@ Trust AI is an [MCP server](/concepts/mcp-integration), so the agent you already
     codex mcp add trustai --url <your-workspace-url>/v1/mcp/
     ```
 
-    Codex does not stop after saving the server: it registers itself with Trust AI, opens your browser on the consent screen, and then waits for its own callback. So step 2 usually happens inside step 1.
+    Codex does not stop after saving the server: it registers itself with TrustAI, opens your browser on the consent screen, and then waits for its own callback. So step 2 usually happens inside step 1.
 
     If nobody completes the browser part in time, Codex gives up with a timed-out message — but **the server entry is still saved**. That is a failed sign-in, not a failed add, and step 2 is how you retry it.
   </Tab>
@@ -81,7 +81,7 @@ The consent screen names four things, and all four are worth reading before you 
 If the account it names is not yours — a shared or borrowed browser — use **Not you? Sign out** and sign back in as yourself. The same connection request is held for whoever signs in next.
 
 <Info>
-  **Not signed in? It handles that.** The consent screen needs a live Trust AI session to know who you are. If there isn't one, your browser goes through your workspace's SSO identity provider in the ordinary way and comes straight back to the same connection request. You sign in, and the consent screen is there — nothing to click in between and no second tab to find.
+  **Not signed in? It handles that.** The consent screen needs a live TrustAI session to know who you are. If there isn't one, your browser goes through your workspace's SSO identity provider in the ordinary way and comes straight back to the same connection request. You sign in, and the consent screen is there — nothing to click in between and no second tab to find.
 
   The held request lasts **10 minutes**, and signing in does not extend it. Past that you start the connection again from your client, which is all there is to it.
 </Info>
@@ -101,7 +101,7 @@ If your client asked to write without asking to read anything, the middle option
 <Warning>
   **Act mode is yours to grant and nobody else's to ask for.** A client can request read and write access; it can never request act mode, and no prompt, setting, or tool call turns it on afterwards. It exists only because you chose it here — and revoking the connection revokes it.
 
-  Act mode skips the pause before each change, and nothing else. Your project access, your workspace's tool permissions, and the guard that refuses to launch a run against a live customer org without an explicit confirmation all still apply. See [MCP integration](/concepts/mcp-integration) for what that gate does and does not cover.
+  Act mode skips the pause before each change, and nothing else. Your project access, your workspace's tool permissions, and the guard that refuses to launch a run against a live customer org without an explicit confirmation all still apply. And it is not the Trust Agent's own **Act** mode, which is one of that assistant's three in-product operating modes and still stops for every mutating write — see [Work with the Trust Agent](/how-to/work-with-the-trust-agent). See [MCP integration](/concepts/mcp-integration) for what that gate does and does not cover.
 </Warning>
 
 A read-only connection does not fail cryptically when it reaches a write. It is refused in plain words, before any approval is raised, and told how to fix it:
@@ -117,7 +117,7 @@ Changing your mind is a reconnect rather than a settings edit. In Claude Code, `
 
 Ask your client for the one call that needs nothing to hand:
 
-> Using the Trust AI MCP server, call `trustai_project` with the op `whoami` and no project id, and tell me which account and workspace it says I am.
+> Using the TrustAI MCP server, call `trustai_project` with the op `whoami` and no project id, and tell me which account and workspace it says I am.
 
 It answers with your email address, your workspace by name, and the projects you can reach. That confirms three things at once: the server is reachable, the credential works, and it is acting as you.
 
@@ -175,7 +175,7 @@ You can list what you have connected and revoke any of it: each entry shows the 
   </Accordion>
 
   <Accordion title="The browser opens on the sign-in page instead of the consent screen">
-    Expected when that browser has no live Trust AI session. Sign in and you are returned to the consent screen automatically — the connection request is held for you. Nothing to click in between.
+    Expected when that browser has no live TrustAI session. Sign in and you are returned to the consent screen automatically — the connection request is held for you. Nothing to click in between.
   </Accordion>
 
   <Accordion title="The browser lands on a page telling you to start the connection again">

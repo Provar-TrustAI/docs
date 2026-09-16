@@ -1,10 +1,10 @@
 ---
 title: "Tables and panels"
 icon: "table"
-description: "The shared interaction language of Trust AI's list surfaces — one table, one detail panel, one set of badges — learned once, used everywhere."
+description: "The shared interaction language of TrustAI's list surfaces — one table, one detail panel, one set of badges — learned once, used everywhere."
 ---
 
-Trust AI's list surfaces are built from one kit. The table you learn on [Sessions](/concepts/sessions) is the same table on [Scenarios](/concepts/scenarios) and on a run's results in [Evaluations](/concepts/evaluations); the detail panel that flies in when you click a session is the same panel on a scenario, a result, or an evaluator. This page teaches that language once — how the table, the fly-in panel, and the shared badges behave — so the per-surface pages can focus on what's *in* them.
+TrustAI's list surfaces are built from one kit. The table you learn on [Sessions](/concepts/sessions) is the same table on [Scenarios](/concepts/scenarios) and on a run's results in [Evaluations](/concepts/evaluations); the detail panel that flies in when you click a session is the same panel on a scenario, a result, or an evaluator. This page teaches that language once — how the table, the fly-in panel, and the shared badges behave — so the per-surface pages can focus on what's *in* them.
 
 ## The shared table
 
@@ -136,11 +136,13 @@ The two neutral labels are not interchangeable, and neither is ever a fabricated
 
 The pill reflects automated evaluations only. A human **Verdict** [annotation](/concepts/annotations) is a separate signal — it grades the judges and never changes the pill. While a run is still scoring, the pill shows a **Scoring…** spinner.
 
+One leg is easy to miss: an amber **Passed with caveats** covers the partial case, where some checks passed and others did not clear outright.
+
 The pill *chrome* is not universal, though the vocabulary is. A run-results table paints its **Final verdict** cell as a flat chip — a coloured dot and coloured text, no fill or border — so that a dense matrix of rows doesn't read as a wall of badges. The soft-filled pill is reserved for panel headers and single-record readouts. Same words, lighter paint.
 
 ### Source chips
 
-Every session wears a **Source** chip naming how the conversation entered the system — exactly one of **Scenario**, **Playground**, or **External**, each in its own hue so a mixed list reads at a glance. There is no fourth value.
+Every session carries a **Source** value naming how the conversation entered the system — exactly one of **Scenario**, **Playground**, or **External**, each rendered as a chip in its own hue so a mixed list reads at a glance. There is no fourth value. The chip renders wherever the value is shown: the session's **Details** tab always, and the Sessions list's **Source** column once you turn it on from **Add column**.
 
 ### Readable ids
 

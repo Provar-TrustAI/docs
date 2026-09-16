@@ -4,7 +4,7 @@ icon: "id-card"
 description: "A versioned, human-reviewable record of what one agent build could actually do — its identity, tools, and knowledge sources, captured at a moment in time."
 ---
 
-An Agent Profile answers a question that is surprisingly hard to answer about a deployed agent: **what can this thing actually do?** Not what the spec says, and not what it did on one conversation — what tools it exposes, what knowledge it draws on, how it identifies itself, and how much of that Trust AI was able to see.
+An Agent Profile answers a question that is surprisingly hard to answer about a deployed agent: **what can this thing actually do?** Not what the spec says, and not what it did on one conversation — what tools it exposes, what knowledge it draws on, how it identifies itself, and how much of that TrustAI was able to see.
 
 A profile is a **record**, not a probe. It was captured at a point in time against one build of your agent, and reading it never re-contacts the platform. That's the property that makes it reviewable: two people opening the same profile a week apart see the same thing.
 
@@ -37,7 +37,7 @@ Your own edits work the other way. A **human overlay** — the corrections and n
 
 ## Two different pins
 
-Two things in Trust AI pin themselves to something in this area, and they pin to different things:
+Two things in TrustAI pin themselves to something in this area, and they pin to different things:
 
 | What | Pins to | Why |
 |---|---|---|
@@ -70,7 +70,7 @@ One label differs by vantage point. **Profile available** is the capture lifecyc
 
 ### Coverage
 
-Each dimension a capture inspects carries a coverage level — **Captured**, **Partial**, or **Limited**. There are no percentages here, and no complete/incomplete. Coverage tells you how thoroughly Trust AI got to look, so you know how much weight the profile can bear.
+Each dimension a capture inspects carries a coverage level — **Captured**, **Partial**, or **Limited**. There are no percentages here, and no complete/incomplete. Coverage tells you how thoroughly TrustAI got to look, so you know how much weight the profile can bear.
 
 ### The four availabilities
 
@@ -101,7 +101,7 @@ Anything else, including **AWS Bedrock AgentCore**, isn't profiled. An AgentCore
 
 Salesforce Agentforce capture reads through the same admin authorization every new connection is created with, records each action's declared inputs, and reads the agent version that is actually live in the org. Where several candidate versions exist and the live one can't be identified, capture says so rather than guessing at the highest-numbered one — a profile of the wrong version would be a confident, wrong answer.
 
-A connection on a supported platform can still come back unsuccessful — an unreachable endpoint, a half-configured connector, missing credentials. Those are **Profile failed**, they carry a plain-language reason, and they *are* worth retrying.
+A connection on a supported platform can still come back unsuccessful — an unreachable endpoint, a half-configured connector, missing credentials. Those are **Profile failed**, they carry a plain-language reason, and they *are* worth retrying — the revision offers **Try capturing again**. (An AgentCore connection offers no retry at all, as above.)
 
 ## Where you find one
 

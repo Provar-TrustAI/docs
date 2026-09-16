@@ -14,7 +14,7 @@ This page is a task recipe. For what scenarios, personas, goals, and the Playgro
 
 ## Prerequisites
 
-- A **Trust AI account** with access to at least one [Project](/concepts/projects)
+- A **TrustAI account** with access to at least one [Project](/concepts/projects)
 - At least one **connected agent** on the Project (every run in this recipe drives a real agent)
 - **Personas** are optional but recommended — a scenario simulates one session per attached persona, so persona coverage is where the fan-out comes from
 
@@ -43,9 +43,9 @@ The fastest way to persona-and-goal coverage is to let the [Trust Agent](/concep
 
     Write the goal as the situation and the outcome the customer wants, not as the answer. The verdict is protected either way: a simulated customer will not state, suggest, or confirm the specific values its own goal asks it to verify, so a goal that happens to mention an order number can't be turned into a leading question the agent passes by repeating it back. Naming the answer still makes for a duller test, because the conversation stops being about whether the agent can find it.
 
-    Two shortcuts worth knowing. **Add recommended scenarios** in the page header opens a starter catalog of ten adversarial probes — one per OWASP Agentic Top 10 failure mode, grouped by category, each with a **Details** disclosure showing **What a safe agent does:** and **Graded by:**. Nothing is ticked when the modal opens, and a **Select all *N*** control sits above the list; scenarios already in the project are shown muted and can't be re-adopted. The footer is three controls, not one confirm: **Cancel**, **Add without tailoring**, and **Add & tailor to your agent**. Tailoring hands the batch to the Trust Agent to customize each check against your connected agent's real tools and rules in the background — with no agent connected it's disabled under the nudge "Connect an agent to tailor these", while plain adoption stays available. Either way the safety checks that grade each probe arrive created and attached. See [Adopt the recommended security scenarios](/how-to/adopt-recommended-security-scenarios) for that whole flow.
+    Two shortcuts worth knowing. **Add recommended scenarios** in the page header opens a starter catalog of ten adversarial probes — one per OWASP Agentic Top 10 (2026) failure mode, grouped by category, each with a **Details** disclosure showing **What a safe agent does:** and **Graded by:**. Nothing is ticked when the modal opens, and a **Select all *N*** control sits above the list; scenarios already in the project are shown muted and can't be re-adopted. The footer is a dismiss and two confirms, and they are not equivalent: **Add & tailor to your agent** (primary), **Add without tailoring**, and **Cancel**. Tailoring hands the batch to the Trust Agent to customize each check against your connected agent's real tools and rules in the background — with no agent connected it's disabled under the nudge "Connect an agent to tailor these", while plain adoption stays available. Either way the safety checks that grade each probe arrive created and attached. See [Adopt the recommended security scenarios](/how-to/adopt-recommended-security-scenarios) for that whole flow.
 
-    Separately, the **Name**, **Goal**, **Personas**, **Evaluators**, and **Verdict** cells are editable inline on the table — no modal round-trip to adjust a scenario later.
+    Separately, the **Scenario**, **User Goal**, **Personas**, **Evaluators**, and **Verdict** cells are editable inline on the table — no modal round-trip to adjust a scenario later.
 
     **You should see:** your scenario appear in the table with its own ID, personas attached, and no expected output yet.
   </Step>
@@ -179,7 +179,7 @@ Expected Output is the scenario's grading contract, and the loop is designed so 
 </Steps>
 
 <Note>
-  **Expected Output is not the only contract on a scenario.** The **Test Data** tab beside it covers the records a test needs, where Expected Output covers agent behavior. It opens with a **Default environment** strip naming the environment every run of this scenario holds, pilled **Always used** — or **Setup required**, if the project has none connected — over the promise that Trust AI acquires, runs, resets, and releases it every time. Below that sits the scenario's **plan**, as five step cards — "Create what this test needs", "Run the conversation", "Read back what the agent created", "Check what should happen", and "Clean up everything this test created". A scenario with no plan shows a **No test data yet** hero offering **Set up with AI**, where the connection can be read for a schema, and **Add manually**; **Edit plan** opens the same docked **AI** / **Form** / **JSON** drawer once a plan exists. **How this test runs** is a separate accordion holding **Runs alongside other tests (recommended)** or **Runs alone**, and **Advanced test data** keeps the record-level controls. Deleting a scenario removes its test data along with its expected-output rubric — the delete confirmation says so. Full model: [Test data](/concepts/test-data) and [Author test data for a scenario](/how-to/author-test-data-for-a-scenario).
+  **Expected Output is not the only contract on a scenario.** The **Test Data** tab beside it covers the records a test needs, where Expected Output covers agent behavior. It opens with a **Default environment** strip naming the environment every run of this scenario holds, pilled **Always used** — or **Setup required**, if the project has none connected — over the promise that TrustAI acquires, runs, resets, and releases it every time. Below that sits the scenario's **plan**, as five step cards — "Create what this test needs", "Run the conversation", "Read back what the agent created", "Check what should happen", and "Clean up everything this test created". A scenario with no plan shows a **No test data yet** hero offering **Set up with AI**, where the connection can be read for a schema, and **Add manually**; **Edit plan** opens the same docked **AI** / **Form** / **JSON** drawer once a plan exists. **How this test runs** is a separate accordion holding **Runs alongside other tests (recommended)** or **Runs alone**, and **Advanced test data** keeps the record-level controls. Deleting a scenario removes its test data along with its expected-output rubric — the delete confirmation says so. Full model: [Test data](/concepts/test-data) and [Author test data for a scenario](/how-to/author-test-data-for-a-scenario).
 </Note>
 
 ## Run and evaluate
@@ -207,7 +207,7 @@ Expected Output is the scenario's grading contract, and the loop is designed so 
       <img src="/images/simulate-run-detail-personas.png" alt="An evaluation run detail page titled 'Refund status after return · persona sweep': a stat line reading 0% pass rate with no evaluator accuracy beside it, above a Conversations passed stat of 0 captioned '0 of 3 conversations', over a results matrix with one row per persona — Frustrated regular, First-time buyer and Terse power user — each showing a transcript preview, an amber divergence hint, and Fail chips under the Final verdict, Refund timeline accuracy, Tone, Expected actions and Expected routes columns." />
     </Frame>
 
-    To grade conversations that *already happened* — synced or captured sessions, with no simulation — use the **Evaluate** action on the [Sessions](/concepts/sessions) surface instead.
+    To grade a conversation's *stored transcript* — exactly as it was recorded, with nothing sent to your agent — open that session and use **Evaluate** in its fly-in. That is a quick evaluation. The Sessions list's bulk **Evaluate** is a different thing: it replays each session's user message against the connected agent and grades the new answer. See [Evaluate captured sessions](/how-to/evaluate-sessions#evaluate-one-session).
 
     **You should see:** a **Pass rate** in the header, a **Conversations passed** stat over the matrix, one result per persona, and a **Simulated** badge on the transcripts this run produced.
   </Step>
@@ -229,7 +229,7 @@ Expected Output is the scenario's grading contract, and the loop is designed so 
   </Accordion>
 
   <Accordion title="I can't find the Simulate at eval time toggle">
-    It no longer exists on any reachable surface. A scenario run **always simulates** — one fresh conversation per attached persona. Your choice is whether to grade: **Run & evaluate** simulates and grades; **Run only** simulates without grading. To grade existing conversations instead of simulating new ones, use **Evaluate** on the Sessions surface.
+    It no longer exists on any reachable surface. A scenario run **always simulates** — one fresh conversation per attached persona. Your choice is whether to grade: **Run & evaluate** simulates and grades; **Run only** simulates without grading. To grade a conversation's stored transcript instead of simulating a new one, open that session and use **Evaluate** in its fly-in — a quick evaluation. The Sessions list's bulk **Evaluate** replays each session against the connected agent instead; see [Evaluate captured sessions](/how-to/evaluate-sessions#evaluate-one-session).
   </Accordion>
 
   <Accordion title="Simulate in the Playground only takes one persona and one goal">

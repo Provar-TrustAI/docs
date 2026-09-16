@@ -16,7 +16,7 @@ docs-plan/*.md
 .env
 
 # Playwright capture scripts
-captures/node_modules/
+captures/node_modules
 
 # Pipeline build artifacts
 pipeline/node_modules/

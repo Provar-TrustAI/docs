@@ -10,7 +10,7 @@ This page is a security and data-model concept, not a workflow. Two boundaries r
 
 ## The organization is the tenant boundary
 
-In Trust AI, an **organization** is the tenant. An organization owns many Projects, and every Project — together with all of its **[Sessions](/concepts/sessions)**, **[Scenarios](/concepts/scenarios)**, **[Evaluators](/concepts/evaluators)**, **[Evaluations](/concepts/evaluations)**, simulations, and **[Trust Agent](/concepts/trust-agent)** tasks — belongs to exactly one organization. Identity, and the organization itself, are federated through your workspace's SSO identity provider: your company's single sign-on is the source of truth for who you are and which tenant you belong to.
+In TrustAI, an **organization** is the tenant. An organization owns many Projects, and every Project — together with all of its **[Sessions](/concepts/sessions)**, **[Scenarios](/concepts/scenarios)**, **[Evaluators](/concepts/evaluators)**, **[Evaluations](/concepts/evaluations)**, simulations, and **[Trust Agent](/concepts/trust-agent)** tasks — belongs to exactly one organization. Identity, and the organization itself, are federated through your workspace's SSO identity provider: your company's single sign-on is the source of truth for who you are and which tenant you belong to.
 
 <Info>
   **Organization vs. Project — two different boundaries.** A **Project** is the *workspace* boundary: members, runtime credentials, and the artifacts under evaluation, all in one place (see **[Projects](/concepts/projects)**). An **organization** is the *tenant* boundary: the security perimeter the platform enforces so one customer's data can never reach another's. A Project lives inside exactly one organization; an organization holds many Projects.
@@ -182,7 +182,7 @@ Masking hides the value, not the fact. The UI still shows a **Configured** statu
 
 The **[Trust Agent](/concepts/trust-agent)** is not an exception to any of this — it runs inside the same tenant boundary as the rest of the platform. An agent session only ever sees and acts on the current organization's Project data, and an approved write executes only within your own organization and Project: **tenant-scoped, server-anchored, and bound to the specific approval you gave.** The agent cannot read or mutate another organization's records. Its tasks and audit log are tenant-anchored exactly like every other domain — every row carries the organization it belongs to. What differs is only the *shape* of a refusal: a chat is gated on who started it, so someone else's chat is denied **403** rather than collapsing to a not-found the way a foreign Session or Scenario id does.
 
-An external client that reaches Trust AI over **[MCP](/concepts/mcp-integration)** crosses the same boundary at its consent screen: the bearer it is issued is frozen there to the person, the account and the workspace that approved it, so a token cannot follow its owner into a different organization.
+An external client that reaches TrustAI over **[MCP](/concepts/mcp-integration)** crosses the same boundary at its consent screen: the bearer it is issued is frozen there to the person, the account and the workspace that approved it, so a token cannot follow its owner into a different organization.
 
 The behavioral side of the agent — its shells, transcript, approvals, and what "approve and execute" actually does — lives in **[Trust Agent](/concepts/trust-agent)**. This page only asserts that all of it happens inside the tenant boundary.
 
@@ -201,6 +201,6 @@ Developers who want the underlying request and response shapes can find them in 
     The in-app assistant whose writes are tenant-scoped and server-anchored — it runs inside the boundary this page describes.
   </Card>
   <Card title="Glossary" icon="book" href="/glossary">
-    Quick definitions for organization, Project, tenant, and the rest of the Trust AI vocabulary.
+    Quick definitions for organization, Project, tenant, and the rest of the TrustAI vocabulary.
   </Card>
 </CardGroup>

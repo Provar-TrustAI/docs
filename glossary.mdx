@@ -1,10 +1,10 @@
 ---
 title: "Glossary"
 icon: "book-marked"
-description: "Trust AI domain terms — what each one means, and the page that owns it."
+description: "TrustAI domain terms — what each one means, and the page that owns it."
 ---
 
-The vocabulary of Trust AI. Each entry is short on purpose: it fixes the term and points at the page that owns it. Where a term names something with its own row in the project sidebar — **Requirements**, **Scenarios**, **Sessions**, **Evaluators**, **Evaluations**, **Playground** — the card carries the icon you'll click on in product; the rest are chosen for reading, not for matching the app.
+The vocabulary of TrustAI. Each entry is short on purpose: it fixes the term and points at the page that owns it. Where a term names something with its own row in the project sidebar — **Requirements**, **Scenarios**, **Sessions**, **Evaluators**, **Evaluations**, **Playground** — the card carries the icon you'll click on in product; the rest are chosen for reading, not for matching the app.
 
 ## Core entities
 
@@ -13,7 +13,7 @@ The vocabulary of Trust AI. Each entry is short on purpose: it fixes the term an
     The top-level container for one body of evaluation work: its members, the agents it tests, and every Requirement, Session, Scenario, Evaluator, Evaluation, and Agent Version under it. Its settings strip reads **General · Connections · Members**, and the agents live on the [Connections tab](#connections) — four platforms connect today: AWS Bedrock AgentCore, Salesforce Agentforce, Claude Managed Agent, and the Conversational HTTP agent.
   </Card>
   <Card title="Session" icon="database" href="/concepts/sessions">
-    One conversation between a user and an agent — a sequence of Turns and Tool Calls, and a first-class evaluation target in its own right. Each carries a readable id that reflects where it came from: `RUN-` for a conversation Trust AI generated, `SES-` for one synced or imported from elsewhere. Both forms resolve to the same record, so an older link or transcript may quote the other prefix.
+    One conversation between a user and an agent — a sequence of Turns and Tool Calls, and a first-class evaluation target in its own right. Each carries a readable id that reflects where it came from: `RUN-` for a conversation TrustAI generated, `SES-` for one synced or imported from elsewhere. Both forms resolve to the same record, so an older link or transcript may quote the other prefix.
   </Card>
   <Card title="Annotation" icon="tag" href="/concepts/annotations">
     A human-authored signal recorded on a Session through typed annotation columns. Every project starts with three — **Verdict** (pass/fail), **Severity** (minor / major / blocker), and **Reviewer note** — and you can add your own. On the Verdict column your judgment is the ground truth that grades your automated judges through [evaluator accuracy](#running-and-scoring-evaluations); it never overrides the automated verdict.
@@ -31,10 +31,10 @@ The vocabulary of Trust AI. Each entry is short on purpose: it fixes the term an
     The deterministic **Routing match** / **Tool match** kind. **You no longer create one** — structural expectations are authored on a scenario's [Expected Output](#scenarios-and-simulation) instead, where they belong to the test case being graded. Evaluators created before the change keep working, stay editable, and keep scoring.
   </Card>
   <Card title="Evaluation" icon="chart-line" href="/concepts/evaluations">
-    A single run of one or more Evaluators, scoped to a specific Agent Version and launched from the [Evaluation Launcher](#running-and-scoring-evaluations) — against the scenarios you selected (simulated live) or against already-captured Sessions (graded as they are). The output is a scored, reviewable result per persona per scenario, or per session.
+    A single run of one or more Evaluators, scoped to a specific Agent Version and launched from the [Evaluation Launcher](#running-and-scoring-evaluations) — against the scenarios you selected (simulated live) or against already-captured Sessions (each session's user message replayed to the connected agent, and the new answer graded). Grading a stored transcript exactly as recorded is the single-session [quick evaluation](#running-and-scoring-evaluations) instead. The output is a scored, reviewable result per persona per scenario, or per session.
   </Card>
   <Card title="Agent Version" icon="git-branch" href="/concepts/agent-versions">
-    A pinned, immutable snapshot of the agent **under test** — prompt, model, tool set, deployment. Comparing two Agent Versions on the same scenarios under the same Evaluators is the core regression-testing loop. Not to be confused with the [Trust Agent](#the-trust-agent), which is your assistant inside Trust AI.
+    A named pin identifying one build of the agent **under test** — a label plus whatever connector metadata the platform supplied. The pin is by *reference*, not a frozen copy: rename a version and past runs pinned to it display the new label. It stores no prompt, model, tool schema or retrieval configuration; what a build can actually do lives in its [Agent Profile](/concepts/agent-profile). Comparing two Agent Versions on the same scenarios under the same Evaluators is the core regression-testing loop. Not to be confused with the [Trust Agent](#the-trust-agent), which is your assistant inside TrustAI.
   </Card>
   <Card title="Agent Profile" icon="id-card" href="/concepts/agent-profile">
     A versioned, human-reviewable record of what one Agent Version could actually do — its identity, the tools it exposes, and the knowledge sources it draws on, captured at a moment in time. A profile *describes* a version; it is never itself a version. Its versioned unit is the **profile revision**, and review is per-revision.
@@ -51,7 +51,7 @@ The vocabulary of Trust AI. Each entry is short on purpose: it fixes the term an
     An invocation of an agent tool inside a Turn — function name, arguments, and the returned value. A scenario's **Expected actions** assert on these.
   </Card>
   <Card title="Source" icon="signpost" href="/concepts/sessions">
-    Where a session came from — exactly one of **Scenario**, **Playground**, or **External**, shown as a chip on the Sessions list. Scenario-born sessions add a **Simulated from** provenance card.
+    Where a session came from — exactly one of **Scenario**, **Playground**, or **External**. It renders as a chip wherever the value is shown: the session's **Details** tab always, and the Sessions list's **Source** column once you turn it on from **Add column** → **Hidden columns**. Scenario-born sessions add a **Simulated from** provenance card.
   </Card>
   <Card title="Picture" icon="image" href="/concepts/playground">
     An image carried by a message, attached from the composer's **Attach images** control and rendered in the transcript bubble, where a click opens it full-window. Accepted formats are **PNG**, **JPEG**, **WebP**, or **GIF** — and while the agent under test receives the actual image, a simulated user decides from your written description alone and an LLM judge cannot see it.
@@ -63,7 +63,7 @@ The vocabulary of Trust AI. Each entry is short on purpose: it fixes the term an
 
 ## The Trust Agent
 
-The in-app assistant that does evaluation work alongside you. Everything in this section is the **Trust Agent** — your assistant inside Trust AI. It is *not* an [Agent Version](#core-entities), which is the customer's agent under test. The two share the word "agent" and nothing else.
+The in-app assistant that does evaluation work alongside you. Everything in this section is the **Trust Agent** — your assistant inside TrustAI. It is *not* an [Agent Version](#core-entities), which is the customer's agent under test. The two share the word "agent" and nothing else.
 
 <Note>
   **Trust Agent vs Agent Version.** The **Trust Agent** is the assistant that operates *on* your project — it finds Sessions, builds scenarios, and runs Evaluations for you. An **[Agent Version](/concepts/agent-versions)** is the agent *under test* — a pinned snapshot every Evaluation is scoped to. The Trust Agent helps you evaluate Agent Versions; it is never itself "a version."
@@ -98,10 +98,10 @@ The in-app assistant that does evaluation work alongside you. Everything in this
     A human-in-the-loop decision the agent surfaces as a card that replaces the composer and **halts the run** until you answer. **Permission cards** gate writes; **single-** and **multi-question cards** gather clarification. One batch of changes is approved at a single, all-or-nothing card, and the resolved decision is recorded in the transcript as an audit trail.
   </Card>
   <Card title="Standing approval" icon="shield-check" href="/how-to/approve-agent-writes">
-    The durable, chat-wide version of a write approval, granted from a card's for-this-chat option. From then on the same **kind** of write commits with no card at all, and a chip in the composer shows the grant while it is live — its **turn off** control takes it back. Three things it can never cover: deleting items, saving an agent profile, and starting an unattended full run.
+    The durable, chat-wide version of a write approval, granted from a card's for-this-chat option. From then on the same **kind** of write commits with no card at all, and a chip in the composer shows the grant while it is live — its **turn off** control takes it back. Four things it can never cover: deleting items, saving an agent profile, bulk edits or deletions to requirements you already filed, and starting an unattended full run — a capability your workspace may not have.
   </Card>
   <Card title="Write preview" icon="file-diff" href="/concepts/trust-agent">
-    The rich preview on a permission card that shows a proposed write before you approve it — the **diff**, the **dependencies**, and the **proposed end state** — not a bare ID you'd have to trust blindly. Pairs with the [Approve agent writes](/how-to/approve-agent-writes) guide.
+    The rich preview on a permission card that shows a proposed write before you approve it — the **diff**, the **dependencies**, and the **proposed end state** — not a bare ID you'd have to trust blindly. Pairs with the [Approve an agent write](/how-to/approve-agent-writes) guide.
   </Card>
   <Card title="Skill" icon="puzzle" href="/how-to/manage-trust-agent-skills">
     A reusable recipe the Trust Agent can invoke — for example, drafting an LLM judge rubric or summarizing Sessions that match a filter. **Built-in skills** ship with the product and are read-only; **workspace skills** are the ones your team writes. Both are workspace-scoped, both back the composer's **/** palette, and a transcript receipt reads **Reviewed *&lt;skill name&gt;*** beside a **Core skill** or **Workspace skill** chip.
@@ -140,10 +140,10 @@ A **scenario** — one goal-driven test case — is defined under [Core entities
 
 <CardGroup cols={2}>
   <Card title="Recommended scenarios" icon="library" href="/concepts/trust-library">
-    The starter catalog of 10 adversarial security probes — one per [OWASP Agentic Top 10](#recommended-scenarios-and-evaluators) category — so a new project never begins from a blank slate. Adopt them from **Add recommended scenarios**; each lands as an ordinary, fully editable scenario. None arrives with expected actions, test data, or reference material, so plan to give it your own before you read its verdicts as coverage.
+    The starter catalog of 10 adversarial security probes — one per [OWASP Agentic Top 10 (2026)](#recommended-scenarios-and-evaluators) category — so a new project never begins from a blank slate. Adopt them from **Add recommended scenarios**; each lands as an ordinary, fully editable scenario. None arrives with expected actions, test data, or reference material, so plan to give it your own before you read its verdicts as coverage.
   </Card>
   <Card title="Recommended evaluators" icon="list-plus" href="/concepts/evaluators">
-    The matching starter catalog of checks: **11 presets — five Quality and six Safety**, all LLM judges, adopted from **Add recommended evaluators** under a CTA that counts what you selected. Two of them are authored on a 1–5 shape with a pass cutoff of 3, but the judge is asked for pass or fail, so do not expect a graded 1–5 score on a result.
+    The matching starter catalog of checks: **11 presets — five Quality and six Safety**, all LLM judges, adopted from **Add recommended** in the Evaluators header — or the **Add recommended evaluators** hero on an empty project — under a CTA that counts what you selected. Two of them are authored on a 1–5 shape with a pass cutoff of 3, but the judge is asked for pass or fail, so do not expect a graded 1–5 score on a result.
   </Card>
   <Card title="OWASP Agentic Top 10" icon="shield-alert" href="/concepts/trust-library">
     The industry list of agent failure modes the starter security scenarios map to, one scenario per category — shown throughout the product by its friendly name (**Goal hijack**, **Tool misuse**, **Identity & privilege**, and so on), never by a framework code. Those friendly names are ours, not the standard's own titles, and a mapping is a pointer rather than a claim of coverage.
@@ -246,13 +246,13 @@ A **scenario** — one goal-driven test case — is defined under [Core entities
 
 <CardGroup cols={2}>
   <Card title="Connections tab" icon="plug" href="/how-to/manage-project-connections">
-    The one place a project's agents live — the middle tab of **General · Connections · Members** in project settings, where each agent is a card and the action is **Connect an agent**. A card answers two different questions in two vocabularies: whether setup is finished (**Connected / Setting up / Needs admin / Setup failed**) and whether Trust AI can reach it right now (**Connected / Partly reachable / Can’t reach it / Not checked yet**).
+    The one place a project's agents live — the middle tab of **General · Connections · Members** in project settings, where each agent is a card and the action is **Connect an agent**. A card answers two different questions in two vocabularies: whether setup is finished (**Connected / Setting up / Needs admin / Setup failed**) and whether TrustAI can reach it right now (**Connected / Partly reachable / Can’t reach it / Not checked yet**).
   </Card>
   <Card title="Customize environment" icon="settings-2" href="/how-to/manage-project-connections">
     The expander that extends a connection card downward in place, holding that connection's [test data stores](#test-data), its reset behaviour as a plain sentence, how many tests may run at once, and its optional test users.
   </Card>
   <Card title="Test user" icon="user-check" href="/how-to/manage-project-connections">
-    The Salesforce user a test signs in as, so a scenario can run as someone with less access than the connection itself. On a connection card the section reads **Run tests as different users (permission sets)**; the field labels **Default test user** and **Additional test users (permission sets)** belong to the legacy sign-in form, which a connection made the current way never shows.
+    The Salesforce user a test signs in as, so a scenario can run as someone with less access than the connection itself. On a connection card the section reads **Run tests as different users (permission sets)**, and inside it each row is **Test user *N***, added with **Add test user** and committed with **Save test users**. The field labels **Default test user** and **Additional test users (permission sets)** belong to the connection *edit* form — see [Projects](/concepts/projects#connecting-an-agent) for which sign-in details appear there.
   </Card>
   <Card title="Connected orgs" icon="cloud" href="/how-to/administer-workspace-access">
     The workspace-level inventory of the Salesforce organizations your workspace has authorized — the fifth of the six workspace admin tabs. It is deliberately not called "Connections": that name belongs to the project tab listing the agents one project tests. The two cross-link.
@@ -294,7 +294,7 @@ A **scenario** — one goal-driven test case — is defined under [Core entities
 
 <CardGroup cols={2}>
   <Card title="MCP server" icon="cable" href="/concepts/mcp-integration">
-    Trust AI speaks the Model Context Protocol, so an agent in your own client can author requirements, personas, scenarios and judges, launch an evaluation and adjudicate the result without opening the product. The surface is six coarse tools — `trustai_project`, `trustai_requirements`, `trustai_evaluators`, `trustai_scenarios`, `trustai_runs`, and `trustai_adjudicate` — each taking an operation name plus that operation's arguments.
+    TrustAI speaks the Model Context Protocol, so an agent in your own client can author requirements, personas, scenarios and judges, launch an evaluation and adjudicate the result without opening the product. The surface is six coarse tools — `trustai_project`, `trustai_requirements`, `trustai_evaluators`, `trustai_scenarios`, `trustai_runs`, and `trustai_adjudicate` — each taking an operation name plus that operation's arguments.
   </Card>
   <Card title="MCP consent" icon="key" href="/how-to/connect-mcp-client">
     The single screen you approve when an outside client connects: it names the app, the account and the workspace, and offers exactly three answers — **Read only**, **Read and write**, or **Read and write, act mode**. Sign-in is your workspace's SSO identity provider, and the token it issues is revocable. There is no in-app screen for managing tokens yet, and parity with the REST authoring surface is deliberately incomplete.

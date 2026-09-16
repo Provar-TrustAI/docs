@@ -6,20 +6,20 @@ description: "Runs of Evaluators across your scenarios or captured sessions, sco
 
 An Evaluation is a run: take one or more [Evaluators](/concepts/evaluators), apply them to the [scenarios](/concepts/scenarios) or [Sessions](/concepts/sessions) you select, against a specific [Agent Version](/concepts/agent-versions). The output is a scored, reviewable record per result — a verdict alongside the reasoning the Evaluator captured.
 
-An Evaluation is **the artifact regressions get caught in**. It's also the artifact every other Trust AI surface ultimately serves: Sessions exist to become scenarios and evaluation targets, Annotations exist to grade the judges, scenarios and Evaluators exist to produce Evaluations.
+An Evaluation is **the artifact regressions get caught in**. It's also the artifact every other TrustAI surface ultimately serves: Sessions exist to become scenarios and evaluation targets, Annotations exist to grade the judges, scenarios and Evaluators exist to produce Evaluations.
 
 ## What an Evaluation can grade
 
 An Evaluation targets one of two sources:
 
-- **Scenarios** — Trust AI simulates each selected scenario live against the Agent Version (via the [Project's runtime connection](/concepts/projects)). Every persona attached to a scenario is simulated and scored on its own, so one scenario with three personas produces three results.
-- **Sessions** — Trust AI grades conversations that already happened. The judges read the captured transcript; no agent is invoked and the session is never modified. Because there's no live conversation to steer, session grading uses **LLM judge** evaluators only. The result is homed on the session itself, and **Open session** in the result's overflow menu takes you back to the exact session that was graded.
+- **Scenarios** — TrustAI simulates each selected scenario live against the Agent Version (via the [Project's runtime connection](/concepts/projects)). Every persona attached to a scenario is simulated and scored on its own, so one scenario with three personas produces three results.
+- **Sessions** — TrustAI grades conversations that already happened, by **replaying** them: each session's stored user message goes back to your connected agent and the reply it gives *now* is what the judges read. The stored session is never modified. (To grade the stored transcript itself, run a [quick evaluation](#quick-evaluations) from the session's own fly-in.) Because there's no live conversation to steer, session grading uses **LLM judge** evaluators only. The result is homed on the session itself, and **Open session** in the result's overflow menu takes you back to the exact session that was graded.
 
 The second source is what makes Evaluations more than a synthetic-test tool: yesterday's real production conversations are as gradeable as your authored test cases.
 
 ## Launching a run
 
-One **Evaluation Launcher** drives every run, and every entry point leads to the same modal. It opens from at least seven places:
+One **Evaluation Launcher** drives every run, and every entry point leads to the same modal. It opens from these seven places:
 
 1. **Sessions list** — select sessions and click **Evaluate** (bulk).
 2. **A single session's panel** — **Evaluate** in the header (a quick evaluation).
@@ -37,7 +37,7 @@ A scenarios launch carries one more section below **This will run**: **Environme
 
 The run button waits on that probe. Until an environment resolves ready, the launcher won't start a scenarios run — and a scenario carrying a [test data](/concepts/test-data) plan turns the picker from a prefilled convenience into a requirement, because that plan has to be set up somewhere.
 
-A sessions launch grades transcripts that already exist, so it needs no agent and shows no Environment section at all.
+A sessions launch shows no Environment section at all — but it still needs a connected agent, because it replays each session against one.
 
 {/* ACCURACY-AUDIT-PENDING */}
 One state couldn't be reproduced on a demo project, so treat it as directional: where another run currently holds the environment you picked, the confirm button is expected to read **Queue run**, and the launch to wait for its turn rather than fail.
@@ -179,7 +179,7 @@ This is what unlocks:
 - **Re-grading without re-running** — evaluate those sessions again with different Evaluators; the judges read the transcript, no agent invocation needed.
 - **Annotating them** like any other session, which feeds the evaluator-accuracy headline.
 - **No special-case surface** — one Sessions list, filtered by Source when you want only one kind.
-- **The test-data record travels with the conversation** — each session's fly-in carries its own **Test Data** tab reporting what Trust AI set up, read back and cleaned up around that one conversation, under the heading **"What TrustAI did"**. The grade stays on the result; the tab explains how the data got there. See [Test data](/concepts/test-data).
+- **The test-data record travels with the conversation** — each session's fly-in carries its own **Test Data** tab reporting what TrustAI set up, read back and cleaned up around that one conversation, under the heading **"What TrustAI did"**. The grade stays on the result; the tab explains how the data got there. See [Test data](/concepts/test-data).
 
 ## Comparing Agent Versions
 
@@ -193,7 +193,7 @@ There is no dedicated run-vs-run comparison view in the app today; the faithful 
 
 ## Working with Evaluations
 
-You drive Evaluations from the Trust AI app, or by asking the [Trust Agent](/concepts/trust-agent). Tell the Trust Agent to evaluate your scenarios against an Agent Version — or click **New evaluation** on the Evaluations list and configure the launcher yourself. Evaluating captured sessions is launcher-driven: start it from the Sessions list or a session's panel (see [Evaluate sessions](/how-to/evaluate-sessions)). Open a run to watch progress, read results, cancel it mid-flight, or re-run it against a different Agent Version. The Trust Agent can also pull aggregate stats and slice results by persona for you.
+You drive Evaluations from the TrustAI app, or by asking the [Trust Agent](/concepts/trust-agent). Tell the Trust Agent to evaluate your scenarios against an Agent Version — or click **New evaluation** on the Evaluations list and configure the launcher yourself. Evaluating captured sessions is launcher-driven: start it from the Sessions list or a session's panel (see [Evaluate sessions](/how-to/evaluate-sessions)). Open a run to watch progress, read results, cancel it mid-flight, or re-run it against a different Agent Version. The Trust Agent can also pull aggregate stats and slice results by persona for you.
 
 Developers who want the underlying endpoints and request/response shapes can find them in the [API Reference](/api-reference).
 

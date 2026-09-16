@@ -60,7 +60,7 @@ You can ask the [Trust Agent](/concepts/trust-agent) this in chat, or ask for th
   </Step>
 
   <Step title="Make sure the connection has a store">
-    A plan needs somewhere to write. In **Project Settings → Connections**, open the agent's card, expand **Customize environment**, and check the **Test data stores** section — **Add a store** if there isn't one. A Salesforce connection can reuse the org the agent runs in, badged **Uses this agent's connection**.
+    A plan needs somewhere to write. In **Project Settings → Connections**, open the agent's card, expand **Customize environment**, and check the **Test data stores** section — **Add a store** if there isn't one. A Salesforce connection arrives with a default store named **This agent’s Salesforce org**, which signs in as the agent connection itself; a store that inherits the connection that way is badged **Uses this agent’s connection**. See [Test data stores](/how-to/manage-project-connections#test-data-stores).
 
     The same panel shows the connection's reset promise: **Between tests: Removes only the records each test created.**
   </Step>
@@ -89,11 +89,11 @@ The JSON is one flat document — the plan's steps and its expected end state as
 
 <AccordionGroup>
   <Accordion title="Set up with AI isn't offered">
-    Drafting reads your connected system for a schema, so it needs a configured environment. Without one the hero says so — "Drafting with an assistant isn't available here, so this plan is written by hand." — and offers only **Add manually**. The **Form** and **JSON** tabs work regardless; only the **AI** tab is withheld.
+    Drafting reads your connected system for a schema, so it needs a configured environment. Without one the hero says so — "Drafting with an assistant isn’t available here, so this plan is written by hand." — and offers only **Add manually**. The **Form** and **JSON** tabs work regardless; only the **AI** tab is withheld.
   </Accordion>
 
   <Accordion title="The save asks me to confirm before it will store the plan">
-    A read-back or cleanup step that reaches past the records the test itself creates is a legitimate thing to write, and Trust AI asks for agreement rather than refusing. Read the sentence — it names the step and what it would reach — then choose **Confirm and save**. **Dismiss** leaves the plan unsaved. Who agreed is stored with the plan.
+    A read-back or cleanup step that reaches past the records the test itself creates is a legitimate thing to write, and TrustAI asks for agreement rather than refusing. Read the sentence — it names the step and what it would reach — then choose **Confirm and save**. **Dismiss** leaves the plan unsaved. Who agreed is stored with the plan.
   </Accordion>
 
   <Accordion title="The plan is declined outright">

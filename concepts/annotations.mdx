@@ -4,7 +4,7 @@ icon: "tag"
 description: "Human judgment recorded in typed columns on Sessions and as verdicts on Scenarios — the ground truth that grades your automated judges."
 ---
 
-An Annotation is a piece of **human judgment** attached to a [Session](/concepts/sessions). You record it in typed **annotation columns** on the Sessions surface — a pass/fail verdict, a severity, a score, tags, or a reviewer note — and it becomes data the rest of Trust AI can use. The human **Verdict** is the ground truth every [Evaluator](/concepts/evaluators) is measured against: it grades the judges.
+An Annotation is a piece of **human judgment** attached to a [Session](/concepts/sessions). You record it in typed **annotation columns** on the Sessions surface — a pass/fail verdict, a severity, a score, tags, or a reviewer note — and it becomes data the rest of TrustAI can use. The human **Verdict** is the ground truth every [Evaluator](/concepts/evaluators) is measured against: it grades the judges.
 
 Without Annotations, Evaluator scores are unaccountable — the app can tell you what its judges decided, but not how often those judges agree with a person.
 
@@ -53,7 +53,7 @@ Annotation happens where the Sessions already are — there is no separate revie
   <img src="/images/annotations-two-places.png" alt="The Sessions table with the Verdict and Severity columns shown, and the fly-in open over it on the Annotations tab. The highlighted row RUN-000012 reads Fail and major in its table cells, while the panel shows the same Fail verdict, major severity, and a Reviewer note reading 'Promised a refund without checking the policy window.'" />
 </Frame>
 
-To work through Sessions in volume, filter the list to the slice you care about — the filter offers **Date**, **Routed To**, **Tags**, and **Turn count** — and save the configuration as a [saved view](/concepts/saved-views). To narrow by something outside that set, show the column and sort on it. Selecting multiple Sessions raises the bulk-actions bar (**Evaluate** · **Tag** · **Download**); **Tag** applies tags from a vocabulary shared across Scenarios and Sessions, with autocomplete.
+To work through Sessions in volume, filter the list to the slice you care about — the filter offers **Date**, **Routed To**, **Tags**, and **Turn count**, plus **User** where the loaded sessions carry an end-user identifier — and save the configuration as a [saved view](/concepts/saved-views). To narrow by something outside that set, show the column and sort on it. Selecting multiple Sessions raises the bulk-actions bar (**Evaluate** · **Tag** · **Download**); **Tag** applies tags from a vocabulary shared across Scenarios and Sessions, with autocomplete.
 
 ## Two verdicts, one rule
 
@@ -62,7 +62,7 @@ A Session can carry two verdicts at once, and they never overwrite each other:
 - The **automated verdict** — the pill produced by [Evaluations](/concepts/evaluations): **Pass**, **Fail**, **Not evaluated** (nothing ran), or **Not graded** (something ran but produced no behavioural score). Only automated results set it. {/* ACCURACY-AUDIT-PENDING */} On a run's own results there is a fifth, amber state — **Couldn't test**, where an action the agent itself runs returned an error. It leaves the pass-rate denominator like the neutrals do, but it is attributed to the agent under test rather than to the environment, so it never carries the grey "not the agent's fault" reading. Back on the Session, a run that ended that way shows as **Not graded**.
 - The **human Verdict annotation** — your Pass / Fail judgment in the Verdict column.
 
-The rule: **your Verdict annotation grades the judges — it never overwrites the automated verdict.** When a Session carries both, Trust AI compares them, and the agreement rate surfaces as the **Evaluator accuracy** headline on evaluation results. A Session where the two disagree is exactly the signal worth investigating: either the agent's behavior is subtle, or the Evaluator's rubric needs work.
+The rule: **your Verdict annotation grades the judges — it never overwrites the automated verdict.** When a Session carries both, TrustAI compares them, and the agreement rate surfaces as the **Evaluator accuracy** headline on evaluation results. A Session where the two disagree is exactly the signal worth investigating: either the agent's behavior is subtle, or the Evaluator's rubric needs work.
 
 ### The one place human judgment does change a score
 
@@ -119,7 +119,7 @@ All three close the loop described in [the evaluation loop](/concepts/evaluation
 
 ## Working with Annotations
 
-Annotating is one of the few genuinely hands-on tasks in Trust AI — the judgment is the point, so no agent does it for you. You can ask the [Trust Agent](/concepts/trust-agent) to find the Sessions worth reviewing ("which sessions from this week have no verdict yet?"), then grade them yourself inline or in the fly-in.
+Annotating is one of the few genuinely hands-on tasks in TrustAI — the judgment is the point, so no agent does it for you. You can ask the [Trust Agent](/concepts/trust-agent) to find the Sessions worth reviewing ("which sessions from this week have no verdict yet?"), then grade them yourself inline or in the fly-in.
 
 For reading or writing annotation columns and values programmatically, the endpoint details live in the [API Reference](/api-reference).
 

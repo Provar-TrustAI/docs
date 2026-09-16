@@ -10,7 +10,7 @@ This page is about that conversation: what to ask for, what comes back on the ap
 
 ## Before you ask: this step is gated
 
-Expected output is step 5 of the authoring workflow the Trust Agent enforces, and the enforcement is a run-time refusal, not a nudge. Ask for it on a project that hasn't been through the earlier steps and nothing is written — the agent tells you what is missing and offers to fix it first:
+Expected output is step 5 of the authoring workflow the Trust Agent enforces, and the enforcement is a run-time refusal, not a nudge. Ask for it on a project that hasn't been through the earlier steps and nothing is written — the agent tells you what is missing and offers to fix it first. The wording below is the recovery text the refusal hands the agent; what you read in the chat is the agent's own paraphrase of it, so expect the sense rather than the sentence:
 
 | The project is missing | What the agent says |
 |---|---|
@@ -21,7 +21,7 @@ Expected output is step 5 of the authoring workflow the Trust Agent enforces, an
 
 So the order that gets you here is: connect an agent → [capture requirements](/how-to/capture-requirements) → [scenarios linked to them](/how-to/simulate-with-scenarios) → an evaluator per requirement, created **and** attached. Say yes when the agent offers to walk you through a missing step; it is the same conversation, not a detour. With no agent connected at all, most authoring is refused a step earlier still — *"Connect an agent before creating tests or running them. I can help you connect one now."*
 
-The rest of this page assumes you are past that gate.
+The rest of this page assumes you are past that gate. Note that expected output is not the last one: simulating a scenario or launching a run is refused until each linked scenario carries **expected actions or routes**, which is what you are about to write.
 
 <Note>
   **What a write replaces, and what it leaves alone.** Setting expected output replaces the scenario's **expected actions and routes** wholesale — that half is not a merge. Its **attached evaluators are a different matter**: a write that doesn't mention them leaves them attached, and only a write that names evaluators explicitly changes which ones grade the scenario. An actions-only write no longer clears a scenario's graders, and the approval card says so in as many words: *"This updates the scenario's expected actions and routes; its current checks stay attached."*
@@ -202,7 +202,7 @@ The check runs **before an approval card ever renders**. A rubric carrying one o
 
 The rejection is built to be repaired rather than reported. It names the category of the problem, quotes back the exact text that tripped it, and carries a concrete fix — for a response-format block, *"Delete the response/output/verdict format section. The platform owns the judge's output shape; the rubric only describes what makes a reply good or bad."* The agent is instructed to use that to revise and re-save, and never to claim an evaluator was created after an error. So the usual outcome is a corrected rubric on the next turn; if it does come back to you, it should name the offending line rather than asking you to guess.
 
-Note the scope: this rule governs rubrics the **Trust Agent** writes. Authoring a judge by hand in the Evaluators editor is not policed the same way, so the discipline there is yours — [Write grading rules that calibrate](/how-to/write-llm-judge-prompt) is the guide.
+Note the scope: this rule governs rubrics the **Trust Agent** writes. Authoring a judge by hand in the Evaluators editor is not policed the same way, so the discipline there is yours — [Write grading rules and judge prompts](/how-to/write-llm-judge-prompt) is the guide.
 
 ## Check the result on the Expected Output tab
 
@@ -263,7 +263,7 @@ The action and route pickers suggest values observed across the project's sessio
   <Card title="Simulate agents with scenarios" icon="users" href="/how-to/simulate-with-scenarios">
     Define a scenario, run it, and set expected output from a session you like.
   </Card>
-  <Card title="Write grading rules that calibrate" icon="ruler" href="/how-to/write-llm-judge-prompt">
+  <Card title="Write grading rules and judge prompts" icon="ruler" href="/how-to/write-llm-judge-prompt">
     Authoring judge rules by hand, and the anti-patterns that don't calibrate.
   </Card>
   <Card title="Calibrate an evaluator" icon="target" href="/how-to/calibrate-an-evaluator">
