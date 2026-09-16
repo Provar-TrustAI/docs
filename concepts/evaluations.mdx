@@ -22,24 +22,50 @@ The second source is what makes Evaluations more than a synthetic-test tool: yes
 One **Evaluation Launcher** drives every run, and every entry point leads to the same modal. It opens from at least seven places:
 
 1. **Sessions list** — select sessions and click **Evaluate** (bulk).
-2. **A single session's panel** — **Evaluate** in the header (one-off).
+2. **A single session's panel** — **Evaluate** in the header (a quick evaluation).
 3. **Scenarios list** — select scenarios and use the **Run** split button (**Run & evaluate**, or **Run only** to simulate without grading).
-4. **A single scenario's fly-in** (one-off).
+4. **A single scenario's fly-in**.
 5. **Evaluations list** — click **New evaluation** and pick the source yourself.
 6. **A finished run's detail page** — **Re-run**.
 7. **An Evaluator's panel** — evaluate with the judge you're looking at.
 
 Nothing is enqueued by any of those clicks. They open the launcher; the run starts when you confirm inside it. However you arrive, the launcher shows a **fan-out preview** — exactly what will run, including the per-persona expansion for scenarios — before you commit.
 
-## One-off evaluation in place
+### The Environment step
 
-You don't need a named run to answer "does this one pass?". Evaluating a single scenario or session grades it in place: the verdict lands directly on the item, and no run is added to the Evaluations list. Bulk runs are for measurement; one-off evaluation is for the quick check while you're already looking at the thing.
+A scenarios launch carries one more section below **This will run**: **Environment**, marked with a **New** pill. Its own line says what it selects — *"Selects the connected org or test data store, test identity, and cleanup used for this run."* You rarely start from nothing: the launcher preselects the first environment attached to the agent you chose and probes it in place, settling on **Ready to run** (or **Ready to run with limited trace data**) above a short list of what it checked — that the agent is active and ready, that the environment is available now, which test data store the run will use, and the cleanup promise **"Between tests: Removes only the records each test created."**
+
+The run button waits on that probe. Until an environment resolves ready, the launcher won't start a scenarios run — and a scenario carrying a [test data](/concepts/test-data) plan turns the picker from a prefilled convenience into a requirement, because that plan has to be set up somewhere.
+
+A sessions launch grades transcripts that already exist, so it needs no agent and shows no Environment section at all.
+
+{/* ACCURACY-AUDIT-PENDING */}
+One state couldn't be reproduced on a demo project, so treat it as directional: where another run currently holds the environment you picked, the confirm button is expected to read **Queue run**, and the launch to wait for its turn rather than fail.
+
+## Quick evaluations
+
+You don't need a named run to answer "does this one pass?". **Evaluate** on a single session grades it in place and the verdict lands on the session itself. Bulk runs are for measurement; a **quick evaluation** is for the check you want while you're already looking at the thing.
+
+It still mints no run — but it is no longer invisible. While the judges work, the session's **Evaluations** tab carries a status chip reading **Queued** and then **Running**, with a caption counting the checks off — *"Scoring check 2 of 3…"*. Progress is tracked on the server rather than in your tab, so it survives a reload and a colleague watching the same session sees the same count. A **Quick evaluation started** toast confirms the launch and a **Quick evaluation finished** toast closes it out, carrying a **View** action.
+
+When it finishes, the Evaluations page lists it as a row named **Quick evaluation** with a muted **Quick** pill beside the name. Clicking that row opens the conversation it graded rather than a run-detail page — there is no run behind it to open — and for the same reason the row carries no **Cancel** and no **Delete run**. Grade the same session again and the new verdict replaces the old one in a single step: the session never holds two, and never sits without one.
+
+Grading a single scenario from its own fly-in takes the same path: it simulates one conversation, grades it, and mints no run either.
+
+One limit is worth knowing: the sidebar's **Evaluations** count still counts full runs only, so a project with one run and one quick evaluation reads **1** in the rail and lists two rows on the page.
 
 ## The run lifecycle
 
 - **Launched** — the run records a snapshot of your scenarios as they were at launch, so a finished run stays reproducible even after you edit or delete scenarios later.
 - **In progress** — results fill in as they complete. If you launched a bulk run from the Scenarios list, you stay on the list and watch each scenario's live **Generating…** badge settle as it finishes. You can open the run and watch results arrive, or click **Cancel run** — the run stops at a clean boundary and keeps every result already scored.
-- **Complete** — every result has settled. That doesn't guarantee a number: a run whose results carry no behavioural score — because no behavioural evaluator was attached, or because every result was excluded — completes with its pass-rate headline reading **Not graded** rather than a percentage. A complete run and a graded run are not the same thing.
+- **Complete** — every result has settled. That doesn't guarantee a number, and where there is no number the header says *which* kind of ungraded it is rather than leaving you to guess:
+  - **Run only — nothing was graded** — you deliberately simulated without grading.
+  - **Not graded — no evaluators** — the run asked to be graded but inherited none, so there was nothing to grade with.
+  - **Not graded** — the residual case, including runs recorded before that distinction shipped, which keep the neutral wording rather than claiming an intent their record can't evidence.
+
+  A complete run and a graded run are not the same thing.
+
+One caveat on "complete": a Salesforce run's score can still move afterwards. Where the platform publishes a conversation's full activity records late, those conversations are re-checked once the evidence lands, and the run carries the notice **"Results were updated after trace review"** so a shifted pass rate reads as a review rather than a bug.
 
 Finished runs offer **Export** (download the results as CSV) and a primary **Re-run**; the **…** menu offers **Delete run**, which removes the run from your lists without destroying the sessions it produced.
 
@@ -62,7 +88,9 @@ This is the honest number for a non-deterministic agent. One that passes 87% of 
 
 Raising the repeat count multiplies the work — but read the launcher's fan-out preview carefully, because it doesn't say so. The preview counts **one attempt**: "*10 sessions × 2 evaluators → 20 evaluator runs*" reads the same at a repeat of 1 as at a repeat of 4. Multiply it yourself. At 3 repeats, that 20 is really 60.
 
-<video controls muted playsInline className="w-full rounded-xl" src="/images/demos/d4-launcher-fanout.mp4"></video>
+<Frame caption="The launcher's fan-out preview on the Sessions branch. Recorded before the environment step was added, so the modal here is one section short of what a scenarios launch shows today.">
+  <video controls muted playsInline className="w-full rounded-xl" src="/images/demos/d4-launcher-fanout.mp4"></video>
+</Frame>
 
 <Note>
   Picking sessions rather than scenarios grades captured conversations in place. The same selector and the same preview appear on the Scenarios branch, where the middle number becomes simulated conversations — one per attached persona.
@@ -72,6 +100,8 @@ Raising the repeat count multiplies the work — but read the launcher's fan-out
 
 Run detail opens **By scenario**. Its top-level rows are one summary per scenario, each carrying a rollup verdict and a passed-of-total reliability figure — `2/3` when two of three attempts passed. Click a summary to expand it and see the individual attempts, labelled **Trial 1**, **Trial 2**, and so on. Clicking a summary row expands it; it doesn't open a panel, because there's no single record behind it.
 
+A collapsed summary row aggregates its children rather than standing in for one of them. In every evaluator column — and in each structural-check column — the summary cell reads `2/3 passed`, with a muted **N not scored** line beneath it when some trials were excluded. Trials that left the score are dropped from the ratio, never counted as failures, and a summary whose trials produced no pass or fail at all leaves the cell empty — announced to a screen reader as **Not scored** — rather than inventing a zero.
+
 Click a trial and the result fly-in opens. Where a scenario has more than one attempt, the panel header grows a **Trial N of K** switcher so you can step between that scenario's attempts without going back to the table.
 
 The **View** toggle at the top of the column menu switches to **Flat**, where every row is one result and the grouping is gone. Use Flat when you want to sort or scan across scenarios rather than within them.
@@ -80,7 +110,7 @@ Because every attached persona is scored separately, divergence between personas
 
 ### Verdict states
 
-A result's verdict is **Pass**, **Fail**, or one of **two** distinct neutral labels — and the difference between the neutrals is the useful part:
+A result's verdict is **Pass**, **Fail**, or one of three reads that are neither — and the differences between those three are the useful part:
 
 | Verdict | Means |
 |---|---|
@@ -88,36 +118,57 @@ A result's verdict is **Pass**, **Fail**, or one of **two** distinct neutral lab
 | **Fail** | At least one gating evaluation failed |
 | **Not evaluated** | Nothing ran against it |
 | **Not graded** | Something ran, but produced no behavioural score |
+| **Couldn't test** | An action the agent itself runs returned an error, so there was no behaviour left to grade |
 
-Neither neutral is silently a pass or a fail. **Not graded** is the one worth opening: there's a result behind it, it just didn't yield a gradeable outcome — often because the run was excluded for one of the reasons below.
+None of the three is silently a pass or a fail. **Not graded** and **Couldn't test** are the ones worth opening, because there is a result behind each. They differ in tone as well as meaning: **Not graded** reads in the same calm grey as the rest of the table, while **Couldn't test** reads amber, because it points at something in the agent's own stack rather than in the rig around it. While a run is still scoring, the cell reads **Scoring…**.
+
+A summary row over mixed trials gets one more read. Where some of its trials couldn't be tested and every trial that *was* scored passed, the chip reads **Pass among scored**, with an amber **N couldn't test** caption beside the ratio — a pass rate that tells you what it is a pass rate *of*.
 
 One more state exists a level down. An individual check can come back **Needs review** when the judge was uncertain. A needs-review check never gates: it is recorded and shown, but it can't flip the result's outcome or push a sibling evaluator's verdict out of the count. On a **Groundedness** check specifically, adjudicating the uncertain claims (see [Annotations](/concepts/annotations)) can resolve the needs-review and let the check gate normally — adjudication is scoped to Groundedness and exists nowhere else.
 
-## When it's not the agent's fault
+## When a result leaves the score
 
-Not every non-pass means the agent got something wrong, and the results no longer pretend otherwise:
+Not every non-pass means the agent got something wrong, and the results no longer pretend otherwise. **Five outcomes leave the pass-rate denominator, and only four of them are the environment's fault.** Leaving the score and being blamed for it are separate questions, and the product keeps them apart:
 
-**Four** distinct situations are excluded from the pass-rate denominator, under three labels:
+| Label | When | Reads |
+|---|---|---|
+| **Guardrail blocked** | A runtime content guardrail suppressed the response before the agent could answer | Grey |
+| **Environment problem** | The supporting infrastructure failed — a gateway or network error, or a timeout — before the agent could answer | Grey |
+| **Environment problem** | The evaluation harness itself errored before it could score the conversation | Grey |
+| **Access blocked** | The platform authenticated the run but refused the selected test user | Grey |
+| **Couldn't test** | An action the agent itself runs — a Flow, an Apex class, an API automation — returned an error, so the behaviour under test never happened | Amber |
 
-| Label | When |
-|---|---|
-| **Guardrail blocked** | A runtime content guardrail suppressed the response before the agent could answer |
-| **Environment problem** | The supporting infrastructure failed — a gateway or network error, or a timeout — before the agent could answer |
-| **Environment problem** | The evaluation harness itself errored before it could score the session |
-| **Access blocked** | The platform authenticated the run but refused the selected execution identity |
+**The first four are the environment's fault**, and only they carry that framing. Each gets its own plain-language explanation rather than one generic guardrail line, because "the network timed out" and "a guardrail fired" are different problems for you to act on. Open one of those results and the banner is headed by its own label — **Guardrail blocked**, **Environment problem**, or **Access blocked**. The per-persona matrix is the one place the three collapse: an excluded row there reads the single neutral keystone **Environment problem — not the agent · Excluded from the score**. All four render neutral in both places, and never a red Fail. The agent never got a fair shot at any of them, so the result is neither a pass nor a fail.
 
-Each gets its own plain-language explanation rather than one generic guardrail line, because "the network timed out" and "a guardrail fired" are different problems for you to act on. Open the result and the banner is headed by that result's own label — **Guardrail blocked**, **Environment problem**, or **Access blocked**. The per-persona matrix is the one place the three collapse: an excluded row there reads the single neutral keystone **Environment problem — not the agent · Excluded from the score**. All four render neutral in both places, and never a red Fail. The agent never got a fair shot, so the result is neither a pass nor a fail.
+**Couldn't test is the fifth, and none of that framing reaches it.** The action that failed belongs to the agent's own stack, not to the rig around it, so the banner reads amber and says only what happened: *"Not scored because an action the agent runs returned an error."* It leaves the denominator for a different reason — a pass would claim that behaviour which never ran succeeded, and a fail would grade behaviour that never ran — not because anyone is off the hook. Read it as a finding about the agent, not as an environment excuse.
+
+Voiding is asymmetric either way: only a would-be pass is voided. A conversation a judge had already failed keeps its verdict, annotated as degraded.
 
 The pipeline also defends itself before classifying anything as an environment problem: model-capacity throttling is retried automatically with backoff, one bad result can't fail the whole run, and judge calls run in parallel within a safe bound. A capacity hiccup at 2 a.m. can no longer masquerade as a drop in agent quality.
+
+### Reading a run's health
+
+Three words carry the whole reliability story on these screens, and nothing else is coined for it:
+
+- **Couldn't test** — an action the agent runs failed, so this conversation could not be scored.
+- **Not scored** — what follows from that, said about the conversation itself. The one-line summary is *"Not scored because an action the agent runs returned an error."*
+- **Unverified** — the trace evidence for this conversation is still pending, or never arrived. An unverified conversation **stays in the run** and is not treated as an action failure.
+
+Where a run couldn't test anything, Run Detail carries an amber strip above the results, titled **Couldn't test some conversations**, with the counts beneath it — `3 couldn't test · 1 unverified` — and a **See details** action. That opens **What happened in this run**, which says how many of how many conversations couldn't be tested, why grading them would have been vacuous, and that each one stays visible with the failed step marked in its transcript. Where the run tested more than two conversations at once, the dialog names that load as a possible cause; above three, it offers **Re-run at concurrency 3** so you can find out whether the failures persist.
+
+The Evaluations list carries the same signal one level up: an amber **N couldn't test** sits beside that run's **Overall pass rate**, so a green rate never renders uncaveated.
 
 ## What's in an Evaluation result
 
 Open any result to see:
 
-- **Transcript** — the full conversation, labeled **Simulated** (the run drove a live conversation) or **Replayed** (the judges graded a captured session).
+- **Transcript** — the full conversation, labeled **Simulated** (the run drove a live conversation) or **Replayed** (the judges graded a captured session). A simulated conversation closes with one plain-English line led by **"This conversation ended because "** — the customer got what they needed, the agent could not help with it, the customer gave up, the agent ended or transferred it, or it reached the length limit before finishing. Where the simulated customer explained itself, its own words follow underneath. A conversation with no recorded ending shows no line at all, so don't rely on one being there.
 - **Final verdict** — the result's verdict, with per-Evaluator score cards beneath it.
 - **Reasoning** — what you get depends on the kind of evaluator. An **LLM judge** shows the rubric reasoning behind its score. A **Structured match** shows the assertion that fired, or didn't. An **Outcome grounded** evaluator compares the backend state the run left behind against the expected end state. The **Groundedness judge** doesn't produce rubric reasoning at all — it produces a claim-by-claim report of what the agent asserted and whether the source material supports it.
+- **End state** — a tab of its own, sitting between **Evaluation** and **Metadata**, on results the run actually graded on end state. It compares what the agent should have left behind against what it did leave behind, and links back to the scenario's plan with **View the test data plan**. The run's results table carries a matching **End state** column, present only when at least one result graded on end state; its absence on a transcript-graded run is correct, not a missing column. See [Test data](/concepts/test-data).
 - **Open session** — in the header's **⋯** menu, alongside **Open scenario**. Both jump to the record behind the result, and each appears only when it resolves.
+
+**An LLM judge reads the whole conversation, not just the closing reply.** Every agent turn is in scope: a criterion violated on any turn fails the conversation for that criterion even if a later turn puts it right, and the reasoning cites the turn that broke it. The judge is also held to the transcript in front of it — it is told the transcript is complete, and must not infer turns, tool calls, or results that aren't shown. If you wrote a rubric against "the final answer", expect it to grade a multi-turn conversation differently than it used to.
 
 ## Evaluation results are Sessions, too
 
@@ -128,6 +179,7 @@ This is what unlocks:
 - **Re-grading without re-running** — evaluate those sessions again with different Evaluators; the judges read the transcript, no agent invocation needed.
 - **Annotating them** like any other session, which feeds the evaluator-accuracy headline.
 - **No special-case surface** — one Sessions list, filtered by Source when you want only one kind.
+- **The test-data record travels with the conversation** — each session's fly-in carries its own **Test Data** tab reporting what Trust AI set up, read back and cleaned up around that one conversation, under the heading **"What TrustAI did"**. The grade stays on the result; the tab explains how the data got there. See [Test data](/concepts/test-data).
 
 ## Comparing Agent Versions
 
