@@ -1,0 +1,195 @@
+---
+title: "Adopt the recommended security scenarios"
+icon: "shield-check"
+description: "Add the OWASP Agentic Top 10 scenarios to a project, tailor them to your connected agent, and run them."
+---
+
+This how-to takes a project from no adversarial coverage to graded security results. You will open the recommended-scenarios catalog, read an entry before you commit to it, add the ones you want, decide whether to tailor them to your own agent, and read the run that comes out.
+
+After working through it:
+
+- You can add any or all of the ten recommended probes to a project in one move, with their safety checks created and attached
+- You can tell **Add without tailoring** from **Add & tailor to your agent**, and know which one your project is ready for
+- You can follow a background tailoring run, read the states it can land in, and re-adopt without creating duplicates
+
+For what the catalog *is* — the ten probes, what they do and do not cover, and why the names are ours rather than the standard's — read [Recommended scenarios](/concepts/trust-library) first.
+
+## Prerequisites
+
+- A **TrustAI account** with access to the [project](/concepts/projects) you are adding to, and permission to create scenarios in it — adopting writes to the project
+- Adding scenarios needs nothing else. **Tailoring** needs a **connected agent with a captured [agent profile](/concepts/agent-profile)** on that project
+- Running the probes afterwards needs a connected agent, because every run drives a real one
+
+## Start by asking the Trust Agent
+
+The [Trust Agent](/concepts/trust-agent) knows this job and will route you to the right door, so ask it before you go hunting for a button.
+
+<Note>
+  *Ask the Trust Agent:* "How could someone break my agent? I have no security coverage yet."
+
+  It offers the fast door first — the recommended catalog described here — and points you at **Add recommended scenarios** on the **Scenarios** page. Adopting itself is a UI gesture: there is no chat command that adds the catalog for you.
+
+  The agent's second door is custom probes: ask it to *"generate adversarial scenarios for my agent"* and it drafts probes worded for your own policies, pausing for approval before it writes. With an agent connected it aims them at that agent's real capabilities rather than at a category. Most teams do both — adopt the ten for breadth, then generate a few for the riskiest part of their own agent.
+</Note>
+
+## Add the scenarios
+
+<Steps>
+  <Step title="Open the catalog">
+    Open **Scenarios** on your project and click **Add recommended scenarios** in the page header — it sits between **Manage personas** and the **Run** split-button.
+
+    On a project with nothing in it yet, the same action is the primary button in the empty state under **No scenarios yet**, beside **New scenario**.
+
+    The modal opens over the catalog, which is fetched the first time you open it. If it cannot load you get "Couldn't load the recommended scenarios." and a **Retry** button rather than an empty list.
+
+    **You should see:** a dialog titled **Add recommended scenarios**, ten entries grouped under uppercase category headings running **GOAL HIJACK** through **OFF-MISSION DRIFT**, and nothing ticked.
+  </Step>
+
+  <Step title="Read an entry before you take it">
+    Each entry is one scannable line: a checkbox, the scenario's name, a chip carrying its category, and the user goal that drives the simulation.
+
+    Click **Details** on an entry to expand the two things that decide whether you want it:
+
+    - **What a safe agent does:** — the behavior the probe is looking for, in prose. This is the guidance that lands on the adopted scenario.
+    - **Graded by:** — the three safety checks that will score the conversations it produces.
+
+    **Hide details** collapses it again. Expand a few before you select: two probes that look similar at the name level often pair with different checks.
+
+    <Frame caption="Goal hijack expanded: the probe's goal, then What a safe agent does and Graded by under Details. The chip reads the category, never the standard's code.">
+      <img src="/images/scenarios-recommended-modal.png" alt="The Add recommended scenarios dialog. Under the heading GOAL HIJACK, the entry 'User pastes hidden instructions to hijack the agent' is expanded, showing What a safe agent does and Graded by: Resists prompt injection, Stays within scope, No unauthorized commitments. A Select all control sits above the list, and the footer carries Cancel, Add without tailoring and a disabled Add & tailor to your agent with the note Connect an agent to tailor these." />
+    </Frame>
+
+    **You should see:** the disclosure flip to **Hide details**, and both **What a safe agent does:** and **Graded by:** appear under the entry.
+  </Step>
+
+  <Step title="Pick what you want">
+    Tick entries individually, or use **Select all *N*** above the list to take everything selectable in one click — on a project that has adopted none of them, that is all ten. Once they are all on the control reads **Deselect all** and clears the selection, so it is its own undo.
+
+    Entries already in your project render muted and cannot be ticked. They carry an **In your project** pill, and **Select all *N*** never counts them, so *N* falls as you adopt more of the catalog over time. A muted entry shows its full description instead of the **Details** toggle, so there is nothing to expand on one you already hold.
+
+    Both confirm actions stay disabled until you have selected at least one entry.
+
+    **You should see:** *N* in the select-all label matching the number of selectable entries — not the size of the catalog — once some are already adopted.
+  </Step>
+
+  <Step title="Choose how to add them">
+    The footer offers a dismiss and two confirms, and they are not equivalent:
+
+    - **Add without tailoring** copies the probes exactly as the catalog ships them. Immediate, and it works on any project.
+    - **Add & tailor to your agent** does the same copy, then starts a background run that customizes the grading to your own agent. It needs a connected agent.
+
+    Pick **Add without tailoring** when you have no agent connected yet, when you want the scenarios on the list before you decide anything, or when you intend to edit the grading yourself. Pick **Add & tailor to your agent** when the project has a real agent connected and profiled, because two of the attached checks — **Stays within scope** and **No unauthorized commitments** — judge against what *your* agent is allowed to do, and grade against a blank until something tells them.
+
+    With no connected agent the tailoring action is visible but disabled, under the nudge **Connect an agent to tailor these**. Adoption itself never blocks on it; **Add without tailoring** stays available. If a build is connected but its profile has not been captured, the action is offered and the kickoff refuses with the server's own sentence: "Connect an agent to tailor these scenarios. Tailoring grounds each scenario in your agent's own tools and knowledge, so it needs a connected agent with a captured profile first."
+
+    **You should see:** the modal close, the Scenarios list refresh with your new entries, and a confirmation toast.
+  </Step>
+
+  <Step title="Read the confirmation">
+    The toast reports what actually happened rather than a generic success. Its title counts what landed — **Added *N* scenarios** — and its description adds only the sentences that apply:
+
+    - **"Graded by *N* checks."** — the checks your new scenarios are attached to, counted once across the batch. Two probes sharing a judge share one check, which is why adopting all ten creates six checks and not thirty.
+    - **"*N* of them need tailoring to your agent before they grade honestly."** — how many of those checks are the agent-relative ones. This is the sentence that tells you tailoring is not optional polish.
+    - **"*N* were already in your project."** and a note about entries no longer in the catalog, when either applies.
+
+    A batch where nothing landed is titled **No new scenarios added** and is not delivered under success chrome.
+
+    **You should see:** the new scenarios on the list with `SCN` ids and checks in their **Evaluators** cell, and **Expected routes** and **Expected actions** still empty — the catalog ships no assertions, and that deferral is the loop working.
+  </Step>
+</Steps>
+
+## Follow the tailoring run
+
+If you chose **Add & tailor to your agent**, adoption has already finished and settled. What follows is separate, runs unattended, and cannot undo it.
+
+<Steps>
+  <Step title="Open the chat from the toast">
+    A second toast reads **Tailoring started** — "Trust Agent is exploring your agent and customizing each check. This runs in the background." It does not auto-dismiss, because the job outlives the moment. Click **Open chat** on it to land in the Trust Agent conversation running the job.
+
+    That conversation is named **Tailor security coverage** and appears in the recent-chats rail like any other chat, so closing the toast does not lose it.
+
+    **You should see:** a Trust Agent conversation titled **Tailor security coverage**, filling in turn by turn.
+  </Step>
+
+  <Step title="Watch it work through the categories">
+    The run takes the adopted categories one per turn, in catalog order, in that single conversation. For each one it reads what your agent actually does and the check already attached, then picks among three moves:
+
+    - **Keep** the attached check, where the failure is one any agent should refuse — obeying hidden instructions, leaking its own instructions, turning abusive. A generic judge grades those correctly and a tailored one would add nothing.
+    - **Tailor** the check, writing criteria grounded in a real rule or limit your agent has that the stock check could not know.
+    - **Add expected and disallowed actions**, pinning the scenario's action contract to capabilities your agent genuinely has. The adopted check stays attached alongside it.
+
+    The moves compose, and it is told not to force a tailored check or an action contract where neither improves on what is already there. What you watch is the conversation itself: there is no progress bar or per-category status panel to open.
+
+    **You should see:** one turn per category, each closing with that scenario's grading contract — including the categories where the decision was to keep the check already attached.
+  </Step>
+
+  <Step title="Read the states a category can land in">
+    Outcomes are reported in plain words, and they are deliberately not collapsed into pass or fail:
+
+    <div style={{ overflowX: "auto" }}>
+
+    | State | What it means |
+    | --- | --- |
+    | **Grounded** | A grading contract landed — a tailored check committed, an action contract pinned, or the attached check re-affirmed as sufficient |
+    | **Needs approval** | The run tried to shape this category's grading but the write needed a human, so it recorded it and moved on. Nothing was lost |
+    | **Not tailored** | The turn ran and landed nothing. The scenario keeps the generic check it was adopted with |
+    | **Failed** | The turn hit an error and stopped — a provider outage, a dropped connection |
+    | **Working** / **Pending** | The category being worked on now, and the ones still queued |
+    | **Not applicable** | Nothing to ground here: the category is outside this run's scope, or has no adopted scenario |
+
+    </div>
+
+    **Failed never reads as grounded.** A provider outage is not a tailoring decision, and a run that lost categories is not marked complete. If a category comes back failed, adopt-and-tailor again once the outage clears.
+
+    {/* ACCURACY-AUDIT-PENDING */}
+    For **Needs approval**, the run's writes are pre-authorized only for the scenarios it was started on. A change that falls outside that scope should be recorded rather than driven, and reviewing it in the **Tailor security coverage** conversation is where you would expect to pick it up.
+  </Step>
+</Steps>
+
+<Warning>
+  **One tailoring run per project, and its list is fixed when it starts.** Click **Add & tailor to your agent** while a run is working and you join the run already going — you do not start a second one. The toast says so rather than claiming a start: **A tailoring run is already in progress**, with "Your scenarios were added. A run that started earlier is still working through this project’s checks — open its chat to follow along."
+
+  When the live run cannot take on what you just added, the same toast names the shortfall: "A run that started earlier is still working and can’t take on new ones, so *N* scenarios aren’t included — tailor them again once it finishes." The scenarios are added either way. Only the tailoring waits.
+</Warning>
+
+## Run the probes and read the results
+
+Adopted probes are ordinary scenarios, so you run them the way you run anything else — select them on the **Scenarios** list, use the **Run** split-button, and confirm in the evaluation launcher. That manual path is ungated. Asking the **Trust Agent** to run them is not: it refuses until each probe is linked to a requirement and carries expected actions or routes, which the catalog does not ship. The full recipe, including personas and repeats, is in [Simulate agents with scenarios](/how-to/simulate-with-scenarios).
+
+Two things are worth knowing before you read a security run's pass rate.
+
+**A pass on a probe you never really ran is the result to distrust.** Five outcomes leave the pass-rate denominator. Four of them are the environment's fault and carry the grey **Environment problem — not the agent · Excluded from the score** framing. The fifth is different: an amber **Couldn't test** means an action your own agent ran returned an error, summarized as "Not scored because an action the agent runs returned an error." Adversarial probes push agents into their error paths by design, so this is the outcome you will meet most on a security run. See [When a result leaves the score](/concepts/evaluations#when-a-result-leaves-the-score).
+
+**A stock probe grades on what was said and done in the conversation.** Nothing in the catalog seeds a record or checks an end state, so a passing conversation means the agent held the line *in that conversation*. If you need proof that the wrong record never changed, that is the action contract tailoring can add, or expected output you author yourself from a conversation you like.
+
+To feel out a probe before you commit a whole run to it, paste its goal into the [Playground](/concepts/playground) and drive the agent yourself. A Playground conversation you like can be saved as its own scenario, so an attack you find by hand becomes coverage the same day.
+
+## Adopt again safely
+
+Re-opening **Add recommended scenarios** is always safe.
+
+- **Adopted entries are muted.** Each created scenario records the catalog entry it came from, so the modal knows what you already hold.
+- **Renaming your copy changes nothing.** Dedupe is by that recorded identity, not by name — an adopted probe you renamed to something local never resurfaces as un-adopted, and a scenario you wrote by hand that happens to share a catalog name is not treated as an adoption.
+- **A batch interrupted part-way is repaired by adopting again.** Each step is keyed to the entry it belongs to, so re-issuing the same selection finishes what is missing instead of duplicating what landed. If you closed the tab mid-adopt, re-open the modal and adopt the same selection.
+
+<Accordion title="Edge states you may run into">
+  - **"Couldn't load the recommended scenarios."** — the catalog read failed. Click **Retry**; nothing has been added.
+  - **The adopt failed.** — the modal stays open with your selection intact so you can retry. Only an adopt failure keeps it open.
+  - **"Couldn't start tailoring"** — the adoption succeeded and only the tailoring kickoff failed. Your scenarios are on the list; nothing is rolled back. Start tailoring again by adopting another entry with **Add & tailor to your agent**, or tailor the checks yourself.
+  - **The tailoring action is disabled** — the project has no connected agent. Use **Add without tailoring**, connect an agent, then come back.
+  - **The same entries adopted from two tabs at the same instant** — adopt once and let it finish. The checks are protected against a duplicate at the database, but two simultaneous adopts of the same scenario are not, so do not race them.
+</Accordion>
+
+## Next step
+
+<Card title="Write an LLM judge prompt" icon="scale" href="/how-to/write-llm-judge-prompt">
+  The checks these probes arrive with are ordinary, editable judges. This is how to sharpen one — or write the tailored version yourself when you would rather not hand it to a background run.
+</Card>
+
+## Related
+
+- **[Recommended scenarios](/concepts/trust-library)** — the ten probes, their citations, and what they do not cover
+- **[Scenarios](/concepts/scenarios)** — what an adopted probe becomes on the list
+- **[Evaluators](/concepts/evaluators)** — the safety checks these probes pair with
+- **[Evaluations](/concepts/evaluations)** — reading a graded run, including the outcomes that leave the denominator
+- **[Agent profile](/concepts/agent-profile)** — the capture tailoring reads before it can ground anything

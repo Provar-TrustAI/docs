@@ -18,8 +18,11 @@ Not every list has Saved Views, and the ones that do don't all offer the same co
 |---|---|---|---|
 | [Sessions](/concepts/sessions) | Yes | Yes | Yes |
 | [Scenarios](/concepts/scenarios) | Yes | Yes | Yes |
+| [Requirements](/concepts/requirements) | Fixed chips | Yes | Yes |
 | A run's results | Yes | Yes | Yes — scoped to that run |
 | The [Evaluations](/concepts/evaluations) run list | No | No | No |
+
+Requirements is the newest list to carry Saved Views, and its filter slot is the one deliberate difference between the four surfaces that have them. Instead of a popover you build a query in, it carries three fixed chips — **All**, **Gaps**, and **Failing** — and those three are its entire filtering vocabulary. The chip you have selected is part of the view like any other filter, so a view saved on **Gaps** reopens on **Gaps**. Everything else is the standard kit: show, hide, reorder and resize columns, save a view, set one as your default, and open a requirement's fly-in full screen.
 
 The Evaluations list is deliberately lighter: it offers a search box and sortable columns, and nothing else. There is no filter popover, no column menu, and no view picker on it. If you are looking for the place to save a lens over evaluation *results*, that's inside a run, not on the list of runs.
 
@@ -43,15 +46,18 @@ Every view is one of two kinds, and the difference decides what you're allowed t
 | --- | --- |
 | Sessions | **All sessions**, **Recent sessions** (last 24 hours) |
 | Scenarios | **All scenarios**, **Missing expected output** |
+| Requirements | **All requirements** |
 | A run's results | **All results** |
 
-Built-ins are read-only. They can't be renamed, deleted, overwritten, or set as your default — and rather than showing you disabled buttons, the app simply doesn't offer those actions when a built-in is active. Clicking **Save view** on one falls through to **Save as new view**, so the shared starting points stay stable for everyone.
+Built-ins are read-only in the interface. While one is active the view picker offers no **Rename view**, no **Delete view**, and no **Set as default** — rather than showing you disabled buttons, the app leaves those three rows out and the menu ends at the list of views. Clicking **Save view** on a built-in falls through to **Save as new view**, so the shared starting points stay stable for everyone.
 
 **User-created views** are the ones you make. They carry the full set: rename, delete, and set-as-default.
 
 ## Default views
 
-A **user-created** view can be marked as your default for a surface, and that surface then opens with it pre-applied. Defaults are per-user and per-project — yours doesn't change anyone else's. A built-in can't be a default; the **Set as default** item isn't offered while one is active.
+Mark a view as your default and that surface opens with it pre-applied. Defaults are per-user and per-project — yours doesn't change anyone else's — and the picker marks the current one **Default**.
+
+**Set as default** is offered on a user-created view that isn't already your default, and it drops out once it is. It is not offered while a built-in is active, so the picker gives you no way to make **All requirements** or **All sessions** your landing view. Save the arrangement you want as your own view and set that as the default instead.
 
 ## Views as run scopes
 
@@ -59,7 +65,7 @@ A **user-created** view can be marked as your default for a surface, and that su
   **Only the Sessions source takes a view.** In the evaluation launcher, choosing **Sessions** as what to evaluate gives you a view picker. Choosing **Scenarios** gives you a scenario picker instead — you select the scenarios individually, and no Scenarios view is consulted.
 </Note>
 
-For the Sessions branch, Trust AI resolves the view to its concrete session list on the server at launch time, so time-window filters anchor to the moment you launch: picking **Recent sessions** always means the last 24 hours as of *now*, and the same view yields a fresh set on every run.
+For the Sessions branch, TrustAI resolves the view to its concrete session list on the server at launch time, so time-window filters anchor to the moment you launch: picking **Recent sessions** always means the last 24 hours as of *now*, and the same view yields a fresh set on every run.
 
 If you were counting on a curated Scenarios view to scope a run, it won't — pick the scenarios in the launcher, or narrow the list first and select from it.
 
@@ -75,4 +81,5 @@ Saved Views are managed from the toolbar of each list surface. Developers who ne
 - **[Tables and panels](/concepts/tables-and-panels)** — the shared table whose filters, sort, and column layout a view persists
 - **[Sessions](/concepts/sessions)** — the primary surface where Saved Views reduce filter noise
 - **[Scenarios](/concepts/scenarios)** — filter the flat Scenarios list by tag, persona, or missing expected output
+- **[Requirements](/concepts/requirements)** — the same views and column controls, with three fixed chips in place of a filter popover
 - **[Evaluations](/concepts/evaluations)** — the run list has no views; a run's *results* table has its own, scoped to that run

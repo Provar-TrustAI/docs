@@ -10,7 +10,7 @@ This page is a security and data-model concept, not a workflow. Two boundaries r
 
 ## The organization is the tenant boundary
 
-In Trust AI, an **organization** is the tenant. An organization owns many Projects, and every Project — together with all of its **[Sessions](/concepts/sessions)**, **[Scenarios](/concepts/scenarios)**, **[Evaluators](/concepts/evaluators)**, **[Evaluations](/concepts/evaluations)**, simulations, and **[Trust Agent](/concepts/trust-agent)** tasks — belongs to exactly one organization. Identity, and the organization itself, are federated through your workspace's SSO identity provider: your company's single sign-on is the source of truth for who you are and which tenant you belong to.
+In TrustAI, an **organization** is the tenant. An organization owns many Projects, and every Project — together with all of its **[Sessions](/concepts/sessions)**, **[Scenarios](/concepts/scenarios)**, **[Evaluators](/concepts/evaluators)**, **[Evaluations](/concepts/evaluations)**, simulations, and **[Trust Agent](/concepts/trust-agent)** tasks — belongs to exactly one organization. Identity, and the organization itself, are federated through your workspace's SSO identity provider: your company's single sign-on is the source of truth for who you are and which tenant you belong to.
 
 <Info>
   **Organization vs. Project — two different boundaries.** A **Project** is the *workspace* boundary: members, runtime credentials, and the artifacts under evaluation, all in one place (see **[Projects](/concepts/projects)**). An **organization** is the *tenant* boundary: the security perimeter the platform enforces so one customer's data can never reach another's. A Project lives inside exactly one organization; an organization holds many Projects.
@@ -48,17 +48,28 @@ Two vocabularies meet here, and they are not the same list. Keep them apart.
 | Project tier | Confers | How you get it |
 | --- | --- | --- |
 | **Viewer** | Read the Project's content. | Granted — directly or through a team. |
-| **Editor** | Read and change the Project's content. | Granted — directly or through a team. |
-| **Owner** | Everything, including the Project's lifecycle. | Conferred at creation. Never grantable, never transferable. |
+| **Editor** | Read and change the Project's content, including its name and description. | Granted — directly or through a team. |
+| **Admin** | Everything an Editor can do, plus sharing the Project and archiving or restoring it. | Granted — directly or through a team. |
+| **Owner** | Everything an Admin can do, plus handing the Project on. | Conferred at creation. Never granted; moved only by **Transfer ownership**. |
 
-Viewer and Editor are the only two tiers a grant dialog offers. Project **Owner** is not on that menu at all — it belongs to whoever created the Project.
+Three of the four tiers are grantable: Viewer, Editor and Admin all appear in the grant dialog. **Owner** does not, and the reason is structural rather than cautious — a Project has exactly one owner, so conferring it would take it from somebody. That is a transfer, with its own endpoint and its own confirmation. A hand-made request asking for it is refused in those terms: *"Ownership isn't something you can grant. Use Transfer ownership to make someone else the owner of this project."* The owner's own access is likewise immutable through grants — it can be neither re-tiered nor revoked, only transferred.
 
-**Project lifecycle is owner-only.** Renaming, archiving, restoring, and deleting a Project require the Project's Owner tier. A workspace Admin without a grant is denied, and so is a project Editor: the gate is stricter than "not ordinary members".
+**Project lifecycle is not one gate but three**, and none of them is owner-only:
 
-In the product, this reference opens where you need it — a **What can each role do?** link sits beside the *workspace*-role picker, in the invite dialog and in the member sheet, and opens a read-only roles-and-permissions drawer. The project-tier controls on **Project access** — the Viewer/Editor toggle in the grant dialog, and the same picker inline on a grant row — carry no such link; their two grantable tiers are the ones in the table above.
+| Act | Who may |
+| --- | --- |
+| Rename the Project, edit its description | **Editor** and up — authoring content and naming it are the same tier |
+| Archive or restore the Project; delete an evaluation run | **Admin** or **Owner** on the Project |
+| Transfer ownership; delete the Project | The Project's **Owner**, or a workspace **Owner** or **Admin** |
+
+The third row is the deliberate offboarding backstop: when a Project's owner leaves the company, whoever administers the workspace has to be able to re-home or retire their Projects, even without a grant on them. It confers no ability to *read* the Project. Note also that the delete path archives rather than destroys — there is no permanent-delete affordance in the product.
+
+A workspace **Guest** cannot create a Project at all. Guests work inside the Projects they are invited to; the affordance is suppressed in the app and the server refuses the request before a Project or its owner membership is written.
+
+In the product, this reference opens where you need it — a **What can each role do?** link sits beside the *workspace*-role picker, in the invite dialog and in the member sheet, and opens a read-only roles-and-permissions drawer. The project-tier controls on **Project access** — the Viewer / Editor / Admin toggle in the grant dialog, and the same picker inline on a grant row — carry no such link; their three grantable tiers are the ones in the table above.
 
 <Note>
-  The drawer's matrix is drawn from the shared permission catalog, which models a coarse workspace-Owner allowance for project actions. The platform edge does not use it: every project decision resolves through the per-project membership check instead, so the rule on this page — **project content is always gated by a grant, admins and owners included** — is what the API actually enforces.
+  The drawer's matrix is drawn from the shared permission catalog, which models a coarse workspace-Owner allowance for project actions. The platform edge does not use it for content: every project *content* decision resolves through the per-project membership check instead, so the rule on this page — **project content is always gated by a grant, admins and owners included** — is what the API actually enforces. The two lifecycle acts in the table above that admit a workspace Owner or Admin are written explicitly at their own call sites, not inherited from this matrix.
 </Note>
 
 ## organization_id, on tenant-anchored rows
@@ -136,9 +147,7 @@ Framing everything as cross-customer would understate the boundary. Several read
 | A project's connected agents and their stats | Any authenticated user of any organization could read them by Project id. | Requires a grant on that Project, checked before the agent runtime is contacted. |
 | A project's dashboard rollup | The same gap. | Requires a grant on that Project, checked before any aggregation runs. |
 | A bulk fetch of sessions by id | Every session in your organization, including projects you hold no grant on — a same-organization, cross-project leak. | Membership is verified once per distinct Project the ids span, and sessions in projects you can't reach are dropped from the result. |
-| Workspace usage and caching figures | Deployment-wide totals, identical for every workspace. | Caching figures are now genuinely per-organization. |
-
-The usage summary is the honest exception. Its numbers come from the model gateway's own request logs, which carry no per-organization attribution to filter on, so a truthful per-tenant figure cannot be produced today. Rather than fabricate one, the read is **restricted to workspace Owners and Admins** — everyone else is denied. That is *containment*, not tenant isolation: an Owner or Admin still sees deployment-wide totals. The per-tenant fix belongs in the model gateway's logging.
+| Workspace caching figures | Deployment-wide totals, identical for every workspace. | Genuinely per-organization — the read joins each task through its Project to the organization that owns it. |
 
 **v2026.07.16.1** closed one more, on the Agent Profile path: a capability profile addressed by a revision or agent-version id is now resolved inside the caller's tenant, and a foreign id collapses to not-found like every other record. See **[Agent Versions](/concepts/agent-versions)**.
 
@@ -173,6 +182,8 @@ Masking hides the value, not the fact. The UI still shows a **Configured** statu
 
 The **[Trust Agent](/concepts/trust-agent)** is not an exception to any of this — it runs inside the same tenant boundary as the rest of the platform. An agent session only ever sees and acts on the current organization's Project data, and an approved write executes only within your own organization and Project: **tenant-scoped, server-anchored, and bound to the specific approval you gave.** The agent cannot read or mutate another organization's records. Its tasks and audit log are tenant-anchored exactly like every other domain — every row carries the organization it belongs to. What differs is only the *shape* of a refusal: a chat is gated on who started it, so someone else's chat is denied **403** rather than collapsing to a not-found the way a foreign Session or Scenario id does.
 
+An external client that reaches TrustAI over **[MCP](/concepts/mcp-integration)** crosses the same boundary at its consent screen: the bearer it is issued is frozen there to the person, the account and the workspace that approved it, so a token cannot follow its owner into a different organization.
+
 The behavioral side of the agent — its shells, transcript, approvals, and what "approve and execute" actually does — lives in **[Trust Agent](/concepts/trust-agent)**. This page only asserts that all of it happens inside the tenant boundary.
 
 Developers who want the underlying request and response shapes can find them in the [API Reference](/api-reference).
@@ -184,12 +195,12 @@ Developers who want the underlying request and response shapes can find them in 
     The workspace boundary you see in the product — members, runtime credentials, and artifacts. Multi-tenancy is the organization boundary enforced beneath it.
   </Card>
   <Card title="Administer workspace access" icon="users" href="/how-to/administer-workspace-access">
-    The admin surface behind this page: invite members, build teams, and grant per-project Viewer or Editor access.
+    The admin surface behind this page: invite members, build teams, grant per-project Viewer, Editor or Admin access, and transfer a project's ownership.
   </Card>
   <Card title="Trust Agent" icon="sparkles" href="/concepts/trust-agent">
     The in-app assistant whose writes are tenant-scoped and server-anchored — it runs inside the boundary this page describes.
   </Card>
   <Card title="Glossary" icon="book" href="/glossary">
-    Quick definitions for organization, Project, tenant, and the rest of the Trust AI vocabulary.
+    Quick definitions for organization, Project, tenant, and the rest of the TrustAI vocabulary.
   </Card>
 </CardGroup>

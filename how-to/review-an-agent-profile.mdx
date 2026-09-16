@@ -11,71 +11,81 @@ Ask the [Trust Agent](/concepts/trust-agent) first. *"Show me the agent profile 
 ## Before you start
 
 - **A connection on a platform that supports capability discovery.** Discovery is implemented for **Conversational HTTP**, [**Claude Managed Agent**](/how-to/connect-claude-managed-agent), and [**Salesforce Agentforce**](/how-to/connect-agentforce).
-- **A connectable agent build on that connection.** The profile describes one [Agent Version](/concepts/agent-versions); a connection with no build has no profile row to open.
+- **A connectable agent build on that connection.** The profile describes one [Agent Version](/concepts/agent-versions); a connection with no build gives the Playground's agent picker nothing to select, and so nothing to open a profile for.
 
 <Warning>
-  **AWS Bedrock AgentCore connections cannot be profiled — and the panel doesn't say so until you try.** Opening the profile on an [AgentCore connection](/how-to/connect-agentcore) looks exactly like any other never-captured build: *"No profile has been generated for this agent build yet."* with a **Generate profile** button. Press it and the capture comes straight back as one calm line — *"Agent profiling isn't available for this connection yet."* — with no retry, because a retry could never succeed. This is a platform limit, not a failure to work around: nothing you change on the connection will make discovery reach it. Skip this page if AgentCore is your only connection.
+  **AWS Bedrock AgentCore connections cannot be profiled.** The panel says so in one calm line — *"Agent profiling isn't available for this connection yet."* — with no retry offered, because a retry could never succeed.
+
+  {/* ACCURACY-AUDIT-PENDING */}
+  Because connecting an agent starts a capture on its own, that line is usually waiting for you the first time you open an [AgentCore connection](/how-to/connect-agentcore)'s profile; where no capture has run you get the never-captured empty state and a **Generate profile** button instead, and pressing it returns the same line. Either way it is a platform limit, not a failure to work around: nothing you change on the connection will make discovery reach it. Skip this page if AgentCore is your only connection.
 </Warning>
 
 ## Open the profile
 
-There are two entry points, and both open the same right-anchored fly-in over whatever you were doing.
+There is one entry point, and it opens a right-anchored fly-in over whatever you were doing.
 
-- **Project settings → Connection.** Each connection card carries a **Current agent version** row — the build's name, its version line and tool count, and the profile's lifecycle pill. Click the row.
-- **The Playground topbar.** The info button beside the agent picker is labelled **Agent profile**; it opens the profile for the agent you're talking to.
+**The Playground topbar.** Open the [Playground](/concepts/playground), pick the build in the agent picker, then press the info button beside it — its tooltip reads **Agent profile**.
 
 The fly-in has exactly three tabs — **Overview**, **Tools** (with the catalog count beside it), and **Sources**. There is no history tab; a revision's past lives in the revisions themselves, not in a separate view. **Esc** closes the panel.
 
 <Note>
-  **The two entry points name the same healthy state differently, on purpose.** The connection row's pill reads **Profile available** — the entry point reports status. The fly-in's own header reads **Version-pinned profile** — the header names the pinning contract instead of repeating what you just clicked. Same profile, two vantage points; it isn't an inconsistency to reconcile.
+  **A connection card no longer opens a profile.** The row that used to carry the build's name, its tool count and its lifecycle pill belonged to the retired two-tab connection settings. The single **Connections** tab that replaced them has no profile entry point yet, and the old tab redirects onto it — so if a colleague tells you to click through from the connection card, they are describing the previous release.
 </Note>
 
 ## Run the review
 
-The whole loop, recorded end to end from the Playground topbar: generate a first profile, read what capture could and couldn't see, drill a tool to its recorded schema, correct it, and approve — then regenerate, and watch the approval reset while the correction survives.
+The whole loop, recorded end to end from the Playground topbar: generate a first profile, read what capture could and couldn't see, drill a tool to its recorded inputs, correct it, and approve — then regenerate, and watch the approval reset while the correction survives.
 
 <video controls muted playsInline className="w-full rounded-xl" src="/images/demos/d2-agent-profile-review.mp4"></video>
 
-<Steps>
-  <Step title="Generate the first profile">
-    A build that has never been captured opens on a plain sentence — *"No profile has been generated for this agent build yet."* — and a single **Generate profile** button. Click it.
+<Note>
+  **One label in the recording is out of date.** The coverage row and the source manifest row both read **Tool inputs** now; the recording still shows the older **Tool schemas**. Everything else in it matches the shipped panel.
+</Note>
 
-    Capture runs in the background and the panel follows it without a reload. The lifecycle pill moves **Profile queued** → **Profile in progress**, and the body says so in words: *"A profile capture is in progress."* with the reassurance *"This panel updates on its own once the profile is ready."* When it lands, the header pill settles on **Version-pinned profile** (and the connection row's pill on **Profile available**).
+<Steps>
+  <Step title="Open the profile and let the first capture land">
+    Connecting an agent queues its first capture automatically, so most builds are already capturing — or already captured — the first time you open the panel. Capture runs in the background and the panel follows it without a reload: the lifecycle pill moves **Profile queued** → **Profile in progress**, and the body says so in words, *"A profile capture is in progress."*, with the reassurance *"This panel updates on its own once the profile is ready."*
+
+    A build the automatic queue never reached opens on a plain sentence instead — *"No profile has been generated for this agent build yet."* — with a single **Generate profile** button. Click it and the same walk starts.
+
+    When a capture lands, the header pill settles on **Version-pinned profile**. That is the header naming the pinning contract; **Profile available** is the capture lifecycle's own word for the same healthy state.
 
     Two other lifecycle pills exist and you'll meet them later, not now: **Profile failed** for a capture that ran and didn't succeed, and **Profile out of date** for a profile whose build has moved on.
   </Step>
 
   <Step title="Read the discovery coverage">
-    The Overview tab opens with **What this version does** — the captured behavior summary — then **Critical behavioral rules**, the compact source-backed rules that actually affect how you'd author an evaluation against this agent. Either section says plainly when nothing was captured rather than showing an empty box.
+    The Overview tab opens with **What this version does** — the captured behavior summary — then **Critical behavioral rules**. Those are the operating rules the connected platform publishes for this agent, carried word for word rather than summarized, each evidenced back to the place it was read from. On an Agentforce org that declares rules against its topics, this is where they land. Either section says plainly when nothing was captured rather than showing an empty box.
 
     Below them, **Discovery coverage** is the section that decides how much weight the rest of the profile can bear. Four dimensions, each with its own level:
 
     | Dimension | What it covers |
     | --- | --- |
     | **Agent identity and behavior summary** | How the agent presents itself and how it's configured to behave |
-    | **Tool schemas** | The actions it exposes, and the parameter contracts behind them |
+    | **Tool inputs** | The actions it exposes, and the input contracts behind them |
     | **Policy and knowledge sources** | The material it can draw on to answer |
     | **System instructions and observed behavior** | Its source instructions, plus sampled conversations and safe probes |
 
     The level is one of three words — **Captured**, **Partial**, or **Limited** — and never a percentage. Each row carries a supporting line naming the fact behind the verdict, so the level is never the whole story: *"2 agent-side and user-side tools"*, or *"Instructions were not exposed; conversations and safe probes were not sampled"*.
 
+    **Every row is a click-through to its own evidence.** Clicking one jumps to the block, tab, or manifest the verdict was drawn from, so you can check a pill rather than trust it. A row short of **Captured** also carries a one-line hint naming what would raise it — that identity rises when the platform declares the rules it operates under or exposes the instructions it runs on, or that **Tool inputs** rises only when each tool is reachable *and* its exact input contract was recorded, which some platforms never publish.
+
     Read **Partial** and **Limited** as scope, not as failure. A profile whose tools are **Captured** but whose identity is **Partial** is perfectly usable for checking what the agent *can* do, and thin evidence for what it's supposed to *refuse* — which is exactly the kind of judgment a review is for.
 
-    Under the coverage list sit the version facts — **Agent version**, **Discovery source**, **Tool catalog**, **Reference material**, **Profile captured**, and **Review** — and, when the catalog groups into subject areas, a **Topics this version covers** section. Topics are inferred by grouping the agent's own actions, not declared by the connected platform, and the section is simply absent when nothing groups.
+    Under the coverage list sit the version facts — **Agent version**, **Discovery source**, **Tool catalog**, **Reference material**, **Profile captured**, and **Review** — and, when the catalog groups into subject areas, a **Topics this version covers** section. Its intro tells you which kind of grouping you are reading: *"Declared by the connected platform — these are the agent's own topic groupings."* when every topic came from the platform, and *"Inferred by grouping this agent's own actions — not declared by the connected platform."* otherwise. Salesforce Agentforce declares its topics, so the declared form is what an Agentforce reviewer sees. The section is simply absent when nothing groups.
   </Step>
 
   <Step title="Drill into a tool">
-    The **Tools** tab is the catalog: one row per tool with its parameter count, its actor (**Agent** or **User**), its availability (**Always** or **Discoverable**), and its description. A search box narrows the list.
+    The **Tools** tab is the catalog: one row per tool with its parameter count, its actor (**Agent** or **User**), its availability (**Always** or **Discoverable**), and its description. A search box narrows the list. A tool the platform makes the agent confirm carries **Asks the person first** on the row itself, just after the parameter count — the one gate state worth repeating down a long catalog.
 
-    Click a row to open the tool's detail — headed *"Exact invocation from agent version …"*. **Tool contract** spells out the actor in long form (**Evaluated agent** or **Simulated user**) and the availability (**Always available** or **Discoverable**), and the **Parameters** table lists each recorded parameter with its name, type, whether it's required, and its allowed values.
+    Click a row to open the tool's detail — headed *"Exact invocation from agent version …"*. **Tool contract** spells out the actor in long form (**Evaluated agent** or **Simulated user**), the availability (**Always available** or **Discoverable**), and — under **Before it runs** — the platform's confirm gate as one of **Asks the person first**, **Runs without asking**, or **Not published by the platform**. That third state is the honest one: the platform never said, which is not the same as saying no. Check it before you author an approval or a decline scenario. The **Parameters** table lists each recorded parameter with its name, type, whether it's required, and its allowed values.
 
     <Note>
-      **The schema you read is the schema that was recorded.** Capture stores the exact bytes the platform advertised and this drill-down serves those bytes back — the connected platform is never re-contacted. A schema you read today therefore cannot have quietly changed underneath a review you did yesterday. Where no exact schema was recorded, the detail says so rather than re-serializing the parameter facts into a look-alike.
+      **The inputs you read are the inputs that were recorded.** Capture stores the exact bytes the platform advertised and this drill-down serves those bytes back — the connected platform is never re-contacted. An input contract you read today therefore cannot have quietly changed underneath a review you did yesterday. Where nothing exact was recorded, the detail says so rather than re-serializing the parameter facts into a look-alike: *"No exact inputs were recorded for this tool when this profile was captured, so its parameters can't be shown."* — or, when the recorded bytes won't read back, *"The inputs recorded for this tool could not be read, so its parameters can't be shown."*
     </Note>
   </Step>
 
   <Step title="Read the Sources tab for what was not captured">
-    **Sources** is where absence is spelled out. **Context sources** lists five categories the capture run tries to reach — **Tool schemas**, **Policy documents**, **System instructions**, **Observed conversations**, and **Safe exploration** — and gives each one of four states:
+    **Sources** is where absence is spelled out. **Context sources** lists five categories the capture run tries to reach — **Tool inputs**, **Policy documents**, **System instructions**, **Observed conversations**, and **Safe exploration** — and gives each one of four states:
 
     | State | Means |
     | --- | --- |
@@ -115,6 +125,8 @@ The whole loop, recorded end to end from the Playground topbar: generate a first
   <Step title="Refresh when the agent changes">
     The header's **Refresh profile** action requests a fresh capture, and the pill walks the same **Profile queued** → **Profile in progress** → ready path. Repeat requests while a capture is already queued or running don't stack — they return the run that's already going. **Refresh profile** and **Edit profile** are there only while there is a profile to show: the empty, in-progress, and failed states carry no header actions, because each already offers the one action that makes sense from where it stands.
 
+    A refresh re-reads the agent as it stands now. On Salesforce Agentforce that means the version actually live in the org, resolved from the org itself rather than assumed — and where several candidate versions exist and the live one can't be identified, capture refuses rather than guessing at the highest-numbered one.
+
     When the connected build moves on, the pill reads **Profile out of date**: the profile you're looking at is still a true record of what was captured, but the live agent has changed since. Refresh, re-read the coverage, and record a decision on the new revision.
 
     A capture that ran and didn't succeed reads **Profile failed** and states the reason in the body — *"The last profile capture failed: The agent's capability endpoint is unreachable, so no catalog could be read."* — with a **Try capturing again** button under it. Unlike the AgentCore case above, this one *is* worth retrying: an unreachable endpoint or a half-configured connector is a real failure, not a platform limit.
@@ -133,23 +145,25 @@ This is a different pin from the one an [Evaluation](/concepts/evaluations) make
 
 <AccordionGroup>
   <Accordion title="The profile says 'Agent profiling isn't available for this connection yet'">
-    You reached this by pressing **Generate profile** — the button is offered on every platform, and only the capture result tells you discovery can't reach this one. The connected platform isn't one capability discovery reaches, and no retry is offered because a retry could not succeed. Discovery covers Conversational HTTP, Claude Managed Agent, and Salesforce Agentforce; **AWS Bedrock AgentCore** falls outside it — see [which platforms can be profiled](/concepts/agent-profile#which-platforms-can-be-profiled).
+    The connected platform isn't one capability discovery reaches, and no retry is offered because a retry could not succeed. Nothing on the connection distinguishes this case in advance — the capture result is what tells you. Discovery covers Conversational HTTP, Claude Managed Agent, and Salesforce Agentforce; **AWS Bedrock AgentCore** falls outside it — see [which platforms can be profiled](/concepts/agent-profile#which-platforms-can-be-profiled).
   </Accordion>
 
   <Accordion title="Coverage came back Limited across the board">
     The capture reached the connection but the connector surfaced almost nothing — a common shape when an agent isn't activated or its metadata isn't readable with the saved credentials. Check the **Sources** tab: **Not exposed** across the manifest points at the connector or the agent's configuration, while **Not sampled** and **Not run** point at the capture having nothing to observe yet. Fix the connection, then **Refresh profile**.
+
+    Salesforce Agentforce has a stricter outcome than **Limited**. A capture that reached the org but read no tools and no operating instructions comes back **Profile failed** rather than an empty profile stamped ready, and the reason names the fix: check that the connected user can read the agent's active version and its topics and actions, then capture again.
   </Accordion>
 
   <Accordion title="The Tools tab shows a count of 0">
-    Nothing in the tool catalog reached this capture. The coverage row says the same thing in words — *"No tools were reachable when this profile was captured"* — and the **Sources** tab's **Tool schemas** row names which kind of absence it was. A profile with no tools is still a valid record; it just can't carry a review about what the agent is able to do.
+    Nothing in the tool catalog reached this capture. The coverage row says the same thing in words — *"No tools were reachable when this profile was captured"* — and the **Sources** tab's **Tool inputs** row names which kind of absence it was. A profile with no tools is still a valid record; it just can't carry a review about what the agent is able to do.
   </Accordion>
 
   <Accordion title="I approved this profile, and now it says it hasn't been reviewed">
     The profile was regenerated, so you are looking at a new revision. Reviews are recorded per revision and never carry forward. Your own edits *do* carry forward — they belong to the build — so re-reading and re-approving is usually quick.
   </Accordion>
 
-  <Accordion title="The header pill says 'Version-pinned profile' but the connection row said 'Profile available'">
-    Both are correct and both describe a healthy profile. The connection row reports the capture's status; the fly-in header names the pinning contract. Nothing is out of sync.
+  <Accordion title="The header pill says 'Version-pinned profile', not 'Profile available'">
+    Both name a healthy profile. **Profile available** is the capture lifecycle's own word for one; the fly-in header names the pinning contract instead, because by the time you are reading the header you already know the profile is there. Nothing is out of sync — and since the fly-in is where a profile opens, **Version-pinned profile** is the pill you will actually see.
   </Accordion>
 </AccordionGroup>
 
@@ -160,5 +174,5 @@ Developers who want the profile, overlay, and revision-review endpoints can find
 - **[Agent Profile](/concepts/agent-profile)** — what a profile is, why the revision is the versioned unit, and what each state means
 - **[Agent Versions](/concepts/agent-versions)** — the build a profile describes, and what an evaluation pins
 - **[Trust Agent](/concepts/trust-agent)** — the assistant that reads profiles and proposes corrections
-- **[Approve agent writes](/how-to/approve-agent-writes)** — the approval gate a proposed profile edit goes through
+- **[Approve an agent write](/how-to/approve-agent-writes)** — the approval gate a proposed profile edit goes through
 - **[Compare agent versions](/how-to/compare-agent-versions)** — reading two builds against each other once both are profiled

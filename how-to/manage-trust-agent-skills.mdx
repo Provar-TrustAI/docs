@@ -54,6 +54,11 @@ Select a built-in and the form goes view-only. A note at the top of the form rea
 
 You can still read a built-in's full recipe in the **Instructions** field — that is the point of the view-only form. Read it before you write your own version, so you start from what the shipped recipe actually does.
 
+The bundled set grows with the product, so the list in your editor is likely longer than the one above — read the panel rather than working from a fixed list. Two recipes are worth knowing by name:
+
+- **/getting-started** is the one the agent reaches for when you don't know what to do next, or are picking a project back up. It is a router rather than a step of its own — it re-reads where the project actually is, names the single next thing to do, loads the recipe for that step, and gets out of the way.
+- **/autorun** is the opposite shape: it does the whole arc in one approved, unattended pass. See [Run an Automatic Full Run](/how-to/run-an-automatic-full-run).
+
 <Note>
   A built-in skill is always on. It is served by the product rather than stored in your workspace, so there is nothing to switch off — and nothing to lose track of when TrustAI ships a new one.
 </Note>
@@ -95,7 +100,7 @@ To customise one: open the built-in, read its **Instructions**, then choose **+ 
   <Step title="Choose Create skill">
     The skill saves and the row appears in the list without a **Built-in** chip. Editing it later gives you **Save changes** and a **Delete** button in the same form.
 
-    **You should see:** your skill in the left-hand list, and the **Slug** field now locked.
+    **You should see:** your skill in the left-hand list, and the slug field now reading **Slug (fixed)** — a built-in skill reads **Slug (built-in)** instead.
   </Step>
 </Steps>
 
@@ -113,7 +118,7 @@ The workspace list is **Workspace Settings → Skills**, grouped into two sectio
 Because there is only one list, a bookmark to a project's skills settings takes you to the workspace page instead — the project-scoped address redirects there.
 
 <Info>
-  Turning a workspace skill **Disabled** stops the agent from choosing it on its own. It still appears in the composer's **/** menu, so treat disabling as "stop suggesting this," not as "hide it." Delete it if you want it gone.
+  Turning a workspace skill **Disabled** stops the agent from choosing it on its own: the agent is only ever told about the skills that are enabled, so a disabled one is invisible to it. The composer's **/** menu lists what your workspace holds rather than what the agent was told about, so the skill is still in there — treat disabling as "stop suggesting this," not as "hide it." Delete it if you want it gone.
 </Info>
 
 ## Use a skill

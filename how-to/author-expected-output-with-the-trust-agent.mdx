@@ -1,15 +1,30 @@
 ---
 title: "Author expected output with the Trust Agent"
 icon: "sparkles"
-description: "Ask the Trust Agent to draft a scenario's grading contract, read the approval card and its proposed-state diff, and understand what the agent will and won't decide for you."
+description: "Ask the Trust Agent to draft a scenario's grading contract — what the step is gated on, what the approval card shows, what a write replaces and what it leaves alone, and where the agent's judgment stops."
 ---
 
 A scenario's **expected output** is its grading contract: the tool calls the agent must or must not make, the routes it must or must not take, and the evaluators that grade the conversation. You can author it by hand on the scenario's **Expected Output** tab — but describing it to the [Trust Agent](/concepts/trust-agent) is usually faster, because the agent reads the scenario first, tells you what it thinks is wrong with your request, and shows you the exact write before anything is saved.
 
 This page is about that conversation: what to ask for, what comes back on the approval card, and where the agent's judgment stops and yours begins.
 
+## Before you ask: this step is gated
+
+Expected output is step 5 of the authoring workflow the Trust Agent enforces, and the enforcement is a run-time refusal, not a nudge. Ask for it on a project that hasn't been through the earlier steps and nothing is written — the agent tells you what is missing and offers to fix it first. The wording below is the recovery text the refusal hands the agent; what you read in the chat is the agent's own paraphrase of it, so expect the sense rather than the sentence:
+
+| The project is missing | What the agent says |
+|---|---|
+| Any saved requirement | *"Draft and save the requirements first. I can guide you through that now before we continue."* |
+| Scenarios linked to those requirements | *"Create scenarios linked to every requirement first. I can guide you through that now before we continue."* |
+| An evaluator per requirement | *"Create and attach one evaluator for each requirement first. I can guide you through that now before we continue."* |
+| Those evaluators attached to the scenarios | *"Attach each requirement's evaluator to its scenarios first. I can guide you through that now before we continue."* |
+
+So the order that gets you here is: connect an agent → [capture requirements](/how-to/capture-requirements) → [scenarios linked to them](/how-to/simulate-with-scenarios) → an evaluator per requirement, created **and** attached. Say yes when the agent offers to walk you through a missing step; it is the same conversation, not a detour. With no agent connected at all, most authoring is refused a step earlier still — *"Connect an agent before creating tests or running them. I can help you connect one now."*
+
+The rest of this page assumes you are past that gate. Note that expected output is not the last one: simulating a scenario or launching a run is refused until each linked scenario carries **expected actions or routes**, which is what you are about to write.
+
 <Note>
-  Expected output is per scenario, and setting it **replaces the whole contract** — the write is not a merge. That is why the agent reads the scenario's current contract before it proposes anything, and why it asks you what to keep when the scenario already has one.
+  **What a write replaces, and what it leaves alone.** Setting expected output replaces the scenario's **expected actions and routes** wholesale — that half is not a merge. Its **attached evaluators are a different matter**: a write that doesn't mention them leaves them attached, and only a write that names evaluators explicitly changes which ones grade the scenario. An actions-only write no longer clears a scenario's graders, and the approval card says so in as many words: *"This updates the scenario's expected actions and routes; its current checks stay attached."*
 </Note>
 
 ## Ask for the contract you want
@@ -28,7 +43,9 @@ This page is about that conversation: what to ask for, what comes back on the ap
   </Step>
 
   <Step title="Answer the questions it asks">
-    When the scenario **already has a contract**, the agent does not guess. It opens a question flow — "SCN-000008 already has a contract. `set_expected_output` replaces it wholesale, so confirm what to keep alongside your new assertions" — and walks you through one decision per existing assertion, such as **Keep Billing as required** or **Drop it — no route assertion**. Work through the flow with **Next**; **Back** revisits an earlier answer.
+    When the scenario **already carries actions or routes**, the agent does not guess which of them you meant to keep — that half of the contract is replaced wholesale, so anything it doesn't carry forward is dropped. It opens a question flow and walks you through one decision per existing assertion, such as **Keep Billing as required** or **Drop it — no route assertion**. Work through the flow with **Next**; **Back** revisits an earlier answer.
+
+    It has no reason to ask about the scenario's attached evaluators, and shouldn't: a write that doesn't name them leaves them where they are.
   </Step>
 
   <Step title="Review the approval card, then approve">
@@ -38,16 +55,26 @@ This page is about that conversation: what to ask for, what comes back on the ap
 
 ## What the approval card actually shows
 
-The gate for an expected-output write is the standard permission card, and it is **deliberately terse**. It carries:
+The gate for an expected-output write is the standard permission card. This one covers a single scenario, so it is **deliberately terse** — it summarizes the write rather than itemizing it:
 
 | On the card | Example |
 |---|---|
 | The question | **Set the expected output on SCN-000002?** |
+| A plain-language summary of the blast radius | *1 action the agent must take, 1 it must not.* |
 | A change count | **1 field changed** |
 | A link to the full proposal | **View proposal** |
 | Your choice | **Approve** / **Reject — and tell me why (optional)** |
 
-The card face does **not** itemize the assertions. To see them, choose **View proposal** — it opens the proposed-state panel, headed **Proposed changes to SCN-000002** with a **Pending approval** status, showing a field-level before-and-after:
+Two lines are worth watching for on that face:
+
+- **What the write leaves alone.** An actions-and-routes write that doesn't name evaluators carries *"This updates the scenario's expected actions and routes; its current checks stay attached."* A write that *does* name them says *"This replaces the scenario's current expected output."* instead. Those two sentences are the difference between a contract edit and a grader swap.
+- **A test-data provenance caveat.** When the project has a test data store this conversation never read, the card adds *"Drafted without consulting this scenario's test data (store: …, N records)."* It is a flag, never a gate — the write goes ahead if you approve it — and it is telling you the contract was written without looking at the records the test will actually run against.
+
+<Note>
+  Terse is specific to a one-record write like this. A card covering a **batch** — several requirements filed at once, say — lists every record it covers by title, with a *"N records in this batch"* line above them, because a count alone would ask you to approve content you can't see.
+</Note>
+
+The card face does **not** name the individual assertions. To see them, choose **View proposal** — it opens the proposed-state panel, headed **Proposed changes to SCN-000002** with a **Pending approval** status, showing a field-level before-and-after:
 
 ```
 EXPECTED ACTIONS
@@ -55,7 +82,7 @@ none
 issue_refund — required; close_account — disallowed
 ```
 
-The "before" line reads `none` on a scenario that had no contract; on a scenario that had one, it shows what the replace would drop. **Read this panel, not just the card** — it is the only place the write is spelled out, and on a wholesale replace it is where you catch an assertion you meant to keep.
+The "before" line reads `none` on a scenario that had no contract; on a scenario that had one, it shows what the replace would drop. **Read this panel, not just the card** — it is the only place the assertions are spelled out, and since actions and routes are replaced wholesale, it is where you catch one you meant to keep.
 
 The agent's message above the card is the other half of the story. It routinely explains its reasoning and flags problems there before the card ever renders — that prose is worth reading, because some of what the agent knows never makes it onto the card.
 
@@ -86,13 +113,44 @@ Two assertions naming the same tool with **different** pins are distinct checks 
 
 Assertions cover structure — which tools, which routes. Anything about the *quality* of what the agent said is graded by an evaluator attached to the scenario, listed on the Expected Output tab under **Expected behavior** with the note "Evaluators used to grade the scenario. All must pass for the session to pass."
 
-Only **review evaluators** can be attached — an [LLM judge](/how-to/write-llm-judge-prompt) or a **Groundedness judge**. Attaching anything else is refused with *"Only review evaluators can grade a scenario. Structural checks live on the scenario's expected output."* That refusal is the design, not a limitation: structural checks are the assertions above, so there is no Structured match evaluator to attach — creating one is retired.
+Only evaluators that review replies can be attached — an [LLM judge](/how-to/write-llm-judge-prompt) or a **Groundedness judge**. Anything else is refused with:
+
+> That evaluator can't grade this scenario. Choose one of this project's evaluators that reviews replies — structural checks live on the scenario's expected output.
+
+Read that sentence literally, because it is **one refusal standing in for four different problems**: an evaluator of a kind this scenario can't bind, an id that names nothing, an id that names an evaluator in a project you're not looking at, and an id that isn't well formed at all. They are held indistinguishable on purpose — a refusal that said "that one is real, just not yours" would enumerate another project's records one id at a time. So when you see it, check the evaluator is in *this* project before you assume the problem is its kind.
+
+The kind half of the rule is the design, not a limitation: structural checks are the assertions above, so there is no Structured match evaluator to attach — creating one is retired.
 
 A Groundedness judge grades the agent's answers against the scenario's **Reference material**, which attaches per scenario on the same tab. A scenario with a Groundedness judge and no reference material can't run, and the tab says so.
+
+### Expected output is not expected end state
+
+A scenario can also carry a **test data plan** — the records the test needs before the conversation runs, what to read back afterwards, and what to clean up. That plan has a contract of its own, called **Expected end state**.
+
+Hold the two apart, because the names are close and the contracts are not:
+
+- **Expected output** is the *agent-behavior* contract, on the scenario's own **Expected Output** tab. Which tools, which routes, which evaluators grade the reply.
+- **Expected end state** is the *data* contract, inside the test data plan. What the records should look like once the conversation has finished.
+
+Asking the Trust Agent to set expected output never touches the test data plan, and asking it for the plan never rewrites the assertions. (There is no such thing as "Expected Data" — no surface ships that name.)
+
+So structural checking has two homes at this release, not one:
+
+| The question | Where it is answered |
+|---|---|
+| Did the agent call the right tools and take the right routes? | **Expected actions** and **Expected routes**, on the Expected Output tab |
+| Was the reply good enough? | The evaluators listed under **Expected behavior** |
+| Did the records end up the way they should have? | **Expected end state**, in the scenario's test data plan |
+
+[Test data](/concepts/test-data) explains the model; [Author test data for a scenario](/how-to/author-test-data-for-a-scenario) is the task recipe. Setting a plan through the Trust Agent sits behind the same gate as this page's ask — each requirement needs an evaluator created and attached first.
 
 ## Building and attaching an evaluator in one approval
 
 When you ask the agent to build a judge, it does not need a second turn to attach it. The evaluator create and the attach are **the same gated write** — one approval card, one approve, and the judge is grading immediately afterwards.
+
+The agent builds judges **one per requirement**, not one per project. It reads which requirements have linked scenarios but no evaluator, writes a focused rubric for each from that requirement's own acceptance criteria, attaches it to that requirement's linked scenarios in the same write, and links it back to the requirement record so coverage rolls up. Where the project has human-reviewed scenarios to sample, it calibrates in the same save and reports the agreement. A broad project-wide rubric attached to everything is exactly what it is told not to produce.
+
+After the attach it keeps going rather than handing you the bookkeeping: it completes the applicable expected actions and routes from the connected agent's recorded vocabulary, and sets applicable test data and end-state checks, before it offers to run anything.
 
 The card for a create is titled **Create the evaluator 'your evaluator name'?** and its primary button reads **Create it**. Behind **View proposal** you get the same before-and-after treatment on the evaluator's own fields:
 
@@ -102,17 +160,17 @@ TYPE     Not set → LLM judge
 RUBRIC   Not set → Pass if the agent's reply stays polite …
 ```
 
-### What it attaches to when you don't say
+### What happens when no scenarios are named
 
-This is the part most worth knowing, because it is easy to assume wrong in either direction:
+The platform has a default for a create that names no scenarios, and it is worth knowing even though the agent no longer relies on it:
 
-| You ask for | Scenarios it attaches to |
+| The write | Scenarios it attaches to |
 |---|---|
-| A **create**, naming scenarios | Exactly those |
-| A **create**, naming none | Every scenario in the project that has **no evaluator yet** |
-| An **update**, naming none | **None** — attachments are left alone |
+| A **create** naming scenarios | Exactly those. This is the path the agent takes, with the requirement's linked scenarios |
+| A **create** naming none | Every scenario in the project that has **no evaluator yet** |
+| An **update** naming none | **None** — attachments are left alone |
 
-The create default is idempotent and never clobbers: a scenario that is already graded by any evaluator is skipped, and a scenario that already had assertions keeps them — the new evaluator is appended to its contract, not swapped in. In a ten-scenario project where one scenario already had an evaluator, a create naming no scenarios attached the new judge to the other nine and left that one untouched.
+The create default is idempotent and never clobbers: a scenario already graded by any evaluator is skipped, and a scenario that already had assertions keeps them — the new evaluator is appended to its contract, not swapped in.
 
 <Warning>
   It is **not** a bulk attach to every scenario. If you want a judge on a scenario that already has one, name that scenario explicitly — re-running the create won't do it, because the default deliberately skips scenarios that are already graded.
@@ -140,14 +198,11 @@ The catalog is only as good as what the platform has captured. If the connected 
 
 When the agent builds a judge for you, the rubric describes what makes a reply good or bad — and nothing else. Response-format instructions, verdict-shape instructions ("return strict JSON", "respond pass or fail"), and hardcoded answer-key tables are **rejected by the platform**, because the product owns the judge's verdict contract.
 
-The refusal lands after you approve, not before, and the agent recovers by asking you how to proceed rather than silently rewriting your words:
+The check runs **before an approval card ever renders**. A rubric carrying one of those blocks is rejected while the write is still being previewed, so there is nothing for you to approve and nothing is created — you will not see a card and then a failure behind it.
 
-> The rubric's '## Output format' block (strict JSON / pass-or-fail verdict) is what the platform rejected — it wants grading criteria only. How do you want to proceed?
->
-> · Drop the Output format block, keep just 'Pass if the answer is accurate.'
-> · Cancel — don't create it
+The rejection is built to be repaired rather than reported. It names the category of the problem, quotes back the exact text that tripped it, and carries a concrete fix — for a response-format block, *"Delete the response/output/verdict format section. The platform owns the judge's output shape; the rubric only describes what makes a reply good or bad."* The agent is instructed to use that to revise and re-save, and never to claim an evaluator was created after an error. So the usual outcome is a corrected rubric on the next turn; if it does come back to you, it should name the offending line rather than asking you to guess.
 
-Nothing is created when the rubric is refused. Note the scope: this rule governs rubrics the **Trust Agent** writes. Authoring a judge by hand in the Evaluators editor is not policed the same way, so the discipline there is yours — [Write grading rules that calibrate](/how-to/write-llm-judge-prompt) is the guide.
+Note the scope: this rule governs rubrics the **Trust Agent** writes. Authoring a judge by hand in the Evaluators editor is not policed the same way, so the discipline there is yours — [Write grading rules and judge prompts](/how-to/write-llm-judge-prompt) is the guide.
 
 ## Check the result on the Expected Output tab
 
@@ -159,13 +214,21 @@ After you approve, open the scenario from the [Scenarios](/concepts/scenarios) l
 
 **Reference material is not a fourth section.** It is a subsection nested under **Expected behavior**, and it is revealed only by attaching a judge that grades against it — today, a Groundedness judge. A scenario without one never shows it, so don't go looking for it before you attach the judge. Once it is showing and still empty it carries a blocker naming the judge: *"Reference material required — … grades this scenario's answers against reference material. Attach at least one document — until then this scenario can't run."*
 
-Above all of it sits the tab's **Requirements** section — the `REQ-{n}` pills for the requirements this scenario covers, plus **Link requirement**. It is the *why* behind the contract rather than part of the contract, and it is covered in [Requirements](/concepts/requirements).
+Above all of it sits the tab's **Requirements** section — the `REQ-{n}` pills for the requirements this scenario covers, plus **Link requirement**. It is the *why* behind the contract rather than part of the contract, and it is covered in [Requirements](/concepts/requirements). Because of the gate at the top of this page, it will not be empty by the time you get here.
 
 The action and route pickers suggest values observed across the project's sessions; on a project that hasn't run yet they say *"Nothing observed yet. Type a tool name to add it — observed actions will appear here as suggestions once sessions run."* You can type a name that has never been observed, which is exactly how an unverified tool name reaches a contract — the same gap the agent warns you about.
 
 ## Troubleshooting
 
 <AccordionGroup>
+  <Accordion title="The agent won't write it and keeps steering me back to requirements or evaluators">
+    That is the workflow gate, not a fault. Setting expected output is refused until every requirement in the project carries an evaluator that has been created **and** attached to its scenarios. The message names the missing step and offers to walk you through it — take the offer. See [Before you ask](#before-you-ask-this-step-is-gated).
+  </Accordion>
+
+  <Accordion title="My write changed the assertions but not the graders (or the other way round)">
+    That is the split. Expected actions and routes are replaced wholesale by every write. Attached evaluators are only changed by a write that names evaluators explicitly — otherwise they stay exactly as they were. The approval card's wording tells you which kind of write you are approving.
+  </Accordion>
+
   <Accordion title="The agent asked me questions instead of proposing a write">
     The scenario already has an expected output, and the write replaces it wholesale. The flow confirms what to keep before anything is dropped. Answer each question and the approval card follows.
   </Accordion>
@@ -178,8 +241,8 @@ The action and route pickers suggest values observed across the project's sessio
     Check whether the required tool exists on the connected agent. A required assertion on a tool the agent doesn't expose can never be satisfied. The agent flags this in chat when it drafts the contract, but the assertion is still written if you approve.
   </Accordion>
 
-  <Accordion title="The evaluator wasn't created after I approved it">
-    Its rubric probably carried response-format or answer-key content, which the platform rejects. The agent comes back with options — drop the offending block, or cancel. Nothing was saved.
+  <Accordion title="The agent never offered me a card for the evaluator I asked for">
+    Its rubric probably carried response-format, verdict-shape, or answer-key content, which the platform rejects while the write is still a preview. Nothing was saved, and there was nothing to approve. The rejection names the offending text and the fix, so the agent should come back with a corrected rubric.
   </Accordion>
 
   <Accordion title="The scenario can't run and mentions reference material">
@@ -200,10 +263,16 @@ The action and route pickers suggest values observed across the project's sessio
   <Card title="Simulate agents with scenarios" icon="users" href="/how-to/simulate-with-scenarios">
     Define a scenario, run it, and set expected output from a session you like.
   </Card>
-  <Card title="Write grading rules that calibrate" icon="ruler" href="/how-to/write-llm-judge-prompt">
+  <Card title="Write grading rules and judge prompts" icon="ruler" href="/how-to/write-llm-judge-prompt">
     Authoring judge rules by hand, and the anti-patterns that don't calibrate.
   </Card>
   <Card title="Calibrate an evaluator" icon="target" href="/how-to/calibrate-an-evaluator">
     Prove a judge agrees with a careful human reviewer before you rely on it.
+  </Card>
+  <Card title="Capture requirements" icon="clipboard-check" href="/how-to/capture-requirements">
+    The step this one is gated on: get requirements on file before anything downstream will write.
+  </Card>
+  <Card title="Author test data for a scenario" icon="database" href="/how-to/author-test-data-for-a-scenario">
+    The other contract — starting data, read-back, and expected end state.
   </Card>
 </CardGroup>

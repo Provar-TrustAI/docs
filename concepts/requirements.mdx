@@ -6,7 +6,9 @@ description: "What your agent must do and must never do, written in business lan
 
 A Requirement is a statement about your agent in the language your business actually uses: *"Refund requests are resolved within one conversation."* *"Never promise a refund amount without checking policy."* It's the layer above test cases — the thing a test case exists to prove.
 
-Requirements answer a question the rest of Trust AI can't: **is anything actually checking this?** A project can have a healthy pass rate and still be blind to a rule nobody wrote a scenario for. Requirements make that blindness visible.
+Requirements answer a question the rest of TrustAI can't: **is anything actually checking this?** A project can have a healthy pass rate and still be blind to a rule nobody wrote a scenario for. Requirements make that blindness visible.
+
+They are also the second step of the authoring workflow the [Trust Agent](/concepts/trust-agent) enforces, and everything after them is built on them — ask for scenarios on a project with nothing on file and the agent declines and brings you back here. See [Why requirements come first](#why-requirements-come-first).
 
 ## What a requirement carries
 
@@ -42,6 +44,8 @@ You never assert a requirement's health. It's derived from the scenarios and eva
   A **Draft** or **Archived** requirement shows a lifecycle chip instead, and its Status column reads an em-dash — because health is a statement about evidence, and a draft isn't claiming anything yet. Drafts aren't a health state wearing a different hat.
 </Note>
 
+Not every result is evidence. A conversation that ends in **Guardrail blocked**, **Environment problem** or **Access blocked**, or in the amber **Couldn't test** — an action the agent itself runs returned an error — is out of the pass rate entirely, so it can neither pass nor fail a requirement. A requirement whose coverage is in place but whose results were all of that kind stays on **Not yet run**.
+
 Here's that computation in practice, on a requirement with nothing attached:
 
 | Action | Health becomes |
@@ -52,9 +56,40 @@ Here's that computation in practice, on a requirement with nothing attached:
 
 Nothing was asserted at any step. Linking changed what could be proven, and the rollup followed.
 
+## Why requirements come first
+
+Requirements are not a tab you can come back to later. They are step 2 of the authoring workflow the Trust Agent enforces at run time, and each step is refused until the artifact before it exists:
+
+<Steps>
+  <Step title="Connect an agent">
+    The agent under test. Most authoring is refused outright without one.
+  </Step>
+  <Step title="Capture requirements">
+    What the agent must do, and must never do.
+  </Step>
+  <Step title="Generate scenarios">
+    Each linked to the requirement it exercises.
+  </Step>
+  <Step title="Build an evaluator per requirement">
+    Created for that requirement and attached to its linked scenarios in the same write.
+  </Step>
+  <Step title="Complete expected output">
+    The actions and routes the scenarios assert.
+  </Step>
+  <Step title="Run the evaluation">
+    The step that produces the evidence health is computed from.
+  </Step>
+</Steps>
+
+Ask for step 3 on a project with no saved requirement and the agent does not improvise. It tells you what is missing and offers to fix it — *"Draft and save the requirements first. I can guide you through that now before we continue."* — and the later steps carry the same shape, so a project that skipped this page dead-ends at the first thing it tries to run.
+
+That ordering is what makes coverage computable end to end. Because every evaluator is authored for a requirement and attached to that requirement's own scenarios, the evidence a run produces has somewhere to roll up to.
+
 ## Reading the list
 
-The Requirements list leads with a rollup — how many requirements, how many uncovered, how many still drafts — and three filters:
+**Requirements** sits in the project sidebar above **Scenarios** — the rail reads as the authoring funnel, so requirements come before the scenarios that prove them. The row is there in every project; its badge counts the project's active requirements and stays blank at zero, so an untouched surface reads quiet rather than shouting a `0`.
+
+The list leads with a rollup — how many requirements, and how many in each health state, plus a neutral **Drafts** segment when there are any. Then three filters:
 
 - **All**
 - **Gaps** — Uncovered **plus** Partially covered. Both are places you can't yet stand behind a claim, so they belong in one worklist.
@@ -62,11 +97,13 @@ The Requirements list leads with a rollup — how many requirements, how many un
 
 Gaps is the one to live in. Failing tells you something broke; Gaps tells you something was never being watched, which is usually the more expensive problem.
 
-The table shows the handle, the requirement, its source, linked scenario and evaluator counts, status, pass rate, and when evidence last arrived. Drafts and archived requirements are excluded from the Gaps and Failing filters, since their health isn't a health state.
+Those three chips are the whole of the filtering — there is no filter popover on this surface — but they are not the whole toolbar. It also carries the ordinary table controls: **Views** for saved views, a column gear that both shows and hides columns and reorders them by dragging, column resize, a search box, a result count, and **Save view**. **All requirements** is the only built-in view; any view you save yourself can be renamed, deleted, or **Set as default**, and the default is what the surface opens on next time.
+
+The table shows the handle, the requirement, its source, linked scenario and evaluator counts, status, pass rate, and when evidence last arrived. Long lists load as you scroll rather than stopping at a page boundary. Drafts and archived requirements are excluded from the Gaps and Failing filters, since their health isn't a health state.
 
 ## Following a requirement to its evidence
 
-A requirement's fly-in has **Details**, **Coverage**, and **Status** tabs — what it says, what proves it, and what the evidence currently shows.
+A requirement's fly-in has **Details**, **Coverage**, and **Status** tabs — what it says, what proves it, and what the evidence currently shows. Its footer names the keys: `J` and `K` move to the next and previous requirement, `F` goes fullscreen, and `Esc` backs out one level at a time.
 
 From the other direction, a scenario's requirement pills link back with a `?req=` deep link, and that link takes the handle in whatever form you have it. All of these resolve to the same requirement:
 
@@ -81,7 +118,7 @@ That's deliberate: the handle is meant to be pasteable out of a message or a tic
 Four sources, and the list labels each one so you always know how a requirement entered:
 
 - **Manual** — typed in directly.
-- **Document** — extracted from a document you already have, via **Extract from your docs**.
+- **Document** — extracted from a document you already have. The control reads **Extract from document** in the list header, and **Extract from your docs** on the empty list.
 - **Chat** — captured from a conversation with the [Trust Agent](/concepts/trust-agent).
 - **Import** — brought in from an external system.
 

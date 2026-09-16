@@ -1,0 +1,124 @@
+---
+title: "Test data"
+icon: "database"
+description: "How a scenario prepares, reads back, checks, and cleans up the records a test needs — plans, stores, and the run report."
+---
+
+Most grading asks what the agent *said*. **Test data** asks what it *did*. A scenario that carries test data creates the records the conversation needs, holds the conversation, reads those records back afterwards, checks them against what you said should happen, and removes everything it created — every run, in that order.
+
+That is the difference between "the agent told the customer their case was escalated" and "the case is escalated." A refund the agent promised but never issued passes a transcript check and fails a test-data check.
+
+<Note>
+  **Expected end state is not expected output.** They are two different contracts on the same [scenario](/concepts/scenarios), and the product keeps their names apart on purpose.
+
+  - **Expected output** is the *agent-behavior* contract on the scenario's own **Expected Output** tab: which tools must or must not be called, where the conversation must be routed, which judges grade the reply.
+  - **Expected end state** is the *backend-data* contract inside the test data plan: what the records should look like once the agent has finished.
+
+  A scenario can carry both, one, or neither. Never read one as the other.
+</Note>
+
+## One scenario, one plan
+
+A scenario's test data is authored as a single **plan**, and the plan is what a run executes. Open a scenario, choose the **Test Data** tab, and the plan renders as five step cards in run order. Their titles are full sentences, because each one is a claim about what will happen:
+
+- **Create what this test needs** — the records the agent should find when the conversation starts. Each one gets a plain-language label ("The cracked-screen case"), and every later step refers to it by that label rather than by an id.
+- **Run the conversation** — "The persona speaks with the agent; its goal can use the seeded values."
+- **Read back what the agent created** — after the conversation, TrustAI re-reads the matching records. A read-back collects what it found for the run report, and grades any field you gave an expected value.
+- **Check what should happen** — the expected end state. Only the changes listed here should happen, and only the objects the read-back names are checked — nothing outside the plan.
+- **Clean up everything this test created** — any cleanup steps you wrote, plus the automatic sweep described below.
+
+<Frame caption="The Test Data tab leads with the plan. The bar above it names the environment every run acquires; each card summarizes its step when collapsed and opens into the records behind it.">
+  <img src="/images/scenarios-test-data-plan.png" alt="The Test Data tab of scenario SCN-000001, Escalate a cracked-screen support case. A Default environment bar reads Always used above a section headed The plan with an Edit plan button. Five step cards follow: Create what this test needs, expanded to show the seeded records The buyer account (Account, Northwind Supplies) and The cracked-screen case, then Run the conversation, Read back what the agent created, Check what should happen, and Clean up everything this test created." />
+</Frame>
+
+The tab carries a **Help** button that defines the vocabulary in place — **The plan**, **Read-back**, **Filter**, **Cleanup**, **How this test runs**, **Starting data**, **Expected end state**, and **Environment**. Those are the product's own words for these ideas, and this page uses the same ones.
+
+Two spellings are deliberate and both ship: the step is the verb **Read back**, the thing it produces is the noun **read-back**.
+
+### Starting data is created fresh, not borrowed
+
+**Starting data** is the records a run needs that don't exist yet. They are created fresh for the scenario and reset each run, so a test never depends on a record somebody else left behind — and never leaves one behind itself.
+
+That is also why steps name records by label. A label survives the record being recreated on the next run; an id does not.
+
+## How this test runs
+
+Every scenario answers one question about the environment, and it is binary: **Runs alongside other tests (recommended)** or **Runs alone**. Choose the second when the test touches settings or data other tests share. There is no third option, and nothing else about parallelism is asked — the rest is derived from what the plan actually does.
+
+## Where test data lives
+
+Test data is created in a **store** on a connection, not in the abstract. Stores are configured per agent connection on a project's **Connections** tab: open the agent's card, expand **Customize environment**, and the **Test data stores** section lists what that connection can write to, with **Add a store** to add another. A Salesforce connection can reuse the org the agent itself runs in, in which case the store is badged **Uses this agent's connection**.
+
+The same expander carries the connection's reset promise as a plain sentence — **Between tests: Removes only the records each test created.** — alongside how many tests may run against the connection at once and the optional test users a run can act as.
+
+Open a store to see how it connects and where its test data goes. Its tagging promise is the thing to read: "Every record these tests create carries that tag, so a reset removes only their own rows and never touches your real data."
+
+See [Manage a project's connections](/how-to/manage-project-connections) for the tab itself, and [Connect a Salesforce Agentforce agent](/how-to/connect-agentforce) for standing one up.
+
+## Cleanup runs on every run
+
+Cleanup is not a step you can forget and not a setting you can turn off. No surface offers to disable it.
+
+Two sentences ship, and they answer different questions — don't swap them:
+
+| Where you see it | What it says |
+|---|---|
+| The connection's **Customize environment** footer | "Between tests: Removes only the records each test created." |
+| The plan's **Clean up everything this test created** card | "Removes the records this test created and tagged for the run — seeded records included." |
+
+{/* ACCURACY-AUDIT-PENDING */}
+The sweep runs whether or not the plan lists cleanup steps of its own. Where the plan named the records it created, the sweep targets those records specifically and removes them in the reverse of the order they were created, so a child record goes before the parent it depends on. Cleanup steps you wrote run first, and the sweep adds to them rather than replacing them.
+
+A plan is allowed to reach wider than that. A cleanup step that tidies up after the agent often has to — nothing marks a record the agent created, so the step has to say something broader, like "every case whose status is New". TrustAI does not refuse such a plan; it asks somebody entitled to make the call to agree on the record, with **Dismiss** and **Confirm and save**, and it stores who agreed alongside the plan so the next person can see that somebody did. A drafted plan is warned about the same way rather than withheld.
+
+There is one boundary that is not yours to agree past: the objects the connection was set up to work with. A plan reaching outside that allowlist is declined outright, and the refusal names what is inside it, so you learn what you can ask for.
+
+## What a run reports back
+
+{/* ACCURACY-AUDIT-PENDING */}
+Every run records what actually happened to the test data, under the heading **What TrustAI did**. It reads as a timeline — the environment reserved, the starting records created, the conversation run, the end state read back, the run cleaned up — with three totals beside it: **Total time**, **Records created**, and **Records removed**. A step that was skipped or failed says so in its own words rather than going quiet.
+
+It is a section, not a page, and it appears in two places:
+
+- On a graded result, in the [evaluation](/concepts/evaluations) result fly-in's **End state** tab, beneath the expected-versus-actual diff. The grade comes first; the report explains how it was reached.
+- On a conversation, in the [session](/concepts/sessions) fly-in's **Test Data** tab, without the diff — "Grading lives with this session's evaluation result."
+
+Both carry **View the test data plan**, which takes you back to the scenario the plan belongs to. Before a scenario has ever run, the section says so plainly instead of rendering an empty timeline.
+
+On a run's detail table, an **End state** column appears only when at least one result actually graded on end state. Its absence on a transcript-graded run is correct, not a missing column.
+
+## How TrustAI works out which Salesforce objects a test can use
+
+{/* ACCURACY-AUDIT-PENDING */}
+Drafting a plan for a Salesforce agent needs to know which objects that agent touches, and TrustAI works it out rather than asking you to list them. It walks from the agent to its actions; for an action that runs a Flow it reads the **active** version of that Flow and takes the objects that version actually reads, creates, updates, or deletes — never inferring them from the Flow's name. It then narrows the result to the objects the connected user is permitted to read.
+
+Two things about that are worth knowing before you trust the result:
+
+- **The narrowing is at the object level.** It is a read of which objects the connected user can reach, not a field-by-field permission check. An object the user cannot read is dropped.
+- **What it could not resolve is reported, not assumed away.** A Flow that calls subflows, a dynamically built query, or an Apex class the connected user cannot read leaves that action unresolved, and the catalog says so: it names the count and tells you to treat the list as a starting point rather than the agent's whole surface. It never widens into a describe of your entire org to compensate — an empty result refuses instead.
+
+So read the catalog as a well-grounded proposal. If an object you need is missing, add it to the connection's scope.
+
+## Drafting a plan, and where the Trust Agent fits
+
+You never have to start from an empty form.
+
+**The plan editor drafts for you.** Its **AI** tab takes a sentence about the data a test needs — "Seed a support case about a cracked widget screen, check the agent escalates it, and clean up afterward" — and drafts the plan, the end state it should leave behind, and a proposal for how the test should run, then counts how many records each step would touch. Nothing applies until you review it: the draft lands on the tab badged **Draft — not saved** with **Discard** and **Apply draft**, and applying it over a plan you already had is a replacement, which it says out loud before it happens.
+
+**The [Trust Agent](/concepts/trust-agent) can set a scenario's test data in chat**, behind the usual approval card. That write replaces the scenario's test data wholesale, so the agent reads what is already there before it proposes anything.
+
+One gap worth knowing: when you open a scenario from the Trust Agent's own fly-in, the docked plan editor isn't wired there. You get the step cards plus the whole-plan JSON editor instead, headed **The stored plan** with an **Edit the plan as JSON** disclosure. It edits the same document the **Form** tab does.
+
+## Working with test data
+
+Test data is authored on the scenario, configured on the connection, and read back on the run — three surfaces, one plan. [Author test data for a scenario](/how-to/author-test-data-for-a-scenario) walks the authoring path end to end.
+
+Developers who want the underlying endpoints and request/response shapes can find them in the [API Reference](/api-reference).
+
+## Related concepts
+
+- **[Scenarios](/concepts/scenarios)** — the test case a plan belongs to, and where **Expected Output** lives
+- **[Evaluations](/concepts/evaluations)** — runs that grade scenarios, including on end state
+- **[Sessions](/concepts/sessions)** — the conversations a run produces, each with its own **Test Data** tab
+- **[Manage a project's connections](/how-to/manage-project-connections)** — where test data stores are configured
+- **[Connect a Salesforce Agentforce agent](/how-to/connect-agentforce)** — standing up the connection a store sits on

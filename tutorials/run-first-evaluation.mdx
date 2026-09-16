@@ -4,7 +4,7 @@ icon: "chart-line"
 description: "Apply the Evaluator you authored across the scenarios you curated — the first scored run against a live agent."
 ---
 
-Finishing this tutorial completes the click-path through the evaluation loop; the agent-led capstone, [Evaluate with the Trust Agent](/tutorials/evaluate-with-the-trust-agent), drives the same loop by conversation. With the [scenarios](/concepts/scenarios) you curated in [the quickstart](/tutorials/quickstart) and the [Evaluator](/concepts/evaluators) you authored in [Build your first Evaluator](/tutorials/build-first-evaluator), you'll now **run an [Evaluation](/concepts/evaluations)** — the moment Trust AI produces its first piece of evidence about your agent's behavior.
+Finishing this tutorial completes the click-path through the evaluation loop; the agent-led capstone, [Evaluate with the Trust Agent](/tutorials/evaluate-with-the-trust-agent), drives the same loop by conversation. With the [scenarios](/concepts/scenarios) you curated in [the quickstart](/tutorials/quickstart) and the [Evaluator](/concepts/evaluators) you authored in [Build your first Evaluator](/tutorials/build-first-evaluator), you'll now **run an [Evaluation](/concepts/evaluations)** — the moment TrustAI produces its first piece of evidence about your agent's behavior.
 
 By the end you'll have:
 
@@ -13,13 +13,13 @@ By the end you'll have:
 - A second run against a different [Agent Version](/concepts/agent-versions) (where available), read side by side with the first
 - A concrete idea of what to do next based on what you saw
 
-Configuring the run and reading the results are a few minutes of clicking each. How long the run itself takes is not a Trust AI number — it is however long your agent takes to hold each conversation, multiplied by how many conversations you launched. Watch the run's progress counter rather than the clock; step 3 shows you where it is.
+Configuring the run and reading the results are a few minutes of clicking each. How long the run itself takes is not a TrustAI number — it is however long your agent takes to hold each conversation, multiplied by how many conversations you launched. Watch the run's progress counter rather than the clock; step 3 shows you where it is.
 
 ## Before you start
 
 You should have, from the prior two tutorials:
 
-- A [Project](/concepts/projects) with at least one connected agent. If none is connected yet, the launcher will tell you: **Connect an agent in Settings → Connections before running this scenario** (that's the **Connection** tab of Project Settings).
+- A [Project](/concepts/projects) with at least one connected agent. If none is connected yet, the launcher will tell you: **Connect an agent in Settings → Connections before running this scenario** — follow it literally; **Connections** is a tab of Project Settings.
 - At least 3-5 scenarios in your **Scenarios** list (more is better)
 - At least one saved [Evaluator](/concepts/evaluators). Calibrating it against the pass/fail verdicts you recorded on scenarios (the prior tutorial) makes its verdicts trustworthy, but it isn't a gate — you can run before calibrating.
 
@@ -35,7 +35,7 @@ One thing to check before launching: **evaluators travel with each scenario**, n
 
     The agent proposes the run and waits for your approval before anything launches. Or set it up by hand: open **Scenarios**, select the scenarios you want (or select none to run the whole view), and click **Run** — the split button's default is **Run & evaluate**. (The chevron also offers **Run only**, which simulates without grading; skip that for now.)
 
-    Either path opens the same **Evaluation Launcher** — one modal that drives every run in Trust AI. You can also reach it from the Evaluations page via **New evaluation**, where you first choose what to evaluate: scenarios (simulate with an agent) or sessions (grade recorded conversations directly).
+    Either path opens the same **Evaluation Launcher** — one modal that drives every run in TrustAI. You can also reach it from the Evaluations page via **New evaluation**, where you first choose what to evaluate: scenarios (simulate with an agent) or sessions (replay recorded conversations against the connected agent and grade the new answers — see [Evaluate captured sessions](/how-to/evaluate-sessions)).
 
     Notice the **Evaluators** section is read-only: *"Inherited from each scenario — graded automatically, no picking needed."* If it instead says the scenarios don't carry any evaluators yet, go back and add your Evaluator on each scenario's **Expected Output** tab first.
 
@@ -49,13 +49,18 @@ One thing to check before launching: **evaluators travel with each scenario**, n
 
     The **Agent** selector answers one question: *which connected agent simulates each scenario*. Pick the agent your Project has connected — if you connected one during [the quickstart](/tutorials/quickstart), it's in this list. If multiple are connected, pick the production one for your first run; you'll run against another version in step 5.
 
-    **What's happening underneath:** a scenarios run always **simulates**. For every scenario, each attached persona plays out the scenario's goal against this agent in a live conversation — Trust AI doesn't replay stored responses, it gets fresh ones from the agent under test. That's also why each persona gets its own scored result.
+    **What's happening underneath:** a scenarios run always **simulates**. For every scenario, each attached persona plays out the scenario's goal against this agent in a live conversation — TrustAI doesn't replay stored responses, it gets fresh ones from the agent under test. That's also why each persona gets its own scored result.
 
     Below the agent sits **Repeat each test case** — a **1 / 2 / 3 / 4** selector, with the hint *"Repeat each case to measure how reliably the agent passes. More repeats take longer to run."* Leave it at **1** for your first run: one attempt per case, one result per case, a plain pass rate to read. Raise it later when you want to know whether a pass was luck — [the Evaluations concept page](/concepts/evaluations) covers what the repeated-run headline tells you.
 
     One thing the launcher won't do for you: the **This will run** preview counts a single attempt, so it reads identically at a repeat of 1 and a repeat of 4. Multiply it yourself.
 
-    **You should see:** the Agent selected, **Repeat each test case** on **1**, and the **This will run** preview totaling the fan-out — how many simulations the run will produce across your scenarios and their personas.
+    Below the preview sits one more section: **Environment**, with a **New** pill and a line explaining it — *"Selects the connected org or test data store, test identity, and cleanup used for this run."* You shouldn't have to touch it: the launcher preselects the environment attached to the agent you just picked, probes it, and settles on **Ready to run** over the four things it checked — *"The agent is active and ready."*, *"The environment is available now."*, the test data store the run will use, and *"Between tests: Removes only the records each test created."* Take what it offers; [Test data](/concepts/test-data) covers what the choice actually changes. The run button waits on that probe, so if the panel never reaches **Ready to run**, fix that before you launch rather than hunting for a disabled button's reason.
+
+    {/* ACCURACY-AUDIT-PENDING */}
+    One edge you probably won't hit on a first run, but should recognise: where another run is already holding the environment you picked, the confirm button is expected to read **Queue run** instead.
+
+    **You should see:** the Agent selected, **Repeat each test case** on **1**, the **This will run** preview totaling the fan-out — how many simulations the run will produce across your scenarios and their personas — and an **Environment** section beneath it reporting **Ready to run**.
   </Step>
 
   <Step title="Launch and watch it run">
@@ -63,18 +68,18 @@ One thing to check before launching: **evaluators travel with each scenario**, n
       *Ask the Trust Agent:* "Launch it."
     </Note>
 
-    Approve the agent's proposed run, or click the launcher's confirm button (**Run evaluation**) yourself.
+    Approve the agent's proposed run, or click the launcher's confirm button yourself. It reads **Run evaluation** — or **Queue run**, if another run currently holds the environment you picked, in which case the launch waits for its turn and starts on its own.
 
     What happens in the background, in roughly this order:
 
-    1. For each scenario × persona pair, Trust AI simulates a fresh conversation with your agent
+    1. For each scenario × persona pair, TrustAI simulates a fresh conversation with your agent
     2. Each conversation is captured as a real Session — it appears in your Sessions list with Source **Scenario**, linked back to the scenario that produced it (the "Evaluation results are Sessions, too" pattern, expanded in [the Evaluations concept page](/concepts/evaluations#evaluation-results-are-sessions-too))
     3. The evaluators inherited from each scenario grade each result and produce a verdict + reasoning
     4. The headline numbers roll up on the run detail page
 
     If you launched from the Scenarios list, you stay right there: each in-flight scenario shows a live **Generating…** badge that settles as it finishes. Open the run's detail page and the status pill reads **Running**, with a progress line beneath the run name counting *N* / *M* completed. That counter — not a stopwatch — is how you tell a slow run from a stuck one. While the run is in flight the header offers **Cancel run** (and a confirm dialog: canceling keeps every result already scored, but the run can't be resumed). When it settles, the pill reads **Completed**.
 
-    We don't publish an expected duration, because there isn't one to publish: the wall-clock time is your agent's conversation latency times the number of simulations you launched, and Trust AI doesn't control either. Judge progress by the counter.
+    We don't publish an expected duration, because there isn't one to publish: the wall-clock time is your agent's conversation latency times the number of simulations you launched, and TrustAI doesn't control either. Judge progress by the counter.
 
     The pipeline is also built not to lie to you about infrastructure: model-capacity throttling is retried automatically with backoff, and one bad result can't sink the whole run.
 
@@ -104,25 +109,28 @@ One thing to check before launching: **evaluators travel with each scenario**, n
 
     After those comes one column per evaluator — plus a per-check column for any structural expectation the run graded (**Expected Actions**, **Expected Routes**) and an **End state** column when at least one result was actually graded on end state. All of those are hideable from the column menu, which also carries **Duration** (listed there but off by default). The menu is where the **View** toggle lives too, at the very top, offering **By scenario** and **Flat**. **Flat** drops the grouping: one row per result, no summaries, no reliability read. Reach for it when you want to sort or scan across scenarios rather than within them.
 
-    Click an attempt row to open the result fly-in: score, reasoning, and a **Transcript** tab carrying a **Simulated** badge (a fresh conversation was driven for this run) or **Replayed** (stored turns were graded). Where a scenario has more than one attempt, the fly-in header grows a **Trial N of K** switcher. **Export** in the header downloads the full results as CSV.
+    On a summary row, each of those evaluator and per-check columns rolls its trials up rather than showing one of them: the cell reads `1/1 passed` on your single-attempt run, `2/3 passed` on a repeated one, with a muted **N not scored** line beneath it where some attempts left the score. Expand the row and each **Trial** shows its own **Pass** or **Fail** in the same column.
 
-    A verdict isn't just pass or fail. Three labels cover the cases where the agent never got a fair shot: guardrail-intercepted responses read **Guardrail blocked**, infrastructure and harness failures read **Environment problem**, and a platform that refused the run's execution identity reads **Access blocked**. None of them count against the pass rate, so a capacity hiccup can't masquerade as a drop in agent quality.
+    Click an attempt row to open the result fly-in: score, reasoning, and a **Transcript** tab carrying a **Simulated** badge (a fresh conversation was driven for this run) or **Replayed** (stored turns were graded). A simulated transcript closes with one plain-English line — **"This conversation ended because "** the customer got what they needed, the agent could not help with it, the customer gave up, the agent ended or transferred it, or it reached the length limit before finishing — which answers the "did this finish, or did it run out of turns?" question before you read a single verdict. Where a scenario has more than one attempt, the fly-in header grows a **Trial N of K** switcher. **Export** in the header downloads the full results as CSV.
 
-    But those three labels are written in the **result fly-in**, not in the table. Open an excluded result and a banner sits above the transcript naming the class and explaining it in a sentence — "The evaluation harness hit an error before it could score this example, so it was never graded," and so on. The table itself never prints them.
+    A verdict isn't just pass or fail. **Five outcomes leave the pass-rate denominator, and only four of them are the environment's fault.** The four environment ones read under three labels — guardrail-intercepted responses read **Guardrail blocked**, infrastructure and harness failures read **Environment problem**, and a platform that refused the run's test user reads **Access blocked**. On those, the agent never got a fair shot, and none of them count against the pass rate — so a capacity hiccup can't masquerade as a drop in agent quality.
 
-    What the table prints for all three is the fourth state: **Not graded** in the **Final verdict** column. It is the same label a result gets when a conversation was held and a result was written but nothing produced a behavioral score for it — usually because no behavioral evaluator was attached to that scenario. So **Not graded** carries exactly one meaning at a glance: *no behavioral score here*. Whether that's a gap in your grading or a run the environment sank is the fly-in's answer to give, not the column's — which is why an excluded result is always worth opening rather than counting. (Don't confuse either with **Not evaluated**, which means no evaluation ran against the session at all.)
+    Those three labels are written in the **result fly-in**, not in the table. Open such a result and a banner sits above the transcript naming the class and explaining it in a sentence — "The evaluation harness hit an error before it could score this example, so it was never graded," and so on. What the table prints for all three is the neutral **Not graded** chip in the **Final verdict** column — the same label a result gets when a conversation was held and a result was written but nothing produced a behavioral score for it, usually because no behavioral evaluator was attached to that scenario.
 
-    **Not graded** also appears a level up. A run can reach **Completed** with nothing behaviorally scored, and then the header reads **Not graded** where the pass rate would be. A completed run and a graded run are not the same thing.
+    The fifth outcome is the exception, and it is the one to learn now: **Couldn't test**. It means an action the agent itself runs — a Flow, an Apex class, an API automation — returned an error, so the behavior under test never happened. It leaves the score for a reason of its own (a pass would claim behavior that never ran succeeded; a fail would grade behavior that never ran), and it does **not** get the "not the agent's fault" framing, because the failing action is the agent's. So it paints its own **amber** chip right in the **Final verdict** column, and the table now carries two "didn't score" reads rather than one: calm grey **Not graded**, and amber **Couldn't test**. Open either — the column tells you a result exists, not what to do about it. (Don't confuse either with **Not evaluated**, which means no evaluation ran against the session at all.)
+
+    **Not graded** also appears a level up, and there it now names its own cause: a run can reach **Completed** with nothing behaviorally scored, and the header reads **Run only — nothing was graded** if you deliberately simulated without grading, **Not graded — no evaluators** if the run asked to be graded but inherited none, or a plain **Not graded** otherwise. A completed run and a graded run are not the same thing.
 
     **What to look at first:**
 
-    1. **The pass rate.** Sanity check: is it roughly where you expected? If your calibration agreement in the prior tutorial was 90%, you'd expect roughly that — on this run, with this agent, on these scenarios.
-    2. **Failed results, top-down.** Click the **Final verdict** header and choose **Sort ascending** — the header opens a small menu rather than sorting on the click — to bring the failing summaries to the top. Expand the first one and open its attempt. Read the evaluator's reasoning, then the transcript. The triage is three-way: did the agent regress, did the evaluator over-reject, or is it an environment problem? The third case won't be among the fails: an excluded result reads **Not graded**, so it sorts into its own block ahead of them. Ascending order therefore reads **Not graded**, then **Fail**, then **Pass** — work down from the top.
-    3. **Persona spread.** Each scenario and persona pair gets its own summary row, so a persona that fails where the others pass stands out. On a failing attempt the **Transcript** column carries a plain-English divergence hint saying how the answer diverged — a behavior gap tied to *who's asking*, which a single aggregate number would have hidden.
+    1. **An amber strip, if there is one.** Where a run couldn't test some of its conversations, an amber banner sits above the results reading **Couldn't test some conversations**, with the counts beneath it and a **See details** action opening **What happened in this run**. Read that before the pass rate: it tells you how much of the run the number is actually about. Where the run tested more than three conversations at once, the dialog also offers **Re-run at concurrency 3** so you can find out whether the load was the cause.
+    2. **The pass rate.** Sanity check: is it roughly where you expected? If your calibration agreement in the prior tutorial was 90%, you'd expect roughly that — on this run, with this agent, on these scenarios. Remember it counts only the conversations that were scored; the **Conversations passed** tile spells out the denominator.
+    3. **Failed results, top-down.** Click the **Final verdict** header and choose **Sort ascending** — the header opens a small menu rather than sorting on the click — to bring the failing summaries to the top. Expand the first one and open its attempt. Read the evaluator's reasoning, then the transcript — all of it, because the judge read all of it. A criterion violated on any agent turn fails the conversation for that criterion even if a later turn puts it right, so the offending turn may not be the last one. The triage is three-way: did the agent regress, did the evaluator over-reject, or was the conversation never fairly tested? That third case won't be among the fails: both ungraded reads sort into their own block ahead of them, so ascending order runs **Not graded** and **Couldn't test**, then **Fail**, then **Pass** — work down from the top.
+    4. **Persona spread.** Each scenario and persona pair gets its own summary row, so a persona that fails where the others pass stands out. On a failing attempt the **Transcript** column carries a plain-English divergence hint saying how the answer diverged — a behavior gap tied to *who's asking*, which a single aggregate number would have hidden.
 
     One more headline you may meet later: if you raised **Repeat each test case** at launch *and* the run graded something, it leads with a **Pass^K** reliability rate instead of a pass rate — the share of cases that passed *every* attempt, with the full curve on hover. Graded results are the gate, not the repeat count: a repeated run with nothing behaviorally scored still leads with **Not graded**. You left the selector at **1**, so you'll see the plain pass rate.
 
-    **You should see:** an Evaluation that tells a story — pass rate, one summary row per scenario and persona, and the reasoning behind each verdict. This is the evidence Trust AI exists to produce.
+    **You should see:** an Evaluation that tells a story — pass rate, one summary row per scenario and persona, and the reasoning behind each verdict. This is the evidence TrustAI exists to produce.
   </Step>
 
   <Step title="Run it again — and against another Agent Version">
@@ -140,7 +148,7 @@ One thing to check before launching: **evaluators travel with each scenario**, n
 
     By hand: open the finished run, click **Re-run**, check that **Repeat each test case** still matches the first run, and change **only the Agent** to the other build. When it completes, open both runs from the Evaluations list — in two tabs works well — and read them side by side: the headline pass rates, then the results tables, summary row by summary row. A pass that became a fail is a regression; a fail that became a pass is an improvement.
 
-    There's no dedicated run-vs-run comparison view yet — the side-by-side reading is manual (or delegated to the Trust Agent, which is exactly the kind of cross-referencing it's good at). This is still the regression-tracking habit Trust AI is built around: same scenarios, same evaluators, different agent, and the diff is your evidence. [Compare two Agent Versions](/how-to/compare-agent-versions) is the full workflow — matched configuration, reading the flipped cases, making the ship call.
+    There's no dedicated run-vs-run comparison view yet — the side-by-side reading is manual (or delegated to the Trust Agent, which is exactly the kind of cross-referencing it's good at). This is still the regression-tracking habit TrustAI is built around: same scenarios, same evaluators, different agent, and the diff is your evidence. [Compare two Agent Versions](/how-to/compare-agent-versions) is the full workflow — matched configuration, reading the flipped cases, making the ship call.
   </Step>
 </Steps>
 
@@ -149,7 +157,7 @@ One thing to check before launching: **evaluators travel with each scenario**, n
 The Evaluation results point in three possible directions, often more than one at once:
 
 - **Refine the Evaluator.** If the agent produced reasonable output but the rubric scored it differently than you would, the rubric needs tightening. Go back to [Build your first Evaluator](/tutorials/build-first-evaluator) → calibration step, and iterate.
-- **Expand your scenarios.** If one category of behavior is missing (everything passed because everything skipped the failure mode), add scenarios that cover it — **New scenario**, or **Add recommended scenarios** on the Scenarios list. And you don't have to convert real traffic into scenarios to grade it: select sessions in your Sessions list and use **Evaluate** to judge them directly.
+- **Expand your scenarios.** If one category of behavior is missing (everything passed because everything skipped the failure mode), add scenarios that cover it — **New scenario**, or **Add recommended scenarios** on the Scenarios list. And you don't have to convert real traffic into scenarios to grade it: select sessions in your Sessions list and use **Evaluate** to judge them directly. Grading a single session that way is a **quick evaluation** — it mints no run, but you can watch it score, and it lands on the Evaluations page as a row with a muted **Quick** pill that opens the conversation it graded.
 - **Fix the agent.** If the evaluator is fair and the rubric is good, but the agent failed a scenario a human would expect it to pass, that's a real bug. Hand it to the team owning the agent with the failing result — transcript, verdict, and reasoning — as the artifact.
 
 Most teams iterate on all three over time. The Evaluation isn't a verdict — it's a piece of evidence that closes one round of the [evaluation loop](/concepts/evaluation-loop).
@@ -166,9 +174,9 @@ Finishing this tutorial closes one full round of the evaluation loop, click by c
     Go deeper on personas and goals — the machinery behind every scenario run you just launched.
   </Card>
   <Card title="Connect another agent" icon="plug" href="/how-to/connect-agentcore">
-    Bring a second agent (or a second environment of the same agent) into Trust AI. Same shape, narrower scope.
+    Bring a second agent (or a second environment of the same agent) into TrustAI. Same shape, narrower scope.
   </Card>
   <Card title="API Reference" icon="code" href="/api-reference">
-    Every endpoint, request shape, and response shape — the source of truth for programmatic Trust AI usage.
+    Every endpoint, request shape, and response shape — the source of truth for programmatic TrustAI usage.
   </Card>
 </CardGroup>

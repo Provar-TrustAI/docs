@@ -57,7 +57,6 @@ Aim for 10–20 marked scenarios spanning both passes and fails — don't label 
 
     <Warning>
       **Calibration is metered.** Each sampled scenario is one billable check against your [workspace credit pool](/concepts/overview#workspace-credits), and the credit check runs *before* any judging starts. If your workspace has reached its credit limit the check is refused outright rather than running slowly — nothing is judged and no result is written. Your admin manages the pool, which resets monthly.
-      {/* ACCURACY-AUDIT-PENDING: the refusal is verified in the API (services/api/src/domain/evaluators/service.py:1438-1451 gates admission and raises a 402 before judging). A credit-capped workspace is not reachable on the instance used for this pass, so how the Calibrate tab renders that refusal is described at behavior level only. */}
     </Warning>
   </Step>
 
@@ -79,7 +78,7 @@ Aim for 10–20 marked scenarios spanning both passes and fails — don't label 
 
     For each disagreement, decide who's right:
 
-    - **The judge is wrong** — the rubric is the problem. Switch to the **Criteria** tab and tighten the rules: add a **Passes when…** rule for behavior the judge wrongly failed, or a **Fails when…** rule for behavior it wrongly let through, then commit with **Save grading rules**. [Write an effective LLM-judge prompt](/how-to/write-llm-judge-prompt) covers the craft of rules that calibrate well.
+    - **The judge is wrong** — the rubric is the problem. Switch to the **Criteria** tab and tighten the rules: add a **Passes when…** rule for behavior the judge wrongly failed, or a **Fails when…** rule for behavior it wrongly let through, then commit with **Save grading rules**. [Write grading rules and judge prompts](/how-to/write-llm-judge-prompt) covers the craft of rules that calibrate well.
     - **Your verdict is wrong** — it happens; correct the scenario's **Verdict** rather than bending the rubric around a bad ground truth.
     - **Genuinely ambiguous** — a healthy rubric tolerates a small disagreement rate on cases a second human reviewer would also debate. Don't add a rule for every edge.
   </Step>
@@ -119,6 +118,6 @@ Developers who want the calibration endpoints and the run history's response sha
 
 - **[Evaluators](/concepts/evaluators)** — the concept page, including why calibration is the trust loop
 - **[Scenarios](/concepts/scenarios#the-verdict-column)** — the **Verdict** column where the labels calibration reads are recorded
-- **[Write an effective LLM-judge prompt](/how-to/write-llm-judge-prompt)** — rules that calibrate well, and the anti-patterns that don't
+- **[Write grading rules and judge prompts](/how-to/write-llm-judge-prompt)** — rules that calibrate well, and the anti-patterns that don't
 - **[Annotations](/concepts/annotations)** — session verdicts, the separate channel that grades evaluator accuracy on runs
 - **[Build your first Evaluator](/tutorials/build-first-evaluator)** — author the LLM judge this page calibrates

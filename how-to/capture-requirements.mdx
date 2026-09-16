@@ -6,7 +6,7 @@ description: "File a requirement from a conversation, a document, or by hand; li
 
 This how-to walks you through the Requirements surface end to end: getting requirements on file, linking each one to the scenarios and evaluators that prove it, and reading the coverage that comes back. After you've worked through it:
 
-- You can file a requirement three ways — from a [Trust Agent](/concepts/trust-agent) conversation, extracted from a document, or typed by hand
+- You can file a requirement three ways — from a [Trust Agent](/concepts/trust-agent) conversation, extracted from a document, or typed by hand — and you know why this step comes before the scenarios and evaluators that prove it
 - You can read the list: handle, source, coverage counts, status, pass rate
 - You can link scenarios and evaluators, and watch a requirement's status move as you do
 - You can find your **Gaps** and move a requirement through its lifecycle
@@ -15,24 +15,69 @@ This page is a task recipe. For what a requirement *is*, and why coverage is com
 
 ## Prerequisites
 
-- A **Trust AI account** with access to at least one [Project](/concepts/projects)
-- Some [Scenarios](/concepts/scenarios) and [Evaluators](/concepts/evaluators) in the project — a requirement proves nothing on its own, and the linking step needs something to link
-- At least one completed [Evaluation](/concepts/evaluations) if you want to see a requirement reach **Passing**, since that verdict is read from evidence a run produced
+- A **TrustAI account** with access to at least one [Project](/concepts/projects)
+- A connected agent, if you want the [Trust Agent](/concepts/trust-agent) to capture for you — most of its authoring is refused until the project has one
+- [Scenarios](/concepts/scenarios) and [Evaluators](/concepts/evaluators) only for the linking sections further down. You do **not** need them to get requirements on file; on the agent path you can't have them yet
+
+<Warning>
+  **Requirements come before the things that prove them, not after.** The Trust Agent enforces the order at run time. Ask it to generate scenarios on a project with nothing on file and it refuses and routes you here — *"Draft and save the requirements first. I can guide you through that now before we continue."* Each later step is gated the same way: an evaluator needs scenarios linked to requirements, and expected output needs each requirement's evaluator created **and** attached. Working the surface by hand is unaffected, but a guide that sends you to build scenarios first will dead-end.
+</Warning>
 
 ## Capture one
 
-<Note>
-  *Ask the Trust Agent:* "Read the attached PRD and file the requirements it implies." The agent has a built-in **Capture requirements** skill: it checks what is already on file first, offers you a document or an interview, reflects the candidate list back to you before writing anything, then files each requirement behind an approval card. Every requirement the agent files records its Source as **Chat**. One you approve on its own lands **active** — but a batch mined out of a document lands as **drafts**, exactly like the Extract from document path below, so dozens of unvetted rows never land in your coverage counts at once. When you are filing several in one sitting, the first approval card offers a chat-wide grant so you approve once rather than once per requirement.
-</Note>
+### Ask the Trust Agent
+
+> Read the attached PRD and file the requirements it implies.
+
+The agent has a built-in **Capture requirements** skill. It reads what is already on file before it drafts anything, so a behavior you have already written down comes back as a proposed edit to that requirement rather than a second row saying the same thing. Then it offers whichever of three paths fit what it has to work with:
+
+<AccordionGroup>
+  <Accordion title="Seed from the connected agent">
+    Start from what the agent under test is actually made of. The agent reads its captured profile — the subject areas it serves and the actions it can take — and, where the platform publishes them, the operating rules declared for it, and proposes one draft requirement per topic it genuinely serves. (Declared rules are published by Salesforce Agentforce today; other platforms contribute their topics and actions.)
+
+    That curation is deliberate and visible. Each declared rule is quoted verbatim in the requirement's description so it traces back to the agent's own wording; a compound rule that carries two or three testable behaviors is split into one requirement each; and the agent says out loud whether it read each rule as a must-do or a must-never, because that choice decides what counts as a violation later. Nothing is filed automatically — the profile is the agent's context, not your test scope, and dropping a rule you don't want tested is a legitimate answer.
+  </Accordion>
+
+  <Accordion title="Extract from a document">
+    You upload a PRD, policy, or spec and the agent mines it. It reads the whole document before proposing anything, scans it twice — once for what the agent must do, once for the boundaries it must never cross — splits compound statements, and quotes the line each requirement came from in its description.
+  </Accordion>
+
+  <Accordion title="Define interactively">
+    A structured interview, one question at a time: the agent's purpose, the happy path, the boundaries, three to five edge cases, the failure modes, and what would make a reviewer mark a reply pass or fail. The last of those becomes the acceptance criteria that evaluator rubrics key off.
+  </Accordion>
+</AccordionGroup>
+
+It defaults to the document when you have one, falls back to seeding when there is a profile to read, and uses the interview for a greenfield agent nothing is known about yet.
+
+### One batch, one approval card
+
+This is the part worth knowing before you start, because it changes how you review.
+
+The agent writes **every draft into its reply first** — numbered, one line each, title plus what would pass or fail it — and only then proposes the whole set as a single batch. The card repeats that list. One card, one decision:
+
+| On the card | What it means |
+| --- | --- |
+| A numbered entry per requirement — title and a one-line summary | You never approve content you can't see. A count or a range is not a description |
+| "They're filed together: if any one of them can't be saved, none of them are." | All-or-nothing. A batch does not land half-applied |
+| "Nothing is saved until you approve." | The gate is the card, not the message above it |
+| "They become active as soon as you approve — you can edit or archive any of them later from the Requirements page." | Or, on a draft batch: "Saved as drafts — review and promote them from the Requirements page when you're ready; drafts don't count toward coverage." |
+
+A batch tops out at **50 requirements**; past that the agent has to split it into more than one. Two entries that say the same thing are refused before a card is ever offered, and so is an entry an existing requirement already captures — the refusal names which one. A near-duplicate title with different content is allowed through with a heads-up on the card that approving files a *second* requirement alongside the existing one.
+
+You can narrow at the card itself — "drop number 4", "only the must-nevers" — and the agent re-proposes the narrowed batch. An edit to a requirement that already exists never rides a batch: it goes through the single-requirement card, so its before-and-after is visible.
+
+Everything the agent files records its Source as **Chat**. A batch mined out of a long document lands as **drafts**, exactly like the manual **Extract from document** path below, so dozens of unvetted rows never land in your coverage counts at once.
+
+### Or do it by hand
 
 The **Requirements** list header carries the two manual paths.
 
 <Steps>
   <Step title="Open Requirements">
-    In a project, open **Requirements** from the sidebar. The row carries a count of the project's **active** requirements — drafts and archived ones are excluded from it.
+    In a project, open **Requirements** from the sidebar — it sits above **Scenarios**, because requirements come before the tests that prove them. The row carries a count of the project's **active** requirements; drafts and archived ones are excluded from it, and at zero the badge is blank rather than a `0`.
   </Step>
   <Step title="Extract from a document">
-    Click **Extract from document**. The modal — *Extract from a document* — takes **either** pasted text **or** one uploaded file, never both; picking a file clears a pending paste. Its caption reads "PDF, Word, Markdown, or plain text."; the file picker also accepts `.csv` and `.json`, and uploads are capped at 10 MB.
+    Click **Extract from document** — on an empty list the same path reads **Extract from your docs**. The modal, *Extract from a document*, takes **either** pasted text **or** one uploaded file, never both; picking a file clears a pending paste. Its caption lists the formats it takes: "PDF, Word, Markdown, text, CSV, JSON." Uploads are capped at 10 MB.
 
     Everything the extractor finds is filed as a **draft**, each carrying the verbatim passage it came from and a Source of **Document**. Nothing lands active — you review and promote. A document that yields nothing usable is rejected with a plain-language reason in the modal, not a status code.
   </Step>
@@ -51,7 +96,7 @@ The list opens on a stat strip, then a toolbar, then one table.
 
 The **stat strip** counts the five health states across the project's active requirements, and adds a neutral **Drafts** segment when there are any. Segments at zero are omitted — only the headline total always renders — so the strip narrates the states you actually have. Drafts never inflate a health count.
 
-The **toolbar** carries three fixed filters and a search box that matches on handle, title, and description:
+The **toolbar** carries three fixed filters, and they are the whole of the filtering on this surface — there is no filter popover, no funnel button, no chip belt underneath:
 
 | Filter | Shows |
 | --- | --- |
@@ -61,7 +106,15 @@ The **toolbar** carries three fixed filters and a search box that matches on han
 
 **Gaps** is the one to work from. Failing tells you something broke; Gaps tells you nothing was watching in the first place, which is usually the more expensive problem. Drafts drop out of Gaps and Failing, because a draft has no health to report.
 
-The table reads left to right: **ID**, **Requirement**, **Source**, **Scenarios**, **Evaluators**, **Status**, **Pass rate**, **Last evidence**.
+Around the chips sit the ordinary table controls:
+
+- **Views** — the saved-views dropdown. **All requirements** is the only built-in and cannot be renamed or deleted. A view you save yourself can be renamed, deleted, or **Set as default**, and the default is what the surface opens on next time you come back.
+- The **column gear** — one popover carrying both the show/hide checkboxes and drag-to-reorder. Columns resize by dragging their header edge, and a trailing **Add column** affordance brings a hidden one back.
+- A **search box** matching on handle, title, and description, a result count beside it, and a **Save view** split button that also offers *Save as new view* and *Reset view*.
+
+Everything the toolbar changes — the chip, the search, the column layout — is what a saved view stores.
+
+The table reads left to right: **ID**, **Requirement**, **Source**, **Scenarios**, **Evaluators**, **Status**, **Pass rate**, **Last evidence**. A long list keeps loading as you scroll rather than stopping at a page boundary.
 
 - The **ID** is the handle — `REQ-1`, `REQ-2`, `REQ-14`. A bare number, deliberately not zero-padded the way a scenario id is (`SCN-000123`), because these are things people say out loud. A draft carries a small neutral **Draft** chip beside its handle.
 - **Scenarios** and **Evaluators** are link counts. A zero is drawn in the failure colour — it is a flag, not a neutral number.
@@ -90,13 +143,15 @@ There are three tabs:
 
 Coverage and Status show a count beside their label once there is something to count. Edits on Details save the moment you make them, with a confirmation toast — there is no save button.
 
+The fly-in's footer names the keys it takes: `J` and `K` step to the next and previous requirement without closing it, `F` goes fullscreen, and `Esc` backs out one level at a time — out of fullscreen first, then out of the panel.
+
 ## Link it, and watch the status move
 
 This is the point of the feature. You never assert that a requirement holds; you attach evidence and read what the evidence says.
 
 <Steps>
   <Step title="Open the Coverage tab">
-    On a requirement with nothing attached, both sections are empty: *No evaluators are scoped to this requirement yet.* and *No scenarios cover this requirement yet.* On a must-not requirement the scenario line reads *No scenarios attempt to trigger this behavior yet.* instead — triggering the behaviour is what a test for one has to do.
+    On a requirement with nothing attached, both sections are empty: *No evaluators are scoped to this requirement yet.* and *No scenarios cover this requirement yet.* On a must-not requirement the scenario line reads *No scenarios attempt to trigger this behavior yet.* instead — triggering the behavior is what a test for one has to do.
   </Step>
   <Step title="Link a scenario">
     Click **Add scenarios** and pick one. The picker searches over handles and names and shows each option as `SCN-000008 · <name>`. The Status pill leaves **Uncovered** as soon as the link lands — but where it goes depends on the scenario. Link one that carries no evaluator of its own and the requirement reads **Partially covered**: the evaluator leg is still open. Link one that already carries an evaluator and that leg is satisfied on its own, so the requirement resolves straight to **Passing**, **Failing**, or **Not yet run** without ever showing **Partially covered**.
@@ -130,7 +185,9 @@ Two things follow from that:
 - **The evaluator leg can be satisfied without an explicit link.** If every linked scenario already carries an evaluator of its own, coverage counts. Those evaluators appear on the Coverage tab in a display-only **Via scenarios** group — visible, but with no unlink control, because there is no explicit link to remove.
 - **The same scenario can read differently under two requirements.** Its verdict is computed through each requirement's own linked evaluators, so a scenario that fails one requirement's lens can pass another's.
 
-Within a requirement, a failure dominates: any failing linked scenario makes the requirement **Failing**. Results in the denominator-excluded classes — **Guardrail blocked**, **Environment problem**, **Access blocked** — are not evidence at all, so they can neither pass nor fail a requirement.
+Within a requirement, a failure dominates: any failing linked scenario makes the requirement **Failing**.
+
+Five outcomes leave the pass-rate denominator, and none of them is evidence — they can neither pass nor fail a requirement. Four are the environment's fault and read under three grey headings: **Guardrail blocked**, **Environment problem**, and **Access blocked**. The fifth reads amber as **Couldn't test** — an action the agent itself runs returned an error, so the behavior under test never happened. It is excluded for the same reason as the others, but it is deliberately *not* framed as an environment problem: that failure is in the agent's own stack, not the rig's. A requirement whose linked scenarios produced only results like these stays **Not yet run**.
 
 ### From the scenario side
 
@@ -177,7 +234,8 @@ Promoting extracted drafts is the common path: open each draft, correct the word
 ## What's next
 
 - [Requirements](/concepts/requirements) — what a requirement carries, and why health is computed from evidence rather than asserted
-- [Simulate agents with scenarios](/how-to/simulate-with-scenarios) — build the scenarios a requirement links to
+- [Simulate agents with scenarios](/how-to/simulate-with-scenarios) — build the scenarios a requirement links to, which is the step straight after this one
+- [Author expected output with the Trust Agent](/how-to/author-expected-output-with-the-trust-agent) — the grading contract on those scenarios, once each requirement carries an attached evaluator
 - [Calibrate an evaluator](/how-to/calibrate-an-evaluator) — check that the evaluator behind a requirement's verdict agrees with you
 - [Work with the Trust Agent](/how-to/work-with-the-trust-agent) — the approval flow behind agent-filed requirements
 

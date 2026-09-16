@@ -8,7 +8,8 @@ This how-to walks you through a working session with the **Trust Agent** — the
 
 - You can open the agent, recognize its three shells, and find your recent chats
 - You can send a request through the composer, attach a document for the agent to read, and pick how the agent works with **Ask / Plan / Act**
-- You can read a streaming reply — the reasoning rail, tool-call cards, the clickable object table, the side rail, and the next-step chips
+- You can choose the model and how hard it thinks, and stop a turn you no longer want
+- You can read a streaming reply — the reasoning rail, tool-call cards, the clickable object table, the side rail, the **Answered in …** breakdown, and the next-step chip
 - You can answer a clarifying question, and approve or refuse a write the agent proposes
 
 <Note>
@@ -17,8 +18,12 @@ This how-to walks you through a working session with the **Trust Agent** — the
 
 ## Prerequisites
 
-- A **Trust AI account** with access to at least one [Project](/concepts/projects)
+- A **TrustAI account** with access to at least one [Project](/concepts/projects)
 - A Project with at least one connected agent or ingested [Sessions](/concepts/sessions), so the agent has real records to act on
+
+<Note>
+  **The agent will route you backwards if the Project isn't ready.** Authoring runs in a fixed order, enforced at run time: no scenarios until a [requirement](/concepts/requirements) is saved, no expected output or test data until each requirement has an evaluator created **and** attached, and no simulation or run until each linked scenario also carries expected actions or routes. Ask for a later step on a bare Project and the agent explains what's missing and offers to do that first, rather than failing halfway. [Capture requirements](/how-to/capture-requirements) is the step most people meet first.
+</Note>
 
 ## Work with the agent
 
@@ -26,15 +31,17 @@ This how-to walks you through a working session with the **Trust Agent** — the
   <Step title="Open the Trust Agent">
     Go to `/projects/:id/agent` for your Project, or click **New chat** at the top of the Project's left nav. The Trust Agent is the **default experience** on every Project — there is no feature flag or query parameter to turn it on, and the legacy assistant no longer exists. An open chat carries its id in the URL as `?task=…`; the same route with no `?task` is the **Welcome** page.
 
-    Welcome shows four starter-prompt pills, tuned to where your Project is: a brand-new Project offers a cold-start set (**Connect agent**, **Explore behaviour**, **Create scenarios**, **Run evaluation**), while a Project that already has data offers a curated set (**Curate data**, **Annotate data**, **Evaluate agent**, **Analyze failures**).
+    Welcome shows four starter-prompt pills — **Evaluate agent**, **Improve requirements**, **Summarize evaluations**, **Connect agent** — and it is the same four whatever state your Project is in. There is no longer a cold-start set and a warmed-up set: the recipe behind the leading pill walks a bare Project through connecting an agent and getting requirements down, so every pill is safe to click on day one.
 
-    Getting from a pill to a sent prompt takes **two clicks, not one**. Clicking a pill doesn't fill the composer — it marks that pill active and expands an inline panel of three ready-made prompts underneath it (the panel has its own close control). Clicking one of *those* prompts fills the composer. Nothing streams unprompted: the prompt you submit is what sends as turn one and starts the first streaming reply.
+    Getting from a pill to a sent prompt takes **two clicks, not one**. Clicking a pill doesn't fill the composer — it marks that pill active and expands an inline panel of two ready-made prompts underneath it (the panel has its own close control). Clicking one of *those* prompts fills the composer. Nothing streams unprompted: the prompt you submit is what sends as turn one and starts the first streaming reply.
 
-    <Frame caption="One click in: the pill is active and its three ready-made prompts are showing. The composer is still empty — filling it takes the second click.">
-      <img src="/images/howto-agent-welcome-pills.png" alt="The Trust Agent Welcome page for a Project with data: a greeting, an empty composer reading 'Ask anything or pick a suggestion below…', and four starter pills — Curate data, Annotate data, Evaluate agent, Analyze failures. Annotate data is active, and an inline panel below it lists three prompts with a close control in its header." />
+    The Welcome composer is not a cut-down one, either. It carries the same **Ask / Plan / Act** toggle, model chip and **Thinking** chip a live conversation does, plus the attach chip — so you can set all of that before your first message rather than correcting it afterwards.
+
+    <Frame caption="One click in: the pill is active and its two ready-made prompts are showing. The composer above is still empty — filling it takes the second click — but its mode, model and Thinking chips are already there to set.">
+      <img src="/images/howto-agent-welcome-pills.png" alt="The Trust Agent Welcome page: the greeting 'Hi, Dev. Let's get to work!', a line reading 'You haven't run any evaluations yet. Try one from the prompts below.', and an empty composer reading 'Ask anything or pick a suggestion below…' whose control row holds the plus attach chip, the Ask mode toggle, the model chip and the Balanced thinking chip. Below sit four starter pills — Evaluate agent, Improve requirements, Summarize evaluations, Connect agent — with Improve requirements active over an inline panel listing its two prompts and a close control." />
     </Frame>
 
-    **You should see:** the Welcome page render at `/projects/:id/agent` with no flag set; clicking a pill expand its prompts panel rather than fill the composer; clicking a prompt fill the composer; and your submitted prompt open a new chat at `?task=…` as turn one.
+    **You should see:** the Welcome page render at `/projects/:id/agent` with no flag set; the same four pills whatever your Project already holds; clicking a pill expand its two prompts rather than fill the composer; clicking a prompt fill the composer; and your submitted prompt open a new chat at `?task=…` as turn one.
   </Step>
 
   <Step title="Find your chats and recognize the three shells">
@@ -42,7 +49,7 @@ This how-to walks you through a working session with the **Trust Agent** — the
 
     The agent runs from **one instance** that presents in three shells, and your chat state is preserved as you move between them:
 
-    - **Full page** — the agent seated in the Project content pane, with the Project's left nav (**New chat**, **Playground**, **Scenarios**, **Sessions**, **Evaluators**, **Evaluations**, **Project Settings**) visible to its left and the composer anchored to the bottom.
+    - **Full page** — the agent seated in the Project content pane, with the Project's left nav (**New chat**, **Playground**, **Requirements**, **Scenarios**, **Sessions**, **Evaluators**, **Evaluations**, **Project Settings**) visible to its left and the composer anchored to the bottom.
     - **Docked panel** — a panel docked in the corner so you can keep working elsewhere in the app. **Minimize to dock** in the full-page header sends the agent there.
     - **Pill** — a collapsed pill. When a Project has no active agent task, the agent resolves to this minimized pill.
 
@@ -53,7 +60,7 @@ This how-to walks you through a working session with the **Trust Agent** — the
     </Note>
 
     <Frame caption="The full-page shell. Recent chats sits under the nav rows on the left — no floating selector — and the composer stays anchored at the bottom of the pane rather than scrolling away with the transcript.">
-      <img src="/images/howto-agent-full-page-shell.png" alt="The Trust Agent full-page shell: the Project's left nav with New chat, Playground, Requirements, Scenarios, Sessions, Evaluators, Evaluations and Project Settings above a Recent chats list; the transcript in the centre with the user's message, an expanded '2 tool calls' group whose second receipt lists five reviewed sessions, and the streamed reply below it; the composer anchored at the bottom with its attach, Ask and model controls; the side rail on the right." />
+      <img src="/images/howto-agent-full-page-shell.png" alt="The Trust Agent full-page shell: the Project's left nav with New chat, Playground, Requirements, Scenarios, Sessions, Evaluators, Evaluations and Project Settings above a Recent chats list; the transcript in the centre with two turns, each a collapsed 'Thought for 1s' rail over a tool-call card — 'Reviewed evaluators' listing Tone and Completeness, and 'Reviewed sessions' listing SES-000010 down to SES-000006 — with the streamed reply between them; the composer anchored at the bottom carrying the plus attach chip, the Ask mode toggle, the model chip and the Balanced thinking chip; the side rail on the right, Context leading with the Refunds Concierge connected-agent card." />
     </Frame>
 
     **You should see:** a **Recent chats** section in the left nav listing your conversations most-recent-first, and the same chat thread persist as you switch shells and navigate between tabs.
@@ -64,9 +71,12 @@ This how-to walks you through a working session with the **Trust Agent** — the
 
     - An **@ picker** for mentioning a known entity. Typing `@` lists your Project's scenarios, evaluators, evaluation runs, and sessions, each with a plain-language second line (a session reads `Refund timing inquiry · acme-refund-001` over `Session · 2026-08-04`). An @-mention is passed to the agent directly, so it acts on that entity without first running a search to find it.
     - A **/ palette** for slash commands and skills. Typing `/` opens a **Commands** list — each entry a `/name` plus a sentence describing when to reach for it.
-    - An inline **model selector** chip showing the model in play. It offers **Claude Sonnet 5**, **Claude Opus 4.8**, and **Claude Haiku 4.5**, each listed with its provider and a one-word posture — balanced, frontier, fast. It is a price-performance control: no cost or latency figure is shown.
+    - An inline **model** chip showing the model in play, and a **Thinking** chip beside it showing the depth. Both are covered in the next step.
     - An **Ask / Plan / Act** toggle that picks how the agent works.
-    - An **Attach files** button for handing the agent a document to read — PDF, Word, Markdown, text, CSV, or JSON. Attaching is document-and-text only (no images), and the button is disabled until the chat has a first message — its tooltip reads **Send a message first to attach files**. Attached files persist in the side rail's **Attachments** section and open a readable preview in place, no download needed.
+    - An **Attach files** button for handing the agent a document to read — PDF, Word, Markdown, text, CSV, or JSON. Attaching is document-and-text only, so the native picker greys a `.png` out; a **picture** sent to the agent *under test* is a [Playground](/concepts/playground) job, not this composer's. The button is disabled until the chat has a first message — its tooltip reads **Send a message first to attach files**. Attached files persist in the side rail's **Attachments** section and open a readable preview in place, no download needed.
+    - A **Stop** control, centred above the input, that appears only while a turn is genuinely running.
+
+    In the **docked panel** there isn't room for all of that, so the mode, model and **Thinking** controls collapse behind a single composer settings menu. Attach stays out in the open in both shells.
 
     Choose the mode for the job:
 
@@ -82,13 +92,31 @@ This how-to walks you through a working session with the **Trust Agent** — the
 
     A message you send **while the agent is still replying is queued**, not lost. It surfaces as a card above the composer showing the message you queued and the line **Sends when Trust Agent finishes**, with a **Cancel** control — cancelling puts the text back in the composer rather than discarding it. Pressing Enter again while one message is queued merges the new text onto the queued message. Separately, a long message you *have* sent collapses in the transcript behind a **Show more** / **Show less** toggle so it doesn't push the conversation off-screen.
 
-    **You should see:** typing `@` open the mention picker and `/` open the **Commands** palette, the model-selector chip, **Attach files** button, and **Ask / Plan / Act** toggle present in the composer, and your sent message anchored at the top of the transcript.
+    **You should see:** typing `@` open the mention picker and `/` open the **Commands** palette, the model chip, **Thinking** chip, **Attach files** button and **Ask / Plan / Act** toggle present in the composer, and your sent message anchored at the top of the transcript.
+  </Step>
+
+  <Step title="Pick the model and how hard it thinks">
+    Two chips sit together in the control row, and the second depends on the first.
+
+    Open the **model** chip and each row names a model with its vendor and a one-word posture underneath — *frontier*, *balanced* or *fast*. The list is the Claude models your workspace offers, served by the back end, so read the menu rather than expecting a fixed set. It is a price-performance control and shows **no cost or latency figure**. Pick the frontier posture for reasoning-heavy authoring work, the fast one for lookups you just want answered.
+
+    Then open the **Thinking** chip and pick a depth: **Standard** (answers straight away), **Brief**, **Balanced**, or **Thorough** (thinks hardest, slower). **Balanced** is where a new conversation starts, so an ordinary turn already thinks before it answers — reach for **Thorough** when you are asking the agent to reason about a whole result set, and **Standard** when you want a fact back. The menu shows only the depths the selected model declares and disappears entirely for a model that declares one, so a missing chip means that model has no choice to offer, not that something failed.
+
+    Both choices apply from your **next** message — the menu says so: **Applies from your next message. It never changes a reply you already have.** Switching models resets the depth to that model's default, so check the chip after a switch.
+
+    <Warning>
+      **Depths are not comparable across models.** **Thorough** on one model and **Thorough** on another are not the same amount of thinking, and they don't cost the same. Compare a depth against the same model, never across two.
+    </Warning>
+
+    **You should see:** the model menu list the Claude models your workspace offers, each row carrying a vendor and a one-word posture; the **Thinking** menu offer its four depths with a plain sentence each, opening on **Balanced**; and the chip's label change to what you picked while the reply already on screen stays exactly as it was.
   </Step>
 
   <Step title="Read the streaming reply, tool-call cards, and side rail">
     The agent's reply **streams in live**, token by token — text appears incrementally as formatted markdown prose, with a typing indicator while the turn spins up and a blinking accent caret marking the live tail, rather than arriving all at once when the turn finishes.
 
-    The wait before the first tokens is the **model's own thinking time**, not a fixed delay in the agent. A collapsible reasoning rail shows a live **Thinking… Ns** timer that fills the wait and collapses to **Thought for Xs** when done, expandable to the model's own reasoning prose. There is no fixed duration or SLA — the timer surfaces however long the model takes.
+    The wait before the first tokens is the **model's own thinking time**, not a fixed delay in the agent. A collapsible reasoning rail shows a live **Thinking… Ns** timer that fills the wait and collapses to **Thought for Xs** when done, expandable to the model's own reasoning prose. There is no fixed duration or SLA — the timer surfaces however long the model takes. While that turn is in flight a **Stop** control sits centred above the input; one click ends it, keeping whatever was written so far.
+
+    When the reply settles it closes with a quiet timing line — **Answered in *42s* · *31s* thinking** — naming the total and the biggest slice of it. Expand it for a proportion bar and the per-phase totals: **Thinking**, **Using tools**, **Writing the answer**, **Waiting for you**. That is the honest answer to "why did that take so long", and it is the place to look before you blame the connection. A reply under a second reads **Answered in under 1s**.
 
     As the agent works, it renders its work as structured, clickable elements:
 
@@ -111,9 +139,9 @@ This how-to walks you through a working session with the **Trust Agent** — the
       <img src="/images/howto-agent-side-rail.png" alt="The Trust Agent side rail. Progress shows a six-step checklist reading '2 of 6 done', the first two steps ticked and struck through. Context, marked '2 references', opens with a Connected agent card for 'Refunds Concierge' — a conversational HTTP agent with a 'Not checked' health chip and its base URL, run endpoint, health endpoint and sign-in method — above expandable rows reading '1 evaluation' and '15 scenarios'. Attachments lists one file, acme-refund-policy-v4.md." />
     </Frame>
 
-    When a turn finishes, the agent may offer up to three **next-step chips** — one-tap suggestions for what to do next. Clicking a chip **pre-fills the composer** with a ready-to-send prompt; a chip never sends anything on its own.
+    When a turn finishes, the agent may offer **one** next-step chip — a single suggestion for what to do next, not a menu. Clicking it **pre-fills the composer** with a ready-to-send prompt; a chip never sends anything on its own. On a Project that has done nothing at all — no sessions, scenarios, evaluators or runs — the row leads with a standing **Show me where to start** chip instead, which pre-fills a question about where the Project is up to; the agent answers it by reading the Project's real state, so it works just as well when you come back to a half-finished Project a week later.
 
-    **You should see:** the reply stream in as markdown, a **Thinking… Ns** timer fill the wait, tool calls render as readable cards, multiple records render as a clickable list under a disclosure header, a side rail whose **Context** opens with the **Connected agent** card, and next-step chips waiting under the finished reply.
+    **You should see:** the reply stream in as markdown, a **Thinking… Ns** timer fill the wait, a **Stop** control above the input while the turn runs, tool calls render as readable cards, multiple records render as a clickable list under a disclosure header, a side rail whose **Context** opens with the **Connected agent** card, an **Answered in …** line under the settled reply, and at most one next-step chip beneath it.
   </Step>
 
   <Step title="Answer a clarifying question">
@@ -144,7 +172,7 @@ This how-to walks you through a working session with the **Trust Agent** — the
 
     The write-approval flow in full — the permission card, the rich preview, approve-and-execute, and the audit echo — is its own recipe.
 
-    **You should see:** a create / update / delete proposal pause behind a permission card before it runs, and a receipt of your decision left in the transcript. The exception is a write already covered by a standing approval you granted earlier in this chat: that one commits with no card at all, and the chip above the composer is the only thing that tells you why. To work through that flow end to end, continue to [Approve agent writes](/how-to/approve-agent-writes).
+    **You should see:** a create / update / delete proposal pause behind a permission card before it runs, and a receipt of your decision left in the transcript. The exception is a write already covered by a standing approval you granted earlier in this chat: that one commits with no card at all, and the chip above the composer is the only thing that tells you why. To work through that flow end to end, continue to [Approve an agent write](/how-to/approve-agent-writes).
   </Step>
 
   <Step title="Connect an agent without leaving the chat">
@@ -153,9 +181,9 @@ This how-to walks you through a working session with the **Trust Agent** — the
     - **Salesforce Agentforce** opens a *stepped* card: progress chips across the top, a counter that opens at **Step 1 of 3**, and the first step headed **Your Salesforce org**. **Continue** advances it, and **Back** appears once you are past the first step.
     - **Claude Managed Agent** opens a *single form* — no steps and no counter. You enter the API key, AWS region, and workspace, press **Find agents**, then pick your **Agent** and **Environment** from the lists discovery returns and press **Connect**.
 
-    Both cards carry **Not now** to back out.
+    Both cards carry **Close setup** to back out; the agent confirms nothing was connected and waits.
 
-    Credentials typed into that card go straight to Trust AI over a separate call. They are never part of the conversation the model reads and never appear in the transcript — the card says so, and the only thing handed back to the agent when you finish is the outcome: connected or not, which agent, and its health.
+    Credentials typed into that card go straight to TrustAI over a separate call. They are never part of the conversation the model reads and never appear in the transcript — the card says so, and the only thing handed back to the agent when you finish is the outcome: connected or not, which agent, and its health.
 
     **You should see:** a connection card open inside the chat — stepped for Agentforce, a single form for a Claude Managed Agent — the run wait while you complete it, and the new connection lead the side rail's **Context** section as the **Connected agent** card on the next turn that touches your records. For the full platform-by-platform setup, see [Connect Agentforce](/how-to/connect-agentforce) and [Connect a Claude managed agent](/how-to/connect-claude-managed-agent).
   </Step>
@@ -166,6 +194,14 @@ This how-to walks you through a working session with the **Trust Agent** — the
 <AccordionGroup>
   <Accordion title="The reply takes a while before any text appears">
     That wait is the model's own thinking time (time to first token), not a stall in the agent. The reasoning rail's **Thinking… Ns** timer fills it and a working indicator shows the run is live; once tokens start, the reply streams in. There is no fixed timeout you can shorten from the UI — different models think for different lengths of time.
+
+    Afterwards you can check where the time actually went: expand the **Answered in …** line under the settled reply and it breaks the turn into **Thinking**, **Using tools**, **Writing the answer** and **Waiting for you**. If **Thinking** dominates, a shallower depth or a faster model will shorten it; if **Using tools** does, the request was simply a lot of work.
+  </Accordion>
+
+  <Accordion title="I want to stop the agent mid-reply">
+    Press **Stop**, the control centred above the input while a turn runs. The turn ends there and the partial reply is kept rather than discarded — it does not count as an error and raises no notice. **Stop** is only there while something is genuinely running: if a question or permission card has taken the composer's place, the agent is waiting on *you*, so there is nothing to stop — answer it or **Skip** it.
+
+    Reopen that chat later and the stopped reply reads **This reply was interrupted.** with a **Continue** action, the same note a dropped connection leaves. The two are recorded differently, but the transcript does not distinguish them, so don't read that note as proof the network was at fault.
   </Accordion>
 
   <Accordion title="The agent asked a question instead of doing what I asked">
@@ -173,7 +209,7 @@ This how-to walks you through a working session with the **Trust Agent** — the
   </Accordion>
 
   <Accordion title="I asked the agent to change something and nothing happened yet">
-    Writes pause for approval. The agent surfaces a permission card describing the change and waits — nothing is created, updated, or deleted until you approve. The exception is a write already covered by a standing approval you granted earlier in this chat: that one commits without asking again, and the chip above the composer tells you it is in force. See [Approve agent writes](/how-to/approve-agent-writes).
+    Writes pause for approval. The agent surfaces a permission card describing the change and waits — nothing is created, updated, or deleted until you approve. The exception is a write already covered by a standing approval you granted earlier in this chat: that one commits without asking again, and the chip above the composer tells you it is in force. See [Approve an agent write](/how-to/approve-agent-writes).
   </Accordion>
 
   <Accordion title="I sent a message while the agent was still replying">
@@ -181,11 +217,24 @@ This how-to walks you through a working session with the **Trust Agent** — the
   </Accordion>
 
   <Accordion title="I came back and the reply was cut off">
-    If you leave (or lose connection) while a reply is streaming, reopening the chat shows a quiet **This reply was interrupted.** note with a one-tap **Continue**. Continue resumes the reply from the agent's saved context — it doesn't reattach to the original live stream, so the resumed reply picks up from what was already saved.
+    Reopening a chat whose last reply was cut short shows a quiet **This reply was interrupted.** note with a one-tap **Continue**. Two different things produce it: leaving or losing connection while the reply was streaming, and pressing **Stop** yourself. Continue resumes the reply from the agent's saved context — it doesn't reattach to the original live stream, so the resumed reply picks up from what was already saved.
+  </Accordion>
+
+  <Accordion title="I pressed Enter and nothing sent">
+    On a chat you have just opened, the send control stays inert until the conversation's history has finished loading — a new turn must not append on top of history nobody has read yet. Typing stays live throughout, so keep going: the control comes alive the moment history lands, with your draft intact.
   </Accordion>
 
   <Accordion title="The turn stopped with an error, or the conversation wouldn't load">
-    Two different states, worded differently on purpose. A turn that failed mid-run ends with **The Trust Agent hit an unexpected error and stopped. Please try again.** — send the request again. A chat whose history couldn't be fetched opens with **Couldn't load this conversation** and a **Retry** button; your messages are still saved, and sending is blocked until the read succeeds so a new turn can't append on top of invisible history.
+    Four states, worded differently on purpose — read the sentence, because it tells you which one you have.
+
+    | What you see | What it means, and what to do |
+    |---|---|
+    | **The Trust Agent hit an unexpected error and stopped. Please try again.** | The turn failed and the server said so. Use **Try again** on the card. |
+    | **The Trust Agent couldn't finish this reply. Please check your connection and try again.** | The request never reached a verdict at all — check your connection first, then **Try again**. |
+    | **This reply was interrupted.** with **Continue** | The reply was cut short, by a dropped connection or by you pressing **Stop**. **Continue** picks it up from the saved context. |
+    | **Couldn't load this conversation** with **Retry** | The chat history couldn't be fetched. Your messages are still saved; sending is blocked until the read succeeds so a new turn can't append on top of invisible history. |
+
+    The first two are the same card, and it is not a dead end: don't retype the request. The card carries the hint **You can try again, or pick a different model first.**, the same model chip the composer has, and a **Try again** button that re-runs the turn on whatever model is selected when you press it. If the model looked like the problem, switch it *then* press **Try again**. The card belongs to the live session — reopen the chat later and you get the stored transcript instead.
   </Accordion>
 
   <Accordion title="The side rail isn't showing">
@@ -193,14 +242,18 @@ This how-to walks you through a working session with the **Trust Agent** — the
   </Accordion>
 
   <Accordion title="The Attach files button is disabled">
-    Attaching needs an open chat to attach *to*: the button stays disabled until the chat has a first message, with the tooltip **Send a message first to attach files**. Send your request, then attach. Also note the supported types — PDF, Word, Markdown, text, CSV, and JSON; images aren't supported.
+    Attaching needs an open chat to attach *to*: the button stays disabled until the chat has a first message, with the tooltip **Send a message first to attach files**. Send your request, then attach. Also note the supported types — PDF, Word, Markdown, text, CSV, and JSON. Images are not among them here: to send a **picture** to the agent you are testing, use the [Playground](/concepts/playground), where the composer control reads **Attach images**.
   </Accordion>
 </AccordionGroup>
 
 ## Related reading
 
 - **[Trust Agent](/concepts/trust-agent)** — the concept page: the runtime, the full shell / transcript / side-rail model, and the disambiguation from Agent Versions in depth
-- **[Approve agent writes](/how-to/approve-agent-writes)** — the human-in-the-loop write-approval flow this page points to
-- **[Simulate with Scenarios](/how-to/simulate-with-scenarios)** — drive the agent against personas and goals in the Playground
+- **[Approve an agent write](/how-to/approve-agent-writes)** — the human-in-the-loop write-approval flow this page points to
+- **[Simulate agents with scenarios](/how-to/simulate-with-scenarios)** — drive the agent against personas and goals in the Playground
 - **[Evaluate with the Trust Agent](/tutorials/evaluate-with-the-trust-agent)** — the end-to-end walkthrough that ties this into a full evaluation
+- **[Capture requirements](/how-to/capture-requirements)** — the step the agent routes you to first, and the gate every later step waits on
+- **[Manage Trust Agent skills](/how-to/manage-trust-agent-skills)** — the recipes behind the **/** palette, and how to write your own
+- **[Requirements](/concepts/requirements)** — what the agent must do and must never do, and how coverage is computed
+- **[MCP integration](/concepts/mcp-integration)** — the same tools published for an agent outside TrustAI to drive
 - **[Agent Versions](/concepts/agent-versions)** — the *other* "agent": the customer's agent under test, never explained here, only kept distinct

@@ -9,21 +9,21 @@ An [evaluation](/concepts/evaluations) doesn't have to start from a scenario. Wh
 There are two ways in, and they are **not** the same job:
 
 - **Bulk** — select sessions and click **Evaluate**, so one named run grades the whole batch
-- **One-off** — click **Evaluate** in a single session's fly-in, so the verdict lands on that session with no run created
+- **Quick evaluation** — click **Evaluate** in a single session's fly-in, so the judges read that one stored transcript and the verdict lands on the session
 
 <Warning>
-  **The two paths grade different things.** A one-off reads the transcript you are looking at. A bulk run **re-sends** each session's user message to your connected agent and grades the *new* answer. Pick the one that matches the question you're asking — the difference is spelled out below.
+  **The two paths grade different things.** A quick evaluation reads the transcript you are looking at. A bulk run **re-sends** each session's user message to your connected agent and grades the *new* answer. Pick the one that matches the question you're asking — the difference is spelled out below.
 </Warning>
 
 ## Which path grades what
 
-|  | **Bulk run** — Sessions list → **Evaluate** | **One-off** — session fly-in → **Evaluate** |
+|  | **Bulk run** — Sessions list → **Evaluate** | **Quick evaluation** — session fly-in → **Evaluate** |
 |---|---|---|
 | What the judges read | A **fresh answer**. The session's user message is replayed to your connected agent and the reply it gives *now* is what gets graded. | The **stored transcript**, exactly as recorded. |
 | Which sessions it can target | Only a session that has a **scenario made from it** — the launcher resolves each selected session to that scenario and replays it. Anything else is refused. See [Not every session can be bulk-evaluated](#not-every-session-can-be-bulk-evaluated). | **Any** stored session, including one no scenario was ever made from. |
 | Is your agent invoked? | Yes — once per session. | No. Nothing is called; grading is a read. |
 | Does it need a connected agent? | Yes. Without one every row fails as a rig problem, not an agent fail. | No. |
-| What it produces | A named run on the [Evaluations](/concepts/evaluations) list. | Nothing on the Evaluations list — the verdict homes on the session. |
+| What it produces | A named run on the [Evaluations](/concepts/evaluations) list. | No run — but a row on the [Evaluations](/concepts/evaluations) list, named **Quick evaluation** and badged **Quick**, that opens the conversation it graded. The verdict also homes on the session. |
 | What it costs | One agent replay per session **plus** one check per judge per session. | One check per judge. No agent replay. |
 | Stopped when you're at your credit cap? | Yes — the launch is refused before any work starts. | No — but it still draws credit. |
 
@@ -47,7 +47,7 @@ It reads like you selected nothing, which is the confusing part: you did select 
 
 Two ways out, and they answer different questions:
 
-- **Grade the recorded words** — use the one-off path on each session. It has no such requirement, needs no connected agent, and works on any stored session.
+- **Grade the recorded words** — run a quick evaluation on each session. It has no such requirement, needs no connected agent, and works on any stored session.
 - **Measure the live agent** — give those conversations a scenario first, then bulk-evaluate. *Ask the [Trust Agent](/concepts/trust-agent):* "Turn these sessions into scenarios." It drafts them and pauses for your approval before writing anything.
 
 ## Sessions or scenarios — which to launch
@@ -65,7 +65,7 @@ If you're chasing a regression between [Agent Versions](/concepts/agent-versions
 
 ## Prerequisites
 
-- A **Trust AI account** with access to a [Project](/concepts/projects) that has sessions — synced, generated, or run in the Playground
+- A **TrustAI account** with access to a [Project](/concepts/projects) that has sessions — synced, generated, or run in the Playground
 - At least one **LLM judge** evaluator in the project. If your Evaluators list is empty, **Add recommended evaluators** on the [Evaluators](/concepts/evaluators) surface gives you a curated starting roster in one step.
 - For a **bulk** run only: a connected agent on the project. The replay needs something to call.
 - For a **bulk** run only: a scenario made from every session you select. See [Not every session can be bulk-evaluated](#not-every-session-can-be-bulk-evaluated).
@@ -110,23 +110,27 @@ If you're chasing a regression between [Agent Versions](/concepts/agent-versions
 
 ## Evaluate one session
 
-For the quick check while you're already reading a conversation, you don't need a run at all — and this is the path that grades the transcript in front of you.
+While you're already reading a conversation you don't need a run at all. A **quick evaluation** puts your judges on the transcript in front of you and homes the verdict on the session it graded.
 
 <Steps>
   <Step title="Open the session and click Evaluate">
-    Click any session on the Sessions list to open its fly-in. The header's primary action is **Evaluate** — click it and the launcher opens titled **Evaluate session**, with just two fields: **Evaluators** and **This will run**. There is no name field and no repeat selector; a one-off mints no run, so there is nothing to name and nothing to repeat.
+    Click any session on the Sessions list to open its fly-in. The header's primary action is **Evaluate** — click it and the launcher opens titled **Evaluate session**, with just two fields: **Evaluators** and **This will run**. There is no name field and no repeat selector: a quick evaluation mints no run, so there is nothing to name and nothing to repeat.
 
     **You should see:** the fly-in header's **Evaluate** button open a launcher scoped to just this session, with **Evaluate session** as the primary button.
   </Step>
 
-  <Step title="Confirm and read the verdict in place">
-    Pick your judges and click **Evaluate session**. The modal closes and you stay exactly where you are. Once grading completes, the verdict lands on the session itself: the fly-in header's verdict pill reflects it, and the **Evaluations** tab records the grade.
+  <Step title="Confirm, then watch it score">
+    Pick your judges and click **Evaluate session**. The modal closes, you stay exactly where you are, and a **Quick evaluation started** toast confirms the launch.
 
-    **You should see:** the Evaluations list stay unchanged, and the session's own fly-in carry the new verdict.
+    Grading is visible while it runs. The fly-in's **Evaluations** tab leads with a status card reading **Queued** and then **Running**, captioned with the check it is on — "Scoring check 2 of 3…" — and a matching row leads the **Evaluations** list. That progress is tracked on the server rather than in your browser tab, so it survives a reload and a colleague watching the same session sees it too.
+
+    When the judges finish, a **Quick evaluation finished** toast reports the verdict and carries a **View** action that opens the graded conversation. The fly-in header's verdict pill and the **Evaluations** tab carry the grade from then on.
+
+    **You should see:** a **Quick evaluation started** toast, a **Queued** then **Running** card on the session's **Evaluations** tab, and a **Quick evaluation finished** toast with a **View** action.
   </Step>
 </Steps>
 
-Bulk runs are for measurement against a live agent; the one-off is for "did this recorded answer pass?" without ceremony.
+Bulk runs are for measurement against a live agent; a quick evaluation is for "did this recorded answer pass?" without ceremony.
 
 ## Credits and the launch gate
 
@@ -142,9 +146,10 @@ Three things can happen when you click **Run evaluation**:
 
 Practical consequences:
 
-- **A re-grade costs the same as the first grade.** Re-running ten sessions through two judges after tweaking a rubric is another twenty checks and another ten replays.
+- **A bulk re-grade costs the same as the first grade.** Re-running ten sessions through two judges after tweaking a rubric is another twenty checks and another ten replays.
 - **Raising Repeat each test case multiplies everything.** Four repeats over ten sessions is forty replays, not ten.
-- **A one-off draws credit too** — one check per judge. It is not stopped by the launch gate, but it is not free either.
+- **A quick evaluation draws credit too** — one check per judge. It is not stopped by the launch gate, but it is not free either.
+- **Re-grading one conversation replaces its verdict instead of stacking a second one.** The new grade lands and the previous one leaves in the same write, so a conversation is never without a verdict and never carries two — and the charge is recorded only once the new grade is durable. If the same grading request is delivered twice, the second delivery neither re-grades nor re-charges.
 - **The credit pool resets monthly.** A cap you hit late in the month clears at the reset; you don't have to buy your way out of it.
 - Only a workspace **Owner** or **Admin** can raise the pool. If you're blocked, that's who the banner is pointing you at.
 
@@ -172,6 +177,7 @@ Open any result and use **Open session** — in the fly-in header's **⋯** menu
 Every graded session carries its results with it:
 
 - The fly-in header shows the automated verdict pill. It has four labels across three states: **Pass**, **Fail**, and two distinct neutrals — **Not evaluated** when nothing has graded this session, **Not graded** when an evaluation exists but produced no behavioural score. They are not interchangeable, and writing a human annotation does not change either.
+- A session graded by a quick evaluation is also listed on the **Evaluations** page, as a row named **Quick evaluation** with a muted **Quick** pill. Clicking that row opens the conversation it graded rather than a run detail page — there is no run behind it, which is also why the row carries no **Cancel** and no **Delete**.
 - The fly-in's **Evaluations** tab opens with a count line reading "*N* evaluations", and lists every evaluation that graded this session below it, newest first. Each one is a **card**, not a disclosure — the run's rollup verdict, its name, when it ran, and its individual checks with their reasoning, all visible without expanding anything. A still-grading run leads the tab as a **Queued** or **Running** card, above even the count line — which counts finished evaluations only.
 
 *Ask the [Trust Agent](/concepts/trust-agent):* "Analyze the failures in that run." On a completed run it open-codes each failing result and groups the notes into ranked failure themes — a fast first pass before you read transcripts yourself.
@@ -180,7 +186,7 @@ Every graded session carries its results with it:
 
 <AccordionGroup>
   <Accordion title="My bulk run failed every row with a rig error, and I have no agent connected">
-    Expected. A bulk sessions run replays each session's user message against your connected agent, so with none connected there is nothing to call. Those rows count as an **Environment problem** — excluded from the pass-rate denominator rather than scored as agent failures — and the run reads **Not graded** rather than 0%. Connect an agent and re-run, or use the one-off path, which grades the stored transcript and needs no agent.
+    Expected. A bulk sessions run replays each session's user message against your connected agent, so with none connected there is nothing to call. Those rows count as an **Environment problem** — excluded from the pass-rate denominator rather than scored as agent failures — and the run reads **Not graded** rather than 0%. Connect an agent and re-run, or run a quick evaluation instead, which grades the stored transcript and needs no agent.
   </Accordion>
 
   <Accordion title="The bulk verdicts don't match what I read in the transcript">
@@ -192,7 +198,7 @@ Every graded session carries its results with it:
   </Accordion>
 
   <Accordion title="My bulk launch says there's nothing to evaluate, but I selected sessions">
-    You did, and they are real — but a bulk run replays a [scenario](/concepts/scenarios), so it needs a scenario made from each session you picked, and at least one of yours has none. The message is generic ("There's nothing to evaluate yet. Pick at least one scenario or session and try again.") and does not name the session that failed to resolve. It is also all-or-nothing: one unresolvable session refuses the whole selection. Grade those conversations with the one-off path instead, or turn them into scenarios first — [Not every session can be bulk-evaluated](#not-every-session-can-be-bulk-evaluated) has both routes.
+    You did, and they are real — but a bulk run replays a [scenario](/concepts/scenarios), so it needs a scenario made from each session you picked, and at least one of yours has none. The message is generic ("There's nothing to evaluate yet. Pick at least one scenario or session and try again.") and does not name the session that failed to resolve. It is also all-or-nothing: one unresolvable session refuses the whole selection. Grade those conversations with a quick evaluation instead, or turn them into scenarios first — [Not every session can be bulk-evaluated](#not-every-session-can-be-bulk-evaluated) has both routes.
   </Accordion>
 
   <Accordion title="The launch was refused with a credit message">
@@ -207,8 +213,8 @@ Every graded session carries its results with it:
     The headline self-hides when there's nothing to measure against: accuracy compares the judges to human **Verdict** annotations, and none of the graded sessions carry one yet. Set pass/fail verdicts on some of those sessions and re-run, and the number resolves.
   </Accordion>
 
-  <Accordion title="My one-off evaluation isn't in the Evaluations list">
-    By design. A one-off mints no run — the verdict is homed on the session. Find it on the session itself: the verdict pill in its fly-in header and the graded checks in its **Evaluations** tab.
+  <Accordion title="My quick evaluation has no Cancel or Delete on the Evaluations list">
+    Expected, and the row is not broken. **Cancel** and **Delete** both act on a run, and a quick evaluation mints none — so the row carries no **⋯** menu at all rather than a disabled one. Manage it from the conversation instead: the row opens the session it graded, where **Evaluate** re-grades it and the new verdict replaces the old one.
   </Accordion>
 
   <Accordion title="Will evaluating change my sessions?">

@@ -1,7 +1,7 @@
 ---
 title: "Administer workspace access"
 icon: "users"
-description: "Invite members and manage the invite lifecycle, assign workspace roles, build teams, grant per-project Viewer/Editor access, and read your credit pool and workspace connections — all from Workspace settings."
+description: "Invite members and manage the invite lifecycle, assign workspace roles, build teams, grant per-project Viewer, Editor or Admin access, transfer a project's ownership, and read your credit pool and connected orgs — all from Workspace settings."
 ---
 
 Everything about who can get into your workspace — and what they can reach once they're in — is administered from one surface: **Workspace settings**. This how-to walks the admin jobs end to end:
@@ -9,15 +9,16 @@ Everything about who can get into your workspace — and what they can reach onc
 - Invite people to the workspace and manage the invite lifecycle (pending, expired, resend, revoke)
 - Change a member's **workspace role**, inside the guardrails that keep a workspace from locking itself out
 - Group people into **teams** so project access can be granted once, to the whole team
-- Grant **per-project access** (Viewer or Editor), directly or via a team, and read where each person's access comes from
+- Grant **per-project access** (Viewer, Editor or Admin), directly or via a team, and read where each person's access comes from
+- **Transfer a project's ownership** when the person who created it moves on
 - Trace any access change in the in-context **access history**
-- Read your workspace's **credit** usage and the **Salesforce connections** the whole workspace shares
+- Read your workspace's **credit** usage and the **connected orgs** the whole workspace shares
 
 This is a hands-on admin surface, so you work in the UI directly.
 
 ## Prerequisites
 
-- A **Trust AI account** in the workspace you want to administer
+- A **TrustAI account** in the workspace you want to administer
 - A workspace role that can manage members, teams, and access — **Owner** or **Admin** (the app describes the Admin role as "Manage members, teams & access")
 
 Both halves of that gate are real. A member or guest never sees the **Workspace Settings** row in the sidebar footer, and if they reach the surface by a saved link they get a card reading "Workspace management is admin-only" instead of the tabs. The server enforces it independently: an admin-only read like the members roster is refused before the identity provider is even called, so hiding the door is a convenience, not the control.
@@ -32,17 +33,19 @@ Click **Workspace Settings** in the sidebar footer (it sits above your user chip
 | **Teams** | Groups that bundle project access so you grant it once, not per person. |
 | **Project access** | Who can open each project — directly or inherited through a team. |
 | **Credits** | Your workspace credit pool, how much you have used this billing month, and where it went. |
-| **Connections** | The Salesforce orgs your workspace is connected to, and the projects that use each one. |
+| **Connected orgs** | The Salesforce orgs your workspace is connected to, and the projects that use each one. |
 | **General** | Settings that apply across every project in this workspace. |
 
 Each tab is a stable, bookmarkable route, so a refresh or a shared link lands on the right tab. The page opens on **Members** by default.
 
 <Note>
-  A June 2026 release note describes this surface consolidating "six tabs into four". That was true of that release; **Credits** and **Connections** landed afterwards. Six is the current count.
+  A June 2026 release note describes this surface consolidating "six tabs into four". That was true of that release; **Credits** and **Connected orgs** landed afterwards. Six is the current count.
+
+  The fifth tab is deliberately *not* called "Connections" — that name belongs to a project's own **Settings → Connections** tab, which lists the agents that one project tests. One word cannot name both.
 </Note>
 
 <Frame caption="Every administration job on this page starts from the tab strip. Members opens first, and its two actions — Invite and View access history — sit above the roster.">
-  <img src="/images/workspace-settings-members.png" alt="Workspace settings on the Members tab. A six-tab strip reads Members, Teams, Project access, Credits, Connections, General. Below it a roster of five people, each row showing name and email, an Admin or Member role badge, team chips such as Risk & Compliance and Support QA, and a joined date. A Search members field, a View access history button and a blue Invite button sit above the table." />
+  <img src="/images/workspace-settings-members.png" alt="Workspace settings on the Members tab. A six-tab strip reads Members, Teams, Project access, Credits, Connected orgs, General. Below it a roster of five people, each row showing name and email, an Admin or Member role badge, a team chip such as Risk & Compliance or Support QA where the person belongs to one, and a joined date. A Search members field, a View access history button and a blue Invite button sit above the table." />
 </Frame>
 
 ## Two role vocabularies, one rule
@@ -50,7 +53,7 @@ Each tab is a stable, bookmarkable route, so a refresh or a shared link lands on
 The surface uses two distinct vocabularies — keep them apart:
 
 - **Workspace roles** describe someone's standing in the workspace: **Owner**, **Admin**, **Member**, **Guest**. Ownership is never reassignable from this surface; Admins manage members, teams, and access; Members get standard access to the projects they're granted; Guests are external and project-scoped, with no teams.
-- **Project access tiers** describe what a grant on one project confers: **Viewer** (read) or **Editor** (read and change). These are the only two grantable tiers — admin-level access is conferred by ownership, never granted from a dialog.
+- **Project access tiers** describe what a grant on one project confers: **Viewer** (read), **Editor** (read and change) or **Admin** (change, plus share and archive). All three are grantable from the dialog. A fourth tier, **Owner**, sits above them — conferred when the project is created, never granted, and moved only by **Transfer ownership**.
 
 One rule ties them together: **project content is always gated by a project grant, and no workspace role is an exception — Owner included**. A workspace Admin who has no grant on a project doesn't see its content, and neither does the workspace Owner; the roles reference renders those cells as "Needs grant" rather than a blanket allow.
 
@@ -62,19 +65,23 @@ Wherever you pick a role — the invite dialog and the member sheet — a **What
 
 ## What a grant tier actually gates
 
-The two grantable tiers are deliberately narrow, and the tightening that shipped in July 2026 is stricter than "not ordinary members":
-
 | You want to | You need |
 |---|---|
-| Open the project and read its contents — scenarios, sessions, evaluators, evaluation runs | **Viewer** |
-| Create and change the project's contents, and start an evaluation run | **Editor** |
-| Grant or revoke other people's access to the project | Workspace **Owner** or **Admin** |
-| Rename, archive, or delete the project — or delete an evaluation run | The project's **owner** — the person who created it |
+| Open the project and read its contents — requirements, scenarios, sessions, evaluators, evaluation runs | **Viewer** |
+| Create, edit **and delete** the project's contents — personas, evaluators, scenarios, requirements — start an evaluation run, and edit the project's own name and description | **Editor** |
+| Grant or revoke other people's access to the project | **Admin** on the project, or workspace **Owner** or **Admin** |
+| Archive or restore the project, or delete an evaluation run | **Admin** or **Owner** on the project |
+| Transfer the project's ownership, or delete the project | The project's **Owner**, or workspace **Owner** or **Admin** |
 
-Two consequences worth knowing before you promise someone access:
+Three consequences worth knowing before you promise someone access:
 
-- **Project lifecycle is owner-only.** Renaming, archiving, and deleting a project belong to whoever created it. A workspace Owner or Admin *without* a grant on that project is denied as well — on project content the check resolves purely from the project grant, and workspace standing confers nothing.
-- **Managing access is the exception.** Granting and revoking access to a project is a workspace-level job, so an Admin can hand out grants on a project whose contents they can't open.
+- **Editors own the whole authoring loop.** An Editor creates, edits *and deletes* personas, evaluators, scenarios and requirements, and can fix a typo in the project's own name. Naming a project is authored content, not a lifecycle decision — it destroys nothing and anyone who can do it can undo it.
+- **Project content is gated by the grant alone.** A workspace Owner or Admin *without* a grant on a project is denied its content exactly like anyone else. Workspace standing confers no reading.
+- **Two acts are the deliberate exception.** Deleting a project and transferring its ownership both admit a workspace Owner or Admin with no grant on it — the offboarding backstop for a project whose owner has left. Neither lets them read the project.
+
+<Note>
+  Every permission refusal names your role, the action, and the remedy, so nobody has to guess which of the tiers above they are short of. The template reads **"Your Viewer role doesn't have permission to delete personas. Contact a project admin to change your role."** Two refusals end differently on purpose, because no project admin can help: project deletion and ownership transfer both close with **"Only the project's owner, or a workspace admin, can …"**. Someone with no grant at all hears **"You don't have access to this project. Contact a workspace admin to request access."**
+</Note>
 
 ## Invite members
 
@@ -147,21 +154,38 @@ Teams exist so you can grant project access once instead of per person.
   </Step>
 
   <Step title="Add a grant">
-    Click **Add access**. The **Grant access to [project]** dialog has a **Role** toggle — exactly **Viewer** or **Editor**, with Editor preselected — and a **People** / **Teams** tab pair listing the candidates, filtered by one search field that spans both tabs. Click a person to grant them the selected role directly, or a team to grant everyone in it at once. A status pill reads back what you're about to hand out ("Granting as Editor"), and **Done** closes the dialog.
+    Click **Add access**. The **Grant access to [project]** dialog has a **Role** toggle — **Viewer**, **Editor** or **Admin**, with Editor preselected — and a **People** / **Teams** tab pair listing the candidates, filtered by one search field that spans both tabs. Click a person to grant them the selected role directly, or a team to grant everyone in it at once. A status pill reads back what you're about to hand out ("Granting as Editor"), and **Done** closes the dialog.
 
-    Candidates are filtered by whether they already hold a grant **at all**, not by the tier you have selected: someone with any direct grant on the project is absent from **People** even when you switch the toggle to the other tier. To change an existing grant, use the inline role control on its row rather than looking for the person here.
+    Granting **Admin** needs no extra permission of its own: anyone trusted to share a project may share it at the tier they hold themselves. What a project Admin cannot do is hand the project away — that is the separate step below.
 
-    <Frame caption="Editor is preselected, and the candidate list is shorter than the roster: Marcus and Priya are missing from it because they already hold a grant, visible in the panel behind.">
-      <img src="/images/workspace-grant-access-dialog.png" alt="The Grant access to Acme refunds CSAT dialog: a Role toggle offering Viewer and Editor with Editor selected, a People / Teams tab pair, a search field, and two candidate rows each with an add button. Behind it the project's access panel lists the Risk & Compliance team under Teams with access and three people under People with access, each tagged Direct." />
+    Candidates are filtered by whether they already hold a grant **at all**, not by the tier you have selected: someone with any direct grant on the project is absent from **People** even when you switch the toggle to another tier. To change an existing grant, use the inline role control on its row rather than looking for the person here.
+
+    <Frame caption="Editor is preselected of the three tiers, and the candidate list is shorter than the roster: Marcus and Priya are missing from it because they already hold a grant, visible in the panel behind.">
+      <img src="/images/workspace-grant-access-dialog.png" alt="The Grant access to Acme refunds CSAT dialog: a Role toggle offering Viewer, Editor and Admin with Editor selected, a People / Teams tab pair, a search field, and two candidate rows each with an add button. Behind it the project's access panel lists the Risk & Compliance team under Teams with access and three people under People with access — the owner's row showing a static Owner badge, the other two an inline Viewer / Editor / Admin picker — above a Transfer ownership button and an Add access button." />
     </Frame>
 
     **You should see:** the new grant appear in the panel's **People with access** or **Teams with access** section with its role badge.
   </Step>
 
   <Step title="Read the provenance, adjust, or revoke">
-    Every grant row tells you *how* the access exists: a **Direct** pill for a per-person grant, a **via [team]** chip when the access is inherited through a team. A person can carry both at once. Each row's role is changeable inline between **Viewer** and **Editor**, and each row has a revoke action.
+    Every grant row tells you *how* the access exists: a **Direct** pill for a per-person grant, a **via [team]** chip when the access is inherited through a team. A person can carry both at once.
 
-    One grant you may see but can't change or revoke: the project owner's own access, conferred by ownership rather than granted. Its row shows a static badge reading **Admin** — a third label you will see nowhere else on this surface — with no Viewer/Editor control and no revoke action. **Admin** on a grant row means "this is the owner", not a third grantable tier.
+    Every grant row's tier is changeable inline between **Viewer**, **Editor** and **Admin**, and each row has a revoke action — with one exception. The project owner's own access is conferred by ownership rather than granted, so its row shows a static badge reading **Owner**, with no tier picker and no revoke. Trying to re-tier or revoke it through the API is refused in those terms: *"The project owner's access can't be changed or removed. Transfer ownership first — the previous owner becomes an admin."*
+  </Step>
+
+  <Step title="Hand the project on with Transfer ownership">
+    A project has exactly one owner, so making someone else the owner takes it from whoever holds it. That is why it is a transfer and not a grant: **Transfer ownership** sits in the access panel's footer, beside **Add access**.
+
+    The button appears only for someone the server would authorize — the current owner, or a workspace Owner or Admin re-homing a project whose owner has left — and it is hidden entirely when there is nobody else on the project to hand it to.
+
+    The confirm dialog is titled **Transfer ownership?** and names both halves of the swap: "A project has one owner. Whoever you choose becomes the owner of [project]. You become an admin."
+
+    Two rules shape who you can pick:
+
+    - **The new owner must already be on the project.** Ownership is a promotion, not an invitation, so a stranger is never quietly added. Aim the transfer at someone with no grant and the refusal quotes their email address back and tells you the step you are missing — give them access to the project first, then transfer ownership to them. Teams are not candidates either; a project is owned by a person.
+    - **The outgoing owner steps down to Admin**, keeping full operational control of what they built. The swap is atomic, so there is never a moment with two owners or none.
+
+    **You should see:** the panel repaint with the **Owner** badge on its new holder, and your own row drop to an editable **Admin**.
   </Step>
 </Steps>
 
@@ -191,13 +215,17 @@ Two states are worth recognizing:
 - **No pool yet.** Usage is metered but nothing is capped, and the card says so.
 - **Past the pool.** The card reads "You have gone past your credit pool for this billing month." When a workspace is capped and reaches its limit, runs are refused with a clear message telling you to contact your admin, rather than failing obscurely.
 
-## The Connections tab
+Reading the card in full — what draws on the pool, and what happens as you approach and then reach the limit — is covered in [Track credit usage](/how-to/track-credit-usage).
 
-**Connections** lists the Salesforce orgs your *workspace* is connected to — one card per org, showing which projects use it, its connection state, and how it signs in (for a connection made the recommended way, **Admin authorization**).
+## The Connected orgs tab
 
-Every card offers **Delete**, which removes the connection from Trust AI across every project that uses it. **Disconnect** — which also tears down the app Trust AI deployed in your Salesforce org — appears **only on connections made by admin authorization**, because those are the only ones with a Trust AI–deployed app to remove; a connection wired to an app your own admin created offers **Delete** alone. Both actions are destructive and both ask you to confirm.
+**Connected orgs** lists the Salesforce orgs your *workspace* is connected to — one card per org, showing which projects use it, its connection state, and how it signs in (for a connection made the recommended way, **Admin authorization**).
 
-This tab is where you see connections your projects share. Reading a row, reusing an org, and choosing between the two removals are covered in full in [Manage Salesforce connections](/how-to/manage-salesforce-connections). Creating one is a per-project job — see [Connect a Salesforce Agentforce agent](/how-to/connect-agentforce).
+Every card offers **Delete**, which removes the connection from TrustAI across every project listed under **Used by** and leaves your Salesforce org untouched. **Disconnect** appears **only on connections made by admin authorization**, because those are the only ones with a TrustAI–deployed app to remove; a connection wired to an app your own admin created offers **Delete** alone.
+
+Disconnect is not Delete with a teardown on top. It removes the app from your Salesforce org — which stops every project that reuses the org — but deletes only the one connection record that owns that app, so any other project under **Used by** is left pointing at an app that no longer exists. Both actions are destructive and both ask you to confirm.
+
+This tab is where you see connections your projects share. Reading a row, reusing an org, and choosing between the two removals are covered in full in [Manage Salesforce connections](/how-to/manage-salesforce-connections). Creating one is a per-project job, done on that project's own **Settings → Connections** tab — see [Manage a project's connections](/how-to/manage-project-connections) for that tab, and [Connect a Salesforce Agentforce agent](/how-to/connect-agentforce) for the Salesforce setup itself.
 
 ## The General tab
 
@@ -215,11 +243,15 @@ This tab is where you see connections your projects share. Reading a row, reusin
   </Accordion>
 
   <Accordion title="An Admin can't open a project">
-    Expected. A workspace role governs administration, not project content — project content is always gated by a project grant, admins included. Grant them **Viewer** or **Editor** on the project (directly or via a team) from **Project access**. The same is true of a workspace **Owner** without a grant.
+    Expected. A workspace role governs administration, not project content — project content is always gated by a project grant, admins included. Grant them **Viewer**, **Editor** or **Admin** on the project (directly or via a team) from **Project access**. The same is true of a workspace **Owner** without a grant.
   </Accordion>
 
-  <Accordion title="An Admin can't rename or delete a project">
-    Also expected, and stricter than the content rule. Renaming, archiving, and deleting a project belong to the person who created it. A grant — even Editor — doesn't confer it, and neither does workspace Owner or Admin standing.
+  <Accordion title="An Editor can't archive a project">
+    Expected — the three lifecycle acts sit at three different tiers. Renaming and editing the description are **Editor**; archiving and restoring are **Admin** on the project; transferring ownership and deleting are the project's **Owner** or a workspace Owner or Admin. Grant them **Admin** on the project from **Project access** if archiving is what they need.
+  </Accordion>
+
+  <Accordion title="I can't find the permanent-delete button for a project">
+    There isn't one. A project's **Settings → General** offers **Archive project**, which hides it from active views while preserving its history, settings, members and artifacts — and an archived project is restored from the **Archived projects** group in the project switcher. There is no Danger zone and no destructive delete anywhere on the surface.
   </Accordion>
 
   <Accordion title="The roles reference calls the Member role &quot;Editor&quot;">
@@ -243,6 +275,8 @@ This tab is where you see connections your projects share. Reading a row, reusin
 
 - **[Projects](/concepts/projects)** — how workspace membership and per-project access fit the Project model
 - **[Multi-tenancy](/concepts/multi-tenancy)** — the organization boundary all of this access control lives inside
-- **[Manage Salesforce connections](/how-to/manage-salesforce-connections)** — the Connections tab in full: reading a row, reusing an org, Disconnect vs Delete
+- **[Manage Salesforce connections](/how-to/manage-salesforce-connections)** — the Connected orgs tab in full: reading a row, reusing an org, Disconnect vs Delete
+- **[Manage a project's connections](/how-to/manage-project-connections)** — the project-side **Settings → Connections** tab the fifth workspace tab is deliberately not named after
+- **[Track credit usage](/how-to/track-credit-usage)** — the Credits tab in full: what draws on the pool, and what happens at the limit
 - **[Connect a Salesforce Agentforce agent](/how-to/connect-agentforce)** — how a Salesforce connection is created in the first place
 - **[Glossary](/glossary)** — the vocabulary in one place

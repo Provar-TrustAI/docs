@@ -3,8 +3,11 @@
 
     Usage:
       import { PreviewNotice } from "/snippets/preview-notice.mdx";
-      <PreviewNotice surface="Test Data Management" />
-      <PreviewNotice surface="Test Data Management" detail="Ask your admin to enable it." />
+      <PreviewNotice surface="&lt;surface name&gt;" />
+      <PreviewNotice surface="&lt;surface name&gt;" detail="Ask your admin to enable it." />
+
+    Never name a shipped surface in this example — a reader who greps the repo for a surface name
+    must not land on a placeholder that mislabels it as preview.
 
     Do NOT name environment variables — readers do not set flags, operators do. Do not promise
     a ship date. See AGENTS.md on preview features.

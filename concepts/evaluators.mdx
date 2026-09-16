@@ -4,7 +4,7 @@ icon: "ruler"
 description: "Reusable judges that score sessions — plain-language rules you write, or a built-in rubric that grounds every claim in your source material."
 ---
 
-An Evaluator is a reusable judgment function. You define it once in a [Project](/concepts/projects), attach it to the [Scenarios](/concepts/scenarios) it should grade, and it gets reused across many [Evaluations](/concepts/evaluations) — against whatever [Agent Version](/concepts/agent-versions) you're testing. The same Evaluators scoring the same scenarios across two Agent Versions is **the apples-to-apples comparison** Trust AI is built around.
+An Evaluator is a reusable judgment function. You define it once in a [Project](/concepts/projects), attach it to the [Scenarios](/concepts/scenarios) it should grade, and it gets reused across many [Evaluations](/concepts/evaluations) — against whatever [Agent Version](/concepts/agent-versions) you're testing. The same Evaluators scoring the same scenarios across two Agent Versions is **the apples-to-apples comparison** TrustAI is built around.
 
 ## The kinds of Evaluator
 
@@ -12,7 +12,7 @@ Evaluators differ by *how they decide*, and that determines what each one is goo
 
 <CardGroup cols={2}>
   <Card title="LLM judge" icon="brain">
-    Plain-language grading rules applied by an AI judge at evaluation time. The right tool for **qualitative judgment** — politeness, completeness, helpfulness, staying in scope. Scores pass/fail or on a 1–5 scale.
+    Plain-language grading rules applied by an AI judge at evaluation time. The right tool for **qualitative judgment** — politeness, completeness, helpfulness, staying in scope. Authored pass/fail, or on a 1–5 shape with a pass cutoff; either way the judge is asked for a pass or a fail.
   </Card>
   <Card title="Groundedness judge" icon="file-check">
     Checks that every factual claim in a reply is supported by the scenario's **reference material** — the kind that catches a hallucinated or contradicted answer. Always pass/fail.
@@ -40,7 +40,7 @@ This one works differently enough from the others to be worth its own explanatio
 Its contract, in its own words:
 
 - It breaks each agent reply into individually checkable claims.
-- It checks every claim against the scenario's attached reference material — and a claim only counts as supported when there's a quote that Trust AI **verifies actually appears** in the document.
+- It checks every claim against the scenario's attached reference material — and a claim only counts as supported when there's a quote that TrustAI **verifies actually appears** in the document.
 - It fails when any claim contradicts the material, or when unsupported claims cross the threshold — currently strict, so any unsupported claim fails.
 - When it can't verify the evidence either way, it returns **Needs review** rather than guessing. It never silently passes or fails on uncertainty.
 
@@ -58,19 +58,22 @@ For the step-by-step recipe — attaching reference material, running the judge,
 
 ## Start from the recommended library
 
-A new project doesn't start from a blank slate. Trust AI ships a curated library of recommended defaults — the Trust Library — including **11 recommended evaluators**: five **Quality** presets (Tone is professional, Answer is complete, Answers the question, Accomplished the goal, Does not hallucinate) and six **Safety** presets (PII is handled safely, Stays within scope, No unauthorized commitments, No toxic or abusive language, Free of unfair bias, Resists prompt injection).
+A new project doesn't start from a blank slate. TrustAI ships **11 recommended evaluators**: five **Quality** presets (Tone is professional, Answer is complete, Answers the question, Accomplished the goal, Internally consistent) and six **Safety** presets (PII is handled safely, Stays within scope, No unauthorized commitments, No toxic or abusive language, Free of unfair bias, Resists prompt injection). A matching catalog of [recommended scenarios](/concepts/trust-library) covers the same ground on the Scenarios surface.
 
-Nine carry the **Pass / fail** score type; **two carry 1–5 scale** — *Answer is complete* and *Accomplished the goal* — with 3 declared as their pass cutoff. The score type governs how the rubric is written and read, not whether the evaluator reaches a verdict: all eleven are LLM judges, and every LLM judge returns a pass or a fail on the run.
+**Internally consistent** is the one worth reading twice, because it checks less than you might assume. It grades a reply against the conversation, the agent's own tool calls, and the expected response: it fails a reply that contradicts itself or an earlier turn, and one that states a specific — an order number, an amount, a policy name — as settled fact when nothing in front of the judge established it. It does not check facts against source material. That is the Groundedness judge's job, and it needs reference material to do it.
+
+Nine carry the **Pass / fail** score type. Two — *Answer is complete* and *Accomplished the goal* — are authored as a **1–5 scale** with 3 as the pass cutoff, and it is worth being plain about what that buys you: the scale shapes how you write the rubric, not what comes back. Every LLM judge is asked for a pass or a fail, so a scale preset reaches the run as a pass/fail verdict like the rest.
 
 - Click **Add recommended** in the Evaluators header (or the **Add recommended evaluators** call-to-action on an empty project) to open the adopt modal.
 - Each preset shows a provenance chip — a friendly category like **Answer quality** or **Safety & security** — with the underlying method cited in its tooltip. Presets already in your project show a muted **In your project** label, so adopting twice never creates a duplicate.
+- **Select all N** ticks everything you can still adopt. N counts only the selectable presets, never the ones already in your project, and the control flips to **Deselect all** once they are all on.
 - Check the ones you want and confirm with **Add N evaluators**.
 
 Three things to know about adopted presets:
 
 1. **They're ordinary evaluators.** Fully editable, no special status — they just keep a friendly **Recommended** chip on the list and detail header so their origin stays clear.
-2. **Some are marked "Tailor first."** The presets that judge goal completion, scope, or unauthorized commitments are written against a generic agent. The **Tailor first** badge is a nudge — add a rule about what *your* agent is allowed to do before relying on the check. It never blocks adoption.
-3. **They pair with scenarios.** A matching catalog of recommended starter safety scenarios exists on the Scenarios surface, and each is paired with the evaluators that score it well — surfaced as guidance when you attach evaluators, not auto-attached.
+2. **Three are marked "Tailor first."** *Accomplished the goal*, *Stays within scope*, and *No unauthorized commitments* judge against what *your* agent is meant to achieve, stay inside, and is allowed to promise — and until you say what that is, they are grading a generic agent. The **Tailor first** badge is a nudge to add a rule about your own agent before relying on the check. It never blocks adoption, and the other eight presets need no tailoring.
+3. **Adopting a scenario brings its checks with it.** Each [recommended scenario](/concepts/trust-library) is paired with the evaluators that grade it, and adopting one does the whole job in a single step: it creates the scenario, creates any paired preset your project is still missing — once each, even when two scenarios share the same one — and attaches them to the scenario. An adopted probe therefore lands graded rather than bare, and adopting the same entry twice is refused rather than duplicated.
 
 ## Anatomy of an LLM judge
 
@@ -81,6 +84,17 @@ You don't have to write a judge prompt. An LLM judge is defined by:
 3. **Grading rules** — short plain-language sentences. Pass/fail judges take two lists, **Passes when…** and **Fails when…**; 1–5 judges take three anchors, **Rate 5 when…**, **Rate 3 when…**, and **Rate 1 when…**.
 
 The app assembles your rules into the exact criteria the live judge uses. On the create form that assembled prompt is read-only, behind **Advanced — view the prompt this produces**. A **Reason step by step** toggle asks the judge to reason before scoring.
+
+### What the judge reads
+
+On a scenario that produced a single reply, the judge reads that reply. On a simulated multi-turn scenario it reads the **whole conversation** — every customer message and every agent reply, in order, each labelled with a turn id like `[a1]` for an agent turn and `[u1]` for a customer turn.
+
+That changes what your rules mean. The judge grades the agent's conduct across the whole conversation rather than its closing message, and the rule is strict in one direction: **a criterion violated by any agent turn fails the conversation, even if a later turn corrects it.** This is what makes guardrail-shaped rules work — "never discloses another customer's data" is meant to fail a conversation that leaks on turn 2 and recovers by turn 5. The judge is asked to cite the offending turn ids in its reasoning, so a failure tells you where it happened.
+
+Two more properties of what the judge is handed keep verdicts honest:
+
+- **The transcript is declared complete.** The judge is told that nothing was said and no tool was called after the last turn, and that it may quote only turns and tool calls it can actually see. It cannot continue the conversation in its head or infer a call that isn't shown.
+- **Tool calls are anchored to the turn they ran on.** They arrive in call order with their arguments and the scalar fields of what each one returned, so a criterion can name what a tool *answered*, not just that it was called — and a judge can no longer fail a reply for "never calling" something that ran on an earlier turn.
 
 ### Dropping to the raw prompt
 
@@ -93,23 +107,27 @@ Two properties make the judges dependable:
 - **Deterministic scoring.** Judges run at temperature 0 — the same transcript and the same rules produce the same verdict. This is pinned by the product, not a setting.
 - **Environment problems don't count against the agent.** If a judge call fails for infrastructure reasons, the result is excluded from the score as an environment problem rather than recorded as a failure.
 
-A check therefore has three possible verdicts, not two: **Pass**, **Fail**, and an amber **Needs review** for a grade that can't be trusted as-is. A needs-review check never gates — it can't flip a result to fail, and it can't push another evaluator's verdict out of the count. And where a result carries no behavioural score at all, it reads **Not graded**, which is a different statement from **Not evaluated** (nothing ran). See [Evaluations](/concepts/evaluations) for how those land on a run.
+A check therefore has three possible verdicts, not two: **Pass**, **Fail**, and an amber **Needs review** for a grade that can't be trusted as-is. A needs-review check never gates — it can't flip a result to fail, and it can't push another evaluator's verdict out of the count. And where a result carries no behavioural score at all, it reads **Not graded**, which is a different statement from **Not evaluated** (nothing ran).
+
+One more amber read belongs beside those, and it isn't a verdict the judge produced: **Couldn't test**. When an action the agent itself runs returns an error, there is no conduct to grade, so the conversation leaves the pass rate's denominator instead of being recorded as a failure. Leaving the denominator is not the same as excusing the agent, and the app is careful not to say it is — a **Couldn't test** conversation never carries the "environment problem, not the agent" framing that a blocked or unreachable environment does. See [Evaluations](/concepts/evaluations) for how all of these land on a run.
 
 ### Tailor with AI
 
 On the create form, the **Tailor with AI** box drafts the rules for you: describe what the evaluator should check in one sentence, click **Draft for my agent**, and draft pass/fail rules prefill the editor. You review and edit them — nothing is saved until you save.
 
-For how to write rules that hold up, see [Write an effective LLM-judge prompt](/how-to/write-llm-judge-prompt).
+For how to write rules that hold up, see [Write grading rules and judge prompts](/how-to/write-llm-judge-prompt).
 
 ## Attaching Evaluators to Scenarios
 
 Evaluators meet scenarios in the scenario's **Expected Output** editor. The **+ Add evaluator** picker leads with a **Recommended for this scenario** group — the evaluators paired with that scenario's kind of failure — ahead of the full Quality/Safety catalog, and a recommended preset can be adopted and attached in one step from inside the picker. Removing an evaluator from a scenario is clean, and re-adding it is a plain attach.
 
-At run time, an [Evaluation](/concepts/evaluations) applies each scenario's attached evaluators; you can also grade a single scenario or session in place, without creating a run in the Evaluations list.
+Opening an attached evaluator from the scenario doesn't take you away from it. On a wide screen — about 1280 pixels and up — the evaluator's panel **docks beside** the scenario's instead of covering it, so the two tile side by side and both stay interactive. **Esc** closes the evaluator first and leaves the scenario exactly where your eyes left it. On a narrower screen the panels stack as usual.
+
+At run time, an [Evaluation](/concepts/evaluations) applies each scenario's attached evaluators. You can also grade a single session in place with a **quick evaluation**. It mints no run record, but it is not invisible: it lands on the Evaluations list as a row carrying a muted **Quick** pill, and that row opens the conversation it graded rather than a run detail page that would not exist.
 
 ## Calibration — the loop that makes LLM judges trustworthy
 
-An LLM judge is useful only if it agrees with informed humans. Trust AI measures this in two places — the **Calibrate** tab checks the judge against the pass/fail verdicts you recorded on scenarios, and **evaluator accuracy** on run results measures agreement with the human **Verdict** annotations on sessions. In both, the ground truth is **your verdicts**: on the **Verdict** annotation column, a human verdict grades the judges — it never overrides the automated verdict. That rule is scoped to that column, not universal. Groundedness results are the exception: a reviewer can override a per-claim verdict there and the score recomputes (see [Annotations](/concepts/annotations)).
+An LLM judge is useful only if it agrees with informed humans. TrustAI measures this in two places — the **Calibrate** tab checks the judge against the pass/fail verdicts you recorded on scenarios, and **evaluator accuracy** on run results measures agreement with the human **Verdict** annotations on sessions. In both, the ground truth is **your verdicts**: on the **Verdict** annotation column, a human verdict grades the judges — it never overrides the automated verdict. That rule is scoped to that column, not universal. Groundedness results are the exception: a reviewer can override a per-claim verdict there and the score recomputes (see [Annotations](/concepts/annotations)).
 
 ### The Calibrate tab
 
@@ -126,14 +144,15 @@ Calibration runs the exact production judge — same model, same assembled promp
 
 ### Evaluator accuracy on run results
 
-Evaluation run results lead with a dual headline: the **Pass rate** grades the agent, and evaluator accuracy grades the judges — how often the automated verdicts agreed with a human's session verdicts. Calibrate before you trust; an uncalibrated judge produces scores that look authoritative but may not track reality.
+Evaluation run results lead with a dual headline: the **Pass rate** grades the agent, and evaluator accuracy grades the judges — how often the **LLM judges'** verdicts agreed with the human **Verdict** annotations on the conversations they graded. It is scoped to the judges on purpose: structural and other non-judge checks don't contribute to it. It reports on runs driven from your scenarios as well as on ones graded from captured sessions. Calibrate before you trust; an uncalibrated judge produces scores that look authoritative but may not track reality.
 
 ## In the app
 
-- **Evaluators list** — every evaluator in the project, with kind, score type, and any **Recommended** provenance chips. **Add recommended** and **New evaluator** live in the header.
+- **Evaluators list** — every evaluator in the project, with kind, score type, and any **Recommended** provenance chips. **Add recommended** and **New evaluator** live in the header; on an empty project the same catalog opens from the **Add recommended evaluators** hero instead.
 - **Create flow** — pick the **Kind** (LLM judge or Groundedness judge), name and describe it, then either author grading rules — by hand or with **Tailor with AI** — or, for a Groundedness judge, optionally add guidance. The kind is fixed once created.
 - **Side panel** — click any evaluator to open its panel. The tabs render in this order: **Overview** (recent trend), **Criteria** (the grading rules, committed with **Save grading rules** — labelled **What it checks** on a Structured match), **Calibrate** (LLM judges only), then **Runs** (run history, with a count once the evaluator has any). Calibrate sits between Criteria and Runs on purpose: Criteria owns the rules, and Calibrate is what proves them.
-- **Safe delete** — the app checks references before deleting. If active evaluation runs still depend on the evaluator, the delete is refused (**Can't delete**), so you can't silently break a comparison.
+- **Safe delete** — the app checks references first, per evaluator. Select rows on the list and the bulk bar offers **Delete**; the confirmation says how many scenarios will stop grading with what you're deleting, names any check it can't touch — *"N evaluators can't be deleted — they're in use and will be skipped"* — and goes ahead with the rest rather than failing the whole batch. When nothing in the selection can go, the dialog is titled **Can't delete these evaluators** and gives each one's reason: used by an evaluation that is still running, or used in evaluations whose results still hold its scores.
+- **Two kinds of busy** — a delete can also be refused at the moment you press it, for two different reasons: an evaluation run still in flight, or a scenario save holding the evaluator's attachments right now. The app reports whichever one the server named rather than guessing between them. When several refuse at once it says only what is true of all of them: *"they're in use right now. Try again in a moment."*
 
 ## Reusing Evaluators across scenarios, Agent Versions, time
 
@@ -147,11 +166,11 @@ Each calibration run snapshots the rules it tested along with its agreement metr
 
 ## Why we explicitly reject other framings
 
-Trust AI's Evaluator vocabulary deliberately differs from some adjacent ecosystems:
+TrustAI's Evaluator vocabulary deliberately differs from some adjacent ecosystems:
 
 - **Not "metric."** Metrics are continuous scalars (latency, token count). Evaluators produce judgments — pass/fail or rubric-anchored — and the product distinguishes these.
 - **Not "test."** Tests pass or fail without nuance. Evaluators carry reasoning — when an LLM judge fails a result, the reasoning is part of it, which is how you debug agent regressions.
-- **Not "guardrail."** Guardrails are runtime controls (block this output before it reaches a customer). Evaluators are post-hoc judgment. The two even meet cleanly in results: a response blocked by a runtime guardrail shows as **Guardrail blocked** and is excluded from the score rather than counted as a failure.
+- **Not "guardrail."** Guardrails are runtime controls (block this output before it reaches a customer). Evaluators are post-hoc judgment. The two even meet cleanly in results: a response blocked by a runtime guardrail shows as **Guardrail blocked** and is excluded from the score rather than counted as a failure. A break in the agent's own machinery is a third thing again — it reads amber as **Couldn't test** and leaves the score the same way, but it is never presented as the environment's fault.
 
 ## Working with Evaluators
 
@@ -173,6 +192,6 @@ Developers who want the underlying endpoints and request/response shapes can fin
 - **[Annotations](/concepts/annotations)** — the human verdicts that calibrate LLM judges
 - **[Scenarios](/concepts/scenarios)** — where Evaluators attach, via Expected Output
 - **[Evaluations](/concepts/evaluations)** — the runs that apply Evaluators to scenarios and sessions
-- **[The evaluation loop](/concepts/evaluation-loop)** — Evaluators drive step 7, calibrate and tighten
-- **[Write an effective LLM-judge prompt](/how-to/write-llm-judge-prompt)** — practical rule-writing guide
+- **[The evaluation loop](/concepts/evaluation-loop)** — Evaluators drive step 8, calibrate and tighten
+- **[Write grading rules and judge prompts](/how-to/write-llm-judge-prompt)** — practical rule-writing guide
 - **[Check answers against source material](/how-to/check-answers-against-source-material)** — the Groundedness judge end to end, from reference material to the per-claim report

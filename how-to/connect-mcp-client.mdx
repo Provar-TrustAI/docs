@@ -1,57 +1,241 @@
 ---
-title: "Connect an MCP client to Trust AI"
+title: "Connect an MCP client to TrustAI"
 icon: "plug"
-description: "Why pointing Claude Desktop, Cursor, or a VS Code MCP extension at Trust AI is not a supported integration, and what to do instead."
+description: "Point Claude Code, Codex, or any MCP client at your TrustAI workspace: add the server, authenticate through your workspace sign-in, choose an access level, and confirm the connection works."
 ---
 
-Trust AI runs an [MCP server](/concepts/mcp-integration) that republishes a small, fixed subset of the **Trust Agent's** tools. This page is about the client side of that: pointing a standalone MCP client — Claude Desktop, Cursor, a VS Code MCP extension — at it.
-
-<Warning>
-  **Connecting your own MCP client is not yet supported.** There is no supported way to point an external client at Trust AI, and no MCP configuration screen anywhere in the product. The server authenticates every call on a signed-in Trust AI session, and reaching it that way from outside the product is an internal path only — not a customer integration, and not something to build against.
-</Warning>
-
-## What "not supported" means here
-
-It is a statement about what Trust AI stands behind, not a claim that the mechanism is missing.
-
-**What is missing is a credential you can hold.** Every authenticated request Trust AI accepts — over MCP and over the REST API alike — is authorized by your signed-in browser session. There is no key Trust AI issues to a client, so there is nothing you could scope to read-only, rotate on a schedule, or revoke when a laptop goes missing. That, not the protocol work, is the gap.
-
-**So there is nothing to configure.** No connection screen, no server address to paste, no per-client snippet for us to publish. A path we supported would need an issued, revocable credential in place of a session. That is a design direction, not a scheduled release, and this page will not guess at a date.
+TrustAI is an [MCP server](/concepts/mcp-integration), so the agent you already work in can do evaluation work here directly. Connecting it is two steps and about a minute: add a URL, then approve one consent screen in your browser. There is no key to generate, nothing to paste, and no configuration screen to find.
 
 <Note>
-  Earlier versions of this page said the standalone-client path would arrive with an OAuth sign-in flow, and that a client would be handed a short-lived token automatically. That was wrong on both counts. **No OAuth work is planned**, and nothing described here is waiting on it.
+  **The base URL is your own workspace's address** — the same origin you sign in to TrustAI at. Every command below writes it as `<your-workspace-url>`; substitute yours. If you are not sure what it is, it is the origin in your browser's address bar when you are using TrustAI.
+
+  **The trailing slash matters.** The endpoint is `/v1/mcp/`. Without the slash the server answers with a redirect, and not every MCP client follows a redirect on a POST.
 </Note>
 
-## Use the Trust Agent instead
+## 1. Add the server
 
-Nothing sits behind the unsupported door that the product does not already give you. MCP does not add capability — it republishes the Trust Agent's own tools over a second transport, running the same implementations. The agent inside Trust AI is the full surface, not a subset of it, and it reaches you with no client configuration at all.
+<Tabs>
+  <Tab title="Claude Code">
+    ```bash
+    claude mcp add --transport http trustai <your-workspace-url>/v1/mcp/
+    ```
 
-Open a chat from any project and ask for the work directly:
+    Check what you added:
 
-- **Get oriented** — "Summarize this project" returns entity counts, setup state, and the most recent evaluation run.
-- **Query your data** — "How many sessions are in this project?", "Show me two sessions from this project." One entity type at a time: sessions, scenarios, evaluators, evaluations, personas, agent versions, or [requirements](/concepts/requirements).
-- **Read an attached file** — attach a document to the chat and ask the agent to read it back.
-- **Analyze a run** — "Analyze the failures in the last evaluation" produces a short note on each failure and then names the themes across them. It typically takes 30 to 60 seconds.
-- **Write, with a checkpoint** — curating conversations into scenarios, editing or deleting an item, and starting an evaluation each preview what would change and then wait for you to approve. A one-time approval covers that write alone. Where the card also offers a for-this-chat scope, approving it grants a standing pass and the agent repeats that kind of write for the rest of the conversation without stopping again — deletes never offer it, so every delete is approved on its own. See [Approve an agent write](/how-to/approve-agent-writes).
+    ```bash
+    claude mcp list
+    ```
 
-[Work with the Trust Agent](/how-to/work-with-the-trust-agent) covers the chat surface itself — the Ask, Plan, and Act modes and how approvals are granted.
+    It reports `trustai` with `! Needs authentication`. That is the expected state at this point, not a failure — adding the server is all that command did, and the credential comes next.
+  </Tab>
+  <Tab title="Codex">
+    ```bash
+    codex mcp add trustai --url <your-workspace-url>/v1/mcp/
+    ```
+
+    Codex does not stop after saving the server: it registers itself with TrustAI, opens your browser on the consent screen, and then waits for its own callback. So step 2 usually happens inside step 1.
+
+    If nobody completes the browser part in time, Codex gives up with a timed-out message — but **the server entry is still saved**. That is a failed sign-in, not a failed add, and step 2 is how you retry it.
+  </Tab>
+  <Tab title="Another client">
+    Any client that implements the MCP specification's HTTP transport and OAuth can connect. Give it the server URL — `<your-workspace-url>/v1/mcp/` — and nothing else.
+
+    Everything after that is the client's own work: the first call without a credential comes back with a challenge that tells the client where to discover the authorization server, the client registers itself, and the browser opens on the consent screen. No endpoint needs to be typed anywhere, and there is no client id or secret to create by hand.
+  </Tab>
+</Tabs>
+
+## 2. Authenticate
+
+<Tabs>
+  <Tab title="Claude Code">
+    In Claude Code, run:
+
+    ```
+    /mcp
+    ```
+
+    Select `trustai`, then **authenticate**. Your browser opens on a single consent screen.
+
+    When you approve it, control comes back to Claude Code and `claude mcp list` reports the server as connected.
+  </Tab>
+  <Tab title="Codex">
+    If the browser hop did not complete during step 1:
+
+    ```bash
+    codex mcp login trustai
+    ```
+
+    Codex prints the authorization URL and opens it. Approve the consent screen and Codex catches the redirect on its own local port and finishes.
+
+    `codex mcp list` then reports the server's authentication as OAuth. "Not logged in" means this step has not completed yet.
+  </Tab>
+</Tabs>
+
+The consent screen names four things, and all four are worth reading before you click:
+
+- **Which app is asking** — your client, by name.
+- **Who it would act as** — your email address. The line reads *"It will act as you@example.com in the Acme workspace."*
+- **Which workspace** — by name.
+- **What it may do** — the access options, covered in the next step.
+
+If the account it names is not yours — a shared or borrowed browser — use **Not you? Sign out** and sign back in as yourself. The same connection request is held for whoever signs in next.
+
+<Info>
+  **Not signed in? It handles that.** The consent screen needs a live TrustAI session to know who you are. If there isn't one, your browser goes through your workspace's SSO identity provider in the ordinary way and comes straight back to the same connection request. You sign in, and the consent screen is there — nothing to click in between and no second tab to find.
+
+  The held request lasts **10 minutes**, and signing in does not extend it. Past that you start the connection again from your client, which is all there is to it.
+</Info>
+
+## 3. Choose the access to grant
+
+The consent screen offers three answers. Pick the narrowest one that does the job — widening it later is a reconnect, which takes seconds.
+
+| Option | What the connection can do |
+| --- | --- |
+| **Read only** | Look at projects, scenarios, runs, and results. Nothing else. |
+| **Read and write** | The same reads, plus creating and changing requirements, evaluators, scenarios, and runs — with every change stopping to ask you first. |
+| **Read and write, act mode** | The same changes, made without stopping to ask each time. Every change is still recorded. |
+
+If your client asked to write without asking to read anything, the middle option reads **Write access** instead, with an act-mode variant beside it. Only the options your client's request actually covers are shown.
+
+<Warning>
+  **Act mode is yours to grant and nobody else's to ask for.** A client can request read and write access; it can never request act mode, and no prompt, setting, or tool call turns it on afterwards. It exists only because you chose it here — and revoking the connection revokes it.
+
+  Act mode skips the pause before each change, and nothing else. Your project access, your workspace's tool permissions, and the guard that refuses to launch a run against a live customer org without an explicit confirmation all still apply. And it is not the Trust Agent's own **Act** mode, which is one of that assistant's three in-product operating modes and still stops for every mutating write — see [Work with the Trust Agent](/how-to/work-with-the-trust-agent). See [MCP integration](/concepts/mcp-integration) for what that gate does and does not cover.
+</Warning>
+
+A read-only connection does not fail cryptically when it reaches a write. It is refused in plain words, before any approval is raised, and told how to fix it:
+
+```
+This connection is read-only, so it can't run 'trustai_requirements.create'.
+Reconnect TrustAI from your MCP client and choose read and write access when asked.
+```
+
+Changing your mind is a reconnect rather than a settings edit. In Claude Code, `claude mcp remove trustai`, then add it again and pick the other option. In Codex, `codex mcp logout trustai` then `codex mcp login trustai`.
+
+## 4. Check it worked
+
+Ask your client for the one call that needs nothing to hand:
+
+> Using the TrustAI MCP server, call `trustai_project` with the op `whoami` and no project id, and tell me which account and workspace it says I am.
+
+It answers with your email address, your workspace by name, and the projects you can reach. That confirms three things at once: the server is reachable, the credential works, and it is acting as you.
+
+Then name the project you want to work in once, and every later call in that session can leave it out:
+
+> Use `trustai_project` with the op `set_context` to work in the *Acme refunds* project for the rest of this session.
+
+<Tip>
+  Before your agent's first call on any tool, have it read that tool's schema resource — `trustai://schema/trustai_scenarios`, and so on for each. It is one round trip, and it is cheaper than guessing, because a wrong operation name and a wrong argument shape both come back as errors pointing at the same resource.
+</Tip>
+
+## First things to ask
+
+Once the project is set, these are the requests that pay off earliest:
+
+- **Find out what you are pointed at.** "Run `whoami` with the project set and tell me which agent and org this project tests, and whether that org is a sandbox." Worth asking before anything spends.
+- **Take stock.** "Summarize this project — what it holds, what is set up, and what is missing."
+- **Write the requirements first.** "Draft requirements from this document and save them." The rest of the workflow keys off them.
+- **Build the checks, then attach them.** "Create an evaluator that judges whether refund answers cite the returns policy, and attach it to the refund scenarios." Attaching is the step that makes grading happen — an evaluator linked only to a requirement grades nothing.
+- **Run it and read it back.** "Launch a run over these scenarios, poll until it finishes, then summarize the failures." The run's own answer tells your agent how long to wait between polls, so it does not have to invent an interval.
+- **Second-guess a verdict.** "Gather the adjudication evidence for the conversation that failed and tell me whether you believe the verdict." What comes back is evidence, never a verdict about the verdict — the judgement is yours.
+
+Your client also loads the Trust Agent's bundled recipes as MCP prompts, so the same playbooks are available by name in your own client's command picker. The namespace and formatting belong to your client, so browse the picker rather than memorising a prefix.
+
+## Approving a write from outside the browser
+
+On a read-and-write connection, every change stops and waits for you. The call holds open for up to five minutes and reports progress while it waits, so a connection that has gone quiet is not a hang.
+
+Two things follow from that:
+
+- **Your client's per-tool timeout has to outlast the gate.** Most clients cut a tool call off well before five minutes by default. If a write call dies client-side after a minute or two, that ceiling is why — raise it above the approval window.
+- **Only you can answer your own call.** The approval is discoverable and answerable by the same person the call was made under. Someone else's pending approval is not listed, and there is no approval inbox in the product for these — your client finds and answers it on the wire.
+
+The in-product equivalent, which is a different mechanism with a different grant, is covered in [Approve an agent write](/how-to/approve-agent-writes).
+
+## See and revoke what is connected
+
+The credential the consent screen minted lasts **90 days**. When it expires, the same browser hop runs again — there is nothing to re-paste, ever.
+
+You can list what you have connected and revoke any of it: each entry shows the client's name, the access it was granted, the last few characters of its token, and when it was created, last used, and revoked. A revoked credential is refused on that client's very next call, and the client shows that it needs authentication again rather than failing silently. The token value itself is never shown — it exists in full only at the moment the client receives it.
+
+<Info>
+  **There is no screen for this in the product yet.** Listing and revoking connected clients is available on the wire only; request and response shapes live in the [API Reference](/api-reference).
+
+  Removing the server from your client is not revocation. `claude mcp remove trustai` and `codex mcp logout trustai` are both local — they drop your own configuration and leave the credential live until you revoke it or it expires. If a laptop goes missing, revoke.
+</Info>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="The client can't connect, or the first call redirects">
+    The endpoint is `/v1/mcp/` **with** the trailing slash. Without it the server answers `307`, and not every MCP client follows a redirect on a POST — the symptom is a connection that never completes rather than a clear error.
+
+    Remove the server and add it again with the slash: `claude mcp remove trustai`, then the `claude mcp add` command from step 1.
+  </Accordion>
+
+  <Accordion title="The browser opens on the sign-in page instead of the consent screen">
+    Expected when that browser has no live TrustAI session. Sign in and you are returned to the consent screen automatically — the connection request is held for you. Nothing to click in between.
+  </Accordion>
+
+  <Accordion title="The browser lands on a page telling you to start the connection again">
+    The held connection request timed out — it lasts 10 minutes, and signing in does not extend it — or it was already answered.
+
+    Nothing is lost and nothing was half-granted. Start the connection again from your client: `/mcp` → `trustai` → authenticate in Claude Code, or `codex mcp login trustai` in Codex.
+  </Accordion>
+
+  <Accordion title="You clicked Cancel, or the connection came back denied">
+    Cancelling is a real answer, and it is final for that request — nothing is minted and your client is told it was declined. Start the connection again when you are ready to approve it.
+
+    You can also see a denial after clicking **Connect**: if what you picked leaves no overlap with what the client asked for — a client that asked only to write, answered **Read only** — there is no honest credential at the bottom of that combination, so none is issued. Reconnect and pick an option that covers what the client asked for.
+  </Accordion>
+
+  <Accordion title="Every call fails as unauthenticated, or the client says it needs authentication again">
+    The credential was revoked, or its 90 days ran out. Both look the same from the client, and both have the same fix: authenticate again. It is the same hop as the first time and there is nothing to re-enter.
+
+    If it keeps happening immediately after each reconnect, check that you are not also carrying a hand-written authorization header in your client's configuration — let the browser flow supply the credential instead.
+  </Accordion>
+
+  <Accordion title="The consent screen names somebody else's account">
+    A shared or borrowed browser is signed in as them. Click **Not you? Sign out**, then sign in as yourself — the same connection request comes back for whoever signs in next.
+
+    If signing back in returns the same person, your identity provider still has its own session in that browser and only it can end that one. Sign out with your identity provider, or use a private window.
+  </Accordion>
+
+  <Accordion title="A write call dies client-side after a minute or two">
+    Your client's per-tool timeout is below the five-minute approval window. Raise the client's tool timeout above it, then retry the call.
+
+    A launch that dies this way is safe to repeat: an identical relaunch returns the run already under way rather than starting — and charging for — a second one.
+  </Accordion>
+
+  <Accordion title="A tool call returns an error naming the valid operations, or listing what was wrong with the arguments">
+    Your agent guessed instead of reading the schema. Every one of those messages names the tool's `trustai://schema/<tool>` resource — tell the agent to read it and retry. That is the whole recovery, and it needs no one at the keyboard.
+  </Accordion>
+
+  <Accordion title="A project id comes back as not found">
+    Either it does not exist, or it belongs to a different workspace than the account you connected as. Those collapse to the same answer on purpose, so that no caller can use the difference to learn what another workspace holds — see [Multi-tenancy](/concepts/multi-tenancy).
+
+    A project that exists in *your* workspace but that you are not a member of answers differently, and says so: ask a project owner to add you.
+  </Accordion>
+</AccordionGroup>
 
 ## If what you wanted was to connect your own agent
 
-Connecting the agent you want to evaluate is a different job, and it is supported. It runs through a platform connection, not through MCP. **Four platforms are connectable**, and each has a guide of its own:
+Connecting the agent you want to evaluate is a different job, and it runs through a platform connection rather than through MCP. **Four platforms are connectable**, and each has a guide of its own:
 
 - [Connect an AWS Bedrock AgentCore agent](/how-to/connect-agentcore)
 - [Connect a Salesforce Agentforce agent](/how-to/connect-agentforce)
 - [Connect a Claude Managed Agent](/how-to/connect-claude-managed-agent)
 - [Connect a Conversational HTTP agent](/how-to/connect-http-agent)
 
-The fourth is the one to reach for when your agent runs on no named vendor platform at all — any agent that accepts AG-UI run requests and streams AG-UI events back over SSE. All four start the same way: **Project Settings → Connection → Add connection**, then pick the platform. If you came here because your agent does not run on one of the named platforms, the Conversational HTTP guide is your path, and it is the closest thing to "point your own thing at Trust AI" that is supported today.
+The fourth is the one to reach for when your agent runs on no named vendor platform at all — any agent that accepts AG-UI run requests and streams AG-UI events back over SSE. All four start on the project's **Connections** tab with **Connect an agent**.
 
-Your agent under test may itself speak MCP to its own tools. That relationship is between your agent and those tools; it is unaffected by anything on this page.
+Your agent under test may itself speak MCP to its own tools. That relationship is between your agent and those tools, and nothing on this page affects it.
 
 ## Related reading
 
-- **[MCP integration](/concepts/mcp-integration)** — the eight republished tools, the project role each one needs, and the approval gate every write passes through
-- **[Trust Agent](/concepts/trust-agent)** — the assistant whose tools the MCP server republishes
-- **[Work with the Trust Agent](/how-to/work-with-the-trust-agent)** — the in-product path this page points you to
-- **[Approve an agent write](/how-to/approve-agent-writes)** — the approval step in front of every write
+- **[MCP integration](/concepts/mcp-integration)** — the six tools, the consent model, the approval ledger, and what MCP does not reach yet
+- **[Trust Agent](/concepts/trust-agent)** — the in-product assistant, and the recipes your client loads as prompts
+- **[Approve an agent write](/how-to/approve-agent-writes)** — the in-product approval gate, which is a separate grant from act mode
+- **[Evaluations](/concepts/evaluations)** — what a launched run produces and when its verdicts settle
+- **[Multi-tenancy](/concepts/multi-tenancy)** — the workspace boundary every call resolves inside

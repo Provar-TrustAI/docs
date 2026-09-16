@@ -52,17 +52,18 @@ Both switches live on a saved evaluator's **Criteria** tab, and both are repeata
 
 "Advanced prompt editing" means you own the **criteria block**. It does not hand you the judge's system prompt.
 
-| You write | Trust AI owns, in both modes |
+| You write | TrustAI owns, in both modes |
 |---|---|
 | The criteria — as rules, or as prose | The judge's system prompt, which fixes the verdict contract |
 | The score type and pass threshold | The judge model |
 | The **Reason step by step** toggle | Temperature — pinned to `0` on every judge call |
 | | Verdict parsing |
 
-Your criteria are inserted into the judge's payload alongside the expected and the actual response; the system prompt is what tells the judge to answer with one word. Two consequences worth internalizing:
+Your criteria are inserted into the judge's payload alongside the expected and the actual response; the system prompt is what tells the judge to answer with one word. Three consequences worth internalizing:
 
 - **A structured rubric holds grading rules only.** It has room for your rule rows (or anchors) plus the product's opening framing and closing guidance — and nothing else. A response-format, verdict-shape, or answer-key section is rejected server-side.
 - **In prompt mode you can type such a section, but it won't take effect.** The system prompt still owns the verdict contract, and contradicting it is the main way to break verdict parsing. If your prompt never names the verdict vocabulary, the editor warns inline — *"This prompt may not tell the judge to answer PASS or FAIL — verdicts could fail to parse."* It is a nudge, never a gate; saving is always allowed.
+- **The product decides how much of the conversation your criteria apply to, and the answer is all of it.** On a scenario that produced a single reply, the judge reads that reply. On a simulated multi-turn scenario it reads the whole transcript — every customer message and every agent reply, in order, each labelled with a turn id like `[a1]` or `[u1]` — and grades the agent's conduct across all of it. **A criterion violated by any agent turn fails the conversation, even if a later turn corrects it.** You can't write your way out of that framing from the criteria box, and you shouldn't want to: it is what makes a guardrail-shaped rule mean what it says.
 
 <Note>
   *Ask the Trust Agent:* "Draft an evaluator that checks my agent never promises a refund it can't actually authorize." It drafts the rules and the evaluator definition, shows you the write for [approval](/how-to/approve-agent-writes) before anything is saved, and can queue a calibration check against scenarios you've already marked pass or fail once you approve.
@@ -113,6 +114,8 @@ This works because:
 
 In the rule editor, each list is built from **Add a pass rule** / **Add a fail rule**, and the lists tell you how they combine: everything under **Passes when…** must be true, while **any one** thing under **Fails when…** fails the session. Rows can be reordered and removed.
 
+On a multi-turn conversation that combination has a second axis: **any one** thing under **Fails when…**, on **any** agent turn. So write a fail rule as something that must never happen — *"discloses another customer's data"* — rather than as a property of the final message. A rule phrased as "the reply doesn't offer the callback" grades one message; "never ends a refund refusal without offering the callback" grades the conversation, which is almost always what you meant.
+
 ### One criterion per rule
 
 Resist compound rules. "Passes when the response is accurate and friendly and ends with a next step" hides three criteria in one line — when the judge fails it, you can't tell which criterion tripped, and the disagreement table gets much harder to read. Split it: three rules, each independently checkable.
@@ -121,7 +124,7 @@ Resist compound rules. "Passes when the response is accurate and friendly and en
 
 A useful triage before you write anything. If the thing you're checking is **which route the session took** or **which tools the agent called**, you may not need an LLM judge at all — author it as a structural check in the scenario's **Expected Output** editor (**Expected routes** and **Expected actions**, picked from vocabulary learned from your real sessions); see [Scenarios](/concepts/scenarios). Creating a **Structured match** evaluator is retired, though existing ones keep working as ordinary evaluator objects.
 
-If the judgment really does need natural-language reasoning, keep it in criteria — but make each rule as observable as the problem allows.
+If the judgment really does need natural-language reasoning, keep it in criteria — but make each rule as observable as the problem allows. One thing that used to force a structural check no longer does: the judge is shown each tool call's arguments *and* the scalar fields it returned, so a rule can turn on what a tool answered — *"fails when the agent tells the customer the refund was issued and the refund tool didn't report success"* — without leaving the criteria box.
 
 ## Pick the score type
 
@@ -130,6 +133,10 @@ If the judgment really does need natural-language reasoning, keep it in criteria
 **1–5 scale** is more nuanced — useful when pass and fail hide detail you care about (1 = "actively harmful," 5 = "fully resolves it," 3 = "technically correct but blunt"). You anchor the scale at three points — **Rate 5 when…**, **Rate 3 when…**, **Rate 1 when…** — each anchor a single sentence, and all three are required. Scores of 2 and 4 have no anchor text of their own; they land between yours, so write the three anchors as clearly distinguishable behaviors. A **Pass threshold** control (≥2 / ≥3 / ≥4 / ≥5, default **≥3**) converts the score into the pass/fail verdict the rest of the product reports: scores at or above the threshold count as a pass. Cost: reviewer agreement on a scale is markedly lower than on binary, so calibration takes longer.
 
 **Rule of thumb:** start pass/fail. Move to the 1–5 scale only when you can name the specific gradations the binary view is collapsing — and write those gradations into the anchors.
+
+<Note>
+  **The 1–5 scale is an authoring shape, not a reported score.** The anchors are how you write the rubric; the verdict every LLM judge is asked for is a pass or a fail, and the **Pass threshold** is what a scale rubric reports through. Pick the scale because the three anchors sharpen your thinking, not because you're expecting a graded number back on the run.
+</Note>
 
 ## Draft with Tailor with AI
 
@@ -150,6 +157,8 @@ If you are using it as a drafting aid, treat the draft the way you'd treat a col
 ## When to turn on Reason step by step
 
 The **Reason step by step** toggle makes the judge work through each criterion before deciding, instead of returning a snap verdict. It's slower, but better at catching subtle failures like tool order or arguments. Turn it on when your criteria reference *how* the agent did something (which tools, in what order, with what arguments) rather than just *what* the final response says — and leave it off for simple response-content checks, where it mostly adds latency.
+
+There is more for it to work with than there used to be. Tool calls reach the judge in call order, anchored to the agent turn each one ran on and carrying the scalar fields of what it returned — so criteria about sequence, arguments, and results all have something concrete to read. It also removes a class of false failure: a judge can no longer conclude the agent "never looked the policy up" because the lookup happened two turns before the closing message.
 
 The toggle is an LLM-judge control: it doesn't appear on a Groundedness judge's form, and the service refuses to set it on any other kind.
 
@@ -231,7 +240,9 @@ See [Evaluators](/concepts/evaluators) for the full picture.
   <Accordion title="The 'everything fails' judge">
     **Symptom:** after hand-editing the prompt, every scenario scores fail.
 
-    **Cause:** the prompt stopped speaking the verdict vocabulary the parser reads. A pass/fail judge's reply is read for PASS or FAIL; a 1–5 judge's for a score. A prompt that instructs some other output format doesn't change the parser — it just fails to parse, and the scenario degrades to fail.
+    **Cause:** the prompt stopped speaking the verdict vocabulary the parser reads. Every LLM judge's reply is read for PASS or FAIL, whichever score type you picked. A prompt that instructs some other output format doesn't change the parser — it just fails to parse, and the scenario degrades to fail.
+
+    Rule this cause out before you go hunting, because one half of it got narrower. A judge with **Reason step by step** on puts its verdict on the *last* line, and that line is now read generously: markdown emphasis (`**PASS**`), trailing punctuation, a *"Verdict:"* lead-in, and — new — a verdict that *leads* the line with its justification after it (*"FAIL — the case was created"*) all parse, where the last of those used to degrade to fail. A verdict buried mid-sentence still doesn't parse, deliberately, so reasoning prose stays free to use the words *pass* and *fail*. With the toggle off the verdict is read from the *first* line instead, and that reading is stricter — it wants the bare word first, so `**PASS**` there does not parse.
 
     **Fix:** heed the inline warning under the criteria box and add an explicit instruction like *"Answer PASS or FAIL."* Switching back to structured rules also fixes it, since assembled criteria always speak the right vocabulary.
   </Accordion>

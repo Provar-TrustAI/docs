@@ -1,0 +1,123 @@
+---
+title: "Author test data for a scenario"
+icon: "database"
+description: "Give a scenario a test data plan — records to create, read back, check, and clean up — with the Trust Agent, the form, or JSON."
+---
+
+A scenario's [test data](/concepts/test-data) is one **plan**: the records the conversation needs, the read-back that collects what the agent left behind, the end state you expect, and the cleanup. This page is how you write one.
+
+The fastest route is to describe it and review what comes back. The **Test Data** tab is where you check the result, fix a step, and read what each run actually did.
+
+## Ask for the plan you want
+
+Describe the data in a sentence, naming the scenario by its id:
+
+> Set up test data on SCN-000004: seed a support case about a cracked widget screen, check the agent escalates it, and clean up afterward.
+
+You can ask the [Trust Agent](/concepts/trust-agent) this in chat, or ask for the same thing inside the scenario's own plan editor on its **AI** tab. Either way the draft reads what's in your org first, proposes the plan *and* the end state it should leave behind *and* how the test should run, and counts how many records each step would touch.
+
+<Note>
+  **A draft is never applied for you.** From chat, the write goes through the usual approval card and replaces the scenario's test data wholesale — so the agent reads what is already there before it proposes anything (see [Approve an agent write](/how-to/approve-agent-writes)). From the plan editor, the draft lands on the tab badged **Draft — not saved** with **Discard** and **Apply draft**, and applying it over a plan you already had says so before it replaces it.
+</Note>
+
+## Write or fix the plan on the scenario
+
+<Steps>
+  <Step title="Open the scenario's Test Data tab">
+    From the **Scenarios** list, click the scenario to open its fly-in, then choose **Test Data**. The bar at the top names the environment every run of this scenario acquires, runs in, resets, and releases.
+
+    If that bar reads **Setup required**, the project has no connected environment yet and nothing here can run. Use **Configure environment** — or see [Manage a project's connections](/how-to/manage-project-connections).
+  </Step>
+
+  <Step title="Start from the hero">
+    A scenario with no plan shows a hero reading **No test data yet**, offering **Set up with AI** and **Add manually**.
+
+    **Set up with AI** opens the editor on its **AI** tab under the heading **Describe the data this test needs**. Type the sentence, send it, and wait for the draft. **Add manually** opens the same editor on its **Form** tab with nothing in it.
+  </Step>
+
+  <Step title="Review the five step cards">
+    A saved plan renders under **The plan** — "What happens on every run." — as five cards you can expand: **Create what this test needs**, **Run the conversation**, **Read back what the agent created**, **Check what should happen**, and **Clean up everything this test created**.
+
+    Each card summarizes itself when collapsed ("Creates 2 records: …", "1 kind of record · 2 fields each"), and carries its own add control — **Add a record**, **Add a read-back**, **Add an expected record**, **Add a cleanup step**. The pencil on an item opens it in a dialog.
+  </Step>
+
+  <Step title="Edit the whole plan in the drawer">
+    **Edit plan** opens a docked editor titled **Edit the plan**, with tabs **AI · Form · JSON** — "With AI, as a form, or as JSON — one document either way." The tabs are three renderings of one saved document, not three documents.
+
+    - **AI** — describe a change and review the draft. Offered only when the connection can be read for a schema.
+    - **Form** — four sections in run order: **Records this test creates**, **Read back**, **Check what should happen**, **Cleanup**. This is the home for read-back and cleanup filters.
+    - **JSON** — the exact document a run executes. "Saving updates the plan everywhere — the step cards and the form read from the same source."
+  </Step>
+
+  <Step title="Set the expected end state alongside the setup">
+    The end state is part of the same plan, not a separate artifact. Give a read-back step a name and an expected value on each field you want graded, and that read-back becomes the expected record the **Check what should happen** card reports. A value can allow a tolerance, so close-enough still passes.
+
+    Keep this distinct from the scenario's **Expected Output** tab, which grades the agent's *behavior* — routes, tool calls, and reply quality. The two never share a name.
+  </Step>
+
+  <Step title="Choose how the test runs">
+    **How this test runs** is its own section beneath the plan, and it asks one binary question: **Runs alongside other tests (recommended)** or **Runs alone**. Pick **Runs alone** only when the test touches settings or data other tests share.
+  </Step>
+
+  <Step title="Make sure the connection has a store">
+    A plan needs somewhere to write. In **Project Settings → Connections**, open the agent's card, expand **Customize environment**, and check the **Test data stores** section — **Add a store** if there isn't one. A Salesforce connection arrives with a default store named **This agent’s Salesforce org**, which signs in as the agent connection itself; a store that inherits the connection that way is badged **Uses this agent’s connection**. See [Test data stores](/how-to/manage-project-connections#test-data-stores).
+
+    The same panel shows the connection's reset promise: **Between tests: Removes only the records each test created.**
+  </Step>
+
+  <Step title="Run it, then read the report">
+    Run the scenario as usual. The launcher carries an **Environment** step that checks the environment before anything starts, reading "Checking the agent and environment are ready…" and then **Ready to run**.
+
+    {/* ACCURACY-AUDIT-PENDING */}
+    A scenario that carries test data needs an environment picked before the run can start; scenarios without one are unaffected.
+
+    {/* ACCURACY-AUDIT-PENDING */}
+    Afterwards, open the result's fly-in and choose **End state** to read the expected-versus-actual diff, then the **What TrustAI did** section beneath it: the timeline of what the run reserved, created, read back and removed, with **Total time**, **Records created** and **Records removed**. From a conversation instead, the session fly-in's **Test Data** tab shows the same report without the diff. Both link back with **View the test data plan**.
+  </Step>
+</Steps>
+
+## When JSON is the only option
+
+The **Form** tab can edit anything the structured plan model can represent. Two situations fall outside that, and both are signposted rather than silent:
+
+- **The stored plan is in a shape the form can't read.** The tab says so — "This plan isn't in a shape the form can read. Use the JSON tab to edit the stored bytes directly." — and a plan strip offers an **Edit as JSON** pill. Editing it in JSON is the supported path, not a workaround.
+- **You opened the scenario from the Trust Agent's fly-in.** The docked editor isn't wired there. You get the step cards plus a **The stored plan** section with an **Edit the plan as JSON** disclosure and **Clear** / **Save plan**. It writes the same document.
+
+The JSON is one flat document — the plan's steps and its expected end state as siblings, not two files. An unrecognized top-level key is rejected. When a save is blocked, every problem is listed under **Fix this before saving**, not just the first one.
+
+## Common problems
+
+<AccordionGroup>
+  <Accordion title="Set up with AI isn't offered">
+    Drafting reads your connected system for a schema, so it needs a configured environment. Without one the hero says so — "Drafting with an assistant isn’t available here, so this plan is written by hand." — and offers only **Add manually**. The **Form** and **JSON** tabs work regardless; only the **AI** tab is withheld.
+  </Accordion>
+
+  <Accordion title="The save asks me to confirm before it will store the plan">
+    A read-back or cleanup step that reaches past the records the test itself creates is a legitimate thing to write, and TrustAI asks for agreement rather than refusing. Read the sentence — it names the step and what it would reach — then choose **Confirm and save**. **Dismiss** leaves the plan unsaved. Who agreed is stored with the plan.
+  </Accordion>
+
+  <Accordion title="The plan is declined outright">
+    That is a different answer from the one above. A plan reaching outside the objects the connection was set up to work with is not something you can agree past; the refusal names what is inside the allowlist so you know what to ask for instead. A structurally broken plan is refused at save too, with every problem listed rather than only the first.
+  </Accordion>
+
+  <Accordion title="I want to turn cleanup off for one run">
+    You can't, and no surface offers to. Cleanup runs on every run, whether or not the plan lists cleanup steps of its own: "Removes the records this test created and tagged for the run — seeded records included."
+  </Accordion>
+
+  <Accordion title="The read-back reports records I didn't expect">
+    A read-back counts records by when they were created and how they're tagged, using the filters written in the plan — it does not infer which records the agent touched. Narrow the step's filter on the **Form** tab. Only the objects the read-back names are checked; anything outside the plan is not.
+  </Accordion>
+
+  <Accordion title="An object the test needs is missing from what drafting offered">
+    Salesforce object discovery is honest about its own gaps: an action whose objects couldn't be worked out statically is reported, and the catalog tells you to treat it as a starting point. Add the object to the connection's scope and draft again. See [Test data](/concepts/test-data) for what discovery does and doesn't resolve.
+  </Accordion>
+</AccordionGroup>
+
+## Related reading
+
+- **[Test data](/concepts/test-data)** — the plan, stores, cleanup, and the run report explained
+- **[Scenarios](/concepts/scenarios)** — the scenario the plan belongs to, and its **Expected Output** tab
+- **[Evaluations](/concepts/evaluations)** — where an end-state grade shows up
+- **[Sessions](/concepts/sessions)** — each conversation's own **Test Data** tab
+- **[Manage a project's connections](/how-to/manage-project-connections)** — where test data stores are configured
+- **[Connect a Salesforce Agentforce agent](/how-to/connect-agentforce)** — standing up the connection first
