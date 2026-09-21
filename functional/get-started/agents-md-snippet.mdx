@@ -1,0 +1,53 @@
+---
+title: "Agent rules for AGENTS.md / CLAUDE.md"
+icon: "clipboard-list"
+description: "A short block to paste into your own repo's AGENTS.md or CLAUDE.md so any agent working there follows Functional Testing's rules by default — public-site auth, credential slots, gating verification, and needs_review."
+agent_topic: "agents-md-snippet"
+read_when: "You want any agent that works in your repo (not just the one you're pairing with right now) to pick up Functional Testing's rules automatically, without repeating them in every session."
+---
+
+If your repo already has an `AGENTS.md` or `CLAUDE.md` that agents read on start, paste the block below into it. It's short on purpose — a handful of rules that keep an agent from reaching for a placeholder credential, missing a gate, or treating `needs_review` as generic flakiness, not a full explanation of Functional Testing.
+
+<Note>
+  This is a **repo-level default**, not a connection step. See [Setup prompt](/functional/get-started/setup-prompt) to connect an agent to FT over MCP in the first place.
+</Note>
+
+## The block
+
+```markdown
+## Functional Testing — rules for any agent working in this repo
+
+- `functional_guide` is landing in an upcoming FT release — once it's
+  available, call `functional_guide("getting-started")` before your
+  first write, and `functional_guide("why-needs-review")` any time a
+  run settles `needs_review`. Until then, skip these calls.
+- Testing a public target? Create the System with `auth_type: "none"`.
+  If a scenario needs to sign in, that's an ordinary test step, not a
+  System-level credential.
+- Never type a real secret into a test. Reference a stored credential
+  by slot name only: `{{credential.SLOT_NAME}}`. Asking FT to request
+  a new slot by name is coming in an upcoming release — until then,
+  ask a human to configure `credential_slots` on the System directly.
+- Verify on-screen text and headings with a UI Check (matched by
+  accessible role and name). If that verification needs to gate the
+  run's pass/fail, pair it with a role-anchored `PerceptionAssertOp`
+  naming the same element — a UI Check alone settles its own verdict
+  but doesn't count toward the pass gate.
+- If a run settles `needs_review`, read `why-needs-review` before
+  assuming it's flaky — it's one of four distinct, fixable causes.
+```
+
+## What each rule is for
+
+- **`functional_guide`.** Not shipped yet — this repo's own docs are the source of truth today. The rule is written so an agent that has the tool uses it, and an agent that doesn't just skips the call instead of hallucinating one. See [Connect an MCP client](/functional/get-started/connect-an-mcp-client) for the tools that exist right now.
+- **Public-site auth.** `auth_type: "none"` is the correct, credential-free posture for a public target — not a placeholder waiting for a real secret. See [Credentials](/functional/concepts/credentials).
+- **No inline secrets.** A value shaped like a real secret is rejected at the write boundary wherever it appears in an authored test. `{{credential.SLOT_NAME}}` is the only safe way to reference one. See [Credentials](/functional/concepts/credentials).
+- **UI Check + gating clause.** A UI check produces real evidence for text and headings, but doesn't currently count toward the run's pass gate — pairing it with an assert-phase clause is what makes the same verification decide pass/fail. See [Verification](/functional/concepts/verification).
+- **`needs_review` isn't one bucket.** Assertion not observable, binding mismatch, no deterministic assertion, or target unreachable — each has its own fix. See [Why a result reads "needs review"](/functional/troubleshooting/why-needs-review).
+
+## Related reading
+
+- **[Setup prompt: connect an agent to Functional Testing](/functional/get-started/setup-prompt)** — connect Claude Code, Codex, or Cursor to FT over MCP
+- **[Verification: checks and asserts](/functional/concepts/verification)** — the full contract between checks and assert-phase clauses
+- **[Credentials](/functional/concepts/credentials)** — the three auth postures and the credential-slot placeholder
+- **[Why a result reads "needs review"](/functional/troubleshooting/why-needs-review)** — the four causes, and the fix for each

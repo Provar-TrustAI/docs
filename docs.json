@@ -146,7 +146,9 @@
             "icon": "rocket",
             "pages": [
               "functional/get-started/connect-an-mcp-client",
-              "functional/get-started/first-green-test"
+              "functional/get-started/setup-prompt",
+              "functional/get-started/first-green-test",
+              "functional/get-started/agents-md-snippet"
             ]
           },
           {
