@@ -1,0 +1,136 @@
+---
+title: "Your first green test"
+icon: "circle-check"
+description: "System, requirement, test, run — the shortest path from an empty project to a passing Functional Testing result, against a public site that needs no credential."
+agent_topic: "first-green-test"
+read_when: "You're starting from an empty Functional Testing project and want the shortest path to one real, passing run."
+---
+
+Four objects, created in dependency order: a **System** to test, a **Requirement** it must satisfy, a **Test** that proves the requirement, and a **Run** of that test. This walkthrough targets a public site, so the system needs no credential at all — see [Credentials](/functional/concepts/credentials) once your target needs one.
+
+<Note>
+  Every write below is a two-call MCP operation: `functional_tools_search` to find the tool, then `functional_tool_call` to invoke it. See [Connect an MCP client](/functional/get-started/connect-an-mcp-client) if you haven't connected yet.
+</Note>
+
+## 1. Create an environment and a system
+
+A system lives under an environment, which lives under a workspace. If you don't already have an environment, create one:
+
+```json
+{
+  "name": "functional_environments_create",
+  "arguments": { "project_id": "standalone", "workspace_id": "<your workspace id>", "name": "Production" }
+}
+```
+
+Then create the system itself, with `auth_type: "none"` — a public site needs no credential:
+
+```json
+{
+  "name": "functional_systems_create",
+  "arguments": {
+    "project_id": "standalone",
+    "environment_id": "<the environment id above>",
+    "name": "Public docs site",
+    "connection": { "auth_type": "none", "url": "https://example.com" }
+  }
+}
+```
+
+The response exposes only `connection_configured` — there's no secret to echo back, because there's no secret at all.
+
+## 2. Write the requirement
+
+A requirement is the guarantee your test traces to:
+
+```json
+{
+  "name": "functional_requirements_create",
+  "arguments": {
+    "project_id": "standalone",
+    "title": "A visitor can find the pricing page from the homepage",
+    "acceptance_criteria": ["Clicking the pricing link in the header navigates to the pricing page"]
+  }
+}
+```
+
+The response carries the short human id FT allocated, e.g. `R-1` — never a bare UUID.
+
+## 3. Author the test
+
+Create the durable test, linking it back to the requirement through `source_refs`:
+
+```json
+{
+  "name": "functional_tests_create",
+  "arguments": {
+    "project_id": "standalone",
+    "id": "INT-0001",
+    "name": "Homepage pricing link navigates to /pricing",
+    "external_test_id": "homepage-pricing-link",
+    "source_kind": "authored",
+    "source_refs": { "requirement_id": "R-1" }
+  }
+}
+```
+
+Then add the steps and the check that proves the outcome with an update call. A UI check can observe anything rendered on the page, including headings and text — see [Verification](/functional/concepts/verification) for the full contract:
+
+```json
+{
+  "name": "functional_tests_update",
+  "arguments": {
+    "project_id": "standalone",
+    "test_id": "INT-0001",
+    "source_refs": {
+      "requirement_id": "R-1",
+      "scenario": {
+        "version": 1,
+        "steps": [{ "intent": "Click the pricing link in the site header." }],
+        "checks": [
+          {
+            "kind": "ui",
+            "name": "Pricing heading is shown",
+            "target": "Pricing",
+            "operator": "eq",
+            "expected": { "t": "string", "v": "Pricing" },
+            "scope": "role=heading"
+          }
+        ]
+      }
+    }
+  }
+}
+```
+
+## 4. Run it
+
+```json
+{
+  "name": "functional_test_runs_start",
+  "arguments": { "project_id": "standalone", "test_id": "INT-0001", "system_id": "<the system id from step 1>" }
+}
+```
+
+The response returns a `run_`-prefixed human run code, e.g. `run_01HZX9`, and a status of `queued`.
+
+## 5. Read the result
+
+Poll the run until it settles, then read the checks it produced:
+
+```json
+{ "name": "functional_runs_get", "arguments": { "run_code": "run_01HZX9" } }
+{ "name": "functional_run_checks", "arguments": { "run_code": "run_01HZX9" } }
+```
+
+A `passed` run with a `passed` UI check evidence entry is your first green test.
+
+## If it doesn't go green
+
+See [Why a result reads "needs review"](/functional/troubleshooting/why-needs-review) — the four causes, and the fix for each — and [Common pitfalls](/functional/troubleshooting/common-pitfalls) for the FAQ-shaped issues (schema rejections, the two-call write pattern, container networking).
+
+## Related reading
+
+- **[Verification: checks and asserts](/functional/concepts/verification)** — what a check and an assert clause can each observe, and which settle pass/fail
+- **[Credentials](/functional/concepts/credentials)** — what to do once your target needs a real login
+- **[Connect an MCP client](/functional/get-started/connect-an-mcp-client)** — the endpoint, the default tool set, the two-call write pattern
