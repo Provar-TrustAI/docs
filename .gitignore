@@ -25,6 +25,10 @@ pipeline/out/
 # Playwright run artifacts
 captures/test-results/
 
+# FUN-4922 — the Functional docs bundle export (scripts/export-functional-bundle.mjs)
+# is generated output vendored by the FT repo via CI artifact / re-run, never committed here.
+dist/
+
 # Raw screen recordings handed over for demo editing. These can contain org
 # hostnames, admin usernames, OAuth codes, and the presenter's webcam feed.
 # They are reviewed and cut before anything derived from them is committed.
