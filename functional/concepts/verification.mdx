@@ -3,7 +3,7 @@ title: "Verification: checks and asserts"
 icon: "shield-check"
 description: "Two families prove a Functional Testing result — checks (API and UI) and assert-phase clauses — what each can observe, and which ones settle pass/fail."
 agent_topic: "verification"
-read_when: "You're authoring or debugging a test and need to know which verification mechanism can prove what you're claiming, and whether it will actually settle the run's pass/fail verdict."
+read_when: "You're authoring or debugging a test and need to know which verification mechanism can prove what you're claiming, whether it will actually settle the run's pass/fail verdict, or how to anchor a PerceptionAssertOp with the During:/Anchor: grammar and the accepted containing-surface role list."
 ---
 
 A test's browser steps show behavior happened. Verification proves it. FT carries two separate verification families on a test — they persist differently, execute differently, and (this is the part worth getting right) don't gate the run's pass/fail the same way.
@@ -52,6 +52,52 @@ These **do** settle pass/fail. A `DISPROVED` clause is a real, observed failure 
 <Note>
   A `PerceptionAssertOp` in `signal` mode matches a **registered signal class**, never arbitrary text a scenario supplies — the match phrases live server-side. A bare free-text perception clause with body scope is accepted on parse but cannot actually be proven at runtime; prefer a **UI check** for arbitrary text and headings, which the runtime genuinely observes.
 </Note>
+
+## Anchoring an assertion
+
+A `PerceptionAssertOp` in `present` or `absent` mode doesn't grade "the page" — it grades one exact place the run captures on it, the clause's **anchor**. Two attribute lines set that place, on two different phases of the document, and the run refuses to bind a capture — reporting the clause unprovable rather than crediting a pass — when either one is missing or shaped wrong.
+
+### `During:` names the Act step
+
+The clause needs a `During: Act N` line naming the Act step whose result it observes. A clause with no `During:` line names no step of the plan at all, so the run has no capture to adjudicate it against — the FUN-4606 `CLAUSE_NAMES_NO_STEP` refusal.
+
+### `Anchor:` on that Act step names the containing surface
+
+The named Act step, in turn, carries its own `Anchor: <role> "<name>"` line — the containing surface the run roots the capture at.
+
+**The role comes from a closed, 13-item list, never free text:**
+
+`article`, `combobox`, `complementary`, `dialog`, `form`, `group`, `list`, `listbox`, `main`, `navigation`, `region`, `table`, `tabpanel`
+
+Anything else — a `button`, a `heading`, a `textbox` — names an ordinary control, not a containing surface. The run roots the capture at that control instead, so the capture holds only the anchor node itself; the pin ends up certifying its own capture, and a removed affordance reports disproved rather than unprovable. Keep the assert-phase clause and add a step `Check:` if you need to capture free text or a heading too — a `Check:` records evidence for that one step, but it never settles pass/fail on its own.
+
+<Info>
+  `dialog` is the only one of the 13 roles an action is expected to *open*, rather than already have on screen when the step runs — the other 12 name surfaces a page renders on its own. Anchoring on `dialog` ties the clause to whichever step in the plan actually opened it; see [Why a result reads "needs review"](/functional/troubleshooting/why-needs-review) if a dialog-anchored clause won't bind.
+</Info>
+
+**The anchor's `<name>` must differ from the clause's own `Signal:` text.** An anchor whose accessible name equals the target it's proving certifies itself: a removed affordance then reports nothing observed, never disproved, because the look answers with itself.
+
+### Worked example
+
+```
+## Act
+3. Click Sign in to authenticate.
+   Target: button "Sign in"
+   Anchor: main "Dashboard"
+
+## Assert
+1. The authenticated Dashboard for admin is visible.
+   Signal: Dashboard for admin
+   Mode: present
+   Scope: body
+   During: Act 3
+```
+
+Act step 3 carries `Anchor: main "Dashboard"` — a `main` landmark named "Dashboard", distinct from the clause's `Signal: Dashboard for admin`. The Assert clause's `During: Act 3` line points straight at it. This is the one shape the run binds a capture to.
+
+<Tip>
+  Authoring's structural validator walks a whole document in one pass — a bad `authored_step_id` reference, an out-of-order check transition, and a malformed `target_hint` anchor are all collected and reported together, not one at a time, so you can fix a whole document in one round trip. The anchor-shape rules above are a separate, save-time provability check: when a plan's only assert-phase clause fails one of them, the save response names that one relation to fix.
+</Tip>
 
 ## Which one to reach for
 

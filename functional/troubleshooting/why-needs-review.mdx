@@ -30,6 +30,8 @@ The accepted plan carried no check or assert the execution layer can adjudicate 
 
 **Fix:** add at least one deterministic verification. Any of these counts: a state read-back, a `MessageAssertOp`, a `PerceptionAssertOp`, a `NegativeWriteAssertOp`, or an **API check** (a UI check alone does not count toward this — see [Verification](/functional/concepts/verification)). If your test is genuinely a pure UI-perception requirement with nothing else to prove, a `PerceptionAssertOp` still counts — it just has to be present, not implied.
 
+A `PerceptionAssertOp` that looks present can still land here: the save-time provability gate drops a clause whose `During:`/`Anchor:` grammar is malformed — no `During: Act N` line (the FUN-4606 `CLAUSE_NAMES_NO_STEP` refusal), an `Anchor:` role outside the closed 13-item list, or an anchor with no name — and a dropped clause counts as no deterministic assertion at all. See [Anchoring an assertion](/functional/concepts/verification#anchoring-an-assertion) for the exact shape and a worked example.
+
 ## 4. Target unreachable
 
 The read-back or API check never reached the application at all — a transport fault, a 5xx, an unparseable response body, or an authorization refusal (401/403) on the read-back itself. The application wasn't asked a question it could answer either way.

@@ -40,6 +40,10 @@ Issues here are about **calling FT correctly**, not about a run's verdict. If a 
   <Accordion title="A UI check passed but the run still isn't gated on it">
     Working as designed today: UI checks produce evidence and settle their own verdict, but they don't currently count toward the run's pass gate. Pair the UI check with an API check or an assert-phase clause if you need that verification to actually gate the run — see [Verification](/functional/concepts/verification).
   </Accordion>
+
+  <Accordion title="A PerceptionAssertOp is refused even though it looks fine">
+    Check its `During:`/`Anchor:` grammar. A present- or absent-mode clause needs a `During: Act N` line naming the Act step it observes, and that Act step needs its own `Anchor: <role> "<name>"` line naming a containing surface from a closed 13-role list — `button`, `heading`, and other ordinary controls don't qualify, and the anchor's name must differ from the clause's own `Signal:` text. A clause the seam refuses doesn't run against a wrong answer — it binds no capture at all, so the run reports it as unprovable rather than pass or fail. See [Anchoring an assertion](/functional/concepts/verification#anchoring-an-assertion) for the full grammar and a worked example.
+  </Accordion>
 </AccordionGroup>
 
 ## Related reading
