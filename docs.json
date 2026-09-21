@@ -139,6 +139,35 @@
         ]
       },
       {
+        "tab": "Functional Testing",
+        "groups": [
+          {
+            "group": "Get started",
+            "icon": "rocket",
+            "pages": [
+              "functional/get-started/connect-an-mcp-client",
+              "functional/get-started/first-green-test"
+            ]
+          },
+          {
+            "group": "Concepts",
+            "icon": "book-open",
+            "pages": [
+              "functional/concepts/verification",
+              "functional/concepts/credentials"
+            ]
+          },
+          {
+            "group": "Troubleshooting",
+            "icon": "triangle-alert",
+            "pages": [
+              "functional/troubleshooting/why-needs-review",
+              "functional/troubleshooting/common-pitfalls"
+            ]
+          }
+        ]
+      },
+      {
         "tab": "API Reference",
         "openapi": "api-reference/openapi.json"
       }

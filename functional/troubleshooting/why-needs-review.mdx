@@ -1,0 +1,51 @@
+---
+title: "Why a result reads \"needs review\""
+icon: "circle-help"
+description: "The four distinct causes a Functional Testing run can settle needs_review instead of pass or fail, and the fix for each."
+agent_topic: "why-needs-review"
+read_when: "A run settled needs_review (or a clause read unprovable) and you need to know which of the four causes it was, and how to fix it."
+---
+
+`needs_review` is not one generic "flaky" bucket. FT's assert diagnosis names an exact cause for every unprovable clause, and each one points at a different fix. Getting the run to `passed` or a genuine `failed` means fixing the *right* one.
+
+<Info>
+  A **disproved** clause is a different, fifth outcome: the application was asked and it answered against your requirement. That's a real failure, not a review case — don't treat it as one of the four below.
+</Info>
+
+## 1. Assertion not observable
+
+The runtime observation the clause needed was never captured — no message text reached a `MessageAssertOp`, no action set reached a `PerceptionAssertOp`, the run never dispatched the action a read-back depended on, or the assert phase raised before any clause reached a comparison.
+
+**Fix:** confirm the step that should produce the observation actually ran and completed (not stopped mid-dialog or mid-refusal). For a perception clause in `absent` mode specifically, confirm the `hydration_anchor` — the known-present control that proves the action region fully rendered — is itself observable; an `absent` clause fails closed without it, on purpose, so it can't vacuously pass on a half-loaded page.
+
+## 2. Binding mismatch
+
+The clause itself is malformed against the real target — a SOQL query the org rejected outright, a capture field the query never selected, a captured value in a shape the run can't use (a nested object where a scalar was expected), or a signal clause riding a plan with no persistence proof behind it. This is a defect in the **authored test**, not in the application under test.
+
+**Fix:** check the clause's field/query names against the actual schema of what you're reading back. If the org rejected the query itself (a structured error code, not just a bad HTTP status), the query is malformed — fix the SOQL or the capture path, not the application.
+
+## 3. No deterministic assertion
+
+The accepted plan carried no check or assert the execution layer can adjudicate without trusting the agent's own report of what it did in the browser. This is the **assert-less backstop**: a plan whose only "proof" is the agentic loop's self-validation is refused a green verdict on principle, and the run is demoted to `needs_review` instead.
+
+**Fix:** add at least one deterministic verification. Any of these counts: a state read-back, a `MessageAssertOp`, a `PerceptionAssertOp`, a `NegativeWriteAssertOp`, or an **API check** (a UI check alone does not count toward this — see [Verification](/functional/concepts/verification)). If your test is genuinely a pure UI-perception requirement with nothing else to prove, a `PerceptionAssertOp` still counts — it just has to be present, not implied.
+
+## 4. Target unreachable
+
+The read-back or API check never reached the application at all — a transport fault, a 5xx, an unparseable response body, or an authorization refusal (401/403) on the read-back itself. The application wasn't asked a question it could answer either way.
+
+**Fix:** this is usually an environment problem, not a test-authoring one. Check the target's availability, and check that the identity the read-back or check used (see [Credentials](/functional/concepts/credentials)) still has read access — an expired session or a revoked grant on the *read-back's own* identity produces exactly this, indistinguishably from a genuinely down target.
+
+## Quick reference
+
+| You see | Likely cause |
+| --- | --- |
+| "Read-back not proven" / "Perception not proven" / "Refusal message not proven" | **1. Assertion not observable** |
+| "Boundary not proven" with a clause that names a field/query | **2. Binding mismatch** |
+| A run settles `needs_review` with no failed clause listed at all | **3. No deterministic assertion** |
+| An API check or read-back settles `not_verified` with a connectivity-shaped failure | **4. Target unreachable** |
+
+## Related reading
+
+- **[Verification: checks and asserts](/functional/concepts/verification)** — what each verification mechanism can prove, and which ones count toward the pass gate
+- **[Common pitfalls](/functional/troubleshooting/common-pitfalls)** — FAQ-shaped issues that aren't verdict causes (schema rejections, networking, the two-call write pattern)

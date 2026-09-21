@@ -1,0 +1,49 @@
+---
+title: "Common pitfalls"
+icon: "triangle-alert"
+description: "FAQ-shaped Functional Testing issues that aren't a run-verdict cause — schema rejections, the two-call MCP write pattern, container networking, the trailing slash, and the credential wall on a public site."
+agent_topic: "common-pitfalls"
+read_when: "An MCP call is failing or behaving unexpectedly and you suspect it's a setup or authoring mistake rather than something the target application did."
+---
+
+Issues here are about **calling FT correctly**, not about a run's verdict. If a run settled `needs_review`, see [Why a result reads "needs review"](/functional/troubleshooting/why-needs-review) instead.
+
+<AccordionGroup>
+  <Accordion title="A write call was rejected with a schema error">
+    Fix one field at a time. `functional_tool_call` validates your arguments against the target tool's real input schema before dispatch — if it's invalid, you get back which tool rejected it (`{"tool": "<name>"}`), not the validator's own message (that's withheld deliberately, since it can echo a secret-bearing argument back). Re-fetch the schema with `functional_tools_search` for the exact tool, fix one field, and retry rather than guessing at the whole payload again.
+  </Accordion>
+
+  <Accordion title="A write tool isn't callable by name">
+    Expected. Writes — `functional_systems_create`, `functional_requirements_create`, `functional_tests_create`, `functional_test_runs_start`, and the rest — aren't in the bounded default tool set. Every write is **two calls**: `functional_tools_search` to find the tool and its schema, then `functional_tool_call` with that tool's name and arguments. See [Connect an MCP client](/functional/get-started/connect-an-mcp-client).
+  </Accordion>
+
+  <Accordion title="FT can't reach an app running on my own machine">
+    Use `http://host.docker.internal:<port>`, never `http://localhost:<port>`, when FT itself runs in a container and needs to reach something on your host. `localhost` inside a container resolves to the container, not your machine.
+
+    For local API checks specifically, the target origin and the container's connect host are two separate values — see the `CHECK_API_LOCAL_TARGET_ORIGIN` / `CHECK_API_LOCAL_CONNECT_HOST` pair in [Verification](/functional/concepts/verification) if you're pointing an API check at a same-machine dev target. This route only accepts an explicitly configured loopback origin, and production and staging reject it outright.
+  </Accordion>
+
+  <Accordion title="The MCP endpoint doesn't respond, or every call seems to hang">
+    Check for the trailing slash. The endpoint is `/v1/mcp/` — without it, not every MCP client follows the redirect FT's server sends back, and the symptom looks like a connection that never completes rather than a clear error.
+  </Accordion>
+
+  <Accordion title="A test against a public site is asking for a credential">
+    Check the System's `auth_type`. A public target should be configured `auth_type: "none"` — that's the correct, credential-free posture, not a placeholder waiting for a real secret. If your test needs to sign in anyway (to reach a gated page behind an otherwise-public site), that's an ordinary test step, not a System-level credential — see [Credentials](/functional/concepts/credentials).
+
+    If the System genuinely does need a stored secret, remember it's referenced by slot name — `{{credential.SLOT}}` — never pasted inline. A literal secret value anywhere in an authored test (a step's intent text, a setup field, a hook body) is rejected at the write boundary rather than silently accepted, whatever field it's in.
+  </Accordion>
+
+  <Accordion title="An API check keeps coming back not_verified">
+    Confirm the check declared the right identity, and that your test's own setup actually establishes it before the check runs. An FT login or an FT MCP token never authenticates a call to the *target* application — that's a different credential for a different caller. See the identity table in [Verification](/functional/concepts/verification).
+  </Accordion>
+
+  <Accordion title="A UI check passed but the run still isn't gated on it">
+    Working as designed today: UI checks produce evidence and settle their own verdict, but they don't currently count toward the run's pass gate. Pair the UI check with an API check or an assert-phase clause if you need that verification to actually gate the run — see [Verification](/functional/concepts/verification).
+  </Accordion>
+</AccordionGroup>
+
+## Related reading
+
+- **[Why a result reads "needs review"](/functional/troubleshooting/why-needs-review)** — the four run-verdict causes, distinct from the setup issues on this page
+- **[Connect an MCP client](/functional/get-started/connect-an-mcp-client)** — the endpoint, the default tool set, the two-call write pattern
+- **[Credentials](/functional/concepts/credentials)** — the three auth postures and the credential-slot placeholder
