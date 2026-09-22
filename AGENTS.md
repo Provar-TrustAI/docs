@@ -682,3 +682,90 @@ failure, not a style nit.
   prototype, is the authority on shipped behavior.
 - Don't document internal build/process vocabulary ("capture pass", ticket IDs, codenames) in
   reader-visible prose.
+
+## Functional Testing vocabulary
+
+**Everything above this section is AE (the agent-evaluation product) and pinned to
+`v2026.09.09.2`. Functional Testing (FT) is a separate product with its own repo
+(`trustai-functional`) and its own nouns — the AE rules above do not apply to it.** This section is
+pinned to the FT repo at commit `e89bb32355b069b24bdd4aa8cf3beeb8eae677c5` on
+`origin/worktrunk/agent-readiness`, verified 2026-09-21. Source nouns from FT's own UI copy and MCP
+tool descriptions (`services/api/src/mcp/tools/*.py`), never from AE's vocabulary or from
+assumption. Where FT's own code disagrees with itself, prefer the live tool descriptions and
+`services/api/src/domain/test_runs/*.py` docstrings — they are the enforced contract, not prose that
+can drift.
+
+- **System / Environment / Requirement / Test / Run** are the core nouns, in that dependency order.
+  A **System** (web, API, or mobile) lives under an **Environment** and carries its own connection
+  (auth posture + optional secret reference). A **Requirement** is a user-stated guarantee a
+  project's tests trace to. A **Test** is the durable, persisted artifact — the user-stated
+  guarantee a test asserts — authored from one of eight locked `source_kind` values (`prd`,
+  `behaviour_spec`, `policy`, `csv`, `microcopy`, `authored`). A **Run** is one execution of a test
+  against a resolved System; its human handle is `run_`-prefixed (e.g. `run_01HZX9`), never a bare
+  UUID. Requirement and test human codes are similarly short and readable (e.g. `INT-0042`), never a
+  bare UUID.
+- **Two verification families exist on a test, and they are not the same mechanism.** *Checks*
+  (`ApiCheckOp` / `UiCheckOp`, under `source_refs.scenario.checks`) are typed, authored
+  expect-vs-actual comparisons: an **API check** calls the target application's own API under a
+  declared identity and compares a typed field; a **UI check** observes anything rendered on the
+  page — including headings and body text, matched by accessible role and name (`role=heading;name="..."`)
+  or by a plain label — and compares it the same typed way. API checks settle `passed` / `failed` /
+  `not_verified` and count toward the run's pass gate; UI checks use the same three verdicts and
+  produce Checks evidence, but do **not** currently count toward the pass gate. *Assert-phase
+  clauses* (`QueryAssertOp`, `MessageAssertOp`, `PerceptionAssertOp`, `NegativeWriteAssertOp`) are a
+  separate, older deterministic-assertion family evaluated during a phased run's `assert` phase; they
+  do settle pass/fail. A `PerceptionAssertOp` observes a named UI affordance (present/absent) or a
+  registered transient on-screen signal class — never arbitrary client-supplied match text. Never
+  call a check an "assert" or an assert clause a "check" — they are different code paths with
+  different gating.
+- **A bare-text perception signal in body scope is accepted on parse but cannot be proven at
+  runtime.** Prefer proving text and headings with a **UI check**, which the runtime can actually
+  observe and produce evidence for; a perception clause is for a named affordance (a button, a
+  control) or a registered signal class, not free text.
+- **`needs_review` has exactly four causes**, and each maps to a distinct `AssertProof` /
+  `AssertFailureReason` family in `assert_diagnosis.py` — never present them as one generic "flaky"
+  bucket:
+  1. **Assertion not observable** (`unprovable_observation`) — the runtime observation the clause
+     needed (a message, a perception signal, an action, an assert-phase read) was never captured.
+  2. **Binding mismatch** (`unprovable_test`) — the authored clause names a field, query, or check
+     the target rejected, never selected, or returned in an unusable shape; the fault is in the
+     authored test, not the app.
+  3. **No deterministic assertion** (`unprovable_test` / `no_verifiable_assertion`) — the accepted
+     plan carried no check or assert the execution layer can adjudicate without trusting the agent's
+     own self-report of its UI steps (`FlowPlan.has_deterministic_assertion()` is `False`); the
+     "assert-less backstop" demotes such a run to `needs_review` rather than letting it pass on
+     nothing.
+  4. **Target unreachable** (`unprovable_infra`) — the read-back or API check never reached the org
+     or the target application (a transport fault, an unauthorized read-back, an unavailable
+     verification response).
+  `DISPROVED` is a fifth, distinct outcome — the application *was* asked and it *did* answer
+  contradicting the requirement. Never conflate a disproved (real) failure with an unprovable
+  (environment/test-defect) one.
+- **A public site needs no credential.** `auth_type: "none"` (`SystemAuthType.NONE`) is a first-class
+  posture for a credential-free target (a public web URL or API) — never describe a public site as
+  requiring a dummy or placeholder credential. Signing in, when the scenario needs it, is an ordinary
+  test step, not a System-level credential.
+- **A real secret is referenced, never inlined, as `{{credential.SLOT}}`.** `credential_slots` on a
+  System's connection config names the bounded, validated slot identifiers an authored test may
+  reference this way; the secret bundle's values and its provider pointer are structurally absent
+  from every read-back and from the authored test source. **Coming in this release** (FUN-4914): a
+  credential-request flow where the agent asks for a credential by name, a human completes an FT
+  form out of band, and the agent polls for the resulting credential id and its slots — describe
+  this as the intended flow, not as already shipped, until FUN-4914 lands.
+- **Every MCP write is two calls today.** The curated default external tool surface
+  (`EXTERNAL_DEFAULT_TOOL_NAMES` in `tool_curation.py`) exposes ~29 read-only "orient and work" tools
+  by name, plus exactly two discovery tools: `functional_tools_search` (find an operation by
+  describing the capability) and `functional_tool_call` (invoke the name + arguments
+  `functional_tools_search` returned). Every write tool — `functional_systems_create`,
+  `functional_requirements_create`, `functional_tests_create`, `functional_test_runs_start`, and the
+  rest — is reached through that two-call search-then-call pattern, never by name directly, on the
+  external MCP surface. Document the pattern as two calls, not one.
+- **Container networking: `http://host.docker.internal:<port>`, and the MCP endpoint needs its
+  trailing slash.** A containerized FT client reaches a host-run app via `host.docker.internal`
+  (e.g. `http://host.docker.internal:3020`), never `localhost`. The MCP endpoint is
+  `/v1/mcp/` with the trailing slash — omitting it is a real, documented failure mode elsewhere in
+  the codebase (see the AE MCP pages' identical rule); do not assume FT's is more forgiving without
+  re-verifying against `services/api/src/mcp/` on a later pin.
+- **`functional_*` tool names are the FT MCP vocabulary; never invent one.** Verify every tool name
+  used in FT docs against a real file under `services/api/src/mcp/tools/` at the pinned sha — a
+  plausible-sounding name that isn't in that directory does not exist.

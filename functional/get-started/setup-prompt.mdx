@@ -1,0 +1,240 @@
+---
+title: "Setup prompt: connect an agent to Functional Testing"
+icon: "terminal"
+description: "Paste-able prompts that connect Claude Code, Codex, or Cursor to a Functional Testing workspace over MCP — and one verify prompt that proves the connection with a real read call."
+agent_topic: "setup-prompt"
+read_when: "You want an agent to connect itself to Functional Testing over MCP without reading a setup guide — paste a connect block, approve the browser consent screen, then paste the verify block."
+---
+
+You don't have to read a setup guide to connect Functional Testing (FT). Copy one of the blocks below into your coding agent and it does the work: add the server, start the sign-in, wait while you approve it in the browser, and tell you what to do next.
+
+<Note>
+  This page covers connecting FT's own MCP surface. For the endpoint, the bounded default tool set, and the two-call write pattern once you're connected, see [Connect an MCP client](/functional/get-started/connect-an-mcp-client).
+</Note>
+
+## How to use this page
+
+1. Pick the **connect** block for your client and paste it as your first message. Replace `FT_MCP_URL` with your endpoint.
+2. Approve the consent screen in your browser when the agent asks.
+3. **Restart your client**, then paste the [verify block](#verify-any-client) into the fresh session.
+
+The restart in step 3 is not optional. Coding agents load their MCP servers when a session starts, so a server added *during* a session usually has no tools in that session even though it's connected. Each connect block ends by telling you this; the verify block is what proves the connection with a real call.
+
+**Your MCP endpoint** is your FT host with `/v1/mcp/` on the end, trailing slash included:
+
+| Where | URL |
+|---|---|
+| Local dev (root checkout) | `http://localhost:8000/v1/mcp/` |
+| Local dev (a worktree) | use the worktree's own API port — it isn't 8000 |
+
+**What you'll have to do yourself:** approve one consent screen in a browser, choosing **Read only** or **Read and write**. That choice is a person's, by design — it's where you decide whether this agent gets to read your workspace or to read and write it. Everything on either side of that click is the agent's job.
+
+---
+
+## Connect: Claude Code
+
+```text
+Connect yourself to my Functional Testing workspace over MCP.
+
+FT MCP endpoint: FT_MCP_URL
+
+Do this:
+
+1. Add the server:
+   claude mcp add --transport http ft FT_MCP_URL
+   Keep the trailing slash on the URL exactly as given.
+
+2. Run `claude mcp list`. Expect "ft ... ! Needs authentication". That
+   is the correct state at this point, not an error — adding a server
+   does not sign you in. If it already says "Connected", say so and
+   skip to step 4.
+
+3. Tell me, in one short line, to run `/mcp`, choose `ft`, and click
+   authenticate; that a browser will open on a Functional Testing
+   consent screen; and that I should choose "Read and write" if you're
+   meant to create or run systems, requirements, tests, and runs, or
+   "Read only" if you're only meant to look. Mention that I need to be
+   signed in to Functional Testing in that browser already. Then stop
+   and wait for me to say I have done it. Do not try to open a browser
+   yourself.
+
+4. When I say I am done, run `claude mcp list` once more and confirm it
+   reads "Connected".
+
+5. Tell me to restart the client and then paste the Functional Testing
+   verify prompt into the fresh session. Explain why in one line: a
+   server added mid-session usually has no tools until the client
+   reloads, so there is nothing you can call yet even though the
+   connection is good. Do not try to call a Functional Testing tool in
+   this session.
+
+If `claude mcp list` still says "Needs authentication" after step 3,
+the browser step did not finish — the usual cause is not being signed
+in to Functional Testing in that browser. Ask me to run it again rather
+than retrying anything yourself.
+
+Do not create, change, or delete anything in Functional Testing during
+this setup.
+```
+
+---
+
+## Connect: Codex
+
+```text
+Connect yourself to my Functional Testing workspace over MCP.
+
+FT MCP endpoint: FT_MCP_URL
+
+Do this:
+
+1. Add the server:
+   codex mcp add ft --url FT_MCP_URL
+   Keep the trailing slash on the URL exactly as given.
+
+   Note: this command starts the browser sign-in immediately and then
+   waits for it. If it ends with "timed out waiting for OAuth
+   callback", the server entry was still saved — that is a failed
+   login, not a failed add. Move to step 2.
+
+2. Run `codex mcp login ft`. It prints an authorization URL and opens
+   it in a browser.
+
+3. Tell me, in one short line, that a Functional Testing consent screen
+   is waiting in my browser; that I should choose "Read and write" if
+   you're meant to create or run systems, requirements, tests, and
+   runs, or "Read only" if you're only meant to look; and that I need
+   to be signed in to Functional Testing in that browser already. If no
+   browser opened, give me the URL you printed so I can open it myself.
+   Then stop and wait.
+
+4. When the login reports success, run `codex mcp list` and confirm the
+   ft row reads "Auth: OAuth". "Not logged in" means step 3 did not
+   complete — ask me to run `codex mcp login ft` again rather than
+   retrying anything yourself.
+
+5. Tell me to restart the client and then paste the Functional Testing
+   verify prompt into the fresh session. Explain why in one line: a
+   server added mid-session usually has no tools until the client
+   reloads, so there is nothing you can call yet even though the
+   connection is good. Do not try to call a Functional Testing tool in
+   this session.
+
+Do not create, change, or delete anything in Functional Testing during
+this setup.
+```
+
+---
+
+## Connect: Cursor
+
+```text
+Connect yourself to my Functional Testing workspace over MCP.
+
+FT MCP endpoint: FT_MCP_URL
+
+Do this:
+
+1. Find or create the MCP config file: `.cursor/mcp.json` in this
+   project (preferred, so the whole team shares it), or
+   `~/.cursor/mcp.json` for a config that applies to every Cursor
+   workspace. Add or update the "ft" entry, keeping any other servers
+   already in the file:
+     {
+       "mcpServers": {
+         "ft": { "transport": "http", "url": "FT_MCP_URL" }
+       }
+     }
+   Keep the trailing slash on the URL exactly as given.
+
+2. Open Cursor's MCP settings (Cursor Settings → MCP) and make sure the
+   "ft" server is enabled, or reload the Cursor window so it picks up
+   the config change. This is what starts the connection.
+
+3. Tell me, in one short line, that a Functional Testing consent screen
+   should open in my browser; that I should choose "Read and write" if
+   you're meant to create or run systems, requirements, tests, and
+   runs, or "Read only" if you're only meant to look; and that I need
+   to be signed in to Functional Testing in that browser already. If no
+   browser opened automatically, check Cursor's MCP settings for a
+   "connect" or "authenticate" action on the "ft" row and tell me to
+   use that instead. Then stop and wait.
+
+4. When I say I have approved it, check Cursor's MCP settings for the
+   "ft" server's own status rather than assuming a specific label —
+   Cursor's exact wording can differ between versions. If it still
+   reads as disconnected or unauthenticated, the browser step did not
+   finish — ask me to try again rather than retrying anything yourself.
+
+5. Tell me to restart Cursor (or reload the window) and then paste the
+   Functional Testing verify prompt into the fresh session. Explain why
+   in one line: a server added or changed mid-session usually has no
+   tools until the client reloads, so there is nothing you can call yet
+   even though the connection is good. Do not try to call a Functional
+   Testing tool in this session.
+
+Do not create, change, or delete anything in Functional Testing during
+this setup.
+```
+
+---
+
+## Verify: any client
+
+Paste this into a **fresh session**, after restarting your client.
+
+```text
+Verify my Functional Testing MCP connection and tell me what it says.
+
+1. Confirm you can see Functional Testing's MCP tools (they're all
+   named functional_*). If you cannot see any, say so and stop — the
+   client has not picked the server up yet, and restarting it once
+   more is the fix.
+
+2. Call the MCP tool `functional_projects_list` with no arguments. It
+   needs nothing else set up first and returns every project you can
+   reach.
+
+3. Tell me in plain language:
+     - the projects it says I can reach, by name — or that there are
+       none yet, if that is what it says
+     - anything the response tells you to do next
+   Write it as sentences, not as a dump. Do not read raw ids back to
+   me unless something is wrong and the id is the useful detail.
+
+4. Do NOT try to tell me whether the connection is read-only or
+   read-write. Nothing you can call reports that directly — it is
+   whichever I chose on the consent screen, and the only way it shows
+   up is that a write is refused. Say that, rather than guessing.
+
+Reading the results:
+
+- A list of projects (or an honest "none yet") is the whole check. The
+  connection works.
+- A 401, or a status of "Needs authentication" / "Not logged in",
+  means the browser step did not complete. Tell me to run it again.
+- If a write tool isn't in the list you can see, that's expected —
+  every write goes through the two-call pattern
+  (`functional_tools_search` then `functional_tool_call`), never by
+  name directly. See "Connect an MCP client" if you need the full
+  explanation.
+
+Do not create, change, or delete anything in Functional Testing.
+```
+
+---
+
+## If it goes wrong
+
+| What the agent tells you | What it means | What to do |
+|---|---|---|
+| Stuck on "needs authentication" / "not logged in" | The browser consent step didn't finish | Re-run it — the usual cause is not being signed in to Functional Testing in that browser |
+| Can't see any `functional_*` tools, but the client says connected | The client hasn't reloaded its MCP servers yet | Restart the client and paste the verify block again — the single most common "it didn't work" |
+| Says the connection is read-only and can't write | You chose "Read only" on the consent screen | Reconnect and choose "Read and write" if this agent needs to create or run things |
+| Lists no projects | Your workspace doesn't have one yet | Create one in the FT web app, or ask a teammate to grant you access to an existing one |
+
+## Related reading
+
+- **[Connect an MCP client](/functional/get-started/connect-an-mcp-client)** — the endpoint, the bounded default tool set, and the two-call write pattern once you're connected
+- **[Your first green test](/functional/get-started/first-green-test)** — system, requirement, test, run, once you're connected
+- **[Agent rules for AGENTS.md / CLAUDE.md](/functional/get-started/agents-md-snippet)** — a short block to paste into your own repo so any agent working there follows FT's rules

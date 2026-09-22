@@ -1,0 +1,90 @@
+---
+title: "Connect an MCP client to Functional Testing"
+icon: "plug"
+description: "Point any streamable-HTTP MCP client at your Functional Testing workspace, understand the bounded default tool set, and call the tools that sit outside it."
+agent_topic: "connect-mcp-client"
+read_when: "You need to point an MCP client (Claude Code, Codex, or another agent) at a Functional Testing workspace and start calling its tools."
+---
+
+Functional Testing (FT) is a streamable-HTTP [Model Context Protocol](https://modelcontextprotocol.io) server. Point any MCP client at the endpoint and it can work with systems, requirements, tests, and runs directly — no separate API key flow to wire up beyond what the endpoint itself requires.
+
+<Note>
+  This page covers FT's own MCP surface. If you were looking to point FT at a system it should test, see [Your first green test](/functional/get-started/first-green-test) — that's a System, not an MCP client.
+</Note>
+
+## The endpoint
+
+```
+<your-ft-host>/v1/mcp/
+```
+
+**The trailing slash matters.** Local development's default is:
+
+```
+http://localhost:8000/v1/mcp/
+```
+
+Use the worktree's own API port when you're running FT from an isolated worktree rather than the root checkout.
+
+## What the default surface gives you
+
+FT bounds the tool schema every client pays for on every turn instead of handing over its complete registry. The default set is:
+
+- **~29 read-only "orient and work" tools**, reachable by name directly — listing and getting a project's systems, tests, suites, requirements, runs, schedules, datasets, and environments, plus search.
+- **Two discovery tools**, also reachable by name directly:
+  - `functional_tools_search` — describe the capability you need in plain language and get back matching tool names, descriptions, and input schemas.
+  - `functional_tool_call` — call an operation `functional_tools_search` returned, by name and arguments.
+
+Everything else — every write, and every read outside the default set — is reached through those two discovery tools, never by name directly. This is server behavior: it applies to any MCP client, so you don't need a client-specific tool filter or a private settings file to get a bounded default.
+
+<Warning>
+  **Every write is two calls.** Creating a system, a requirement, a test, or starting a run are not in the default named set. Call `functional_tools_search` with a description of what you want to do, then pass the tool name and arguments it returns to `functional_tool_call`.
+</Warning>
+
+```json
+// 1. Search
+{ "tool": "functional_tools_search", "arguments": { "query": "start a test run" } }
+// → returns { "name": "functional_test_runs_start", "input_schema": {...}, ... }
+
+// 2. Call
+{
+  "tool": "functional_tool_call",
+  "arguments": {
+    "name": "functional_test_runs_start",
+    "arguments": { "project_id": "standalone", "test_id": "INT-0042", "system_id": "..." }
+  }
+}
+```
+
+An operation's own name and arguments still apply their normal authentication, authorization, and workspace restrictions — the two-call indirection doesn't relax anything a direct call would enforce.
+
+## Reaching a host app from a container
+
+When FT itself runs in a container and needs to reach an application running on your host machine (your dev server, a local target you're testing), use:
+
+```
+http://host.docker.internal:<port>
+```
+
+not `localhost` — `localhost` inside the container resolves to the container itself, not your host.
+
+## Connecting a Salesforce system through MCP
+
+Salesforce setup is MCP-first too. Discover and call `functional_connections_authorization_start`, open the returned Salesforce authorization URL in a browser, and poll `functional_connections_authorization_get`. A successful callback performs the normal idempotent connection setup — confirm it persisted with `functional_connections_list`. Provider callbacks and credentials never pass through the agent itself.
+
+## Check it worked
+
+Call a tool that's in the default set and needs nothing else set up first:
+
+```json
+{ "tool": "functional_projects_list", "arguments": {} }
+```
+
+It returns every project you can reach. That confirms the endpoint is reachable and the connection is live.
+
+## Related reading
+
+- **[Setup prompt: connect an agent to Functional Testing](/functional/get-started/setup-prompt)** — paste-able prompts that do this whole page's setup for you, per client
+- **[Your first green test](/functional/get-started/first-green-test)** — system, requirement, test, run, for a public site with no credential
+- **[Verification: checks and asserts](/functional/concepts/verification)** — what proves a test passed
+- **[Credentials](/functional/concepts/credentials)** — public sites, login as a step, and stored secrets

@@ -1,0 +1,43 @@
+# FUN-4922 — exports the Functional docs bundle (scripts/export-functional-bundle.mjs)
+# that the FT API vendors at build time (services/api/src/mcp/docs_bundle/ in
+# trustai-functional, fetched by scripts/vendor-docs-bundle.sh). This workflow
+# proves the export stays green and publishes the bundle as an artifact FT's
+# vendoring script can pull by docs commit — it does not vendor anything itself.
+name: Functional docs bundle
+
+on:
+  push:
+    branches:
+      - worktrunk/functional-docs
+      - main
+  pull_request:
+    paths:
+      - "functional/**"
+      - "scripts/export-functional-bundle.mjs"
+      - "scripts/export-functional-bundle.test.mjs"
+      - ".github/workflows/functional-bundle.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Run unit tests
+        run: node --test scripts/export-functional-bundle.test.mjs
+
+      - name: Export the bundle (fails on the self-check)
+        run: node scripts/export-functional-bundle.mjs
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: functional-bundle
+          path: dist/functional-bundle
+          if-no-files-found: error

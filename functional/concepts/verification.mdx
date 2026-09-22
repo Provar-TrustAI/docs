@@ -1,0 +1,115 @@
+---
+title: "Verification: checks and asserts"
+icon: "shield-check"
+description: "Two families prove a Functional Testing result — checks (API and UI) and assert-phase clauses — what each can observe, and which ones settle pass/fail."
+agent_topic: "verification"
+read_when: "You're authoring or debugging a test and need to know which verification mechanism can prove what you're claiming, whether it will actually settle the run's pass/fail verdict, or how to anchor a PerceptionAssertOp with the During:/Anchor: grammar and the accepted containing-surface role list."
+---
+
+A test's browser steps show behavior happened. Verification proves it. FT carries two separate verification families on a test — they persist differently, execute differently, and (this is the part worth getting right) don't gate the run's pass/fail the same way.
+
+## Checks: API and UI
+
+Checks live under `source_refs.scenario.checks`, each with a `kind` discriminator (`api` or `ui`). REST and MCP read and write the same list; FT's Source editor edits the same contract.
+
+### API checks
+
+An **API check** calls the target application's *own* API and compares a returned value against an authored, typed expectation (`{t, v}` — preserving the difference between `0`, `false`, `""`, `null`, and an absent field).
+
+FT does not assume the API uses the browser's login mechanism — every API check must declare **which identity** makes the call:
+
+| Identity | What it sends |
+| --- | --- |
+| `current_browser_session` | Cookies from the browser that ran the UI workflow. Only works when the target API accepts those cookies. |
+| `named_browser_session:<name>` | Cookies from a separately authenticated browser context — e.g. a second persona whose access is under test. |
+| `configured_api_identity:<system>` | The named System's managed API credentials, resolved in the run's Environment — bearer tokens, API keys, Basic auth, or OAuth client credentials. |
+
+The test's own setup must sign in or configure the chosen identity before the check runs. An FT login, an FT MCP token, or a setup/teardown hook token does **not** authenticate a request to the target application — those are different credentials for different callers. A check that can't obtain its identity settles `not_verified`, never a pass.
+
+### UI checks
+
+A **UI check** observes something rendered on the page — an element's text, a form field's value, a checkbox's state, a heading — and compares it the same typed way. It matches its target by **accessible role and name** (`role=heading;name="Pricing"`) or by a plain visible label, scoped to a containing region the same way.
+
+The runner reads the page twice around the exact frame that becomes evidence — a screenshot plus a structured read — and only a *matching* pair of reads is retained as stable evidence. A `before_step_id` / `after_step_id` transition pins which two authored steps bound the observation window.
+
+<Warning>
+  **UI checks currently do not count toward the run's pass gate.** They settle `passed` / `failed` / `not_verified` like an API check and produce retained Checks evidence — but the deterministic-assertion backstop that decides whether a run may terminally pass only counts `ApiCheckOp` among the `checks` list, never `UiCheckOp`. If a test's only verification is a UI check, add an assert-phase clause (below) or an API check if you need that test's outcome to gate the run.
+</Warning>
+
+## Assert-phase clauses
+
+The older, separate deterministic-assertion family, evaluated during a phased run's `assert` phase. Zero inference — every clause is a machine comparison, never the agent's own self-report of what it saw.
+
+| Clause | Proves |
+| --- | --- |
+| A state read-back (`QueryAssertOp` / `http_assert`) | The behavior's durable effect — a record now exists, or doesn't, or a field now holds a value |
+| `MessageAssertOp` | A refusal's validation message named the right field — the second clause a pure state check can't give you, so a block scenario isn't false-passed by the wrong field's error |
+| `PerceptionAssertOp` | A named UI affordance is present or absent, or a registered transient signal class (e.g. a duplicate-record warning) appeared — proven against the run's runtime-observed accessibility snapshot, never the agent's "I saw it" |
+| `NegativeWriteAssertOp` | A permission boundary — it *attempts* a write as the run's persona and proves the org refused it, the only clause that acts rather than looks |
+
+These **do** settle pass/fail. A `DISPROVED` clause is a real, observed failure — the application was asked and it answered against the requirement. An **unprovable** clause (four different reasons — see [Why a result reads "needs review"](/functional/troubleshooting/why-needs-review)) means the application was never actually asked, so the run is demoted to `needs_review` rather than credited with a pass it didn't earn.
+
+<Note>
+  A `PerceptionAssertOp` in `signal` mode matches a **registered signal class**, never arbitrary text a scenario supplies — the match phrases live server-side. A bare free-text perception clause with body scope is accepted on parse but cannot actually be proven at runtime; prefer a **UI check** for arbitrary text and headings, which the runtime genuinely observes.
+</Note>
+
+## Anchoring an assertion
+
+A `PerceptionAssertOp` in `present` or `absent` mode doesn't grade "the page" — it grades one exact place the run captures on it, the clause's **anchor**. Two attribute lines set that place, on two different phases of the document, and the run refuses to bind a capture — reporting the clause unprovable rather than crediting a pass — when either one is missing or shaped wrong.
+
+### `During:` names the Act step
+
+The clause needs a `During: Act N` line naming the Act step whose result it observes. A clause with no `During:` line names no step of the plan at all, so the run has no capture to adjudicate it against — the FUN-4606 `CLAUSE_NAMES_NO_STEP` refusal.
+
+### `Anchor:` on that Act step names the containing surface
+
+The named Act step, in turn, carries its own `Anchor: <role> "<name>"` line — the containing surface the run roots the capture at.
+
+**The role comes from a closed, 13-item list, never free text:**
+
+`article`, `combobox`, `complementary`, `dialog`, `form`, `group`, `list`, `listbox`, `main`, `navigation`, `region`, `table`, `tabpanel`
+
+Anything else — a `button`, a `heading`, a `textbox` — names an ordinary control, not a containing surface. The run roots the capture at that control instead, so the capture holds only the anchor node itself; the pin ends up certifying its own capture, and a removed affordance reports disproved rather than unprovable. Keep the assert-phase clause and add a step `Check:` if you need to capture free text or a heading too — a `Check:` records evidence for that one step, but it never settles pass/fail on its own.
+
+<Info>
+  `dialog` is the only one of the 13 roles an action is expected to *open*, rather than already have on screen when the step runs — the other 12 name surfaces a page renders on its own. Anchoring on `dialog` ties the clause to whichever step in the plan actually opened it; see [Why a result reads "needs review"](/functional/troubleshooting/why-needs-review) if a dialog-anchored clause won't bind.
+</Info>
+
+**The anchor's `<name>` must differ from the clause's own `Signal:` text.** An anchor whose accessible name equals the target it's proving certifies itself: a removed affordance then reports nothing observed, never disproved, because the look answers with itself.
+
+### Worked example
+
+```
+## Act
+3. Click Sign in to authenticate.
+   Target: button "Sign in"
+   Anchor: main "Dashboard"
+
+## Assert
+1. The authenticated Dashboard for admin is visible.
+   Signal: Dashboard for admin
+   Mode: present
+   Scope: body
+   During: Act 3
+```
+
+Act step 3 carries `Anchor: main "Dashboard"` — a `main` landmark named "Dashboard", distinct from the clause's `Signal: Dashboard for admin`. The Assert clause's `During: Act 3` line points straight at it. This is the one shape the run binds a capture to.
+
+<Tip>
+  Authoring's structural validator walks a whole document in one pass — a bad `authored_step_id` reference, an out-of-order check transition, and a malformed `target_hint` anchor are all collected and reported together, not one at a time, so you can fix a whole document in one round trip. The anchor-shape rules above are a separate, save-time provability check: when a plan's only assert-phase clause fails one of them, the save response names that one relation to fix.
+</Tip>
+
+## Which one to reach for
+
+- Proving your app's own API returned the right value, under a specific identity → **API check**.
+- Proving text, a heading, or a form field's on-screen state, and you need that proof to gate the run → an **assert-phase clause** (or pair a UI check with a second, gating clause).
+- Proving a database or backend record changed → a state read-back (`QueryAssertOp` / `http_assert`).
+- Proving a validation message named the right field → `MessageAssertOp`.
+- Proving a control is or isn't available to a persona → `PerceptionAssertOp` in `present`/`absent` mode.
+- Proving an endpoint itself refuses a forbidden write → `NegativeWriteAssertOp`.
+
+## Related reading
+
+- **[Why a result reads "needs review"](/functional/troubleshooting/why-needs-review)** — the four causes an unprovable clause can have, and the fix for each
+- **[Credentials](/functional/concepts/credentials)** — where an API check's identity comes from
+- **[Your first green test](/functional/get-started/first-green-test)** — a worked example with a UI check

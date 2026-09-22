@@ -1,0 +1,12 @@
+{
+  "name": "trust-ai-docs",
+  "private": true,
+  "description": "Provar-TrustAI docs (Mintlify) — repo-level scripts that don't belong to captures/ or pipeline/.",
+  "scripts": {
+    "export:functional-bundle": "node scripts/export-functional-bundle.mjs",
+    "test:functional-bundle": "node --test scripts/export-functional-bundle.test.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
