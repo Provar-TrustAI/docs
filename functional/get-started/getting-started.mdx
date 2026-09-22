@@ -1,0 +1,52 @@
+---
+title: "Getting started"
+icon: "compass"
+description: "The cold-agent orientation for Functional Testing: what it is, the core loop, and where to read next — this is the page functional_guide(\"getting-started\") serves."
+agent_topic: "getting-started"
+read_when: "Before your first write in a session — this is the orientation gate's own first read."
+---
+
+Functional Testing (FT) tests a customer's AI agent or web application. Every result FT produces traces back to one of five objects, created in dependency order: a **System** connects FT to the application under test, a **Requirement** states one guarantee that application must satisfy, a **Test** encodes that guarantee as ordered steps, a **Run** executes the test, and a **Diagnosis** names the root cause when a run fails. You don't need a credential to start: a public site or a public API is a first-class target, not a placeholder.
+
+<Note>
+  This page is the literal target of `functional_guide("getting-started")` — the read this server's own instructions and its orientation gate both name before your first write in a session. If an agent already called it, it has already read everything below.
+</Note>
+
+## The core loop
+
+1. **System** — connects FT to the application under test (a URL, plus how to reach it).
+2. **Requirement** — one guarantee the application must satisfy, stated in plain language.
+3. **Test** — that guarantee encoded as ordered steps an agent or browser runner can execute.
+4. **Run** — one execution of a test, producing a verdict.
+5. **Diagnosis** — when a run fails, the root cause: an app bug, test drift, or an environment problem.
+
+See [Your first green test](/functional/get-started/first-green-test) for a worked example that walks all five stages against a public site, from an empty project to one passing run.
+
+## A public site needs no credential
+
+`auth_type: "none"` is the correct configuration for a target that needs nothing to reach — not a workaround. Reach for a stored credential only when the target actually requires one; see [Credentials](/functional/concepts/credentials) for the three ways a System authenticates, and for what to do when a scenario needs a sign-in step but no stored secret.
+
+## Verify text with a UI check, prove pass/fail with an Assert clause
+
+A **UI check** observes something rendered on the page — text, a heading, a form field's value — and is the right tool for proving arbitrary on-screen content. But a UI check alone doesn't gate the run's pass/fail verdict. To settle pass/fail, pair it with an **assert-phase clause** (`PerceptionAssertOp`, `MessageAssertOp`, a state read-back, or `NegativeWriteAssertOp`) anchored on the step it observes. See [Verification: checks and asserts](/functional/concepts/verification) for which mechanism proves what, and how to anchor a clause correctly.
+
+## Read the guide topic a refusal or diagnosis names
+
+FT surfaces point back into this guide by topic id rather than re-explaining themselves inline: every `functional_projects_get` response carries an `orientation` block naming a `guide_topic`, a blocked first write names this page, and a failed run's `functional_run_diagnosis` result names a `guide_topic` such as `why-needs-review`, `verification`, or `credentials`. When you see a `guide_topic`, call `functional_guide` with that exact id rather than guessing — it's the fastest path to the fix.
+
+## Where to go next
+
+<CardGroup cols={2}>
+  <Card title="Your first green test" icon="circle-check" href="/functional/get-started/first-green-test">
+    The shortest path from an empty project to a passing run, against a public site.
+  </Card>
+  <Card title="Verification: checks and asserts" icon="shield-check" href="/functional/concepts/verification">
+    Which mechanism proves what, and which ones settle pass/fail.
+  </Card>
+  <Card title="Credentials" icon="key-round" href="/functional/concepts/credentials">
+    The three ways a System authenticates, and when to reach for each.
+  </Card>
+  <Card title='Why a result reads "needs review"' icon="circle-help" href="/functional/troubleshooting/why-needs-review">
+    The four causes an unprovable clause can have, and the fix for each.
+  </Card>
+</CardGroup>
