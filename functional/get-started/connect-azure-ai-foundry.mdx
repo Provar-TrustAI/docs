@@ -16,17 +16,31 @@ This section maps one pipeline onto Functional Testing's tools, in order. The pi
 
 **a. Pick a story.** The agent reads an Azure DevOps work item with the Azure DevOps remote MCP server.
 
-**b. Acceptance criteria.** Pass the story text to `functional_requirements_extract`, as `document_text`. Poll `functional_inference_jobs_get` when the call returns a job handle. Save the reviewed candidates with `functional_requirements_add_drafts`, with the work item id as `source_ref`, then promote each one with `functional_requirements_promote`. When the pipeline already wrote acceptance criteria, skip `functional_requirements_extract`. Pass those criteria directly to `functional_requirements_add_drafts` instead.
+**b. Acceptance criteria.** Pass the story text to `functional_requirements_extract`, as `document_text`. Poll `functional_inference_jobs_get` when the call returns a job handle. Save the reviewed candidates with `functional_requirements_add_drafts`, with the work item id as `source_ref`. Promote more than one requirement at once with `functional_requirements_promote_batch`. Promote one alone with `functional_requirements_promote`. When the pipeline already wrote acceptance criteria, skip `functional_requirements_extract`. Pass those criteria directly to `functional_requirements_add_drafts` instead.
 
-**c. Org context.** Functional Testing reads the live Salesforce org itself, during authoring, through the project's own Salesforce connection. The pipeline does not need to fetch org metadata for Functional Testing.
+**c. Org context.** Read the Salesforce system's id with `functional_project_systems_list`. Pass that id as `system_id` to `functional_authoring_suggest` and to `functional_authoring_accept`. Functional Testing then reads the live org during authoring, and the saved test is bound to that system.
 
-**d. Test design, the human gate.** Call `functional_authoring_suggest` for each requirement. Poll `functional_inference_jobs_get` when the call returns a job handle. Show the proposed scenario to the person. Set Foundry `require_approval` on `functional_authoring_accept`, so the person approves each test before Functional Testing saves it. With the default tool list, that accept call reaches the server as `functional_tool_call`. A per-tool approval rule then sees that one name, not `functional_authoring_accept`.
+**d. Test design, the human gate.** Call `functional_authoring_suggest` for each requirement, with that `system_id`. Poll `functional_inference_jobs_get` when the call returns a job handle. Show the proposed scenario to the person, and wait for approval before you save it. With the default tool list, `functional_authoring_accept` reaches the server as `functional_tool_call`. A `require_approval` rule on `functional_authoring_accept` never fires. Set the rule on `functional_tool_call` instead. This also asks for approval on every other call made through `functional_tool_call`, including each `functional_inference_jobs_get` poll.
 
-**e. Test generation.** `functional_authoring_accept` saves an executable test. The pipeline generates and maintains no test code and no page objects.
+**e. Test generation.** `functional_authoring_accept` saves an executable test. Pass:
+
+- The candidate's `accepted_scenario`.
+- `source_channel` set to "requirement".
+- `source_ref` set to the requirement's R- id.
+- `system_id`, from stage c.
+- A new unique `id`, for example `INT-0001`.
+- An `external_test_id` and a `name`.
+- `time_to_accept_ms`.
+
+The two `source_ref` values mean different things. Here, `source_ref` names the requirement. On `functional_requirements_add_drafts`, `source_ref` names the work item.
+
+The pipeline generates and maintains no test code and no page objects.
 
 **f. Execution.** Create a suite of the accepted tests with `functional_suites_create`, with `project_id`, `id`, `name`, `schedule` set to manual, and `test_ids`. Run it with `functional_suites_run`, with `project_id` and `suite_id`. Poll `functional_runs_get` for the run-group's aggregate status, passing the returned `run_group_id` as its `run_code`.
 
 **g. Results.** Read `functional_run_group_result_get` with that `run_group_id` for requirement coverage. For each failed run, read `functional_run_checks` and `functional_run_diagnosis` with that run's own run code. Read `functional_requirement_coverage_get` for each requirement. Then post a summary back to the work item, with the Azure DevOps MCP server.
+
+Every call above also takes `project_id`, to scope it to your project. `functional_inference_jobs_get` requires `job_id` beside it. `functional_requirements_add_drafts` requires `drafts`, the array of reviewed candidates, beside it.
 
 ## The endpoint
 
@@ -70,7 +84,7 @@ Access control still applies:
 - Any workspace tool restriction a Functional Testing admin sets.
 
 <Warning>
-  With the default Functional Testing tool list, every write tool call reaches the server as `functional_tool_call`. A per-tool `require_approval` rule in Foundry then sees only that one name. It does not see the name of the tool it wraps.
+  With the default Functional Testing tool list, every write tool call reaches the server as `functional_tool_call`. A `require_approval` rule set on the wrapped tool's own name, for example `functional_authoring_accept`, never fires. Set the rule on `functional_tool_call` instead. This also asks for approval on every other call made through `functional_tool_call`, including each `functional_inference_jobs_get` poll.
 </Warning>
 
 ## Tools Foundry sees by default
@@ -90,7 +104,7 @@ Three more tools sit in the default list by name, next to that read-only set:
 - `functional_tool_call` calls the name and arguments `functional_tools_search` returned.
 - `functional_autonomy_effective_policy` reads the autonomy mode an internal write in a project runs under right now.
 
-Every other tool sits outside the default list. This includes every write tool, and it includes the read tool `functional_inference_jobs_get`. Reach each one through `functional_tools_search`, then `functional_tool_call`. Every tool this page names below, except `functional_guide`, `functional_runs_get`, `functional_run_checks`, and `functional_run_diagnosis`, needs that pair.
+Every other tool sits outside the default list. This includes every write tool, and it includes the read tool `functional_inference_jobs_get`. Reach each one through `functional_tools_search`, then `functional_tool_call`. Every tool this page names below, except `functional_guide`, `functional_runs_get`, `functional_run_checks`, `functional_run_diagnosis`, and `functional_requirement_coverage_get`, needs that pair.
 
 ## Time limits on a long-running call
 
@@ -147,24 +161,34 @@ b. If the work item carries no acceptance criteria yet, find and call
    functional_inference_jobs_get with that job_id until the job
    settles. Either way, save the acceptance criteria with
    functional_requirements_add_drafts, with the work item id as
-   source_ref, then promote each one with
+   source_ref. Promote more than one requirement at once with
+   functional_requirements_promote_batch, or promote one alone with
    functional_requirements_promote.
 
-c. Do not fetch Salesforce org metadata yourself. Functional Testing
-   reads the live org itself, through the project's own Salesforce
-   connection, when it authors a test.
+c. Call functional_project_systems_list to read the Salesforce
+   system's id. Pass that id as system_id in stage d and stage e.
+   Functional Testing then reads the live org during authoring, and
+   the saved test is bound to that system.
 
 d. For each promoted requirement, find and call
-   functional_authoring_suggest. If the result carries a job_id, poll
-   functional_inference_jobs_get with that job_id until the job
-   settles. Show the proposed scenario to the person, and wait for
-   approval before you call functional_authoring_accept. That accept
-   call reaches the server as functional_tool_call. Name the real
-   tool to the person. Do not assume an approval rule caught it by
-   its own name.
+   functional_authoring_suggest, with that system_id. If the result
+   carries a job_id, poll functional_inference_jobs_get with that
+   job_id until the job settles. Show the proposed scenario to the
+   person, and wait for approval before you save it.
+   functional_authoring_accept reaches the server as
+   functional_tool_call, so a require_approval rule set on
+   functional_authoring_accept never fires. Set the rule on
+   functional_tool_call instead. This also asks for approval on every
+   other call made through functional_tool_call, including each
+   functional_inference_jobs_get poll.
 
 e. Once the person approves, call functional_authoring_accept to save
-   the test.
+   the test. Pass accepted_scenario, source_channel set to
+   "requirement", source_ref set to the requirement's R- id,
+   system_id, a new unique id such as INT-0001, external_test_id,
+   name, and time_to_accept_ms. This source_ref names the requirement.
+   It differs from the source_ref on
+   functional_requirements_add_drafts, which names the work item.
 
 f. Create a suite of the accepted tests with functional_suites_create,
    with schedule set to manual. Run it with functional_suites_run.
@@ -178,10 +202,15 @@ g. Read functional_run_group_result_get with that run_group_id for
    requirement. Then post a summary back to the work item with the
    Azure DevOps MCP server.
 
+Every call above also takes project_id.
+functional_inference_jobs_get requires job_id beside it, and
+functional_requirements_add_drafts requires drafts beside it.
+
 Every tool named above, except functional_guide, functional_runs_get,
-functional_run_checks, functional_run_diagnosis, and
-functional_requirement_coverage_get, sits outside the default tool
-list. Find it first with functional_tools_search, then call it with
+functional_run_checks, functional_run_diagnosis,
+functional_requirement_coverage_get, and
+functional_project_systems_list, sits outside the default tool list.
+Find it first with functional_tools_search, then call it with
 functional_tool_call. Never guess a tool name or an argument name.
 ```
 
