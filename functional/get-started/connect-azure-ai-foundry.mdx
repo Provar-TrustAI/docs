@@ -1,0 +1,159 @@
+---
+title: "Connect an Azure AI Foundry agent to Functional Testing"
+icon: "plug"
+description: "Connect an Azure AI Foundry agent to the Functional Testing MCP server: the endpoint, the key-based token, the tool list, and the Azure DevOps requirements pattern."
+agent_topic: "connect-foundry"
+read_when: "You connect an Azure AI Foundry agent to a Functional Testing workspace and you need the endpoint, the token, the approval setting, or the tool list."
+---
+
+<Note>
+  This page covers Azure AI Foundry only. For the endpoint, the bounded default tool set, and the two-call write pattern on any client, read [Connect an MCP client](/functional/get-started/connect-an-mcp-client) first.
+</Note>
+
+## The endpoint
+
+Point your Foundry MCP tool at this address, with the trailing slash:
+
+```
+<your-ft-host>/v1/mcp/
+```
+
+Foundry needs a public host. It cannot reach a host on your own machine, for example `localhost` or `host.docker.internal`.
+
+## Authenticate with a key-based token
+
+1. Open the MCP access page in Functional Testing settings.
+2. On the "Key-based clients" card, create a token.
+3. Copy the token now. Functional Testing shows the token once.
+
+A token is read or read-write. A token scopes to the whole workspace or to one project. A token also carries an expiry date.
+
+In Foundry, add a key-based connection for the Functional Testing tool.
+
+- Credential name: `Authorization`
+- Credential value: `Bearer <token>`
+
+Foundry stores that name and value on its own project connection. Every user of the agent then acts as the token owner. Foundry gives Functional Testing no separate identity per user today.
+
+<Note>
+  Foundry plans identity passthrough for a remote MCP server. Functional Testing does not support it yet, and no date is set.
+</Note>
+
+## Set approval for the write tools
+
+Foundry's own `require_approval` setting defaults to `always`, matched per tool name. Set it for the write tools your agent calls.
+
+Functional Testing adds no approval step of its own for a token call. A ruling settles this. An external, token-scoped call is Foundry-owned. Functional Testing's own default for that call is Auto, so Functional Testing never blocks, pauses, or clamps it.
+
+Access control still applies:
+
+- The token's own scope, read or read-write.
+- The token's own project or workspace scope.
+- Any workspace tool restriction a Functional Testing admin sets.
+
+<Warning>
+  With the default Functional Testing tool list, every write tool call reaches the server as `functional_tool_call`. A per-tool `require_approval` rule in Foundry then sees only that one name. It does not see the name of the tool it wraps.
+</Warning>
+
+## Tools Foundry sees by default
+
+Functional Testing hands over a bounded tool list, not its complete registry. The default list carries 30 read-only tools, reachable by name directly:
+
+- List and get calls for `functional_projects_list`, `functional_project_counts`, `functional_project_systems_list`, `functional_systems_list`, and `functional_systems_get`.
+- List and get calls for `functional_tests_list`, `functional_tests_get`, `functional_suites_list`, and `functional_suites_get`.
+- List and get calls for `functional_requirements_list`, `functional_requirements_get`, `functional_requirements_tree_get`, and `functional_requirement_coverage_get`.
+- List and get calls for `functional_runs_list`, `functional_runs_get`, `functional_run_checks`, `functional_runs_summary`, `functional_run_attempts_list`, `functional_run_diagnosis`, and `functional_test_runs_list`.
+- List and get calls for `functional_datasets_list`, `functional_datasets_get`, `functional_environments_list`, `functional_environments_get`, `functional_workspaces_list`, and `functional_workspaces_get`.
+- `functional_search`, `functional_records_resolve`, `functional_guide`, and `functional_docs_search`.
+
+Three more tools sit in the default list by name, next to that read-only set:
+
+- `functional_tools_search` describes the capability you need. It returns matching tool names.
+- `functional_tool_call` calls the name and arguments `functional_tools_search` returned.
+- `functional_autonomy_effective_policy` reads the autonomy mode an internal write in a project runs under right now.
+
+Every other tool sits outside the default list. This includes every write tool, and it includes the read tool `functional_inference_jobs_get`. Reach each one through `functional_tools_search`, then `functional_tool_call`. Every tool this page names below, except `functional_guide`, `functional_runs_get`, `functional_run_checks`, and `functional_run_diagnosis`, needs that pair.
+
+## Time limits on a long-running call
+
+Foundry limits a non-streaming MCP call to 100 seconds. Foundry's background mode lifts that limit for some models.
+
+`functional_requirements_extract` and `functional_authoring_suggest` can run past 100 seconds. When a call has not finished after about 25 seconds, it returns a job handle instead of a result. The handle carries a `job_id`.
+
+Poll `functional_inference_jobs_get` with that `job_id` until the job settles. Read the result once the job is ready, or the error once the job failed.
+
+## Two steps a human completes
+
+Two steps in this workflow need a person, not the agent.
+
+**Salesforce authorization.** Call `functional_connections_authorization_start`. Send the returned authorization URL to a person. The person signs in and approves access in a browser. Poll `functional_connections_authorization_get` with the returned `authorization_id` for the outcome.
+
+**The credential form.** For any other credential, call `functional_credentials_request`. Send the returned link to a person. The person fills in a one-time Functional Testing form. The link expires in 15 minutes. Poll `functional_credentials_request_get` with the returned `request_id` for the outcome.
+
+Functional Testing never accepts a secret value over MCP. This rule holds for Foundry, and it holds for every other client.
+
+## The Azure DevOps pattern
+
+Pair Functional Testing with the Azure DevOps remote MCP server in the same Foundry agent.
+
+1. Read a work item with the Azure DevOps server.
+2. Pass the work item's text to `functional_requirements_extract` as `document_text`.
+3. Pass the work item's id to `functional_requirements_add_drafts` as `source_ref`.
+
+The saved draft requirements carry the work item id as their source. A reviewer can then trace each requirement back to it.
+
+## Document links Functional Testing refuses
+
+`functional_requirements_extract` takes a document as `document_text`, `document_file`, or `document_url`.
+
+`document_url` refuses a link with a query part, for example an Azure Blob SAS link. Send the file bytes instead, as `document_file`.
+
+## A starter instruction for the Foundry agent
+
+Paste this into your Foundry agent's instructions. It states the order Functional Testing's tools expect.
+
+```text
+You are a Functional Testing agent connected over MCP.
+
+Work in this order:
+
+1. Call functional_guide with topic "getting-started". Read it once per
+   session, before your first write.
+
+2. To turn a document into draft requirements, find and call
+   functional_requirements_extract. If the result carries a job_id,
+   poll functional_inference_jobs_get with that job_id until the job
+   settles.
+
+3. Save the reviewed candidates with functional_requirements_add_drafts.
+   Promote each one you want active with functional_requirements_promote.
+
+4. To author a candidate test from a requirement, find and call
+   functional_authoring_suggest. If the result carries a job_id, poll
+   functional_inference_jobs_get with that job_id until the job settles.
+
+5. Save the accepted candidate with functional_authoring_accept.
+
+6. Start a run with functional_test_runs_start.
+
+7. Poll functional_runs_get, by name, with the returned run_code, until
+   the run settles.
+
+8. Once the run settles, read functional_run_checks and
+   functional_run_diagnosis, both by name, for the evidence and the
+   cause.
+
+Every tool named above, except functional_guide, functional_runs_get,
+functional_run_checks, and functional_run_diagnosis, sits outside the
+default tool list. Find it first with functional_tools_search, then
+call it with functional_tool_call. Never guess a tool name or an
+argument name.
+```
+
+## Related reading
+
+- **[Connect an MCP client](/functional/get-started/connect-an-mcp-client)**: the endpoint, the bounded default tool set, and the two-call write pattern on any client.
+- **[Setup prompt: connect an agent to Functional Testing](/functional/get-started/setup-prompt)**: paste-able prompts for Claude Code, Codex, and Cursor.
+- **[Credentials](/functional/concepts/credentials)**: the auth postures a System can carry, and the credential-slot placeholder a test references.
+- **[Model Context Protocol tools in Azure AI Foundry Agent Service](https://learn.microsoft.com/en-us/azure/foundry/agents/how-to/tools/model-context-protocol)**: Foundry's own `require_approval`, `allowed_tools`, and background-mode settings.
+- **[Authenticate to a remote MCP server from Azure AI Foundry](https://learn.microsoft.com/en-us/azure/foundry/agents/how-to/mcp-authentication)**: Foundry's key-based and OAuth connection options.
