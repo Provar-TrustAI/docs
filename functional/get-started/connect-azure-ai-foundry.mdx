@@ -10,6 +10,24 @@ read_when: "You connect an Azure AI Foundry agent to a Functional Testing worksp
   This page covers Azure AI Foundry only. For the endpoint, the bounded default tool set, and the two-call write pattern on any client, read [Connect an MCP client](/functional/get-started/connect-an-mcp-client) first.
 </Note>
 
+## Use Functional in a story-to-results pipeline
+
+This section maps one pipeline onto Functional Testing's tools, in order. The pipeline runs from a work item to test results. It carries one human review, at test design.
+
+**a. Pick a story.** The agent reads an Azure DevOps work item with the Azure DevOps remote MCP server.
+
+**b. Acceptance criteria.** Pass the story text to `functional_requirements_extract`, as `document_text`. Poll `functional_inference_jobs_get` when the call returns a job handle. Save the reviewed candidates with `functional_requirements_add_drafts`, with the work item id as `source_ref`, then promote each one with `functional_requirements_promote`. When the pipeline already wrote acceptance criteria, skip `functional_requirements_extract`. Pass those criteria directly to `functional_requirements_add_drafts` instead.
+
+**c. Org context.** Functional Testing reads the live Salesforce org itself, during authoring, through the project's own Salesforce connection. The pipeline does not need to fetch org metadata for Functional Testing.
+
+**d. Test design, the human gate.** Call `functional_authoring_suggest` for each requirement. Poll `functional_inference_jobs_get` when the call returns a job handle. Show the proposed scenario to the person. Set Foundry `require_approval` on `functional_authoring_accept`, so the person approves each test before Functional Testing saves it. With the default tool list, that accept call reaches the server as `functional_tool_call`. A per-tool approval rule then sees that one name, not `functional_authoring_accept`.
+
+**e. Test generation.** `functional_authoring_accept` saves an executable test. The pipeline generates and maintains no test code and no page objects.
+
+**f. Execution.** Create a suite of the accepted tests with `functional_suites_create`, with `project_id`, `id`, `name`, `schedule` set to manual, and `test_ids`. Run it with `functional_suites_run`, with `project_id` and `suite_id`. Poll `functional_runs_get` for the run-group's aggregate status, passing the returned `run_group_id` as its `run_code`.
+
+**g. Results.** Read `functional_run_group_result_get` with that `run_group_id` for requirement coverage. For each failed run, read `functional_run_checks` and `functional_run_diagnosis` with that run's own run code. Read `functional_requirement_coverage_get` for each requirement. Then post a summary back to the work item, with the Azure DevOps MCP server.
+
 ## The endpoint
 
 Point your Foundry MCP tool at this address, with the trailing slash:
@@ -110,44 +128,61 @@ The saved draft requirements carry the work item id as their source. A reviewer 
 
 ## A starter instruction for the Foundry agent
 
-Paste this into your Foundry agent's instructions. It states the order Functional Testing's tools expect.
+Paste this into your Foundry agent's instructions. It states the story-to-results order, stage a to stage g.
 
 ```text
-You are a Functional Testing agent connected over MCP.
+You are a Functional Testing agent connected over MCP, in a
+story-to-results pipeline.
+
+Call functional_guide with topic "getting-started" once per session,
+before your first write.
 
 Work in this order:
 
-1. Call functional_guide with topic "getting-started". Read it once per
-   session, before your first write.
+a. Read an Azure DevOps work item with the Azure DevOps MCP server.
 
-2. To turn a document into draft requirements, find and call
-   functional_requirements_extract. If the result carries a job_id,
-   poll functional_inference_jobs_get with that job_id until the job
-   settles.
+b. If the work item carries no acceptance criteria yet, find and call
+   functional_requirements_extract, with the work item's text as
+   document_text. If the result carries a job_id, poll
+   functional_inference_jobs_get with that job_id until the job
+   settles. Either way, save the acceptance criteria with
+   functional_requirements_add_drafts, with the work item id as
+   source_ref, then promote each one with
+   functional_requirements_promote.
 
-3. Save the reviewed candidates with functional_requirements_add_drafts.
-   Promote each one you want active with functional_requirements_promote.
+c. Do not fetch Salesforce org metadata yourself. Functional Testing
+   reads the live org itself, through the project's own Salesforce
+   connection, when it authors a test.
 
-4. To author a candidate test from a requirement, find and call
+d. For each promoted requirement, find and call
    functional_authoring_suggest. If the result carries a job_id, poll
-   functional_inference_jobs_get with that job_id until the job settles.
+   functional_inference_jobs_get with that job_id until the job
+   settles. Show the proposed scenario to the person, and wait for
+   approval before you call functional_authoring_accept. That accept
+   call reaches the server as functional_tool_call. Name the real
+   tool to the person. Do not assume an approval rule caught it by
+   its own name.
 
-5. Save the accepted candidate with functional_authoring_accept.
+e. Once the person approves, call functional_authoring_accept to save
+   the test.
 
-6. Start a run with functional_test_runs_start.
+f. Create a suite of the accepted tests with functional_suites_create,
+   with schedule set to manual. Run it with functional_suites_run.
+   Poll functional_runs_get, passing the returned run_group_id as
+   run_code, until the run-group settles.
 
-7. Poll functional_runs_get, by name, with the returned run_code, until
-   the run settles.
-
-8. Once the run settles, read functional_run_checks and
-   functional_run_diagnosis, both by name, for the evidence and the
-   cause.
+g. Read functional_run_group_result_get with that run_group_id for
+   requirement coverage. For each failed run, read
+   functional_run_checks and functional_run_diagnosis with that run's
+   own run code. Read functional_requirement_coverage_get for each
+   requirement. Then post a summary back to the work item with the
+   Azure DevOps MCP server.
 
 Every tool named above, except functional_guide, functional_runs_get,
-functional_run_checks, and functional_run_diagnosis, sits outside the
-default tool list. Find it first with functional_tools_search, then
-call it with functional_tool_call. Never guess a tool name or an
-argument name.
+functional_run_checks, functional_run_diagnosis, and
+functional_requirement_coverage_get, sits outside the default tool
+list. Find it first with functional_tools_search, then call it with
+functional_tool_call. Never guess a tool name or an argument name.
 ```
 
 ## Related reading
