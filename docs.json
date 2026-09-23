@@ -145,6 +145,7 @@
             "group": "Get started",
             "icon": "rocket",
             "pages": [
+              "functional/get-started/getting-started",
               "functional/get-started/connect-an-mcp-client",
               "functional/get-started/connect-azure-ai-foundry",
               "functional/get-started/setup-prompt",
