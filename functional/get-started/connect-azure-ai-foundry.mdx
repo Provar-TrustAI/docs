@@ -20,9 +20,9 @@ This section maps one pipeline onto Functional Testing's tools, in order. The pi
 
 **c. Org context.** Read the Salesforce system's id with `functional_project_systems_list`. Pass that id as `system_id` to `functional_authoring_suggest` and to `functional_authoring_accept`. Functional Testing then reads the live org during authoring, and the saved test is bound to that system.
 
-**d. Test design, the human gate.** Call `functional_authoring_suggest` for each requirement, with that `system_id`. Poll `functional_inference_jobs_get` when the call returns a job handle. Show the proposed scenario to the person, and wait for approval before you save it. Connect to the workflow endpoint, and put the Foundry approval rule on `functional_authoring_accept`. See [Set approval for the write tools](#set-approval-for-the-write-tools).
+**d. Test design, the human gate.** Call `functional_authoring_suggest` for each requirement, with that `system_id`. Poll `functional_inference_jobs_get` when the call returns a job handle. Show the proposed scenario to the person. The design review is the Foundry approval request on `functional_authoring_accept`, in stage e. For that request, connect to the workflow endpoint and set the approval rule. See [Set approval for the write tools](#set-approval-for-the-write-tools).
 
-**e. Test generation.** `functional_authoring_accept` saves an executable test. Pass:
+**e. Test generation.** `functional_authoring_accept` saves an executable test. On the workflow endpoint, call it by its own name, so that the Foundry approval rule applies. Pass:
 
 - The candidate's `accepted_scenario`.
 - `source_channel` set to "requirement".
@@ -84,7 +84,9 @@ On the workflow endpoint, set this rule:
 "require_approval": {"always": ["functional_authoring_accept"]}
 ```
 
-The agent then asks a person once for each test, at test design. Every other call runs with no Foundry approval step. This includes each call made through `functional_tool_call`, for example `functional_suites_create`.
+Foundry then asks a person to approve each `functional_authoring_accept` call. That approval is the design review for one test. Every other call runs with no Foundry approval step. This includes each call made through `functional_tool_call`, for example `functional_suites_create`.
+
+The rule matches the tool name that Foundry sees. A call to `functional_authoring_accept` made through `functional_tool_call` does not match it, so it skips the approval. The starter instruction below tells the agent to call `functional_authoring_accept` by its own name.
 
 Functional Testing adds no approval step of its own for a token call. A ruling settles this. An external, token-scoped call is Foundry-owned. Functional Testing's own default for that call is Auto, so Functional Testing never blocks, pauses, or clamps it.
 
@@ -115,7 +117,7 @@ Three more tools sit in the default list by name, next to that read-only set:
 - `functional_tool_call` calls the name and arguments `functional_tools_search` returned.
 - `functional_autonomy_effective_policy` reads the autonomy mode an internal write in a project runs under right now.
 
-Every other tool sits outside the default list. This includes every write tool, and it includes the read tool `functional_inference_jobs_get`. Reach each one through `functional_tools_search`, then `functional_tool_call`. On the default endpoint, every tool this page names needs that pair, except `functional_guide`, `functional_project_systems_list`, `functional_runs_get`, `functional_run_checks`, `functional_run_diagnosis`, and `functional_requirement_coverage_get`.
+Every other tool sits outside the default list. This includes every write tool, and it includes the read tool `functional_inference_jobs_get`. Reach each one through `functional_tools_search`, then `functional_tool_call`. On the default endpoint, every pipeline tool this page names needs that pair, except `functional_guide`, `functional_project_systems_list`, `functional_runs_get`, `functional_run_checks`, `functional_run_diagnosis`, and `functional_requirement_coverage_get`.
 
 ## Tools on the workflow endpoint
 
@@ -207,11 +209,12 @@ c. Call functional_project_systems_list to read the Salesforce
 d. For each promoted requirement, call functional_authoring_suggest,
    with that system_id. If the result carries a job_id, poll
    functional_inference_jobs_get with that job_id until the job
-   settles. Show the proposed scenario to the person, and wait for
-   approval before you save it.
+   settles. Show the proposed scenario to the person.
 
-e. Once the person approves, call functional_authoring_accept to save
-   the test. Pass accepted_scenario, source_channel set to
+e. Call functional_authoring_accept to save the test. If your tool
+   list shows functional_authoring_accept, call it by that name, and
+   never through functional_tool_call. Foundry asks the person to
+   approve this call. Pass accepted_scenario, source_channel set to
    "requirement", source_ref set to the requirement's R- id,
    system_id, a new unique id such as INT-0001, external_test_id,
    name, and time_to_accept_ms. This source_ref names the requirement.
