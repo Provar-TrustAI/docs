@@ -16,7 +16,7 @@ This section maps one pipeline onto Functional Testing's tools, in order. The pi
 
 **a. Pick a story.** The agent reads an Azure DevOps work item with `wit_work_item`, a tool of the Azure DevOps remote MCP server. See [The Azure DevOps pattern](#the-azure-devops-pattern).
 
-**b. Acceptance criteria.** Pass the story text to `functional_requirements_extract`, as `document_text`. When the call returns a job handle, poll `functional_inference_jobs_get`. Save the reviewed candidates with `functional_requirements_add_drafts`, with the work item id as `source_ref`. Promote more than one requirement at once with `functional_requirements_promote_batch`. Promote one alone with `functional_requirements_promote`. When the pipeline already wrote acceptance criteria, skip `functional_requirements_extract`. Pass those criteria directly to `functional_requirements_add_drafts` instead.
+**b. Acceptance criteria.** Pass the story text to `functional_requirements_extract`, as `document_text`. When the call returns a job handle, poll `functional_inference_jobs_get`. Save the reviewed candidates with `functional_requirements_add_drafts`, with the work item id as `source_ref`. Promote the saved requirements with `functional_requirements_promote_batch`. It takes 1 to 100 requirement ids, so it also promotes one requirement alone. When the pipeline already wrote acceptance criteria, skip `functional_requirements_extract`. Pass those criteria directly to `functional_requirements_add_drafts` instead.
 
 **c. Org context.** Read the Salesforce system's id with `functional_project_systems_list`. Pass that id as `system_id` to `functional_authoring_suggest` and to `functional_authoring_accept`. Functional Testing then reads the live org during authoring, and the saved test is bound to that system.
 
@@ -28,7 +28,7 @@ This section maps one pipeline onto Functional Testing's tools, in order. The pi
 - `source_channel` set to "requirement".
 - `source_ref` set to the requirement's R- id.
 - `system_id`, from stage c.
-- A new unique `id`, for example `INT-0001`.
+- A new `id`: a short code that no test in the project uses yet, for example `INT-0001`. If the person names a code, use that code.
 - An `external_test_id` and a `name`.
 - `time_to_accept_ms`.
 
@@ -40,7 +40,7 @@ The pipeline generates and maintains no test code and no page objects.
 
 **g. Results.** Read results only after the run-group settles. While a run is in progress, its coverage reads `not_adjudicated`, and that status is not a result. Read `functional_run_group_result_get` with that `run_group_id` for requirement coverage. For each failed run, read `functional_run_checks` and `functional_run_diagnosis` with that run's own run code. Read `functional_requirement_coverage_get` for each requirement. Then post a summary back to the work item with `wit_work_item_write`. The summary goes into the work item's history as a comment.
 
-Every call above also takes `project_id`, to scope it to your project. `functional_inference_jobs_get` requires `job_id` beside it. `functional_requirements_add_drafts` requires `drafts`, the array of reviewed candidates, beside it.
+Every Functional Testing call above also takes `project_id`, to scope it to your project. `functional_guide` is different: it takes `topic` only, and it refuses any other argument. `functional_inference_jobs_get` requires `job_id` beside it. `functional_requirements_add_drafts` requires `drafts`, the array of reviewed candidates, beside it.
 
 ## The endpoint
 
@@ -196,12 +196,22 @@ If the model reaches its limit, divide the pipeline into two chats:
 
 Paste this into your Foundry agent's instructions. It states the story-to-results order, stage a to stage g.
 
+Above it, add one line that names your project, its id, and your Salesforce system. For example:
+
+```text
+Work in the Functional Testing project "<project name>". Pass its id,
+<project id>, as project_id on every Functional Testing call except
+functional_guide. Its Salesforce system is "<system name>".
+```
+
+A project that you create in the product has a UUID as its id. State that id in the instruction, so that the agent does not spend a call on `functional_projects_list` to find it.
+
 ```text
 You are a Functional Testing agent connected over MCP, in a
 story-to-results pipeline.
 
 Call functional_guide with topic "getting-started" once per session,
-before your first write.
+before your first write. functional_guide takes topic only.
 
 Work in this order:
 
@@ -213,9 +223,8 @@ b. If the work item carries no acceptance criteria yet, call
    functional_inference_jobs_get with that job_id until the job
    settles. Either way, save the acceptance criteria with
    functional_requirements_add_drafts, with the work item id as
-   source_ref. Promote more than one requirement at once with
-   functional_requirements_promote_batch, or promote one alone with
-   functional_requirements_promote.
+   source_ref. Promote the saved requirements with
+   functional_requirements_promote_batch, also when there is only one.
 
 c. Call functional_project_systems_list to read the Salesforce
    system's id. Pass that id as system_id in stage d and stage e.
@@ -232,9 +241,11 @@ e. Call functional_authoring_accept to save the test. If your tool
    never through functional_tool_call. Foundry asks the person to
    approve this call. Pass accepted_scenario, source_channel set to
    "requirement", source_ref set to the requirement's R- id,
-   system_id, a new unique id such as INT-0001, external_test_id,
-   name, and time_to_accept_ms. This source_ref names the requirement.
-   It differs from the source_ref on
+   system_id, name, time_to_accept_ms, and id and external_test_id
+   both set to a short code that no test in the project uses yet, for
+   example INT-0001. If the person names a code, use that code, and
+   use the next number for each test after it. This source_ref names
+   the requirement. It differs from the source_ref on
    functional_requirements_add_drafts, which names the work item.
 
 f. Create a suite of the accepted tests with functional_suites_create,
@@ -249,11 +260,16 @@ g. Do not read results before the run-group settles. While a run is
    functional_run_checks and functional_run_diagnosis with that run's
    own run code. Read functional_requirement_coverage_get for each
    requirement. Then post a summary back to the work item with
-   wit_work_item_write, as a comment in the work item's history.
+   wit_work_item_write, as a System.History update.
 
-Every call above also takes project_id.
-functional_inference_jobs_get requires job_id beside it, and
-functional_requirements_add_drafts requires drafts beside it.
+Every Functional Testing call above, except functional_guide, also
+takes project_id. functional_inference_jobs_get requires job_id beside
+it, and functional_requirements_add_drafts requires drafts beside it.
+
+On the workflow endpoint, functional_suites_create and
+functional_run_group_result_get are not in your tool list. Find each
+one with functional_tools_search, then call it with
+functional_tool_call.
 
 If your tool list shows a tool by name, call it by that name.
 Otherwise, find it first with functional_tools_search, then call it
