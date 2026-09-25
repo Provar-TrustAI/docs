@@ -173,6 +173,7 @@ The saved draft requirements carry the work item id as their source. A reviewer 
 
 Set up the Azure DevOps server in Foundry this way:
 
+- In the agent instruction, name the Azure DevOps organization and the project as two separate values. A combined value such as `my-org/My Project` fails.
 - Put both `wit_work_item` and `wit_work_item_write` in the server's allowed tools. If `wit_work_item_write` is not in the list, the agent cannot post the result back to the work item.
 - Set both tools to auto-approve. The one human review in this pipeline is the approval on `functional_authoring_accept`.
 - Make sure that the Azure DevOps organization and the Foundry project use the same Microsoft Entra tenant. The Azure DevOps server signs in with the person's own identity. If the tenants differ, the first call fails with `VS30063`.
