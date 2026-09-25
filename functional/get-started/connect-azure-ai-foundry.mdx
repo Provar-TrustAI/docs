@@ -16,7 +16,7 @@ This section maps one pipeline onto Functional Testing's tools, in order. The pi
 
 **a. Pick a story.** The agent reads an Azure DevOps work item with `wit_work_item`, a tool of the Azure DevOps remote MCP server. See [The Azure DevOps pattern](#the-azure-devops-pattern).
 
-**b. Acceptance criteria.** Pass the story text to `functional_requirements_extract`, as `document_text`. When the call returns a job handle, poll `functional_inference_jobs_get`. Save the reviewed candidates with one `functional_requirements_add_drafts` call. Pass `source_ref`, set to the work item id, once at the top level, beside `drafts`. A draft never takes `source_ref`. Promote the saved requirements with `functional_requirements_promote_batch`. It takes 1 to 100 requirement ids, so it also promotes one requirement alone. When the pipeline already wrote acceptance criteria, skip `functional_requirements_extract`. Pass those criteria directly to `functional_requirements_add_drafts` instead.
+**b. Acceptance criteria.** Pass the story text to `functional_requirements_extract`, as `document_text`. When the call returns a job handle, poll `functional_inference_jobs_get`. Save the reviewed candidates with one `functional_requirements_add_drafts` call. Pass `source_ref`, set to the work item id, once at the top level, beside `drafts`. A draft never takes `source_ref`. Promote the saved requirements with `functional_requirements_promote_batch`. It takes 1 to 100 requirement ids, so it also promotes one requirement alone. When the story already carries acceptance criteria, skip `functional_requirements_extract`. Save the story as one draft requirement instead: the story title as `title`, the story text as `source_quote`, and each criterion as one entry of that draft's `acceptance_criteria` list. An acceptance criterion is never a requirement of its own.
 
 **c. Org context.** Read the Salesforce system's id with `functional_project_systems_list`. Pass that id as `system_id` to `functional_authoring_suggest` and to `functional_authoring_accept`. Functional Testing then reads the live org during authoring, and the saved test is bound to that system.
 
@@ -218,15 +218,21 @@ Work in this order:
 
 a. Read an Azure DevOps work item with wit_work_item.
 
-b. If the work item carries no acceptance criteria yet, call
+b. Save the work item as one draft requirement, with one
+   functional_requirements_add_drafts call. The draft's title is the
+   work item's title, and its source_quote is the story text. Put each
+   acceptance criterion of the work item into that draft's
+   acceptance_criteria list, one entry each. An acceptance criterion is
+   never a requirement of its own. Pass project_id, drafts, and
+   source_ref set to the work item id, all three at the top level. A
+   draft never takes source_ref.
+   If the work item carries no acceptance criteria, first call
    functional_requirements_extract, with the work item's text as
    document_text. If the result carries a job_id, poll
    functional_inference_jobs_get with that job_id until the job
-   settles. Either way, save the acceptance criteria with one
-   functional_requirements_add_drafts call. Pass project_id, drafts,
-   and source_ref set to the work item id, all three at the top level.
-   Each draft takes title, source_quote, and acceptance_criteria. A
-   draft never takes source_ref. Promote the saved requirements with
+   settles. Save the candidates that it returns, each with its own
+   acceptance criteria.
+   Then promote the saved requirements with
    functional_requirements_promote_batch, also when there is only one.
 
 c. Call functional_project_systems_list to read the Salesforce
