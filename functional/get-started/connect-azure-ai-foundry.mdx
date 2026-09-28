@@ -36,7 +36,7 @@ The two `source_ref` values mean different things. Here, `source_ref` names the 
 
 The pipeline generates and maintains no test code and no page objects.
 
-**f. Execution.** Create a new suite for each pipeline run with `functional_suites_create`, with `project_id`, `id`, `name`, `schedule` set to manual, and `test_ids`. A suite `id` must be unique in the project, so an `id` from an earlier session fails with "Suite already exists". The agent makes the `id` from the work item id and six random characters, for example `suite-wi68-k7q2xd`. Its `test_ids` names only the tests accepted in this run. Run it with `functional_suites_run`, with `project_id` and `suite_id`. Poll `functional_runs_get` for the run-group's aggregate status, passing the returned `run_group_id` as its `run_code`.
+**f. Execution.** Create a new suite for each pipeline run with `functional_suites_create`, with `project_id`, `id`, `name`, `schedule` set to manual, and `test_ids`. A suite `id` must be unique in the project, so an `id` from an earlier session fails with "Suite already exists". The agent makes the `id` from the first accepted test's code, for example `suite-int-82-k4j9p2`, because the server already keeps that code unique. A model that is asked for random characters can copy the example instead. Its `test_ids` names only the tests accepted in this run. Run it with `functional_suites_run`, with `project_id` and `suite_id`. Poll `functional_runs_get` for the run-group's aggregate status, passing the returned `run_group_id` as its `run_code`.
 
 **g. Results.** Read results only after the run-group settles. While a run is in progress, its coverage reads `not_adjudicated`, and that status is not a result. Read `functional_run_group_result_get` with that `run_group_id` for requirement coverage. For each failed run, read `functional_run_checks` and `functional_run_diagnosis` with that run's own run code. Read `functional_requirement_coverage_get` for each requirement. Then post a summary back to the work item with `wit_work_item_write`. The summary goes into the work item's history as a comment. Write the summary as HTML: a table of the acceptance criteria, each met or not met, the run duration, and a link to each run's page in TrustAI, `<your-ft-host>/projects/<project id>/app/runs/<run_code>`. A reviewer opens that page for the steps, the screenshots, and the requirements that the run validated.
 
@@ -173,7 +173,7 @@ The saved draft requirements carry the work item id as their source. A reviewer 
 
 Set up the Azure DevOps server in Foundry this way:
 
-- In the agent instruction, name the Azure DevOps organization and the project as two separate values. A combined value such as `my-org/My Project` fails.
+- In the agent instruction, name only the Azure DevOps project for `wit_work_item`. The connection sets the organization. A combined value such as `my-org/My Project`, or the organization in place of the project, fails with `TF200016`.
 - Put both `wit_work_item` and `wit_work_item_write` in the server's allowed tools. If `wit_work_item_write` is not in the list, the agent cannot post the result back to the work item.
 - Set both tools to auto-approve. The one human review in this pipeline is the approval on `functional_authoring_accept`.
 - Make sure that the Azure DevOps organization and the Foundry project use the same Microsoft Entra tenant. The Azure DevOps server signs in with the person's own identity. If the tenants differ, the first call fails with `VS30063`.
@@ -216,7 +216,9 @@ before your first write. functional_guide takes topic only.
 
 Work in this order:
 
-a. Read an Azure DevOps work item with wit_work_item.
+a. Read an Azure DevOps work item with wit_work_item. Pass the
+   project name as the project. The Azure DevOps connection sets the
+   organization, so never pass the organization as the project.
 
 b. Save the work item as one draft requirement, with one
    functional_requirements_add_drafts call. The draft's title is the
@@ -260,16 +262,19 @@ e. Call functional_authoring_accept to save the test. If your tool
    source_ref on functional_requirements_add_drafts, which names the
    work item.
 
-f. Create a new suite for this run with functional_suites_create.
-   Never reuse a suite id from an earlier session. Set id to
-   suite-wi, then the work item id, then six random lowercase
-   letters and digits, for example suite-wi68-k7q2xd. Set name to
-   "Work item", the work item id, a colon, and the work item title.
-   Pass schedule set to manual, and test_ids set to the tests that
-   you accepted in this session. If the call says that the suite
-   already exists, make a new id and call again. Run the suite with
-   functional_suites_run. Poll functional_runs_get, passing the
-   returned run_group_id as run_code, until the run-group settles.
+f. Create a new suite for this run. functional_suites_create is not
+   in your tool list, so find it first with functional_tools_search,
+   then call it with functional_tool_call. Set id to "suite-" and
+   the first accepted test's code in lowercase, for example
+   suite-int-82-k4j9p2. Set name to "Work item", the work item id, a
+   colon, and the work item title. Pass schedule set to manual, and
+   test_ids set to the tests that you accepted in this session. If
+   the call says that the suite already exists, add -2 to the id and
+   call again. If the call fails for any other reason, stop and
+   report the error. Read the suite id from the reply. Only then run
+   that suite with functional_suites_run. Poll functional_runs_get,
+   passing the returned run_group_id as run_code, until the
+   run-group settles.
 
 g. Do not read results before the run-group settles. While a run is
    in progress, its coverage reads not_adjudicated, and that status
