@@ -38,7 +38,7 @@ The pipeline generates and maintains no test code and no page objects.
 
 **f. Execution.** Create a new suite for each pipeline run with `functional_suites_create`, with `project_id`, `id`, `name`, `schedule` set to manual, and `test_ids`. A suite `id` must be unique in the project, so an `id` from an earlier session fails with "Suite already exists". The agent makes the `id` from the work item id and six random characters, for example `suite-wi68-k7q2xd`. Its `test_ids` names only the tests accepted in this run. Run it with `functional_suites_run`, with `project_id` and `suite_id`. Poll `functional_runs_get` for the run-group's aggregate status, passing the returned `run_group_id` as its `run_code`.
 
-**g. Results.** Read results only after the run-group settles. While a run is in progress, its coverage reads `not_adjudicated`, and that status is not a result. Read `functional_run_group_result_get` with that `run_group_id` for requirement coverage. For each failed run, read `functional_run_checks` and `functional_run_diagnosis` with that run's own run code. Read `functional_requirement_coverage_get` for each requirement. Then post a summary back to the work item with `wit_work_item_write`. The summary goes into the work item's history as a comment.
+**g. Results.** Read results only after the run-group settles. While a run is in progress, its coverage reads `not_adjudicated`, and that status is not a result. Read `functional_run_group_result_get` with that `run_group_id` for requirement coverage. For each failed run, read `functional_run_checks` and `functional_run_diagnosis` with that run's own run code. Read `functional_requirement_coverage_get` for each requirement. Then post a summary back to the work item with `wit_work_item_write`. The summary goes into the work item's history as a comment. Write the summary as HTML: a table of the acceptance criteria, each met or not met, the run duration, and a link to each run's page in TrustAI, `<your-ft-host>/projects/<project id>/app/runs/<run_code>`. A reviewer opens that page for the steps, the screenshots, and the requirements that the run validated.
 
 Every Functional Testing call above also takes `project_id`, to scope it to your project. `functional_guide` is different: it takes `topic` only, and it refuses any other argument. `functional_inference_jobs_get` requires `job_id` beside it. `functional_requirements_add_drafts` requires `drafts`, the array of reviewed candidates, beside it.
 
@@ -167,7 +167,7 @@ Pair Functional Testing with the Azure DevOps remote MCP server in the same Foun
 1. Read a work item with `wit_work_item`.
 2. Pass the work item's text to `functional_requirements_extract` as `document_text`.
 3. Pass the work item's id to `functional_requirements_add_drafts` as the top-level `source_ref`, beside `drafts`.
-4. After the run-group settles, post the result summary with `wit_work_item_write`. The summary goes into the work item's history (`System.History`) as a comment.
+4. After the run-group settles, post the result summary with `wit_work_item_write`. The summary goes into the work item's history (`System.History`) as a comment, with a link to each run's page in TrustAI.
 
 The saved draft requirements carry the work item id as their source. A reviewer can then trace each requirement back to it.
 
@@ -279,6 +279,10 @@ g. Do not read results before the run-group settles. While a run is
    own run code. Read functional_requirement_coverage_get for each
    requirement. Then post a summary back to the work item with
    wit_work_item_write, as a System.History update.
+   Write the summary as HTML. Include a table of the acceptance
+   criteria, each marked met or not met, the run duration, and a
+   link to each run in TrustAI:
+   <your-ft-host>/projects/<project id>/app/runs/<run_code>
 
 Every Functional Testing call above, except functional_guide, also
 takes project_id. functional_inference_jobs_get requires job_id beside
