@@ -28,7 +28,7 @@ This section maps one pipeline onto Functional Testing's tools, in order. The pi
 - `source_channel` set to "requirement".
 - `source_ref` set to the requirement's R- id.
 - `system_id`, from stage c.
-- A new `id`: a short code that no test in the project uses yet, for example `INT-0001`. If the person names a code, use that code.
+- A new `id` that the agent makes itself, for example `INT-56-K7Q2XD`. The server refuses an `id` that another test in the project uses, so the agent makes a new one and calls again.
 - An `external_test_id` and a `name`.
 - `time_to_accept_ms`.
 
@@ -251,11 +251,14 @@ e. Call functional_authoring_accept to save the test. If your tool
    approve this call. Pass accepted_scenario, source_channel set to
    "requirement", source_ref set to the requirement's R- id,
    system_id, name, time_to_accept_ms, and id and external_test_id
-   both set to a short code that no test in the project uses yet, for
-   example INT-0001. If the person names a code, use that code, and
-   use the next number for each test after it. This source_ref names
-   the requirement. It differs from the source_ref on
-   functional_requirements_add_drafts, which names the work item.
+   both set to one new code that you make yourself: INT-, then the
+   requirement's R- number, then six random letters and digits, for
+   example INT-56-K7Q2XD. Do not ask the person for a code. If the
+   call says that the id is taken, make a new code and call again.
+   Never leave out system_id. Accept refuses a Salesforce test without
+   it. This source_ref names the requirement. It differs from the
+   source_ref on functional_requirements_add_drafts, which names the
+   work item.
 
 f. Create a suite of the accepted tests with functional_suites_create,
    with schedule set to manual. Run it with functional_suites_run.
