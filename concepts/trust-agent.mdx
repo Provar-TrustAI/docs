@@ -292,28 +292,30 @@ Three guardrails keep authored coverage tied to evidence, and to the right order
 
 Know the gate's one deliberate limit: it fires only when a store can be **positively confirmed**. A project with no connected data store, or one whose store is momentarily unreachable, is not blocked — the gate never fails a write over evidence it cannot see. So treat it as a guard against inventing an end state next to real data, not as proof that every expected record was checked against a store. The rule it protects is simple: a scenario states the objective, never the procedure. Expected records come from recorded evidence of the connected agent, not from memory.
 
-**Each authoring step is gated on the one before it.** This is the runtime, not the prompt: generating scenarios, saving an evaluator, setting expected output, setting test data, simulating and running are each refused until the earlier artifact actually exists, and several tools refuse outright until an agent is connected. The refusal comes back as something the agent can act on — it names the missing step and offers to take you through it — which is why the agent will sometimes route you *backwards* from what you asked for. The steps themselves are in [the workflow below](#the-workflow-the-agent-enforces).
+**The agent checks the item in hand, not the whole project.** This is the runtime, not the prompt: anything the agent creates or runs — a scenario, an evaluator, expected output, test data, a run — must be linked to a draft or active requirement (an archived requirement doesn't count), and several tools refuse outright until an agent is connected. Gaps on *other* requirements never block it; they come back as plain-language coverage suggestions. When something really is missing for the item you asked about, the agent says so and offers the next step, which is why it will sometimes route you *backwards* from what you asked for. The steps themselves are in [the workflow below](#the-workflow-the-agent-enforces).
 
 The agent can also read the connected agent's own definition straight from its platform — system prompt, model, tools, MCP servers, and skills — as a metadata-only read that starts no conversation. It's the fastest way for the agent to learn what it is testing, and where a platform exposes no definition, it says so and falls back to watching a conversation. What it learns is written back as a reviewable Agent Profile revision, not as chat text.
 
 ## The workflow the agent enforces
 
-The Trust Agent doesn't wait for you to know what to ask — and it doesn't let the steps happen out of order. Underneath the conversation sits a router that reads the project's real state on **every** turn, never a position it remembered from earlier in the chat, names the single next step, hands over to exactly one recipe for it, and then checks the artifact actually landed before it moves on.
+The Trust Agent doesn't wait for you to know what to ask. Underneath the conversation sits a router that reads the project's real state on **every** turn, never a position it remembered from earlier in the chat, names the single next step, hands over to exactly one recipe for it, and then checks the artifact actually landed before it moves on.
 
-The core workflow is six steps. Each one is finished when the project *has* something, and it is something you can go and see for yourself:
+The recommended path is six steps. It is a path, not a gate: the agent checks the thing you're creating or running, not the whole project, so you can take one requirement all the way through while others are still empty. Each step is finished when the project *has* something, and it is something you can go and see for yourself:
 
 | # | Step | Finished when the project has |
 |---|---|---|
 | 1 | Connect the agent | A usable agent connected to the project |
 | 2 | Capture requirements | At least one saved [requirement](/concepts/requirements) stating what to test |
 | 3 | Generate scenarios | Scenarios written, each linked to the requirement it covers |
-| 4 | Build evaluators | One evaluator per requirement, attached to that requirement's scenarios and linked back to it |
+| 4 | Build evaluators | An evaluator for each requirement's scenarios, attached to them and linked back to the requirement |
 | 5 | Fill in expected output and test data | The applicable expected actions, routes and test data saved on each scenario |
 | 6 | Run the evaluation | A prepared evaluation run against the connected agent |
 
-<Warning>
-  **Step 2 is a gate, not a nudge.** Ask the agent to generate scenarios before a single requirement is saved and it refuses — **Draft and save the requirements first. I can guide you through that now before we continue.** — and routes you into capturing them instead. The later steps chain the same way: setting expected output, setting test data, simulating and running all refuse until each requirement has an evaluator created **and** attached to its scenarios. A plan that skips requirements dead-ends. [Capture requirements](/how-to/capture-requirements) is the recipe for that step.
-</Warning>
+<Note>
+  **What the agent needs is a requirement for the item in hand.** Ask it to generate scenarios before a single requirement is saved and it says so — *This project doesn't have a requirement yet, so there's nothing to build scenarios against. I can help you draft one now.* — and routes you into capturing one. After that the check is per item: a scenario, evaluator, expected output, test data or run has to be linked to a requirement, and a scenario counts as set up once it is linked and has an evaluator attached. Expected actions are advisory, and exploring the agent and the automatic full run aren't held up by the workflow. Other requirements that still lack scenarios or evaluators show up as coverage suggestions, never as a refusal. [Capture requirements](/how-to/capture-requirements) is the recipe for step 2.
+</Note>
+
+**Linking costs you nothing extra.** When the agent creates scenarios for a requirement, they are linked in the same approval — one card, not two — and a new evaluator is linked to the requirement its scenarios cover. Adding links from existing scenarios or evaluators to a requirement needs no approval card; you get a receipt instead. Removing a link still asks first.
 
 Exploring the agent, shaping personas, adding adversarial security coverage aligned to the OWASP Agentic Top 10 (2026), and curating scenarios are all **enrichment**. The agent offers them where they add something, and they can make a step stronger — but none of them blocks a step, replaces one, or is a reason to skip one.
 
@@ -379,7 +381,7 @@ The Trust Agent surface is designed to meet WCAG AA contrast, and the interrupt 
     The end-to-end walkthrough: drive a real evaluation from start to finish with the agent.
   </Card>
   <Card title="Capture requirements" icon="list-checks" href="/how-to/capture-requirements">
-    Step 2 of the workflow, and the gate everything downstream waits on: get what your agent must do written down as requirements.
+    Step 2 of the workflow, and what everything downstream links to: get what your agent must do written down as requirements.
   </Card>
   <Card title="Manage Trust Agent skills" icon="book-open" href="/how-to/manage-trust-agent-skills">
     The recipes behind the **/** palette — which ones ship built in, and how to write and disable your own.
@@ -391,7 +393,7 @@ The Trust Agent surface is designed to meet WCAG AA contrast, and the interrupt 
 
 ## Related concepts
 
-- **[Requirements](/concepts/requirements)** — what the agent must do and must never do; the step-2 gate the authoring workflow waits on
+- **[Requirements](/concepts/requirements)** — what the agent must do and must never do; step 2 of the authoring workflow, and what everything downstream links to
 - **[Agent Versions](/concepts/agent-versions)** — the agent under test; the Trust Agent helps you evaluate these, but is not one
 - **[Agent Profile](/concepts/agent-profile)** — the captured picture of an agent version that grounds the Trust Agent's authoring
 - **[Scenarios](/concepts/scenarios)** — the flat, persona-and-goal test cases the agent generates and acts on

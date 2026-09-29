@@ -534,12 +534,19 @@ failure, not a style nit.
   requirement written through MCP is stamped as agent-authored). **All / Gaps / Failing** are a fixed three **filter
   chips** — not saved views, and neither renameable nor extendable. The only built-in *saved view*
   is **All requirements**. Both sit alongside the ordinary table controls: show/hide, reorder, resize, save a view, set as default, fullscreen.
-- Requirements are the **step-2 gate of the Trust Agent's enforced authoring workflow**, and the gate
-  is a runtime refusal rather than a nudge: asking the agent to generate scenarios before any
-  requirement exists is refused with **"Draft and save the requirements first. I can guide you
-  through that now before we continue."** The later steps chain off it — setting expected output,
-  setting test data, simulating and running all refuse until each requirement has an evaluator
-  created *and* attached. A guide that skips requirements will dead-end its reader.
+- Requirements are step 2 of the Trust Agent's recommended authoring path, and the runtime rule is
+  **per item, not project-wide** (shipped at v2026.09.28, PRD-338). The agent checks the ITEM IN HAND:
+  anything being created or run — a scenario, evaluator, expected output, test data, a run — must be
+  linked to a draft or active requirement (an archived one does not count). Gaps on other
+  requirements are plain-language coverage suggestions, never a refusal. A scenario counts as set up
+  for a run once it is linked and has an evaluator attached; expected actions are advisory. Exploring
+  (simulate) and the automatic full run are not held up by the workflow. Never write "every
+  requirement", "each requirement has an evaluator", or "gate" for this rule, and never quote the
+  retired refusal copy *"Draft and save the requirements first…"*. The shipped sentences are e.g.
+  *"This project doesn't have a requirement yet, so there's nothing to build scenarios against. I can
+  help you draft one now."* and *"This scenario isn't linked to a requirement yet. I can help you
+  link it now."* Linking: scenarios created for a requirement link in the SAME approval (one card);
+  adding links to existing scenarios/evaluators needs no card (a receipt); removing links still asks.
 
 ---
 

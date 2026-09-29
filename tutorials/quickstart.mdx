@@ -85,7 +85,7 @@ You'll need:
     Or do it by hand: open **Requirements**. An empty project leads with **Add your first requirement** and two ways in — **Extract from your docs**, which pulls them out of a document you upload, and **New requirement**, which adds one at a time.
 
     <Warning>
-      **This step is a gate, not a suggestion.** Requirements come straight after connecting an agent in the authoring order the Trust Agent enforces at run time. Ask it for scenarios before a requirement is saved and it refuses rather than guessing — *"Draft and save the requirements first. I can guide you through that now before we continue."* Everything downstream chains the same way, and the chain is longer than one link: scenarios must be linked to requirements, each requirement needs an evaluator created **and** attached, and every scenario needs expected actions or routes before the agent will simulate or run. A project that skips a link dead-ends at the first thing it tries to run. The whole chain is laid out in [The order is enforced, not suggested](/tutorials/evaluate-with-the-trust-agent#the-order-is-enforced-not-suggested).
+      **Requirements come first because everything else links to one.** Ask the Trust Agent for scenarios before a requirement is saved and it says so rather than guessing — *"This project doesn't have a requirement yet, so there's nothing to build scenarios against. I can help you draft one now."* From there the check is per item: what you create or run must be linked to a requirement, and a scenario is ready to run once it is linked and has an evaluator attached. Gaps on other requirements are only coverage suggestions. The recommended order is laid out in [The order the agent recommends](/tutorials/evaluate-with-the-trust-agent#the-order-the-agent-recommends).
     </Warning>
 
     **You should see:** the **Requirements** list with at least one row, each carrying a handle like `REQ-1` — a bare number, deliberately not zero-padded the way scenario ids are — and a health pill. With nothing linked yet that pill reads **Uncovered**; the other four states are **Passing**, **Failing**, **Partially covered**, and **Not yet run**.
@@ -147,7 +147,7 @@ You'll need:
       *Ask the Trust Agent:* "Run my first evaluation against the connected agent."
     </Note>
 
-    If you skipped the linking beat in step 5, the Trust Agent refuses here and names the missing step rather than guessing. The manual **Run** split button below is ungated, so it still launches — but the run grades against whatever expected output the scenarios actually carry.
+    If the scenarios aren't linked to a requirement yet, or have no evaluator attached, the Trust Agent says so here and names the missing step rather than guessing. The manual **Run** split button below is ungated, so it still launches — but the run grades against whatever expected output the scenarios actually carry.
 
     By hand: on **Scenarios**, use the **Run** split button (select specific scenarios first, or leave the selection empty to run the current view). Clicking **Run** launches **Run & evaluate**; the chevron beside it exposes both modes explicitly:
 

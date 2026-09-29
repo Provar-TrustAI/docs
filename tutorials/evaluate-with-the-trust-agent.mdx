@@ -24,30 +24,28 @@ One thing to check while you are there: that the connected agent has a **capture
 
 You do **not** need existing sessions, scenarios, evaluators, or requirements. You build them here, in the order below — and that order is the point of the page.
 
-## The order is enforced, not suggested
+## The order the agent recommends
 
-The Trust Agent guides one core authoring workflow, and the runtime holds you to it. Each step refuses to run until the artifact before it exists, so a tutorial that skipped ahead would dead-end its reader at the first write. [The workflow the agent enforces](/concepts/trust-agent#the-workflow-the-agent-enforces) covers the mechanism; this page walks it.
+The Trust Agent guides one core authoring workflow. It is a recommended path, not a gate: the agent checks the item in hand — the scenario, evaluator or run you asked for — rather than the whole project, and that item has to be linked to a requirement. Requirements you haven't reached yet show up as coverage suggestions and never block the one you're on. [The workflow the agent enforces](/concepts/trust-agent#the-workflow-the-agent-enforces) covers the mechanism; this page walks it.
 
 | Step | Finished when |
 | --- | --- |
 | **1. Connect an agent** | A usable agent is connected to the project |
 | **2. Capture requirements** | At least one saved requirement states what to test |
 | **3. Generate scenarios** | Each new scenario is linked to the requirement it exercises |
-| **4. Build evaluators** | One evaluator per requirement is attached to its scenarios and linked back |
+| **4. Build evaluators** | An evaluator is attached to each requirement's scenarios and linked back |
 | **5. Complete expected output** | The applicable actions, routes, and test data are saved on each scenario |
 | **6. Run the evaluation** | A prepared evaluation has run against the connected agent |
 
-Ask for a later step first and you don't get a refusal you have to decode. The agent checks what the project actually holds, names the earliest missing step, and offers to do that instead — it won't collect the later step's details or raise an approval card until the prerequisite lands. Underneath, the platform is returning a specific sentence for each missing artifact:
+Ask for something the item in hand can't support yet and you don't get a refusal you have to decode. The agent checks what that scenario, evaluator or run actually needs, names the missing step, and offers to do it instead — it won't collect the later step's details or raise an approval card until that lands. In plain terms, it says one of these:
 
-| The project is missing | What the platform refuses with |
+| What's missing for the item in hand | What the agent says |
 | --- | --- |
-| Any saved requirement | *"Draft and save the requirements first."* |
-| Scenarios linked to those requirements | *"Create scenarios linked to every requirement first."* |
-| An evaluator per requirement | *"Create and attach one evaluator for each requirement first."* |
-| Those evaluators attached to the scenarios | *"Attach each requirement's evaluator to its scenarios first."* |
-| Expected actions or routes on the scenarios | *"Create expected actions or routes for the scenarios first."* |
+| Any saved requirement | *"This project doesn't have a requirement yet, so there's nothing to build scenarios against. I can help you draft one now."* |
+| A scenario isn't linked to a requirement | *"This scenario isn't linked to a requirement yet. I can help you link it now."* |
+| A linked scenario has no evaluator | *"This project has a scenario linked to a requirement, but no evaluator is attached to grade it yet. I can help you create and attach one now."* |
 
-Each closes with the same offer — *"I can guide you through that now before we continue."* You will usually meet these in the agent's own words rather than as a quoted string: the refusal is handed to the agent as recovery data, and it explains the block and proposes the fix in the reply. Exploration, personas, security coverage, and data discovery sit outside this sequence entirely. They can strengthen a step; they never substitute for one.
+A scenario counts as set up for a run once it is linked to a requirement and has an evaluator attached. Expected actions and routes are advisory. Each closes with an offer to help, and you will usually meet these in the agent's own words rather than as a quoted string. Exploration, personas, security coverage, and data discovery sit outside this sequence entirely. They can strengthen a step; they never substitute for one.
 
 <Tip>
   Landing on a project and not sure how far it got? Ask the agent, or use the **Show me where to start** chip described in step 1. It re-reads the project's real state rather than trusting what an earlier conversation said, so it is accurate even on a project somebody else left half-built.
@@ -136,7 +134,7 @@ Each closes with the same offer — *"I can guide you through that now before we
 
     The agent drafts a focused batch — a persona and a goal each, no transcripts yet — and stops at an approval card before creating them. Approve it and the scenarios land in your project's one flat **Scenarios** list; there is no set or folder layer above them. Personas are drafted alongside them if the project has none.
 
-    Then it does the part that makes coverage computable, without being asked: it reads the scenarios back and **links each one to the requirement it exercises**, several scenarios to one requirement where a requirement has more than one edge. Expect a second approval and a **Reviewed scenarios** receipt between the two.
+    Those scenarios are linked to the requirement they exercise **in the same approval** — one card, not two — which is what makes coverage computable. Where a requirement has more than one edge, several scenarios link to it. Adding links from scenarios you already had needs no card, just a receipt; removing a link still asks first.
 
     <Frame caption="Every row is a real record you can click into — named scenarios and requirements, never a bare identifier — and the rail keeps its own tally beside them: what the agent read under Context, what it changed under Outputs.">
       <img src="/images/agent-tutorial-object-table.png" alt="The Trust Agent transcript with two multi-record tool receipts expanded into clickable object tables — reviewed evaluators and reviewed scenarios — each row carrying a record's name and description with a link glyph at its end and a 'Show more' row beneath. The side rail beside them shows Context, headed by the Refunds Concierge connected-agent card with counts of 6 evaluators and 1 scenario, and an Outputs section reading '8 changes' that lists five named scenarios with 'Show more (3)'. Two resolved 'You answered…' rows sit below the tables." />
@@ -154,7 +152,7 @@ Each closes with the same offer — *"I can guide you through that now before we
 
     > Build the evaluators and attach each to its scenarios.
 
-    The agent builds judges **one per requirement**, not one broad judge per project. For each requirement that has linked scenarios but no evaluator, it writes a focused rubric from that requirement's own acceptance criteria, attaches it to that requirement's linked scenarios **in the same write**, and links it back to the requirement so health rolls up. Where the project has human-reviewed scenarios to sample, it calibrates on the same save and tells you the agreement.
+    The agent builds judges **one per requirement**, not one broad judge per project. For each requirement that has linked scenarios but no evaluator, it writes a focused rubric from that requirement's own acceptance criteria, attaches it to that requirement's linked scenarios **in the same write**, and links it back to the requirement so health rolls up. You can do this one requirement at a time; the requirements you haven't reached yet appear as coverage suggestions, not as a block. Where the project has human-reviewed scenarios to sample, it calibrates on the same save and tells you the agreement.
 
     Because this is the same action repeated, the agent will often offer the **chat-wide grant** on the first card so you approve once instead of four times. Take it or leave it — it binds only to that action, in that chat, and its chip above the composer carries a **turn off** control whenever you want the per-write gate back.
 
@@ -170,7 +168,7 @@ Each closes with the same offer — *"I can guide you through that now before we
   </Step>
 
   <Step title="Finish the grading contract">
-    Attaching a judge is not the whole contract, and this is the step most first-timers discover the hard way: a run is refused until each scenario also carries **expected output** — the tool calls it must or must not make, and the routes it must or must not take. An attached evaluator alone does not satisfy that gate.
+    Attaching a judge is not the whole contract, and this is the step most first-timers discover the hard way: expected output — the tool calls a scenario must or must not make, and the routes it must or must not take — strengthens what an attached evaluator grades. It is advisory: a run doesn't wait for it, and a scenario counts as set up once it is linked and has an evaluator.
 
     > Set the expected output on these scenarios.
 
@@ -182,7 +180,7 @@ Each closes with the same offer — *"I can guide you through that now before we
       If you meet that, capture the profile first — [Review an agent profile](/how-to/review-an-agent-profile) covers how capture works and what **Captured / Partial / Limited** coverage means — then come back and ask again.
     </Warning>
 
-    The agent will not go around the gate, and there is no reason to want it to. Answer what it asks, get the catalog in place, and the assertions it writes are the ones the run can actually check.
+    The agent won't invent an assertion it can't ground, and there is no reason to want it to. Answer what it asks, get the catalog in place, and the assertions it writes are the ones the run can actually check.
 
     [Author expected output with the Trust Agent](/how-to/author-expected-output-with-the-trust-agent) is the focused recipe — what a write replaces, what it leaves alone, and how to read the proposal panel. Two things worth carrying from it: assertions are **required** or **disallowed** only, and **expected end state** — the data contract inside a scenario's test data plan — is a different contract from expected output, never the same thing.
 
@@ -282,7 +280,7 @@ One thing that does not persist: the mode is never remembered across chats. It i
 
 ## Related concepts
 
-- **[Requirements](/concepts/requirements)** — the gate the whole workflow hangs off, and how health is computed rather than asserted
+- **[Requirements](/concepts/requirements)** — what the whole workflow hangs off, and how health is computed rather than asserted
 - **[Trust Agent](/concepts/trust-agent)** — the assistant you drove in this tutorial
 - **[Agent Versions](/concepts/agent-versions)** — the agent under test the evaluation grades; not the Trust Agent
 - **[Scenarios](/concepts/scenarios)** — the flat list the generated scenarios land in
