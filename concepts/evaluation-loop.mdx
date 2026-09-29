@@ -65,7 +65,7 @@ A **Requirement** is a statement about your agent in the language your business 
 
 Each requirement carries a bare, unpadded handle — `REQ-1`, `REQ-2` — a lifecycle (draft, active, archived) and a computed health rollup: **Passing**, **Failing**, **Partially covered**, **Uncovered**, or **Not yet run**. The saved-view chips are **All**, **Gaps** and **Failing**; **Gaps** is everything uncovered or only partly covered, which is the list to work down.
 
-Write them by hand, import them, pull them out of a document, or ask the Trust Agent for a first draft from what your agent already does. Whichever route you take, this step comes first: the Trust Agent's authoring workflow refuses to generate scenarios until a requirement is saved, and every later step — expected output, test data, simulating, running — stays closed until each requirement has an evaluator created *and* attached.
+Write them by hand, import them, pull them out of a document, or ask the Trust Agent for a first draft from what your agent already does. Whichever route you take, this step comes first: the Trust Agent won't generate scenarios until a requirement is saved, and everything it creates or runs afterwards — scenarios, evaluators, expected output, test data, a run — has to be linked to a requirement. It checks the item in hand, so requirements you haven't reached yet never hold it up.
 
 **Read more:** [Requirements](/concepts/requirements) · [Capture requirements](/how-to/capture-requirements)
 

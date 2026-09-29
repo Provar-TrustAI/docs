@@ -22,7 +22,7 @@ This how-to walks you through a working session with the **Trust Agent** — the
 - A Project with at least one connected agent or ingested [Sessions](/concepts/sessions), so the agent has real records to act on
 
 <Note>
-  **The agent will route you backwards if the Project isn't ready.** Authoring runs in a fixed order, enforced at run time: no scenarios until a [requirement](/concepts/requirements) is saved, no expected output or test data until each requirement has an evaluator created **and** attached, and no simulation or run until each linked scenario also carries expected actions or routes. Ask for a later step on a bare Project and the agent explains what's missing and offers to do that first, rather than failing halfway. [Capture requirements](/how-to/capture-requirements) is the step most people meet first.
+  **The agent will route you backwards if the thing you asked for isn't ready.** It checks the item in hand, not the whole Project: anything it creates or runs — a scenario, an evaluator, expected output, test data, a run — must be linked to a [requirement](/concepts/requirements), and a scenario counts as set up for a run once it is linked and has an evaluator attached. Requirements you haven't reached yet show up as coverage suggestions and never block other work. Ask for something a bare Project can't support yet and the agent says what's missing for that item and offers to do it first, rather than failing halfway. [Capture requirements](/how-to/capture-requirements) is the step most people meet first.
 </Note>
 
 ## Work with the agent
@@ -252,7 +252,7 @@ This how-to walks you through a working session with the **Trust Agent** — the
 - **[Approve an agent write](/how-to/approve-agent-writes)** — the human-in-the-loop write-approval flow this page points to
 - **[Simulate agents with scenarios](/how-to/simulate-with-scenarios)** — drive the agent against personas and goals in the Playground
 - **[Evaluate with the Trust Agent](/tutorials/evaluate-with-the-trust-agent)** — the end-to-end walkthrough that ties this into a full evaluation
-- **[Capture requirements](/how-to/capture-requirements)** — the step the agent routes you to first, and the gate every later step waits on
+- **[Capture requirements](/how-to/capture-requirements)** — the step the agent routes you to first, and what everything later links to
 - **[Manage Trust Agent skills](/how-to/manage-trust-agent-skills)** — the recipes behind the **/** palette, and how to write your own
 - **[Requirements](/concepts/requirements)** — what the agent must do and must never do, and how coverage is computed
 - **[MCP integration](/concepts/mcp-integration)** — the same tools published for an agent outside TrustAI to drive

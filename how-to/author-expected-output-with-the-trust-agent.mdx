@@ -8,20 +8,19 @@ A scenario's **expected output** is its grading contract: the tool calls the age
 
 This page is about that conversation: what to ask for, what comes back on the approval card, and where the agent's judgment stops and yours begins.
 
-## Before you ask: this step is gated
+## Before you ask: the scenario needs a requirement
 
-Expected output is step 5 of the authoring workflow the Trust Agent enforces, and the enforcement is a run-time refusal, not a nudge. Ask for it on a project that hasn't been through the earlier steps and nothing is written — the agent tells you what is missing and offers to fix it first. The wording below is the recovery text the refusal hands the agent; what you read in the chat is the agent's own paraphrase of it, so expect the sense rather than the sentence:
+Expected output is step 5 of the recommended path, and the Trust Agent checks the **scenario in hand**, not the whole project. Ask for it on a scenario that isn't linked to a requirement yet and nothing is written — the agent says what is missing for that scenario and offers to fix it first. Requirements elsewhere in the project that are still empty never get in the way. You will usually read this in the agent's own words rather than as a quoted string; the sense is:
 
-| The project is missing | What the agent says |
+| For this scenario, the project is missing | What the agent says |
 |---|---|
-| Any saved requirement | *"Draft and save the requirements first. I can guide you through that now before we continue."* |
-| Scenarios linked to those requirements | *"Create scenarios linked to every requirement first. I can guide you through that now before we continue."* |
-| An evaluator per requirement | *"Create and attach one evaluator for each requirement first. I can guide you through that now before we continue."* |
-| Those evaluators attached to the scenarios | *"Attach each requirement's evaluator to its scenarios first. I can guide you through that now before we continue."* |
+| Any saved requirement | *"This project doesn't have a requirement yet, so there's nothing to build scenarios against. I can help you draft one now."* |
+| A link from the scenario to a requirement | *"This scenario isn't linked to a requirement yet. I can help you link it now."* |
+| An evaluator attached to a scenario you want to run | *"This project has a scenario linked to a requirement, but no evaluator is attached to grade it yet. I can help you create and attach one now."* |
 
-So the order that gets you here is: connect an agent → [capture requirements](/how-to/capture-requirements) → [scenarios linked to them](/how-to/simulate-with-scenarios) → an evaluator per requirement, created **and** attached. Say yes when the agent offers to walk you through a missing step; it is the same conversation, not a detour. With no agent connected at all, most authoring is refused a step earlier still — *"Connect an agent before creating tests or running them. I can help you connect one now."*
+The order that gets you here is the recommended one — connect an agent → [capture requirements](/how-to/capture-requirements) → [scenarios linked to them](/how-to/simulate-with-scenarios) → an evaluator for those scenarios — but it is a path, not a gate. Say yes when the agent offers to walk you through a missing step; it is the same conversation, not a detour. With no agent connected at all, most authoring is refused a step earlier still — *"Connect an agent before creating tests or running them. I can help you connect one now."*
 
-The rest of this page assumes you are past that gate. Note that expected output is not the last one: simulating a scenario or launching a run is refused until each linked scenario carries **expected actions or routes**, which is what you are about to write.
+The rest of this page assumes the scenario is linked to a requirement. Expected actions and routes are what you are about to write; they make a scenario's grading stronger, but they are advisory — a scenario counts as set up for a run once it is linked to a requirement and has an evaluator attached.
 
 <Note>
   **What a write replaces, and what it leaves alone.** Setting expected output replaces the scenario's **expected actions and routes** wholesale — that half is not a merge. Its **attached evaluators are a different matter**: a write that doesn't mention them leaves them attached, and only a write that names evaluators explicitly changes which ones grade the scenario. An actions-only write no longer clears a scenario's graders, and the approval card says so in as many words: *"This updates the scenario's expected actions and routes; its current checks stay attached."*
@@ -142,11 +141,11 @@ So structural checking has two homes at this release, not one:
 | Was the reply good enough? | The evaluators listed under **Expected behavior** |
 | Did the records end up the way they should have? | **Expected end state**, in the scenario's test data plan |
 
-[Test data](/concepts/test-data) explains the model; [Author test data for a scenario](/how-to/author-test-data-for-a-scenario) is the task recipe. Setting a plan through the Trust Agent sits behind the same gate as this page's ask — each requirement needs an evaluator created and attached first.
+[Test data](/concepts/test-data) explains the model; [Author test data for a scenario](/how-to/author-test-data-for-a-scenario) is the task recipe. Setting a plan through the Trust Agent follows the same rule as this page's ask — the scenario has to be linked to a requirement first.
 
 ## Building and attaching an evaluator in one approval
 
-When you ask the agent to build a judge, it does not need a second turn to attach it. The evaluator create and the attach are **the same gated write** — one approval card, one approve, and the judge is grading immediately afterwards.
+When you ask the agent to build a judge, it does not need a second turn to attach it. The evaluator create and the attach are **the same gated write** — one approval card, one approve, and the judge is grading immediately afterwards. The new evaluator is also linked to the requirement its scenarios cover.
 
 The agent builds judges **one per requirement**, not one per project. It reads which requirements have linked scenarios but no evaluator, writes a focused rubric for each from that requirement's own acceptance criteria, attaches it to that requirement's linked scenarios in the same write, and links it back to the requirement record so coverage rolls up. Where the project has human-reviewed scenarios to sample, it calibrates in the same save and reports the agreement. A broad project-wide rubric attached to everything is exactly what it is told not to produce.
 
@@ -222,7 +221,7 @@ The action and route pickers suggest values observed across the project's sessio
 
 <AccordionGroup>
   <Accordion title="The agent won't write it and keeps steering me back to requirements or evaluators">
-    That is the workflow gate, not a fault. Setting expected output is refused until every requirement in the project carries an evaluator that has been created **and** attached to its scenarios. The message names the missing step and offers to walk you through it — take the offer. See [Before you ask](#before-you-ask-this-step-is-gated).
+    That is the per-item check, not a fault. Setting expected output is refused while the scenario isn't linked to a draft or active requirement (an archived one doesn't count). The message names what is missing for that scenario and offers to walk you through it — take the offer. Other requirements in the project being empty is never the reason. See [Before you ask](#before-you-ask-the-scenario-needs-a-requirement).
   </Accordion>
 
   <Accordion title="My write changed the assertions but not the graders (or the other way round)">
@@ -270,7 +269,7 @@ The action and route pickers suggest values observed across the project's sessio
     Prove a judge agrees with a careful human reviewer before you rely on it.
   </Card>
   <Card title="Capture requirements" icon="clipboard-check" href="/how-to/capture-requirements">
-    The step this one is gated on: get requirements on file before anything downstream will write.
+    The step this one builds on: get requirements on file so what you create has something to link to.
   </Card>
   <Card title="Author test data for a scenario" icon="database" href="/how-to/author-test-data-for-a-scenario">
     The other contract — starting data, read-back, and expected end state.
