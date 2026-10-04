@@ -122,8 +122,8 @@ The response returns a `run_`-prefixed human run code, e.g. `run_01HZX9`, and a 
 Poll the run until it settles, then read the checks it produced:
 
 ```json
-{ "name": "functional_runs_get", "arguments": { "run_code": "run_01HZX9" } }
-{ "name": "functional_run_checks", "arguments": { "run_code": "run_01HZX9" } }
+{ "name": "functional_runs_get", "arguments": { "project_id": "standalone", "run_code": "run_01HZX9" } }
+{ "name": "functional_run_checks", "arguments": { "project_id": "standalone", "run_code": "run_01HZX9" } }
 ```
 
 Read the actual and expected check values and retained page evidence. A `passed` result counts for this requirement when it shows the intended navigation and the required heading, rather than an unrelated successful step. Then run the unchanged test again in a fresh browser session to check repeatability.

@@ -28,7 +28,7 @@ Issues here are about **calling FT correctly**, not about a run's verdict. If a 
   </Accordion>
 
   <Accordion title="A test against a public site is asking for a credential">
-    Check the System's `auth_type`. A public target should be configured `auth_type: "none"` — that's the correct, credential-free posture, not a placeholder waiting for a real secret. If your test needs to sign in anyway (to reach a gated page behind an otherwise-public site), that's an ordinary test step, not a System-level credential — see [Credentials](/functional/concepts/credentials).
+    Check the System's `auth_type`. A public target should be configured `auth_type: "none"` — that's the correct, credential-free posture, not a placeholder waiting for a real secret. If the test signs into a browser form with managed credentials, use `auth_type: "basic"` and `login_strategy: "browser_form"` with `base_url`, `username`, and `credential_id`, then author explicit sign-in steps. A `none` connection rejects those authentication fields. See [Credentials](/functional/concepts/credentials).
 
     If the System genuinely does need a stored secret, remember it's referenced by slot name — `{{credential.SLOT}}` — never pasted inline. A literal secret value anywhere in an authored test (a step's intent text, a setup field, a hook body) is rejected at the write boundary rather than silently accepted, whatever field it's in.
   </Accordion>
@@ -50,4 +50,4 @@ Issues here are about **calling FT correctly**, not about a run's verdict. If a 
 
 - **[Why a result reads "needs review"](/functional/troubleshooting/why-needs-review)** — the four run-verdict causes, distinct from the setup issues on this page
 - **[Connect an MCP client](/functional/get-started/connect-an-mcp-client)** — the endpoint, the default tool set, the two-call write pattern
-- **[Credentials](/functional/concepts/credentials)** — the three auth postures and the credential-slot placeholder
+- **[Credentials](/functional/concepts/credentials)** — public access, browser sign-in, and credential-slot placeholders

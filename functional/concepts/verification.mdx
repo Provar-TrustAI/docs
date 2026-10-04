@@ -38,6 +38,8 @@ UI checks settle `passed` / `failed` / `not_verified`, produce retained Checks e
 
 Use the comparison operator `equals`, not `eq`, for equality. Choose target and scope from the actual page: scope identifies the containing region and target identifies the content within it. Do not assume that a plausible page title, control, or landmark exists. Review the saved check's actual and expected values against the requirement, not only its green status.
 
+`count equals` compares the **observed value**, not the number of matching DOM elements: for a number it compares that number, for an array its length, and for a string its character length. A UI check that observes the text `Invoice` sees a string of length 7; `count equals` with expected 1 does not prove that one invoice element exists. Use `equals` for a label, `present` / `absent` within a uniquely resolved scope for membership, or an API check returning a number or array when the requirement needs an exact record count. Do not claim uniqueness from a text-presence check.
+
 ## Assert-phase clauses
 
 The older, separate deterministic-assertion family, evaluated during a phased run's `assert` phase. Zero inference — every clause is a machine comparison, never the agent's own self-report of what it saw.
@@ -81,21 +83,23 @@ Anything else — a `button`, a `heading`, a `textbox` — names an ordinary con
 
 ### Worked example
 
+This template assumes the app exposes a `main` landmark named `Account workspace` containing a `Sign out` button after login. Confirm those controls in the target app before using it.
+
 ```
 ## Act
-3. Click Sign in to authenticate.
+1. Click Sign in to authenticate.
    Target: button "Sign in"
-   Anchor: main "Dashboard"
+   Anchor: main "Account workspace"
 
 ## Assert
-1. The authenticated Dashboard for admin is visible.
-   Signal: Dashboard for admin
+1. The authenticated Sign out control is available.
+   Signal: Sign out
    Mode: present
    Scope: body
-   During: Act 3
+   During: Act 1
 ```
 
-Act step 3 carries `Anchor: main "Dashboard"` — a `main` landmark named "Dashboard", distinct from the clause's `Signal: Dashboard for admin`. The Assert clause's `During: Act 3` line points straight at it. This is the one shape the run binds a capture to.
+Act step 1 carries `Anchor: main "Account workspace"` — a `main` landmark named "Account workspace", distinct from the clause's `Signal: Sign out`. The Assert clause's `During: Act 1` line points straight at it. This is the one shape the run binds a capture to.
 
 <Tip>
   Authoring's structural validator walks a whole document in one pass — a bad `authored_step_id` reference, an out-of-order check transition, and a malformed `target_hint` anchor are all collected and reported together, not one at a time, so you can fix a whole document in one round trip. The anchor-shape rules above are a separate, save-time provability check: when a plan's only assert-phase clause fails one of them, the save response names that one relation to fix.

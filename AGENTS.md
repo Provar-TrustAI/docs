@@ -747,8 +747,9 @@ can drift.
   (environment/test-defect) one.
 - **A public site needs no credential.** `auth_type: "none"` (`SystemAuthType.NONE`) is a first-class
   posture for a credential-free target (a public web URL or API) — never describe a public site as
-  requiring a dummy or placeholder credential. Signing in, when the scenario needs it, is an ordinary
-  test step, not a System-level credential.
+  requiring a dummy or placeholder credential. Managed browser sign-in uses `auth_type: "basic"`
+  with `login_strategy: "browser_form"`, `base_url`, `username`, and `credential_id`; explicit
+  browser steps establish the session. A `none` connection rejects authentication fields.
 - **A real secret is referenced, never inlined, as `{{credential.SLOT}}`.** `credential_slots` on a
   System's connection config names the bounded, validated slot identifiers an authored test may
   reference this way; the secret bundle's values and its provider pointer are structurally absent

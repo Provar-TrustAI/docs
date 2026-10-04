@@ -26,8 +26,10 @@ If your repo already has an `AGENTS.md` or `CLAUDE.md` that agents read on start
   verification cover each criterion. Use fresh data for creation tests;
   establish identity, attempt the action, and prove refusal for denial tests.
 - Testing a public target? Create the System with `auth_type: "none"`.
-  If a scenario needs to sign in, that's an ordinary test step, not a
-  System-level credential.
+  For managed browser sign-in, use `auth_type: "basic"` with
+  `login_strategy: "browser_form"`, `base_url`, `username`, and `credential_id`.
+  Omit `credential_slots` for a `username_password` credential.
+  Explicit browser steps sign in and verify the authenticated identity.
 - Never type a real secret into a test. Reference a stored credential
   by slot name only: `{{credential.SLOT_NAME}}`. Request credentials through
   FT's managed credential form, let the customer enter them, then poll.
@@ -53,5 +55,5 @@ If your repo already has an `AGENTS.md` or `CLAUDE.md` that agents read on start
 
 - **[Setup prompt: connect an agent to Functional Testing](/functional/get-started/setup-prompt)** — connect Claude Code, Codex, or Cursor to FT over MCP
 - **[Verification: checks and asserts](/functional/concepts/verification)** — the full contract between checks and assert-phase clauses
-- **[Credentials](/functional/concepts/credentials)** — the three auth postures and the credential-slot placeholder
+- **[Credentials](/functional/concepts/credentials)** — public access, browser sign-in, and credential-slot placeholders
 - **[Why a result reads "needs review"](/functional/troubleshooting/why-needs-review)** — the four causes, and the fix for each
