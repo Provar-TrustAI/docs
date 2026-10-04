@@ -710,7 +710,9 @@ can drift.
   declared identity and compares a typed field; a **UI check** observes anything rendered on the
   page — including headings and body text — and compares it the same typed way. Its target is an
   exact visible label; the scope alone accepts role/name grammar (`role=heading;name="..."`).
-  Do not put role syntax into a UI check target: the runner compares that string literally. API checks and UI checks settle `passed` / `failed` /
+  Do not put role syntax into a UI check target: the runner compares that string literally.
+  An explicit `css=` scope may identify one visible containing element using standard CSS when
+  labels/roles are insufficient. Keep this fallback source-grounded; never put selectors in target. API checks and UI checks settle `passed` / `failed` /
   `not_verified`, produce Checks evidence, and count toward the run's pass gate. This correction
   was verified against FT `46ad7f47a2e988c9c5ecd9ce21264862e0719ed5`: the deterministic-assertion
   predicate accepts both check types. Do not add a perception clause solely to make a UI check count.
