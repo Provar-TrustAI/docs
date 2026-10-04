@@ -28,7 +28,7 @@ The test's own setup must sign in or configure the chosen identity before the ch
 
 ### UI checks
 
-A **UI check** observes something rendered on the page — an element's text, a form field's value, a checkbox's state, a heading — and compares it the same typed way. It matches its target by **accessible role and name** (`role=heading;name="Pricing"`) or by a plain visible label, scoped to a containing region the same way.
+A **UI check** observes something rendered on the page — an element's text, a form field's value, a checkbox's state, a heading — and compares it the same typed way. The **target is an exact visible label**, such as `Pricing`. The **scope** identifies one containing element by its exact label or by the supported role/name grammar, such as `role=main` or `role=heading;name="Pricing"`. Role syntax belongs in scope, not target. Scope must resolve uniquely; the runner then looks for the target label within it.
 
 The runner reads the page twice around the exact frame that becomes evidence — a screenshot plus a structured read — and only a *matching* pair of reads is retained as stable evidence. A `before_step_id` / `after_step_id` transition names two authored steps that bound the observation window. For one step, use `transition: {"position": "after", "step_id": "<authored_step_id>"}`. Supply exactly one of these transition shapes and use step IDs that exist in the scenario.
 

@@ -708,8 +708,9 @@ can drift.
   (`ApiCheckOp` / `UiCheckOp`, under `source_refs.scenario.checks`) are typed, authored
   expect-vs-actual comparisons: an **API check** calls the target application's own API under a
   declared identity and compares a typed field; a **UI check** observes anything rendered on the
-  page — including headings and body text, matched by accessible role and name (`role=heading;name="..."`)
-  or by a plain label — and compares it the same typed way. API checks and UI checks settle `passed` / `failed` /
+  page — including headings and body text — and compares it the same typed way. Its target is an
+  exact visible label; the scope alone accepts role/name grammar (`role=heading;name="..."`).
+  Do not put role syntax into a UI check target: the runner compares that string literally. API checks and UI checks settle `passed` / `failed` /
   `not_verified`, produce Checks evidence, and count toward the run's pass gate. This correction
   was verified against FT `46ad7f47a2e988c9c5ecd9ce21264862e0719ed5`: the deterministic-assertion
   predicate accepts both check types. Do not add a perception clause solely to make a UI check count.
