@@ -38,7 +38,7 @@ The pipeline generates and maintains no test code and no page objects.
 
 **f. Execution.** Create a new suite for each pipeline run with `functional_suites_create`, with `project_id`, `id`, `name`, `schedule` set to manual, and `test_ids`. A suite `id` must be unique in the project, so an `id` from an earlier session fails with "Suite already exists". The agent makes the `id` from the first accepted test's code, for example `suite-int-82-k4j9p2`, because the server already keeps that code unique. A model that is asked for random characters can copy the example instead. Its `test_ids` names only the tests accepted in this run. Run it with `functional_suites_run`, with `project_id` and `suite_id`. Poll `functional_runs_get` for the run-group's aggregate status, passing the returned `run_group_id` as its `run_code`.
 
-**g. Results.** Read results only after the run-group settles. While a run is in progress, its coverage reads `not_adjudicated`, and that status is not a result. Read `functional_run_group_result_get` with that `run_group_id` for requirement coverage. For each failed run, read `functional_run_checks` and `functional_run_diagnosis` with that run's own run code. Read `functional_requirement_coverage_get` for each requirement. Then post a summary back to the work item with `wit_work_item_write`. The summary goes into the work item's history as a comment. Write the summary as HTML: a table of the acceptance criteria, each met or not met, the run duration, and a link to each run's page in TrustAI, `<your-ft-host>/projects/<project id>/app/runs/<run_code>`. A reviewer opens that page for the steps, the screenshots, and the requirements that the run validated.
+**g. Results.** Read results only after the run-group settles. While a run is in progress, its coverage reads `not_adjudicated`, and that status is not a result. Read `functional_run_group_result_get` with that `run_group_id` for requirement coverage. For each failed child run, call `functional_runs_get` with `project_id`, that child's own `run_code`, and `include: ["checks", "diagnosis"]`. Read `functional_requirement_coverage_get` for each requirement. Then post a summary back to the work item with `wit_work_item_write`. The summary goes into the work item's history as a comment. Write the summary as HTML: a table of the acceptance criteria, each met or not met, the run duration, and a link to each run's page in TrustAI, `<your-ft-host>/projects/<project id>/app/runs/<run_code>`. A reviewer opens that page for the steps, the screenshots, and the requirements that the run validated.
 
 Every Functional Testing call above also takes `project_id`, to scope it to your project. `functional_guide` is different: it takes `topic` only, and it refuses any other argument. `functional_inference_jobs_get` requires `job_id` beside it. `functional_requirements_add_drafts` requires `drafts`, the array of reviewed candidates, beside it.
 
@@ -97,27 +97,31 @@ Access control still applies:
 - Any workspace tool restriction a Functional Testing admin sets.
 
 <Warning>
-  On the default endpoint, `/v1/mcp/`, every write tool call reaches the server as `functional_tool_call`. A `require_approval` rule set on the wrapped tool's own name, for example `functional_authoring_accept`, never fires. Set the rule on `functional_tool_call` instead. This also asks for approval on every other call made through `functional_tool_call`, including each `functional_inference_jobs_get` poll. To approve `functional_authoring_accept` alone, use the workflow endpoint.
+  On the default endpoint, `/v1/mcp/`, the pipeline writes described here reach the server as `functional_tool_call`. A `require_approval` rule set on the wrapped tool's own name, for example `functional_authoring_accept`, never fires. Set the rule on `functional_tool_call` instead. This also asks for approval on every other call made through `functional_tool_call`, including each `functional_inference_jobs_get` poll. To approve `functional_authoring_accept` alone, use the workflow endpoint.
 </Warning>
 
 ## Tools Foundry sees by default
 
-Functional Testing hands over a bounded tool list, not its complete registry. The default list carries 30 read-only tools, reachable by name directly:
+Functional Testing hands over a bounded tool list, not its complete registry. The default list carries these read-only tools, reachable by name directly:
 
 - List and get calls for `functional_projects_list`, `functional_project_counts`, `functional_project_systems_list`, `functional_systems_list`, and `functional_systems_get`.
 - List and get calls for `functional_tests_list`, `functional_tests_get`, `functional_suites_list`, and `functional_suites_get`.
 - List and get calls for `functional_requirements_list`, `functional_requirements_get`, `functional_requirements_tree_get`, and `functional_requirement_coverage_get`.
-- List and get calls for `functional_runs_list`, `functional_runs_get`, `functional_run_checks`, `functional_runs_summary`, `functional_run_attempts_list`, `functional_run_diagnosis`, and `functional_test_runs_list`.
+- List and get calls for `functional_runs_list`, `functional_runs_get`, and `functional_test_runs_list`.
 - List and get calls for `functional_datasets_list`, `functional_datasets_get`, `functional_environments_list`, `functional_environments_get`, `functional_workspaces_list`, and `functional_workspaces_get`.
 - `functional_search`, `functional_records_resolve`, `functional_guide`, and `functional_docs_search`.
 
-Three more tools sit in the default list by name, next to that read-only set:
+Additional tools sit in the default list by name:
 
 - `functional_tools_search` describes the capability you need. It returns matching tool names.
 - `functional_tool_call` calls the name and arguments `functional_tools_search` returned.
 - `functional_autonomy_effective_policy` reads the autonomy mode an internal write in a project runs under right now.
+- `functional_credentials_request` and `functional_credentials_request_get` request and poll managed credential entry.
+- `functional_runs_review` records a review resolution after you inspect the evidence.
 
-Every other tool sits outside the default list. This includes every write tool, and it includes the read tool `functional_inference_jobs_get`. Reach each one through `functional_tools_search`, then `functional_tool_call`. On the default endpoint, every pipeline tool that this page names needs that pair, with six exceptions. The exceptions are `functional_guide`, `functional_project_systems_list`, `functional_runs_get`, `functional_run_checks`, `functional_run_diagnosis`, and `functional_requirement_coverage_get`.
+Use `functional_runs_get` with a nonempty `include` array to select `detail`, `checks`, `attempts`, and `diagnosis` in one response. Without `include`, it returns the detail directly. For project-wide outcome counts, use `functional_runs_list` with `summary: true`.
+
+Every other tool sits outside the default list. This includes the pipeline write tools and the read tool `functional_inference_jobs_get`. Reach each one through `functional_tools_search`, then `functional_tool_call`. On the default endpoint, every pipeline tool that this page names needs that pair, with four exceptions: `functional_guide`, `functional_project_systems_list`, `functional_runs_get`, and `functional_requirement_coverage_get`.
 
 ## Tools on the workflow endpoint
 
@@ -279,10 +283,10 @@ f. Create a new suite for this run. functional_suites_create is not
 g. Do not read results before the run-group settles. While a run is
    in progress, its coverage reads not_adjudicated, and that status
    is not a result. Read functional_run_group_result_get with that
-   run_group_id for requirement coverage. For each failed run, read
-   functional_run_checks and functional_run_diagnosis with that run's
-   own run code. Read functional_requirement_coverage_get for each
-   requirement. Then post a summary back to the work item with
+   run_group_id for requirement coverage. For each failed child run,
+   call functional_runs_get with project_id, that child's own run_code,
+   and include ["checks", "diagnosis"]. Read
+   functional_requirement_coverage_get for each requirement. Then post a summary back to the work item with
    wit_work_item_write, as a System.History update.
    Write the summary as HTML. Include a table of the acceptance
    criteria, each marked met or not met, the run duration, and a

@@ -14,7 +14,7 @@ Issues here are about **calling FT correctly**, not about a run's verdict. If a 
   </Accordion>
 
   <Accordion title="A write tool isn't callable by name">
-    Expected. Writes — `functional_systems_create`, `functional_requirements_create`, `functional_tests_create`, `functional_test_runs_start`, and the rest — aren't in the bounded default tool set. Every write is **two calls**: `functional_tools_search` to find the tool and its schema, then `functional_tool_call` with that tool's name and arguments. See [Connect an MCP client](/functional/get-started/connect-an-mcp-client).
+    Expected for authoring and execution writes such as `functional_systems_create`, `functional_requirements_create`, `functional_tests_create`, and `functional_test_runs_start`. These operations aren't in the bounded default tool set and use **two calls**: `functional_tools_search` to find the tool and its schema, then `functional_tool_call` with that tool's name and arguments. See [Connect an MCP client](/functional/get-started/connect-an-mcp-client).
   </Accordion>
 
   <Accordion title="FT can't reach an app running on my own machine">

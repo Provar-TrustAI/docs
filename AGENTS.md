@@ -758,14 +758,18 @@ can drift.
   `functional_credentials_request_get` provide the managed request/poll flow. A human enters
   secrets outside MCP. Document the active tool schema: username/password forms omit explicit
   `credential_slots`; bundle credentials use that list.
-- **Every MCP write is two calls today.** The curated default external tool surface
-  (`EXTERNAL_DEFAULT_TOOL_NAMES` in `tool_curation.py`) exposes ~29 read-only "orient and work" tools
-  by name, plus exactly two discovery tools: `functional_tools_search` (find an operation by
-  describing the capability) and `functional_tool_call` (invoke the name + arguments
-  `functional_tools_search` returned). Every write tool — `functional_systems_create`,
-  `functional_requirements_create`, `functional_tests_create`, `functional_test_runs_start`, and the
-  rest — is reached through that two-call search-then-call pattern, never by name directly, on the
-  external MCP surface. Document the pattern as two calls, not one.
+- **Discover operations outside the default MCP tool set before calling them.** The external
+  default surface includes bounded reads, managed credential request/poll tools, run review,
+  policy lookup, and the two discovery tools. Authoring and execution writes such as
+  `functional_systems_create`, `functional_requirements_create`, `functional_tests_create`, and
+  `functional_test_runs_start` use `functional_tools_search` then `functional_tool_call`.
+  Do not claim every write uses that pattern or hardcode a moving tool count.
+- **Run reads are consolidated.** Verified against FT `244663cf8`: `functional_runs_get`
+  requires `project_id` and `run_code`. Omit `include` for the flat detail (including checks),
+  or provide a nonempty array of `detail`, `checks`, `attempts`, and `diagnosis` for a result
+  with `run_code` plus the requested section keys. A group handle has null attempts/diagnosis
+  with explanations; use its child run codes. Do not advertise retired checks/attempts/diagnosis
+  aliases. `functional_runs_list` with `summary: true` adds the outcome counts.
 - **Container networking: `http://host.docker.internal:<port>`, and the MCP endpoint needs its
   trailing slash.** A containerized FT client reaches a host-run app via `host.docker.internal`
   (e.g. `http://host.docker.internal:3020`), never `localhost`. The MCP endpoint is

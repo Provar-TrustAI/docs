@@ -40,7 +40,7 @@ A **UI check** observes something rendered on the page — text, a heading, a fo
 
 ## Read the guide topic a refusal or diagnosis names
 
-FT surfaces point back into this guide by topic id rather than re-explaining themselves inline: every `functional_projects_get` response carries an `orientation` block naming a `guide_topic`, a blocked first write names this page, and a failed run's `functional_run_diagnosis` result names a `guide_topic` such as `why-needs-review`, `verification`, or `credentials`. When you see a `guide_topic`, call `functional_guide` with that exact id rather than guessing — it's the fastest path to the fix.
+FT surfaces point back into this guide by topic id rather than re-explaining themselves inline: every `functional_projects_get` response carries an `orientation` block naming a `guide_topic`, a blocked first write names this page, and a failed child run's `functional_runs_get` response with `include: ["diagnosis"]` names a `guide_topic` such as `why-needs-review`, `verification`, or `credentials`. When you see a `guide_topic`, call `functional_guide` with that exact id rather than guessing — it's the fastest path to the fix.
 
 ## Where to go next
 

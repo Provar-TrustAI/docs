@@ -30,15 +30,15 @@ Use the worktree's own API port when you're running FT from an isolated worktree
 
 FT bounds the tool schema every client pays for on every turn instead of handing over its complete registry. The default set is:
 
-- **~29 read-only "orient and work" tools**, reachable by name directly — listing and getting a project's systems, tests, suites, requirements, runs, schedules, datasets, and environments, plus search.
+- **Read-only "orient and work" tools**, reachable by name directly — listing and getting a project's systems, tests, suites, requirements, runs, datasets, and environments, plus search and guides.
 - **Two discovery tools**, also reachable by name directly:
   - `functional_tools_search` — describe the capability you need in plain language and get back matching tool names, descriptions, and input schemas.
   - `functional_tool_call` — call an operation `functional_tools_search` returned, by name and arguments.
 
-Everything else — every write, and every read outside the default set — is reached through those two discovery tools, never by name directly. This is server behavior: it applies to any MCP client, so you don't need a client-specific tool filter or a private settings file to get a bounded default.
+Managed credential request/poll tools, run review, and the effective autonomy-policy read are also directly available. Every operation outside the default set is reached through those two discovery tools, never by name directly. This is server behavior: it applies to any MCP client, so you don't need a client-specific tool filter or a private settings file to get a bounded default.
 
 <Warning>
-  **Every write is two calls.** Creating a system, a requirement, a test, or starting a run are not in the default named set. Call `functional_tools_search` with a description of what you want to do, then pass the tool name and arguments it returns to `functional_tool_call`.
+  **Discover authoring and execution writes before calling them.** Creating a system, a requirement, a test, or starting a run are not in the default named set. Call `functional_tools_search` with a description of what you want to do, then pass the tool name and arguments it returns to `functional_tool_call`.
 </Warning>
 
 ```json
