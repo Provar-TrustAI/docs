@@ -708,11 +708,15 @@ can drift.
   (`ApiCheckOp` / `UiCheckOp`, under `source_refs.scenario.checks`) are typed, authored
   expect-vs-actual comparisons: an **API check** calls the target application's own API under a
   declared identity and compares a typed field; a **UI check** observes anything rendered on the
-  page — including headings and body text, matched by accessible role and name (`role=heading;name="..."`)
-  or by a plain label — and compares it the same typed way. API checks settle `passed` / `failed` /
-  `not_verified` and count toward the run's pass gate; UI checks use the same three verdicts and
-  produce Checks evidence, but do **not** currently count toward the pass gate. *Assert-phase
-  clauses* (`QueryAssertOp`, `MessageAssertOp`, `PerceptionAssertOp`, `NegativeWriteAssertOp`) are a
+  page — including headings and body text — and compares it the same typed way. Its target is an
+  exact visible label; the scope alone accepts role/name grammar (`role=heading;name="..."`).
+  Do not put role syntax into a UI check target: the runner compares that string literally.
+  An explicit `css=` scope may identify one visible containing element using standard CSS when
+  labels/roles are insufficient. Keep this fallback source-grounded; never put selectors in target. API checks and UI checks settle `passed` / `failed` /
+  `not_verified`, produce Checks evidence, and count toward the run's pass gate. This correction
+  was verified against FT `46ad7f47a2e988c9c5ecd9ce21264862e0719ed5`: the deterministic-assertion
+  predicate accepts both check types. Do not add a perception clause solely to make a UI check count.
+  *Assert-phase clauses* (`QueryAssertOp`, `MessageAssertOp`, `PerceptionAssertOp`, `NegativeWriteAssertOp`) are a
   separate, older deterministic-assertion family evaluated during a phased run's `assert` phase; they
   do settle pass/fail. A `PerceptionAssertOp` observes a named UI affordance (present/absent) or a
   registered transient on-screen signal class — never arbitrary client-supplied match text. Never
@@ -722,9 +726,12 @@ can drift.
   runtime.** Prefer proving text and headings with a **UI check**, which the runtime can actually
   observe and produce evidence for; a perception clause is for a named affordance (a button, a
   control) or a registered signal class, not free text.
-- **`needs_review` has exactly four causes**, and each maps to a distinct `AssertProof` /
-  `AssertFailureReason` family in `assert_diagnosis.py` — never present them as one generic "flaky"
-  bucket:
+- **Run review guidance and clause-proof diagnosis are distinct.** Current FT returns one
+  `review_guidance` cause with next actions and allowed resolutions for a needs-review run:
+  `possible_defect_not_proven`, `check_did_not_see_target`, `run_did_not_finish`, or
+  `no_deterministic_check`. Read the actual block rather than inferring a cause from the label.
+  Separately, the clause-proof diagnoses map to `AssertProof` / `AssertFailureReason`
+  families in `assert_diagnosis.py`:
   1. **Assertion not observable** (`unprovable_observation`) — the runtime observation the clause
      needed (a message, a perception signal, an action, an assert-phase read) was never captured.
   2. **Binding mismatch** (`unprovable_test`) — the authored clause names a field, query, or check
@@ -743,23 +750,29 @@ can drift.
   (environment/test-defect) one.
 - **A public site needs no credential.** `auth_type: "none"` (`SystemAuthType.NONE`) is a first-class
   posture for a credential-free target (a public web URL or API) — never describe a public site as
-  requiring a dummy or placeholder credential. Signing in, when the scenario needs it, is an ordinary
-  test step, not a System-level credential.
+  requiring a dummy or placeholder credential. Managed browser sign-in uses `auth_type: "basic"`
+  with `login_strategy: "browser_form"`, `base_url`, `username`, and `credential_id`; explicit
+  browser steps establish the session. A `none` connection rejects authentication fields.
 - **A real secret is referenced, never inlined, as `{{credential.SLOT}}`.** `credential_slots` on a
   System's connection config names the bounded, validated slot identifiers an authored test may
   reference this way; the secret bundle's values and its provider pointer are structurally absent
-  from every read-back and from the authored test source. **Coming in this release** (FUN-4914): a
-  credential-request flow where the agent asks for a credential by name, a human completes an FT
-  form out of band, and the agent polls for the resulting credential id and its slots — describe
-  this as the intended flow, not as already shipped, until FUN-4914 lands.
-- **Every MCP write is two calls today.** The curated default external tool surface
-  (`EXTERNAL_DEFAULT_TOOL_NAMES` in `tool_curation.py`) exposes ~29 read-only "orient and work" tools
-  by name, plus exactly two discovery tools: `functional_tools_search` (find an operation by
-  describing the capability) and `functional_tool_call` (invoke the name + arguments
-  `functional_tools_search` returned). Every write tool — `functional_systems_create`,
-  `functional_requirements_create`, `functional_tests_create`, `functional_test_runs_start`, and the
-  rest — is reached through that two-call search-then-call pattern, never by name directly, on the
-  external MCP surface. Document the pattern as two calls, not one.
+  from every read-back and from the authored test source. At FT
+  `46ad7f47a2e988c9c5ecd9ce21264862e0719ed5`, `functional_credentials_request` and
+  `functional_credentials_request_get` provide the managed request/poll flow. A human enters
+  secrets outside MCP. Document the active tool schema: username/password forms omit explicit
+  `credential_slots`; bundle credentials use that list.
+- **Discover operations outside the default MCP tool set before calling them.** The external
+  default surface includes bounded reads, managed credential request/poll tools, run review,
+  policy lookup, and the two discovery tools. Authoring and execution writes such as
+  `functional_systems_create`, `functional_requirements_create`, `functional_tests_create`, and
+  `functional_test_runs_start` use `functional_tools_search` then `functional_tool_call`.
+  Do not claim every write uses that pattern or hardcode a moving tool count.
+- **Run reads are consolidated.** Verified against FT `244663cf8`: `functional_runs_get`
+  requires `project_id` and `run_code`. Omit `include` for the flat detail (including checks),
+  or provide a nonempty array of `detail`, `checks`, `attempts`, and `diagnosis` for a result
+  with `run_code` plus the requested section keys. A group handle has null attempts/diagnosis
+  with explanations; use its child run codes. Do not advertise retired checks/attempts/diagnosis
+  aliases. `functional_runs_list` with `summary: true` adds the outcome counts.
 - **Container networking: `http://host.docker.internal:<port>`, and the MCP endpoint needs its
   trailing slash.** A containerized FT client reaches a host-run app via `host.docker.internal`
   (e.g. `http://host.docker.internal:3020`), never `localhost`. The MCP endpoint is

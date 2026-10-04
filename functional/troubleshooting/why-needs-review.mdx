@@ -1,38 +1,81 @@
 ---
 title: "Why a result reads \"needs review\""
 icon: "circle-help"
-description: "The four distinct causes a Functional Testing run can settle needs_review instead of pass or fail, and the fix for each."
+description: "Read the run's review guidance, inspect the supporting evidence, and resolve or repair the right cause."
 agent_topic: "why-needs-review"
-read_when: "A run settled needs_review (or a clause read unprovable) and you need to know which of the four causes it was, and how to fix it."
+read_when: "A run settled needs_review or a clause read unprovable, and you need its cause, next action, or review resolution."
 ---
 
-`needs_review` is not one generic "flaky" bucket. FT's assert diagnosis names an exact cause for every unprovable clause, and each one points at a different fix. Getting the run to `passed` or a genuine `failed` means fixing the *right* one.
+A `needs_review` run ended without an automatic pass or fail that settles the result. Read its `review_guidance` in the detail from `functional_runs_get`. The block names one cause, explains it, and supplies `next_actions` and `allowed_resolutions`. It is null for other outcomes and after a reviewer resolves the run.
 
-<Info>
-  A **disproved** clause is a different, fifth outcome: the application was asked and it answered against your requirement. That's a real failure, not a review case — don't treat it as one of the four below.
-</Info>
+To inspect the detail alongside the checks and diagnosis, call:
 
-## 1. Assertion not observable
+```json
+{
+  "name": "functional_runs_get",
+  "arguments": {
+    "project_id": "standalone",
+    "run_code": "run_01HZX9",
+    "include": ["detail", "checks", "diagnosis"]
+  }
+}
+```
+
+Read `detail.review_guidance` in this response. Use a child run's own code when a suite returned a run-group handle; attempts and diagnosis require a single run. Add `"attempts"` to `include` when you need the recorded actions.
+
+## Follow the run's review guidance
+
+### Possible defect, not proven
+
+`possible_defect_not_proven`: the agent reported a defect, but no check proves it. Open the evidence and compare it with the requirement before resolving the run as Failed or Passed. The agent's description alone does not establish a defect.
+
+### A check did not see its target
+
+`check_did_not_see_target`: an observation could not prove its target. Re-run the test; if it still cannot observe the target, regenerate or correct the test using the actual app context. Use the clause diagnosis below to distinguish missing observations, incorrect bindings, and an unreachable target.
+
+### The run did not finish
+
+`run_did_not_finish`: execution stopped before reaching a result. Re-run the test. If it stops at the same step, inspect that step's action and retained evidence before editing it. A stalled run does not by itself prove an application or credential defect.
+
+### The test has no deterministic check
+
+`no_deterministic_check`: the steps ran, but no deterministic check proves the result. Regenerate or correct the test with a verification tied to its acceptance criteria. A valid UI check can provide this verification for a UI requirement; an extra perception clause is not required.
+
+## Resolve a reviewed run
+
+Inspect the evidence first. Call `functional_runs_review` with `project_id`, the child's `run_code`, `verdict` (`passed` or `failed`), and a nonempty `note` explaining the decision. Use `allowed_resolutions` from the guidance to see the accepted verdicts. It does not bypass your authorization or approval policy: Plan mode refuses both verdicts, Assisted holds both for approval, and Auto can resolve Failed while Passed still requires a person's approval.
+
+A review layers a resolution on top of the run. The original engine verdict remains available; a reviewed Passed result is not evidence of a fresh successful execution. Re-run the unchanged test when you need to establish repeatability.
+
+## Distinguish a defect from missing proof
+
+The structured `verdict` is separate from the coarse outcome and from a reviewer's resolution. An agent-reported defect with no disproved clause can remain `inconclusive`. A disproved clause can support `bug_found`; a runtime limit or cycle can instead produce `non_convergence`. Inspect the retained comparison and the complete run rather than inferring a defect from the `needs_review` label.
+
+## Diagnose an unproved assertion
+
+The run-level causes above guide the next action. Individual assert clauses also carry proof diagnoses that explain exactly what could not be established. They are a separate classification:
+
+### 1. Assertion not observable
 
 The runtime observation the clause needed was never captured — no message text reached a `MessageAssertOp`, no action set reached a `PerceptionAssertOp`, the run never dispatched the action a read-back depended on, or the assert phase raised before any clause reached a comparison.
 
 **Fix:** confirm the step that should produce the observation actually ran and completed (not stopped mid-dialog or mid-refusal). For a perception clause in `absent` mode specifically, confirm the `hydration_anchor` — the known-present control that proves the action region fully rendered — is itself observable; an `absent` clause fails closed without it, on purpose, so it can't vacuously pass on a half-loaded page.
 
-## 2. Binding mismatch
+### 2. Binding mismatch
 
 The clause itself is malformed against the real target — a SOQL query the org rejected outright, a capture field the query never selected, a captured value in a shape the run can't use (a nested object where a scalar was expected), or a signal clause riding a plan with no persistence proof behind it. This is a defect in the **authored test**, not in the application under test.
 
 **Fix:** check the clause's field/query names against the actual schema of what you're reading back. If the org rejected the query itself (a structured error code, not just a bad HTTP status), the query is malformed — fix the SOQL or the capture path, not the application.
 
-## 3. No deterministic assertion
+### 3. No deterministic assertion
 
 The accepted plan carried no check or assert the execution layer can adjudicate without trusting the agent's own report of what it did in the browser. This is the **assert-less backstop**: a plan whose only "proof" is the agentic loop's self-validation is refused a green verdict on principle, and the run is demoted to `needs_review` instead.
 
-**Fix:** add at least one deterministic verification. Any of these counts: a state read-back, a `MessageAssertOp`, a `PerceptionAssertOp`, a `NegativeWriteAssertOp`, or an **API check** (a UI check alone does not count toward this — see [Verification](/functional/concepts/verification)). If your test is genuinely a pure UI-perception requirement with nothing else to prove, a `PerceptionAssertOp` still counts — it just has to be present, not implied.
+**Fix:** add at least one deterministic verification. Any of these counts: a state read-back, a `MessageAssertOp`, a `PerceptionAssertOp`, a `NegativeWriteAssertOp`, or an **API or UI check** with a valid authored binding — see [Verification](/functional/concepts/verification). If your test is genuinely a pure UI-perception requirement with nothing else to prove, a `PerceptionAssertOp` still counts — it just has to be present, not implied.
 
-A `PerceptionAssertOp` that looks present can still land here: the save-time provability gate drops a clause whose `During:`/`Anchor:` grammar is malformed — no `During: Act N` line (the FUN-4606 `CLAUSE_NAMES_NO_STEP` refusal), an `Anchor:` role outside the closed 13-item list, or an anchor with no name — and a dropped clause counts as no deterministic assertion at all. See [Anchoring an assertion](/functional/concepts/verification#anchoring-an-assertion) for the exact shape and a worked example.
+A `PerceptionAssertOp` that looks present can still land here: the save-time provability gate drops a clause whose `During:`/`Anchor:` grammar is malformed — no `During: Act N` line (`CLAUSE_NAMES_NO_STEP`), an `Anchor:` role outside the closed 13-item list, or an anchor with no name — and a dropped clause counts as no deterministic assertion at all. See [Anchoring an assertion](/functional/concepts/verification#anchoring-an-assertion) for the exact shape and a worked example.
 
-## 4. Target unreachable
+### 4. Target unreachable
 
 The read-back or API check never reached the application at all — a transport fault, a 5xx, an unparseable response body, or an authorization refusal (401/403) on the read-back itself. The application wasn't asked a question it could answer either way.
 
@@ -44,7 +87,7 @@ The read-back or API check never reached the application at all — a transport 
 | --- | --- |
 | "Read-back not proven" / "Perception not proven" / "Refusal message not proven" | **1. Assertion not observable** |
 | "Boundary not proven" with a clause that names a field/query | **2. Binding mismatch** |
-| A run settles `needs_review` with no failed clause listed at all | **3. No deterministic assertion** |
+| `review_guidance.cause` is `no_deterministic_check` | **3. No deterministic assertion** |
 | An API check or read-back settles `not_verified` with a connectivity-shaped failure | **4. Target unreachable** |
 
 ## Related reading

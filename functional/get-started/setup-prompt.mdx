@@ -214,10 +214,9 @@ Reading the results:
 - A 401, or a status of "Needs authentication" / "Not logged in",
   means the browser step did not complete. Tell me to run it again.
 - If a write tool isn't in the list you can see, that's expected —
-  every write goes through the two-call pattern
-  (`functional_tools_search` then `functional_tool_call`), never by
-  name directly. See "Connect an MCP client" if you need the full
-  explanation.
+  operations outside the default list use the two-call pattern
+  (`functional_tools_search` then `functional_tool_call`). See
+  "Connect an MCP client" if you need the full explanation.
 
 Do not create, change, or delete anything in Functional Testing.
 ```

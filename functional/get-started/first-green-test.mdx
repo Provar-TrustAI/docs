@@ -12,6 +12,8 @@ Four objects, created in dependency order: a **System** to test, a **Requirement
   Every write below is a two-call MCP operation: `functional_tools_search` to find the tool, then `functional_tool_call` to invoke it. See [Connect an MCP client](/functional/get-started/connect-an-mcp-client) if you haven't connected yet.
 </Note>
 
+This is a template for your application's own pricing-page requirement. `https://example.com` is a placeholder, not a runnable pricing site. First inspect your app's source, documentation, or UI and confirm its actual link, heading, and containing region. Replace the example URL and target names with that evidence; use your project's returned IDs throughout.
+
 ## 1. Create an environment and a system
 
 A system lives under an environment, which lives under a workspace. If you don't already have an environment, create one:
@@ -49,7 +51,7 @@ A requirement is the guarantee your test traces to:
   "arguments": {
     "project_id": "standalone",
     "title": "A visitor can find the pricing page from the homepage",
-    "acceptance_criteria": ["Clicking the pricing link in the header navigates to the pricing page"]
+    "acceptance_criteria": ["Clicking the pricing link in the header opens a page whose main region displays the Pricing heading"]
   }
 }
 ```
@@ -86,15 +88,16 @@ Then add the steps and the check that proves the outcome with an update call. A 
       "requirement_id": "R-1",
       "scenario": {
         "version": 1,
-        "steps": [{ "intent": "Click the pricing link in the site header." }],
+        "steps": [{ "authored_step_id": "navigate-pricing", "intent": "Click the pricing link in the site header." }],
         "checks": [
           {
             "kind": "ui",
             "name": "Pricing heading is shown",
             "target": "Pricing",
-            "operator": "eq",
+            "operator": "equals",
             "expected": { "t": "string", "v": "Pricing" },
-            "scope": "role=heading"
+            "transition": { "position": "after", "step_id": "navigate-pricing" },
+            "scope": "role=main"
           }
         ]
       }
@@ -119,11 +122,13 @@ The response returns a `run_`-prefixed human run code, e.g. `run_01HZX9`, and a 
 Poll the run until it settles, then read the checks it produced:
 
 ```json
-{ "name": "functional_runs_get", "arguments": { "run_code": "run_01HZX9" } }
-{ "name": "functional_run_checks", "arguments": { "run_code": "run_01HZX9" } }
+{ "name": "functional_runs_get", "arguments": { "project_id": "standalone", "run_code": "run_01HZX9" } }
+{ "name": "functional_runs_get", "arguments": { "project_id": "standalone", "run_code": "run_01HZX9", "include": ["detail", "checks"] } }
 ```
 
-A `passed` run with a `passed` UI check evidence entry is your first green test.
+Omitting `include` returns the run detail directly. With `include`, the result contains `run_code` and one key per requested section: `detail`, `checks`, `attempts`, or `diagnosis`. For a failed run, request `["diagnosis", "attempts", "checks"]`. A run-group handle supports the aggregate detail, but its attempts and diagnosis are null with an explanation; read a child run code for those sections.
+
+Read the actual and expected check values and retained page evidence. A `passed` result counts for this requirement when it shows the intended navigation and the required heading, rather than an unrelated successful step. Then run the unchanged test again in a fresh browser session to check repeatability.
 
 ## If it doesn't go green
 

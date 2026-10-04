@@ -6,7 +6,7 @@ agent_topic: "verification"
 read_when: "You're authoring or debugging a test and need to know which verification mechanism can prove what you're claiming, whether it will actually settle the run's pass/fail verdict, or how to anchor a PerceptionAssertOp with the During:/Anchor: grammar and the accepted containing-surface role list."
 ---
 
-A test's browser steps show behavior happened. Verification proves it. FT carries two separate verification families on a test — they persist differently, execute differently, and (this is the part worth getting right) don't gate the run's pass/fail the same way.
+A test's browser steps show behavior happened. Verification proves it. FT carries two verification families on a test: typed checks and assert-phase clauses. Both can settle pass/fail, but they observe different kinds of evidence.
 
 ## Checks: API and UI
 
@@ -28,13 +28,17 @@ The test's own setup must sign in or configure the chosen identity before the ch
 
 ### UI checks
 
-A **UI check** observes something rendered on the page — an element's text, a form field's value, a checkbox's state, a heading — and compares it the same typed way. It matches its target by **accessible role and name** (`role=heading;name="Pricing"`) or by a plain visible label, scoped to a containing region the same way.
+A **UI check** observes something rendered on the page — an element's text, a form field's value, a checkbox's state, a heading — and compares it the same typed way. The **target is an exact visible label**, such as `Pricing`. The **scope** identifies one containing element by its exact label or by the supported role/name grammar, such as `role=main` or `role=heading;name="Pricing"`. Role syntax belongs in scope, not target. Scope must resolve uniquely; the runner then looks for the target label within it.
 
-The runner reads the page twice around the exact frame that becomes evidence — a screenshot plus a structured read — and only a *matching* pair of reads is retained as stable evidence. A `before_step_id` / `after_step_id` transition pins which two authored steps bound the observation window.
+When the app has no useful named region, scope can use an explicit `css=` prefix with a standard CSS selector, for example `css=section[data-section="billing"]`. Derive the selector from the app's source or observed markup and choose a stable containing element. Exactly one visible element must match. Invalid selectors, no visible scope, or multiple visible scopes remain `not_verified`; they do not prove the target absent. The target still uses an exact label, not CSS. Selectors are used only to read the page.
 
-<Warning>
-  **UI checks currently do not count toward the run's pass gate.** They settle `passed` / `failed` / `not_verified` like an API check and produce retained Checks evidence — but the deterministic-assertion backstop that decides whether a run may terminally pass only counts `ApiCheckOp` among the `checks` list, never `UiCheckOp`. If a test's only verification is a UI check, add an assert-phase clause (below) or an API check if you need that test's outcome to gate the run.
-</Warning>
+The runner reads the page twice around the exact frame that becomes evidence — a screenshot plus a structured read — and only a *matching* pair of reads is retained as stable evidence. A `before_step_id` / `after_step_id` transition names two authored steps that bound the observation window. For one step, use `transition: {"position": "after", "step_id": "<authored_step_id>"}`. Supply exactly one of these transition shapes and use step IDs that exist in the scenario.
+
+UI checks settle `passed` / `failed` / `not_verified`, produce retained Checks evidence, and count toward the run's deterministic pass gate. A UI check alone can supply the verification for a UI-only requirement; it does not require a second perception or API clause. Other failed or unverified checks and execution errors still affect the complete run.
+
+Use the comparison operator `equals`, not `eq`, for equality. Choose target and scope from the actual page: scope identifies the containing region and target identifies the content within it. Do not assume that a plausible page title, control, or landmark exists. Review the saved check's actual and expected values against the requirement, not only its green status.
+
+`count equals` compares the **observed value**, not the number of matching DOM elements: for a number it compares that number, for an array its length, and for a string its character length. A UI check that observes the text `Invoice` sees a string of length 7; `count equals` with expected 1 does not prove that one invoice element exists. Use `equals` for a label, `present` / `absent` within a uniquely resolved scope for membership, or an API check returning a number or array when the requirement needs an exact record count. Do not claim uniqueness from a text-presence check.
 
 ## Assert-phase clauses
 
@@ -69,7 +73,7 @@ The named Act step, in turn, carries its own `Anchor: <role> "<name>"` line — 
 
 `article`, `combobox`, `complementary`, `dialog`, `form`, `group`, `list`, `listbox`, `main`, `navigation`, `region`, `table`, `tabpanel`
 
-Anything else — a `button`, a `heading`, a `textbox` — names an ordinary control, not a containing surface. The run roots the capture at that control instead, so the capture holds only the anchor node itself; the pin ends up certifying its own capture, and a removed affordance reports disproved rather than unprovable. Keep the assert-phase clause and add a step `Check:` if you need to capture free text or a heading too — a `Check:` records evidence for that one step, but it never settles pass/fail on its own.
+Anything else — a `button`, a `heading`, a `textbox` — names an ordinary control, not a containing surface. The run roots the capture at that control instead, so the capture holds only the anchor node itself; the pin ends up certifying its own capture, and a removed affordance reports disproved rather than unprovable. Use an authored UI check for a typed text or heading comparison that gates the run. The separate inline Act-step `Check:` attribute records evidence for that step; unlike an entry in `scenario.checks`, that attribute alone does not satisfy the deterministic-assertion gate.
 
 <Info>
   `dialog` is the only one of the 13 roles an action is expected to *open*, rather than already have on screen when the step runs — the other 12 name surfaces a page renders on its own. Anchoring on `dialog` ties the clause to whichever step in the plan actually opened it; see [Why a result reads "needs review"](/functional/troubleshooting/why-needs-review) if a dialog-anchored clause won't bind.
@@ -79,21 +83,23 @@ Anything else — a `button`, a `heading`, a `textbox` — names an ordinary con
 
 ### Worked example
 
+This template assumes the app exposes a `main` landmark named `Account workspace` containing a `Sign out` button after login. Confirm those controls in the target app before using it.
+
 ```
 ## Act
-3. Click Sign in to authenticate.
+1. Click Sign in to authenticate.
    Target: button "Sign in"
-   Anchor: main "Dashboard"
+   Anchor: main "Account workspace"
 
 ## Assert
-1. The authenticated Dashboard for admin is visible.
-   Signal: Dashboard for admin
+1. The authenticated Sign out control is available.
+   Signal: Sign out
    Mode: present
    Scope: body
-   During: Act 3
+   During: Act 1
 ```
 
-Act step 3 carries `Anchor: main "Dashboard"` — a `main` landmark named "Dashboard", distinct from the clause's `Signal: Dashboard for admin`. The Assert clause's `During: Act 3` line points straight at it. This is the one shape the run binds a capture to.
+Act step 1 carries `Anchor: main "Account workspace"` — a `main` landmark named "Account workspace", distinct from the clause's `Signal: Sign out`. The Assert clause's `During: Act 1` line points straight at it. This is the one shape the run binds a capture to.
 
 <Tip>
   Authoring's structural validator walks a whole document in one pass — a bad `authored_step_id` reference, an out-of-order check transition, and a malformed `target_hint` anchor are all collected and reported together, not one at a time, so you can fix a whole document in one round trip. The anchor-shape rules above are a separate, save-time provability check: when a plan's only assert-phase clause fails one of them, the save response names that one relation to fix.
@@ -102,7 +108,7 @@ Act step 3 carries `Anchor: main "Dashboard"` — a `main` landmark named "Dashb
 ## Which one to reach for
 
 - Proving your app's own API returned the right value, under a specific identity → **API check**.
-- Proving text, a heading, or a form field's on-screen state, and you need that proof to gate the run → an **assert-phase clause** (or pair a UI check with a second, gating clause).
+- Proving text, a heading, or a form field's on-screen state → a **UI check** with an observed target/scope and an authored-step transition.
 - Proving a database or backend record changed → a state read-back (`QueryAssertOp` / `http_assert`).
 - Proving a validation message named the right field → `MessageAssertOp`.
 - Proving a control is or isn't available to a persona → `PerceptionAssertOp` in `present`/`absent` mode.
