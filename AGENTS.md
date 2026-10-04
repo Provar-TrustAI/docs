@@ -726,9 +726,12 @@ can drift.
   runtime.** Prefer proving text and headings with a **UI check**, which the runtime can actually
   observe and produce evidence for; a perception clause is for a named affordance (a button, a
   control) or a registered signal class, not free text.
-- **`needs_review` has exactly four causes**, and each maps to a distinct `AssertProof` /
-  `AssertFailureReason` family in `assert_diagnosis.py` — never present them as one generic "flaky"
-  bucket:
+- **Run review guidance and clause-proof diagnosis are distinct.** Current FT returns one
+  `review_guidance` cause with next actions and allowed resolutions for a needs-review run:
+  `possible_defect_not_proven`, `check_did_not_see_target`, `run_did_not_finish`, or
+  `no_deterministic_check`. Read the actual block rather than inferring a cause from the label.
+  Separately, the clause-proof diagnoses map to `AssertProof` / `AssertFailureReason`
+  families in `assert_diagnosis.py`:
   1. **Assertion not observable** (`unprovable_observation`) — the runtime observation the clause
      needed (a message, a perception signal, an action, an assert-phase read) was never captured.
   2. **Binding mismatch** (`unprovable_test`) — the authored clause names a field, query, or check
