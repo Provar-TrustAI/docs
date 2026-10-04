@@ -17,32 +17,36 @@ If your repo already has an `AGENTS.md` or `CLAUDE.md` that agents read on start
 ```markdown
 ## Functional Testing — rules for any agent working in this repo
 
-- `functional_guide` is landing in an upcoming FT release — once it's
-  available, call `functional_guide("getting-started")` before your
-  first write, and `functional_guide("why-needs-review")` any time a
-  run settles `needs_review`. Until then, skip these calls.
+- Read `functional_guide` with topic `getting-started` before your first
+  write, and topic `why-needs-review` when a run settles `needs_review`.
+- Investigate the app's source, docs, and UI. Save relevant app context
+  in the requirement description and state acceptance criteria explicitly.
+  Keep intended behavior separate from observed implementation.
+- Before accepting an authored candidate, check that its actions and
+  verification cover each criterion. Use fresh data for creation tests;
+  establish identity, attempt the action, and prove refusal for denial tests.
 - Testing a public target? Create the System with `auth_type: "none"`.
   If a scenario needs to sign in, that's an ordinary test step, not a
   System-level credential.
 - Never type a real secret into a test. Reference a stored credential
-  by slot name only: `{{credential.SLOT_NAME}}`. Asking FT to request
-  a new slot by name is coming in an upcoming release — until then,
-  ask a human to configure `credential_slots` on the System directly.
-- Verify on-screen text and headings with a UI Check (matched by
-  accessible role and name). If that verification needs to gate the
-  run's pass/fail, pair it with a role-anchored `PerceptionAssertOp`
-  naming the same element — a UI Check alone settles its own verdict
-  but doesn't count toward the pass gate.
+  by slot name only: `{{credential.SLOT_NAME}}`. Request credentials through
+  FT's managed credential form, let the customer enter them, then poll.
+- Verify on-screen text and headings with a UI check using observed target
+  and scope, a typed expectation, and an authored-step transition. UI checks
+  count toward pass/fail; no extra perception clause is required.
+- Read run and check evidence before repairing a failure; rerun the finished
+  definition unchanged with fresh browser state before claiming success.
 - If a run settles `needs_review`, read `why-needs-review` before
   assuming it's flaky — it's one of four distinct, fixable causes.
 ```
 
 ## What each rule is for
 
-- **`functional_guide`.** Not shipped yet — this repo's own docs are the source of truth today. The rule is written so an agent that has the tool uses it, and an agent that doesn't just skips the call instead of hallucinating one. See [Connect an MCP client](/functional/get-started/connect-an-mcp-client) for the tools that exist right now.
+- **App context and acceptance criteria.** The connected agent researches the app and supplies what the test should do; FT formats that context for execution. Source code explains the implementation, but does not replace the customer's intended behavior. See [Getting started](/functional/get-started/getting-started).
+- **`functional_guide`.** The MCP guide serves these product instructions directly. Read the topic named by a refusal or diagnosis before guessing a repair.
 - **Public-site auth.** `auth_type: "none"` is the correct, credential-free posture for a public target — not a placeholder waiting for a real secret. See [Credentials](/functional/concepts/credentials).
 - **No inline secrets.** A value shaped like a real secret is rejected at the write boundary wherever it appears in an authored test. `{{credential.SLOT_NAME}}` is the only safe way to reference one. See [Credentials](/functional/concepts/credentials).
-- **UI Check + gating clause.** A UI check produces real evidence for text and headings, but doesn't currently count toward the run's pass gate — pairing it with an assert-phase clause is what makes the same verification decide pass/fail. See [Verification](/functional/concepts/verification).
+- **UI checks.** A UI check produces comparison evidence for rendered content and counts toward pass/fail. Use perception clauses for their own supported observations, not as a second check for the same heading. See [Verification](/functional/concepts/verification).
 - **`needs_review` isn't one bucket.** Assertion not observable, binding mismatch, no deterministic assertion, or target unreachable — each has its own fix. See [Why a result reads "needs review"](/functional/troubleshooting/why-needs-review).
 
 ## Related reading

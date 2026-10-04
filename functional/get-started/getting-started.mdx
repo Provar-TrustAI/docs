@@ -22,13 +22,21 @@ Functional Testing (FT) tests a customer's AI agent or web application. Every re
 
 See [Your first green test](/functional/get-started/first-green-test) for a worked example that walks all five stages against a public site, from an empty project to one passing run.
 
+## Understand the application before authoring
+
+The connected agent supplies the application context; FT formats that context into an executable test. Read the customer's available source code, documentation, and requirements, and inspect the running UI where needed. Record the relevant version, entry points, roles, setup, actions, and expected outcomes. Save that context in the requirement's description and state the acceptance criteria explicitly before asking FT to author a test. Keep intended behavior separate from what the current implementation happens to do; do not weaken a requirement to match a defect.
+
+Review each generated candidate before accepting it: do its actions exercise the requirement, and do its checks prove every acceptance criterion? A creation test must create fresh data and verify that result. A permission test must establish the tested identity, attempt the restricted action, and verify refusal; a missing menu alone proves less. Base target names and page states on evidence rather than guessing.
+
+Start with one small test, inspect its saved run and checks, and rerun the unchanged definition before expanding coverage. When a run fails, compare the authored step, its expected result, and the recorded actions/page state before changing the test or blaming the runner. For sign-in, entering a masked password is separate from submitting the form; expect an authenticated page only after submission. If a label or workflow remains uncertain, record the missing context instead of inventing it.
+
 ## A public site needs no credential
 
 `auth_type: "none"` is the correct configuration for a target that needs nothing to reach — not a workaround. Reach for a stored credential only when the target actually requires one; see [Credentials](/functional/concepts/credentials) for the three ways a System authenticates, and for what to do when a scenario needs a sign-in step but no stored secret.
 
-## Verify text with a UI check, prove pass/fail with an Assert clause
+## Verify rendered content with a UI check
 
-A **UI check** observes something rendered on the page — text, a heading, a form field's value — and is the right tool for proving arbitrary on-screen content. But a UI check alone doesn't gate the run's pass/fail verdict. To settle pass/fail, pair it with an **assert-phase clause** (`PerceptionAssertOp`, `MessageAssertOp`, a state read-back, or `NegativeWriteAssertOp`) anchored on the step it observes. See [Verification: checks and asserts](/functional/concepts/verification) for which mechanism proves what, and how to anchor a clause correctly.
+A **UI check** observes something rendered on the page — text, a heading, a form field's value — and is the right tool for proving arbitrary on-screen content. UI checks count toward the run's deterministic pass/fail verification. They do not need an additional perception clause to make a heading or text comparison count. Give the check an observed target and scope, a typed expectation, and a transition tied to an authored step. See [Verification: checks and asserts](/functional/concepts/verification) for which mechanism proves what, and how to anchor a clause correctly.
 
 ## Read the guide topic a refusal or diagnosis names
 

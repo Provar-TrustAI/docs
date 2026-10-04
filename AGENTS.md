@@ -709,10 +709,11 @@ can drift.
   expect-vs-actual comparisons: an **API check** calls the target application's own API under a
   declared identity and compares a typed field; a **UI check** observes anything rendered on the
   page — including headings and body text, matched by accessible role and name (`role=heading;name="..."`)
-  or by a plain label — and compares it the same typed way. API checks settle `passed` / `failed` /
-  `not_verified` and count toward the run's pass gate; UI checks use the same three verdicts and
-  produce Checks evidence, but do **not** currently count toward the pass gate. *Assert-phase
-  clauses* (`QueryAssertOp`, `MessageAssertOp`, `PerceptionAssertOp`, `NegativeWriteAssertOp`) are a
+  or by a plain label — and compares it the same typed way. API checks and UI checks settle `passed` / `failed` /
+  `not_verified`, produce Checks evidence, and count toward the run's pass gate. This correction
+  was verified against FT `46ad7f47a2e988c9c5ecd9ce21264862e0719ed5`: the deterministic-assertion
+  predicate accepts both check types. Do not add a perception clause solely to make a UI check count.
+  *Assert-phase clauses* (`QueryAssertOp`, `MessageAssertOp`, `PerceptionAssertOp`, `NegativeWriteAssertOp`) are a
   separate, older deterministic-assertion family evaluated during a phased run's `assert` phase; they
   do settle pass/fail. A `PerceptionAssertOp` observes a named UI affordance (present/absent) or a
   registered transient on-screen signal class — never arbitrary client-supplied match text. Never
@@ -748,10 +749,11 @@ can drift.
 - **A real secret is referenced, never inlined, as `{{credential.SLOT}}`.** `credential_slots` on a
   System's connection config names the bounded, validated slot identifiers an authored test may
   reference this way; the secret bundle's values and its provider pointer are structurally absent
-  from every read-back and from the authored test source. **Coming in this release** (FUN-4914): a
-  credential-request flow where the agent asks for a credential by name, a human completes an FT
-  form out of band, and the agent polls for the resulting credential id and its slots — describe
-  this as the intended flow, not as already shipped, until FUN-4914 lands.
+  from every read-back and from the authored test source. At FT
+  `46ad7f47a2e988c9c5ecd9ce21264862e0719ed5`, `functional_credentials_request` and
+  `functional_credentials_request_get` provide the managed request/poll flow. A human enters
+  secrets outside MCP. Document the active tool schema: username/password forms omit explicit
+  `credential_slots`; bundle credentials use that list.
 - **Every MCP write is two calls today.** The curated default external tool surface
   (`EXTERNAL_DEFAULT_TOOL_NAMES` in `tool_curation.py`) exposes ~29 read-only "orient and work" tools
   by name, plus exactly two discovery tools: `functional_tools_search` (find an operation by

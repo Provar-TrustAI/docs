@@ -37,8 +37,8 @@ Issues here are about **calling FT correctly**, not about a run's verdict. If a 
     Confirm the check declared the right identity, and that your test's own setup actually establishes it before the check runs. An FT login or an FT MCP token never authenticates a call to the *target* application — that's a different credential for a different caller. See the identity table in [Verification](/functional/concepts/verification).
   </Accordion>
 
-  <Accordion title="A UI check passed but the run still isn't gated on it">
-    Working as designed today: UI checks produce evidence and settle their own verdict, but they don't currently count toward the run's pass gate. Pair the UI check with an API check or an assert-phase clause if you need that verification to actually gate the run — see [Verification](/functional/concepts/verification).
+  <Accordion title="A UI check passed but the complete run did not pass">
+    UI checks do count toward the run's pass gate. Inspect the complete run's diagnosis and every check: another comparison may have failed or remained unverified, or execution may have stopped. Confirm the saved test includes the intended check and that its transition names an existing authored step. A second perception clause is not required just to make a UI check count — see [Verification](/functional/concepts/verification).
   </Accordion>
 
   <Accordion title="A PerceptionAssertOp is refused even though it looks fine">
