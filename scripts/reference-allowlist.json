@@ -1,0 +1,57 @@
+{
+  "source_revision": "44db56ef9afbe7986110cccdae474c1ae99b7e0b",
+  "openapi_sha256": "53f5087c603c84f035438c204e0c4de74bdfb63238b000c3c1584559f05f1af9",
+  "tools_sha256": "cf927c170e326b4dbced7df5835af1f00408e4d62c0f433330b38c3c13506e5f",
+  "operations": [
+    "getMe",
+    "listProjects",
+    "getProject"
+  ],
+  "excluded_operations": [
+    "addTeamMember",
+    "changeWorkspaceMemberRole",
+    "createConnector",
+    "createTeam",
+    "deleteTeam",
+    "finishConnectorSetup",
+    "finishSignIn",
+    "getConnectorSetup",
+    "getHealth",
+    "getProjectAccess",
+    "grantProjectAccess",
+    "listConnectorKinds",
+    "listConnectors",
+    "listMcpTokens",
+    "listTeamMembers",
+    "listTeams",
+    "listWorkspaceInvitations",
+    "listWorkspaceMembers",
+    "listWorkspaceProjects",
+    "mintMcpToken",
+    "probeConnector",
+    "reapproveTeamMember",
+    "removeTeamMember",
+    "removeWorkspaceMember",
+    "renameTeam",
+    "resendWorkspaceInvitation",
+    "revokeMcpToken",
+    "revokeProjectAccess",
+    "revokeWorkspaceInvitation",
+    "sendWorkspaceInvitation",
+    "signOut",
+    "startConnectorSetup",
+    "startSignIn",
+    "transferProjectOwnership"
+  ],
+  "tools": [
+    "trustai_get_me",
+    "trustai_list_projects",
+    "trustai_get_project"
+  ],
+  "excluded_tools": [
+    "trustai_change_project_access",
+    "trustai_read_guide",
+    "trustai_review_members",
+    "trustai_review_project_access"
+  ]
+}
