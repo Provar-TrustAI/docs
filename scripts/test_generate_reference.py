@@ -176,10 +176,14 @@ class ReferenceContract(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary).resolve()
             source, approval = self.source_fixture(root)
+            private_file = source / "services/api/private-customer-records.json"
+            private_file.write_text('{"private_token": "PRIVATE-FILE-CANARY-T261"}')
             output = root / "dist/reference-candidate/candidate.json"
             output.parent.mkdir(parents=True, exist_ok=True)
             self.generate(source, output, approval)
             first = output.read_bytes()
+            self.assertNotIn(b"PRIVATE-FILE-CANARY-T261", first)
+            self.assertNotIn(b"private_token", first)
             self.generate(source, output, approval)
             self.assertEqual(output.read_bytes(), first)
             spec_path = source / "services/api/openapi.json"
