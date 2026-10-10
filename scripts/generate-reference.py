@@ -7,6 +7,7 @@ import hashlib
 import importlib.util
 import json
 import os
+import re
 from pathlib import Path
 import tempfile
 
@@ -80,6 +81,22 @@ def check_content(document):
         raise ValueError("private_content")
 
 
+def sanitize_provider_prose(document):
+    """Apply docs house vocabulary to candidate prose without changing wire values."""
+    if isinstance(document, dict):
+        for key, value in document.items():
+            if key in {"example", "examples", "default", "enum", "const"}:
+                continue
+            if key in {"description", "summary", "title"} and isinstance(value, str):
+                value = re.sub(r"\bWorkOS(?:\s+AuthKit)?\b", "your workspace's SSO identity provider", value, flags=re.IGNORECASE)
+                document[key] = re.sub(r"\bAuthKit\b", "sign-in", value, flags=re.IGNORECASE)
+            else:
+                sanitize_provider_prose(value)
+    elif isinstance(document, list):
+        for value in document:
+            sanitize_provider_prose(value)
+
+
 def build_reference(spec, tools, approval):
     spec, tools = copy.deepcopy(spec), copy.deepcopy(tools)
     if not isinstance(spec, dict) or not isinstance(spec.get("paths"), dict) or not isinstance(tools, list):
@@ -126,9 +143,11 @@ def build_reference(spec, tools, approval):
     approved_tools = selection(names, approval["tools"], approval.get("excluded_tools", []))
     tools = [tool for tool in tools if tool["name"] in approved_tools]
     sanitizer.clean(spec)
+    sanitize_provider_prose(spec)
     check_content(spec)
     for tool in tools:
         sanitizer.clean(tool)
+        sanitize_provider_prose(tool)
         # JSON Schema references are relative to each schema, not the tool envelope.
         for field in ("inputSchema", "outputSchema"):
             if field in tool:

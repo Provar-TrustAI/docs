@@ -90,6 +90,27 @@ class ReferenceContract(unittest.TestCase):
         self.assertNotIn("PRIVATE-CANARY-EXAMPLE", json.dumps(result))
         self.assertEqual((spec, tools, approval), before, "preparing a candidate must not alter its reference input")
 
+    def test_provider_prose_uses_house_words_without_rewriting_wire_values(self):
+        spec, tools, approval = example()
+        operation = spec["paths"]["/v1/widgets"]["post"]
+        operation["description"] = "WorkOS AuthKit verifies your identity. AuthKit session stays private."
+        operation["summary"] = "Sign in with WorkOS"
+        spec["components"]["schemas"]["WorkOS"] = {"type": "string", "enum": ["WorkOS", "AuthKit"], "const": "AuthKit", "example": "WorkOS"}
+        properties = spec["components"]["schemas"]["Widget"]["properties"]
+        properties["WorkOS"] = {"$ref": "#/components/schemas/WorkOS"}
+        properties["structured"] = {"type": "object", "example": {"description": "WorkOS", "summary": "AuthKit"}, "examples": [{"title": "AuthKit"}], "default": {"description": "WorkOS AuthKit"}, "const": {"title": "WorkOS"}}
+        tools[0]["description"] = "WorkOS verifies your identity."
+        tools[0]["inputSchema"]["properties"]["AuthKit"] = {"type": "string", "enum": ["WorkOS", "AuthKit"], "example": "AuthKit"}
+        result = self.generator.build_reference(spec, tools, approval)
+        public = result["openapi"]
+        self.assertEqual(public["paths"]["/v1/widgets"]["post"]["description"], "your workspace's SSO identity provider verifies your identity. sign-in session stays private.")
+        self.assertEqual(public["paths"]["/v1/widgets"]["post"]["summary"], "Sign in with your workspace's SSO identity provider")
+        self.assertEqual(public["components"]["schemas"]["WorkOS"], {"type": "string", "enum": ["WorkOS", "AuthKit"], "const": "AuthKit", "example": "WorkOS"})
+        self.assertEqual(public["components"]["schemas"]["Widget"]["properties"]["WorkOS"], {"$ref": "#/components/schemas/WorkOS"})
+        self.assertEqual(public["components"]["schemas"]["Widget"]["properties"]["structured"], {"type": "object", "example": {"description": "WorkOS", "summary": "AuthKit"}, "examples": [{"title": "AuthKit"}], "default": {"description": "WorkOS AuthKit"}, "const": {"title": "WorkOS"}})
+        self.assertEqual(result["mcp_tools"][0]["description"], "your workspace's SSO identity provider verifies your identity.")
+        self.assertEqual(result["mcp_tools"][0]["inputSchema"]["properties"]["AuthKit"], {"type": "string", "enum": ["WorkOS", "AuthKit"], "example": "AuthKit"})
+
     def test_unknown_and_internal_approved_surfaces_fail_closed(self):
         for field, value in (("operations", "unknownOperation"), ("operations", "internalOperator"), ("tools", "trustai_unknown_tool")):
             with self.subTest(field=field, value=value):

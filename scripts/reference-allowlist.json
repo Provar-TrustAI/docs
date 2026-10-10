@@ -9,6 +9,7 @@
     "createTeam",
     "deleteTeam",
     "finishConnectorSetup",
+    "finishSignIn",
     "getConnectorSetup",
     "getMe",
     "getProject",
@@ -31,17 +32,16 @@
     "revokeProjectAccess",
     "revokeWorkspaceInvitation",
     "sendWorkspaceInvitation",
+    "signOut",
     "startConnectorSetup",
+    "startSignIn",
     "transferProjectOwnership"
   ],
   "excluded_operations": [
-    "finishSignIn",
     "getHealth",
     "listMcpTokens",
     "mintMcpToken",
-    "revokeMcpToken",
-    "signOut",
-    "startSignIn"
+    "revokeMcpToken"
   ],
   "tools": [
     "trustai_get_me",
