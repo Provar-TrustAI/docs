@@ -18,6 +18,8 @@ METHODS = {"get", "post", "put", "patch", "delete", "head", "options", "trace"}
 # Only these sections are projected; any other (webhooks, servers, tags, x-*) is unreviewed and refused.
 SECTIONS = {"openapi", "info", "paths", "components", "security"}
 PATH_KEYS = {"summary", "description", "parameters"}
+# Operation keys the projection reviews; callbacks, servers and x-* carry unlisted content and are refused.
+OPERATION_KEYS = {"operationId", "summary", "description", "tags", "parameters", "requestBody", "responses", "security", "deprecated"}
 
 module_spec = importlib.util.spec_from_file_location("reference_sanitizer", DOCS_ROOT / "docs-plan/doc-kit/openapi-sanitize.py")
 sanitizer = importlib.util.module_from_spec(module_spec)
@@ -112,6 +114,8 @@ def build_reference(spec, tools, approval):
             if method in METHODS:
                 if not isinstance(operation, dict) or not isinstance(operation.get("operationId"), str):
                     raise ValueError("invalid_operation")
+                if set(operation) - OPERATION_KEYS:
+                    raise ValueError("unapproved_section")
                 operations.append(operation["operationId"])
     chosen = selection(operations, approval["operations"], approval.get("excluded_operations", []))
     paths = {}

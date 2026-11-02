@@ -141,10 +141,10 @@ class ReferenceContract(unittest.TestCase):
                     self.generator.build_reference(spec, tools, approval)
 
     def test_unlisted_spec_sections_are_refused(self):
-        for place, key in (("root", "webhooks"), ("root", "servers"), ("root", "tags"), ("root", "x-private"), ("path", "servers"), ("path", "x-private"), ("path", "$ref")):
+        for place, key in (("root", "webhooks"), ("root", "servers"), ("root", "tags"), ("root", "x-private"), ("path", "servers"), ("path", "x-private"), ("path", "$ref"), ("operation", "callbacks"), ("operation", "servers"), ("operation", "x-private")):
             with self.subTest(place=place, key=key):
                 spec, tools, approval = example()
-                target = spec if place == "root" else spec["paths"]["/v1/widgets"]
+                target = {"root": spec, "path": spec["paths"]["/v1/widgets"], "operation": spec["paths"]["/v1/widgets"]["post"]}[place]
                 target[key] = [{"url": "https://private.example"}]
                 with self.assertRaisesRegex(ValueError, "unapproved_section"):
                     self.generator.build_reference(spec, tools, approval)
