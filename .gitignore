@@ -34,3 +34,4 @@ dist/
 # They are reviewed and cut before anything derived from them is committed.
 # The source never is.
 pipeline/public/incoming/
+__pycache__/

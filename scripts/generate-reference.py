@@ -15,6 +15,9 @@ DOCS_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_APPROVAL = DOCS_ROOT / "scripts/reference-allowlist.json"
 INPUTS = {"openapi": "services/api/openapi.json", "tools": "services/api/tests/mcp/tool_list.json"}
 METHODS = {"get", "post", "put", "patch", "delete", "head", "options", "trace"}
+# Only these sections are projected; any other (webhooks, servers, tags, x-*) is unreviewed and refused.
+SECTIONS = {"openapi", "info", "paths", "components", "security"}
+PATH_KEYS = {"summary", "description", "parameters"}
 
 module_spec = importlib.util.spec_from_file_location("reference_sanitizer", DOCS_ROOT / "docs-plan/doc-kit/openapi-sanitize.py")
 sanitizer = importlib.util.module_from_spec(module_spec)
@@ -101,6 +104,8 @@ def build_reference(spec, tools, approval):
     spec, tools = copy.deepcopy(spec), copy.deepcopy(tools)
     if not isinstance(spec, dict) or not isinstance(spec.get("paths"), dict) or not isinstance(tools, list):
         raise ValueError("invalid_artifact")
+    if set(spec) - SECTIONS or any(set(item) - METHODS - PATH_KEYS for item in spec["paths"].values()):
+        raise ValueError("unapproved_section")
     operations = []
     for item in spec["paths"].values():
         for method, operation in item.items():

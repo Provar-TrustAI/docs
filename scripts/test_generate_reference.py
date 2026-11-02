@@ -140,6 +140,30 @@ class ReferenceContract(unittest.TestCase):
                 with self.assertRaises(ValueError):
                     self.generator.build_reference(spec, tools, approval)
 
+    def test_unlisted_spec_sections_are_refused(self):
+        for place, key in (("root", "webhooks"), ("root", "servers"), ("root", "tags"), ("root", "x-private"), ("path", "servers"), ("path", "x-private"), ("path", "$ref")):
+            with self.subTest(place=place, key=key):
+                spec, tools, approval = example()
+                target = spec if place == "root" else spec["paths"]["/v1/widgets"]
+                target[key] = [{"url": "https://private.example"}]
+                with self.assertRaisesRegex(ValueError, "unapproved_section"):
+                    self.generator.build_reference(spec, tools, approval)
+
+    def test_selected_route_outside_public_root_is_refused(self):
+        for path in ("/health", "/v1/ready"):
+            with self.subTest(path=path):
+                spec, tools, approval = example()
+                spec["paths"][path] = {"get": {"operationId": "getHealth", "responses": {"200": {"description": "OK"}}}}
+                approval["operations"] = ["createWidget", "getHealth"]
+                with self.assertRaisesRegex(ValueError, "private_route"):
+                    self.generator.build_reference(spec, tools, approval)
+
+    def test_shared_operation_id_is_refused(self):
+        spec, tools, approval = example()
+        spec["paths"]["/v1/widgets-copy"] = {"get": {"operationId": "createWidget", "responses": {"200": {"description": "Unreviewed"}}}}
+        with self.assertRaisesRegex(ValueError, "duplicate_inventory"):
+            self.generator.build_reference(spec, tools, approval)
+
     def generate(self, source, output, approval):
         with patch.object(self.generator, "DOCS_ROOT", approval.parent):
             return self.generator.generate(source, output, approval)

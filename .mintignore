@@ -10,7 +10,7 @@ drafts/
 docs-plan/
 
 # Repo scripts and their notes — tooling, not reader pages
-scripts/
+/scripts/
 
 # Version archive folders — empty until M3 cuts. v2026.05.11/ is the first
 # archive (cut in DEV-1909/1910/1912). Future EMPTY future archive folders
